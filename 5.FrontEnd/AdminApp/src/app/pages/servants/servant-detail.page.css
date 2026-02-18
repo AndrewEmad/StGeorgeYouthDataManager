@@ -145,6 +145,15 @@
   text-decoration: underline;
 }
 
+.servant-detail .mt-2 { margin-top: 12px; }
+.servant-detail .btn-secondary { display: inline-flex; align-items: center; gap: 6px; }
+.servant-detail .modal-content { padding: 24px; min-width: 320px; }
+.servant-detail .modal-content h3 { margin: 0 0 8px 0; }
+.servant-detail .modal-content .small { font-size: 0.875rem; margin-bottom: 16px; }
+.servant-detail .modal-content .form-group { margin-bottom: 16px; }
+.servant-detail .modal-content .error-msg { color: #f87171; font-size: 0.9rem; margin-bottom: 12px; }
+.servant-detail .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
+
 @media (max-width: 600px) {
   .servant-detail .detail-section { padding: 18px 16px; }
   .servant-detail .detail-grid {

@@ -30,3 +30,5 @@ public record UpdateUserDto(
     string Phone,
     bool IsActive
 );
+
+public record SetPasswordDto(string NewPassword);

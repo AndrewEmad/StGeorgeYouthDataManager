@@ -27,7 +27,7 @@ export class AuthService {
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
       const user = JSON.parse(savedUser);
-      if (user.role === 'Admin' || user.role === 'Priest') {
+      if (user.role === 'Admin' || user.role === 'Priest' || user.role === 'Manager') {
         this.currentUser.set(user);
       } else {
         this.logout();

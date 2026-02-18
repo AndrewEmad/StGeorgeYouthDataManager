@@ -198,4 +198,21 @@ public class UserService : IUserService
         }
         return ServiceResult.Failure(string.Join(", ", result.Errors.Select(e => e.Description)));
     }
+
+    public async Task<ServiceResult> SetPasswordAsync(Guid id, SetPasswordDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.NewPassword) || dto.NewPassword.Length < 6)
+            return ServiceResult.Failure("كلمة المرور يجب أن تكون 6 أحرف على الأقل.");
+        var user = await _userManager.FindByIdAsync(id.ToString());
+        if (user == null) return ServiceResult.Failure("User not found");
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var result = await _userManager.ResetPasswordAsync(user, token, dto.NewPassword);
+        if (!result.Succeeded)
+            return ServiceResult.Failure(string.Join(", ", result.Errors.Select(e => e.Description)));
+        user.MustChangePassword = true;
+        user.UpdatedAt = DateTime.UtcNow;
+        await _userManager.UpdateAsync(user);
+        await _logger.LogAsync("تغيير كلمة المرور", $"تم تعيين كلمة مرور جديدة للمستخدم: {user.FullName} (يُطلب منه تغييرها عند أول دخول)");
+        return ServiceResult.Success();
+    }
 }

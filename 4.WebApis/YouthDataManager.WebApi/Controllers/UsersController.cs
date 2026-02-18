@@ -58,6 +58,15 @@ public class UsersController : ControllerBase
         return Ok();
     }
 
+    [HttpPost("{id}/set-password")]
+    public async Task<IActionResult> SetPassword(Guid id, [FromBody] SetPasswordDto dto)
+    {
+        if (dto == null) return BadRequest("Invalid request.");
+        var result = await _userService.SetPasswordAsync(id, dto);
+        if (result.Status != ServiceResultStatus.Success) return BadRequest(result.Message);
+        return Ok();
+    }
+
     [HttpPost("{id}/toggle-status")]
     public async Task<IActionResult> ToggleStatus(Guid id)
     {

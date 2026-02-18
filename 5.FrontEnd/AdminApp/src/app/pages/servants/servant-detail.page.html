@@ -131,42 +131,42 @@
   </div>
 
   <div *ngIf="!loading && !servant" class="p-4 text-center muted">الخادم غير موجود</div>
+</div>
 
-  <!-- تغيير كلمة المرور -->
-  <div *ngIf="showPasswordModal" class="modal-overlay" (click)="closeChangePassword()">
-    <div class="glass-card modal-content" (click)="$event.stopPropagation()">
-      <h3>تغيير كلمة المرور</h3>
-      <p class="muted small">سيُطلب من الخادم اختيار كلمة مرور جديدة عند أول دخول له.</p>
-      <div class="form-group">
-        <label>كلمة المرور الجديدة</label>
-        <input
-          type="password"
-          [(ngModel)]="newPassword"
-          class="form-input"
-          placeholder="6 أحرف على الأقل"
-        />
-      </div>
-      <div class="form-group">
-        <label>تأكيد كلمة المرور</label>
-        <input
-          type="password"
-          [(ngModel)]="confirmPassword"
-          class="form-input"
-          placeholder="تأكيد كلمة المرور"
-        />
-      </div>
-      <p *ngIf="passwordError" class="error-msg">{{ passwordError }}</p>
-      <div class="modal-actions">
-        <button type="button" class="btn-secondary" (click)="closeChangePassword()">إلغاء</button>
-        <button
-          type="button"
-          class="btn-primary"
-          (click)="submitChangePassword()"
-          [disabled]="passwordLoading"
-        >
-          {{ passwordLoading ? 'جاري الحفظ...' : 'تعيين كلمة المرور' }}
-        </button>
-      </div>
+<!-- تغيير كلمة المرور – خارج servant-detail لضبط التوسيط على الشاشة -->
+<div *ngIf="showPasswordModal" class="password-modal-overlay" (click)="closeChangePassword()">
+  <div class="glass-card password-modal-content" (click)="$event.stopPropagation()">
+    <h3>تغيير كلمة المرور</h3>
+    <p class="muted small">سيُطلب من الخادم اختيار كلمة مرور جديدة عند أول دخول له.</p>
+    <div class="form-group">
+      <label>كلمة المرور الجديدة</label>
+      <input
+        type="password"
+        [(ngModel)]="newPassword"
+        class="form-input"
+        placeholder="6 أحرف على الأقل"
+      />
+    </div>
+    <div class="form-group">
+      <label>تأكيد كلمة المرور</label>
+      <input
+        type="password"
+        [(ngModel)]="confirmPassword"
+        class="form-input"
+        placeholder="تأكيد كلمة المرور"
+      />
+    </div>
+    <p *ngIf="passwordError" class="error-msg">{{ passwordError }}</p>
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary" (click)="closeChangePassword()">إلغاء</button>
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="submitChangePassword()"
+        [disabled]="passwordLoading"
+      >
+        {{ passwordLoading ? 'جاري الحفظ...' : 'تعيين كلمة المرور' }}
+      </button>
     </div>
   </div>
 </div>

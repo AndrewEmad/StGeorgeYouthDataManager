@@ -1,0 +1,45 @@
+name: Deploy ServantApp to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: deploy-servant
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 5.FrontEnd/ServantApp/package-lock.json
+
+      - name: Install dependencies
+        working-directory: 5.FrontEnd/ServantApp
+        run: npm ci
+
+      - name: Build ServantApp
+        working-directory: 5.FrontEnd/ServantApp
+        run: npx ng build --configuration production --base-href /${{ github.event.repository.name }}/servant/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: 5.FrontEnd/ServantApp/dist/ServantApp/browser
+          destination_dir: servant
+          keep_files: true

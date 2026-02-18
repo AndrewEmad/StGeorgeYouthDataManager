@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.24" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\2.Infrastructure\YouthDataManager.Infrastructure\YouthDataManager.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\3.Services\Auth\YouthDataManager.Auth.Service.Abstractions\YouthDataManager.Auth.Service.Abstractions.csproj" />
+    <ProjectReference Include="..\..\3.Services\Auth\YouthDataManager.Auth.Service.DependencyInjection\YouthDataManager.Auth.Service.DependencyInjection.csproj" />
+    <ProjectReference Include="..\..\3.Services\Students\YouthDataManager.Students.Service.Abstractions\YouthDataManager.Students.Service.Abstractions.csproj" />
+    <ProjectReference Include="..\..\3.Services\Students\YouthDataManager.Students.Service.DependencyInjection\YouthDataManager.Students.Service.DependencyInjection.csproj" />
+    <ProjectReference Include="..\..\3.Services\FollowUp\YouthDataManager.FollowUp.Service.Abstractions\YouthDataManager.FollowUp.Service.Abstractions.csproj" />
+    <ProjectReference Include="..\..\3.Services\FollowUp\YouthDataManager.FollowUp.Service.DependencyInjection\YouthDataManager.FollowUp.Service.DependencyInjection.csproj" />
+    <ProjectReference Include="..\..\3.Services\Reports\YouthDataManager.Reports.Service.Abstractions\YouthDataManager.Reports.Service.Abstractions.csproj" />
+    <ProjectReference Include="..\..\3.Services\Reports\YouthDataManager.Reports.Service.DependencyInjection\YouthDataManager.Reports.Service.DependencyInjection.csproj" />
+    <ProjectReference Include="..\..\3.Services\Shared\YouthDataManager.Shared.Service.Abstractions\YouthDataManager.Shared.Service.Abstractions.csproj" />
+    <ProjectReference Include="..\..\3.Services\Shared\YouthDataManager.Shared.Service.DependencyInjection\YouthDataManager.Shared.Service.DependencyInjection.csproj" />
+    <ProjectReference Include="..\..\3.Services\Users\YouthDataManager.Users.Service.Abstractions\YouthDataManager.Users.Service.Abstractions.csproj" />
+    <ProjectReference Include="..\..\3.Services\Users\YouthDataManager.Users.Service.DependencyInjection\YouthDataManager.Users.Service.DependencyInjection.csproj" />
+  </ItemGroup>
+
+</Project>

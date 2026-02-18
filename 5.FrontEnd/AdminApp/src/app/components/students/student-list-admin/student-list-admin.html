@@ -1,0 +1,256 @@
+<div class="animate-slide">
+  <header class="content-header flex-header">
+    <div>
+      <h1>إدارة المخدومين</h1>
+      <p class="text-muted">عرض وتوزيع المخدومين على الخدام</p>
+    </div>
+    <div class="header-actions">
+      <a class="btn-outline" (click)="downloadCsvTemplate()" href="javascript:void(0)">
+        <span class="material-icons">download</span>
+        تحميل نموذج CSV
+      </a>
+      <button type="button" class="btn-outline" (click)="csvFileInput.click()" [disabled]="uploadingCsv">
+        <span class="material-icons">upload_file</span>
+        {{ uploadingCsv ? 'جاري الاستيراد...' : 'استيراد من ملف' }}
+      </button>
+      <input #csvFileInput type="file" accept=".csv" (change)="onCsvFileSelected($event)" style="display: none" />
+      <button class="btn-primary" (click)="openAddModal()">
+        <span class="material-icons">person_add</span>
+        إضافة مخدوم
+      </button>
+    </div>
+  </header>
+
+  <div class="upload-result glass-card" *ngIf="uploadResult">
+    <div class="upload-result-header">
+      <span class="material-icons">info</span>
+      <strong>نتيجة الاستيراد:</strong> تم استيراد {{ uploadResult.created }} مخدوم.
+      <button type="button" class="btn-close" (click)="uploadResult = null" aria-label="إغلاق">&times;</button>
+    </div>
+    <div class="upload-result-errors" *ngIf="uploadResult.errors.length">
+      <p>أخطاء ({{ uploadResult.errors.length }}):</p>
+      <ul>
+        <li *ngFor="let e of uploadResult.errors">صف {{ e.row }}: {{ e.message }}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="filters-bar glass-card">
+    <button type="button" class="filters-toggle btn-outline sm" (click)="showFilters = !showFilters">
+      <span class="material-icons">filter_list</span>
+      بحث متقدم
+      <span class="material-icons toggle-icon">{{ showFilters ? 'expand_less' : 'expand_more' }}</span>
+    </button>
+    <div class="filters-panel" *ngIf="showFilters">
+      <div class="filters-grid">
+        <div class="form-group">
+          <label>بحث (اسم، تليفون، منطقة)</label>
+          <input type="text" [(ngModel)]="filters.search" (ngModelChange)="applyFilters()" class="form-input" placeholder="بحث..." />
+        </div>
+        <div class="form-group">
+          <label>المنطقة</label>
+          <select [(ngModel)]="filters.area" (ngModelChange)="applyFilters()" class="form-input">
+            <option value="">— الكل —</option>
+            <option *ngFor="let a of regionOptions" [value]="a">{{ a }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>السنة الدراسية</label>
+          <select [(ngModel)]="filters.academicYear" (ngModelChange)="applyFilters()" class="form-input">
+            <option value="">— الكل —</option>
+            <option *ngFor="let y of academicYearOptions" [value]="y">{{ y }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>النوع</label>
+          <select [(ngModel)]="filters.gender" (ngModelChange)="applyFilters()" class="form-input">
+            <option value="">— الكل —</option>
+            <option value="0">ذكر</option>
+            <option value="1">أنثى</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>الخادم</label>
+          <select [(ngModel)]="filters.servantId" (ngModelChange)="applyFilters()" class="form-input">
+            <option value="">— الكل —</option>
+            <option value="_none">غير مخصص</option>
+            <option *ngFor="let serv of servants" [value]="serv.id">{{ serv.fullName }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>التخصيص</label>
+          <select [(ngModel)]="filters.hasServant" (ngModelChange)="applyFilters()" class="form-input">
+            <option value="">— الكل —</option>
+            <option value="yes">مخصص لخادم</option>
+            <option value="no">غير مخصص</option>
+          </select>
+        </div>
+      </div>
+      <div class="filters-actions">
+        <button type="button" class="btn-outline sm" (click)="clearFilters()">مسح خيارات البحث</button>
+        <span class="filter-count">{{ totalCount }} مخدوم</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bulk-actions" *ngIf="selectedStudentIds.size > 0">
+    <span class="selected-count">{{ selectedStudentIds.size }} مخدوم محدد</span>
+    <button type="button" class="btn-primary" (click)="openBulkAssignModal()">
+      <span class="material-icons">group_work</span>
+      تخصيص المحددين لخادم
+    </button>
+  </div>
+
+  <div class="glass-card table-container">
+    <table *ngIf="!loading">
+      <thead>
+        <tr>
+          <th class="col-checkbox">
+            <input type="checkbox" [checked]="allFilteredSelected" (change)="selectAllFiltered()" title="تحديد الكل" />
+          </th>
+          <th class="sortable" (click)="setSort('fullName')">اسم المخدوم <span class="sort-icon" *ngIf="sortBy === 'fullName'">{{ sortDesc ? '▼' : '▲' }}</span></th>
+          <th class="sortable" (click)="setSort('academicYear')">السنة الدراسية <span class="sort-icon" *ngIf="sortBy === 'academicYear'">{{ sortDesc ? '▼' : '▲' }}</span></th>
+          <th class="sortable" (click)="setSort('servantName')">الخادم الحالي <span class="sort-icon" *ngIf="sortBy === 'servantName'">{{ sortDesc ? '▼' : '▲' }}</span></th>
+          <th class="sortable" (click)="setSort('lastFollowUpDate')">آخر متابعة <span class="sort-icon" *ngIf="sortBy === 'lastFollowUpDate'">{{ sortDesc ? '▼' : '▲' }}</span></th>
+          <th>آخر ملاحظة</th>
+          <th>الإجراءات</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of students" class="row-clickable" (click)="viewStudent(s)">
+          <td class="col-checkbox" (click)="$event.stopPropagation()">
+            <input type="checkbox" [checked]="isSelected(s)" (change)="toggleSelection(s)" />
+          </td>
+          <td>{{s.fullName}}</td>
+          <td>{{ s.academicYear || '—' }}</td>
+          <td>
+            <span *ngIf="s.servantName" class="badge">{{s.servantName}}</span>
+            <span *ngIf="!s.servantName" class="text-error">غير مخصص</span>
+          </td>
+          <td>{{ s.lastFollowUpDate ? (s.lastFollowUpDate | date:'dd/MM/yyyy') : '—' }}</td>
+          <td class="col-note" [title]="s.lastFollowUpNote || ''">{{ (s.lastFollowUpNote | slice:0:40) || '—' }}{{ s.lastFollowUpNote && s.lastFollowUpNote.length > 40 ? '…' : '' }}</td>
+          <td class="col-actions" (click)="$event.stopPropagation()">
+            <button class="btn-outline sm" (click)="openAssignModal(s)">تخصيص</button>
+            <button class="btn-outline sm danger" (click)="deleteStudent(s)">حذف</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pagination" *ngIf="totalCount > 0">
+    <span class="pagination-info">{{ (page - 1) * pageSize + 1 }} - {{ (page - 1) * pageSize + students.length }} من {{ totalCount }}</span>
+    <label class="pagination-size">
+      عرض
+      <select class="form-input sm" [ngModel]="pageSize" (ngModelChange)="setPageSize($event)">
+        <option *ngFor="let n of pageSizeOptions" [value]="n">{{ n }}</option>
+      </select>
+    </label>
+    <button type="button" class="btn-outline sm" [disabled]="page <= 1" (click)="goToPage(page - 1)">السابق</button>
+    <span class="page-num">صفحة {{ page }} من {{ totalPages }}</span>
+    <button type="button" class="btn-outline sm" [disabled]="page >= totalPages" (click)="goToPage(page + 1)">التالي</button>
+  </div>
+</div>
+
+<!-- Modals outside animate-slide so position:fixed is relative to viewport -->
+<div class="modal-overlay" *ngIf="showAddModal">
+    <div class="glass-card modal-content animate-slide add-modal">
+      <h3>إضافة مخدوم جديد</h3>
+      <div class="form-group">
+        <label>الاسم الكامل *</label>
+        <input type="text" [(ngModel)]="newStudent.fullName" class="form-input" placeholder="الاسم الكامل" />
+      </div>
+      <div class="form-group">
+        <label>رقم التليفون *</label>
+        <input type="tel" [(ngModel)]="newStudent.phone" class="form-input" placeholder="رقم التليفون" />
+      </div>
+      <div class="form-group">
+        <label>تاريخ الميلاد</label>
+        <input type="date" [(ngModel)]="newStudent.birthDate" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label>العنوان</label>
+        <input type="text" [(ngModel)]="newStudent.address" class="form-input" placeholder="العنوان" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>المنطقة</label>
+          <input type="text" [(ngModel)]="newStudent.area" class="form-input" placeholder="المنطقة" />
+        </div>
+        <div class="form-group">
+          <label>النوع</label>
+          <select [(ngModel)]="newStudent.gender" class="form-input">
+            <option [value]="0">ذكر</option>
+            <option [value]="1">أنثى</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>الكلية</label>
+          <input type="text" [(ngModel)]="newStudent.college" class="form-input" placeholder="الكلية" />
+        </div>
+        <div class="form-group">
+          <label>السنة الدراسية</label>
+          <input type="text" [(ngModel)]="newStudent.academicYear" class="form-input" placeholder="السنة" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>أب الاعتراف</label>
+        <input type="text" [(ngModel)]="newStudent.confessionFather" class="form-input" placeholder="أب الاعتراف" />
+      </div>
+      <div class="form-group">
+        <label>تخصيص لخادم</label>
+        <select [(ngModel)]="newStudent.servantId" class="form-input">
+          <option value="">-- بدون تخصيص --</option>
+          <option *ngFor="let serv of servants" [value]="serv.id">{{serv.fullName}}</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-outline" (click)="showAddModal = false" [disabled]="addSaving">إلغاء</button>
+        <button class="btn-primary" [disabled]="addSaving || !newStudent.fullName?.trim() || !newStudent.phone?.trim()" (click)="onCreateStudent()">
+          {{ addSaving ? 'جاري الحفظ...' : 'إضافة' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+<div class="modal-overlay" *ngIf="showAssignModal">
+  <div class="glass-card modal-content animate-slide sm">
+    <h3>تخصيص مخدوم لخادم</h3>
+    <p>تخصيص المخدوم: <strong>{{selectedStudent?.fullName}}</strong></p>
+    
+    <div class="form-group mt-4">
+      <label>اختر الخادم</label>
+      <select [(ngModel)]="targetServantId" class="form-input">
+        <option value="">-- اختر خادماً --</option>
+        <option *ngFor="let serv of servants" [value]="serv.id">{{serv.fullName}}</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-outline" (click)="showAssignModal = false">إلغاء</button>
+      <button class="btn-primary" [disabled]="!targetServantId" (click)="onAssign()">تأكيد التخصيص</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showBulkAssignModal">
+  <div class="glass-card modal-content animate-slide sm">
+    <h3>تخصيص مخدومين لخادم</h3>
+    <p>تخصيص <strong>{{ selectedStudentIds.size }}</strong> مخدوم للخادم المختار.</p>
+    <div class="form-group mt-4">
+      <label>اختر الخادم</label>
+      <select [(ngModel)]="bulkTargetServantId" class="form-input">
+        <option value="">-- اختر خادماً --</option>
+        <option *ngFor="let serv of servants" [value]="serv.id">{{serv.fullName}}</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-outline" (click)="showBulkAssignModal = false" [disabled]="bulkAssignSaving">إلغاء</button>
+      <button class="btn-primary" [disabled]="!bulkTargetServantId || bulkAssignSaving" (click)="onBulkAssign()">
+        {{ bulkAssignSaving ? 'جاري التخصيص...' : 'تأكيد التخصيص' }}
+      </button>
+    </div>
+  </div>
+</div>

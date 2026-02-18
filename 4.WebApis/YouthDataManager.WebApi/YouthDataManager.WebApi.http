@@ -1,0 +1,6 @@
+@YouthDataManager.WebApi_HostAddress = http://localhost:5155
+
+GET {{YouthDataManager.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

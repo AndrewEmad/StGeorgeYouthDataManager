@@ -1,0 +1,44 @@
+<div class="container animate-fade">
+  <header class="list-header">
+    <div class="header-main">
+      <a routerLink="/dashboard" class="btn-back">
+        <span class="material-icons">arrow_forward</span>
+      </a>
+      <h1>قائمة المخدومين</h1>
+    </div>
+    <div class="search-box">
+      <span class="material-icons search-icon">search</span>
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        (input)="onSearch()" 
+        class="form-input" 
+        placeholder="ابحث بالاسم أو المنطقة...">
+    </div>
+  </header>
+
+  <div *ngIf="loading" class="loader-container">
+    <div class="spinner"></div>
+  </div>
+
+  <div *ngIf="!loading" class="students-grid">
+    <div *ngFor="let student of filteredStudents" class="glass-card student-card">
+      <div class="student-info">
+        <h3>{{student.fullName}}</h3>
+        <p><span class="material-icons">place</span> {{student.area}}</p>
+        <p><span class="material-icons">school</span> {{student.college}}</p>
+      </div>
+      <div class="student-actions">
+        <a [href]="'tel:' + student.phone" class="btn-icon call">
+          <span class="material-icons">phone</span>
+        </a>
+        <a [routerLink]="['/students', student.id]" class="btn-outline">التفاصيل</a>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && filteredStudents.length === 0" class="empty-state">
+    <span class="material-icons">search_off</span>
+    <p>لم يتم العثور على مخدومين</p>
+  </div>
+</div>

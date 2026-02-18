@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\YouthDataManager.FollowUp.Service.Abstractions\YouthDataManager.FollowUp.Service.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\1.Domain\YouthDataManager.Domain\YouthDataManager.Domain.csproj" />
+    <ProjectReference Include="..\..\..\2.Infrastructure\YouthDataManager.Infrastructure\YouthDataManager.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

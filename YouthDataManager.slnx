@@ -1,0 +1,40 @@
+<Solution>
+  <Folder Name="/1.Domain/">
+    <Project Path="1.Domain/YouthDataManager.Domain/YouthDataManager.Domain.csproj" />
+  </Folder>
+  <Folder Name="/2.Infrastructure/">
+    <Project Path="2.Infrastructure/YouthDataManager.Infrastructure/YouthDataManager.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/3.Services/" />
+  <Folder Name="/3.Services/Auth/">
+    <Project Path="3.Services/Auth/YouthDataManager.Auth.Service.Abstractions/YouthDataManager.Auth.Service.Abstractions.csproj" />
+    <Project Path="3.Services/Auth/YouthDataManager.Auth.Service.DependencyInjection/YouthDataManager.Auth.Service.DependencyInjection.csproj" />
+    <Project Path="3.Services/Auth/YouthDataManager.Auth.Service.Implementations/YouthDataManager.Auth.Service.Implementations.csproj" />
+  </Folder>
+  <Folder Name="/3.Services/FollowUp/">
+    <Project Path="3.Services/FollowUp/YouthDataManager.FollowUp.Service.Abstractions/YouthDataManager.FollowUp.Service.Abstractions.csproj" />
+    <Project Path="3.Services/FollowUp/YouthDataManager.FollowUp.Service.DependencyInjection/YouthDataManager.FollowUp.Service.DependencyInjection.csproj" />
+    <Project Path="3.Services/FollowUp/YouthDataManager.FollowUp.Service.Implementations/YouthDataManager.FollowUp.Service.Implementations.csproj" />
+  </Folder>
+  <Folder Name="/3.Services/Reports/">
+    <Project Path="3.Services/Reports/YouthDataManager.Reports.Service.Abstractions/YouthDataManager.Reports.Service.Abstractions.csproj" />
+    <Project Path="3.Services/Reports/YouthDataManager.Reports.Service.DependencyInjection/YouthDataManager.Reports.Service.DependencyInjection.csproj" />
+    <Project Path="3.Services/Reports/YouthDataManager.Reports.Service.Implementations/YouthDataManager.Reports.Service.Implementations.csproj" />
+  </Folder>
+  <Folder Name="/3.Services/Shared/">
+    <Project Path="3.Services/Shared/YouthDataManager.Shared.Service.Abstractions/YouthDataManager.Shared.Service.Abstractions.csproj" />
+  </Folder>
+  <Folder Name="/3.Services/Students/">
+    <Project Path="3.Services/Students/YouthDataManager.Students.Service.Abstractions/YouthDataManager.Students.Service.Abstractions.csproj" />
+    <Project Path="3.Services/Students/YouthDataManager.Students.Service.DependencyInjection/YouthDataManager.Students.Service.DependencyInjection.csproj" />
+    <Project Path="3.Services/Students/YouthDataManager.Students.Service.Implementations/YouthDataManager.Students.Service.Implementations.csproj" />
+  </Folder>
+  <Folder Name="/3.Services/Users/">
+    <Project Path="3.Services/Users/YouthDataManager.Users.Service.Abstractions/YouthDataManager.Users.Service.Abstractions.csproj" />
+    <Project Path="3.Services/Users/YouthDataManager.Users.Service.DependencyInjection/YouthDataManager.Users.Service.DependencyInjection.csproj" />
+    <Project Path="3.Services/Users/YouthDataManager.Users.Service.Implementations/YouthDataManager.Users.Service.Implementations.csproj" />
+  </Folder>
+  <Folder Name="/4.WebApis/">
+    <Project Path="4.WebApis/YouthDataManager.WebApi/YouthDataManager.WebApi.csproj" />
+  </Folder>
+</Solution>

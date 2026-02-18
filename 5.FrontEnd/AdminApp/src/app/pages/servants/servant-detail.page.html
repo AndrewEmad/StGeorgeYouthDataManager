@@ -1,0 +1,106 @@
+<div class="animate-slide servant-detail">
+  <header class="content-header">
+    <a routerLink="/dashboard/servants" class="back-link">
+      <span class="material-icons">arrow_forward</span>
+      العودة لقائمة الخدام
+    </a>
+  </header>
+
+  <div *ngIf="loading" class="p-4 text-center">جاري التحميل...</div>
+
+  <div *ngIf="!loading && servant" class="detail-content">
+    <section class="glass-card detail-section">
+      <h2>بيانات الخادم</h2>
+      <dl class="detail-grid">
+        <dt>الاسم الكامل</dt><dd>{{ servant.fullName }}</dd>
+        <dt>اسم المستخدم</dt><dd>{{ servant.userName }}</dd>
+        <dt>الهاتف</dt><dd>{{ servant.phone || '—' }}</dd>
+        <dt>الدور</dt><dd>{{ servant.role === 'Manager' ? 'أمين خدمة' : (servant.role === 'Priest' ? 'الاب الكاهن المسئول' : 'خادم') }}</dd>
+        <dt>الحالة</dt><dd><span class="status-dot" [class.active]="servant.isActive"></span> {{ servant.isActive ? 'نشط' : 'متوقف' }}</dd>
+      </dl>
+    </section>
+
+    <section class="glass-card detail-section" *ngIf="performance">
+      <h2>أداء المتابعة (هذا الأسبوع: جمعة–خميس)</h2>
+      <div class="perf-grid">
+        <div class="glass-card stat-item indigo">
+          <span class="material-icons">people</span>
+          <div class="s-info">
+            <h3>{{ performance.assignedStudentsCount }}</h3>
+            <p>المخدومين المخصصين</p>
+          </div>
+        </div>
+        <div class="glass-card stat-item emerald">
+          <span class="material-icons">call</span>
+          <div class="s-info">
+            <h3>{{ performance.callsThisWeek }}</h3>
+            <p>مكالمات هذا الأسبوع</p>
+          </div>
+        </div>
+        <div class="glass-card stat-item amber">
+          <span class="material-icons">home</span>
+          <div class="s-info">
+            <h3>{{ performance.visitsThisWeek }}</h3>
+            <p>زيارات هذا الأسبوع</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="glass-card detail-section">
+      <h2>سجل المتابعة الهاتفية</h2>
+      <div class="table-wrap">
+        <table *ngIf="calls.length">
+          <thead>
+            <tr>
+              <th>المخدوم</th>
+              <th>التاريخ</th>
+              <th>الحالة</th>
+              <th>ملاحظات</th>
+              <th>متابعة قادمة</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of calls">
+              <td><a [routerLink]="['/dashboard/students', c.studentId]" class="student-link">{{ c.studentName || '—' }}</a></td>
+              <td>{{ formatDate(c.callDate) }}</td>
+              <td>{{ callStatusLabel(c.callStatus) }}</td>
+              <td>{{ c.notes || '—' }}</td>
+              <td>{{ formatDate(c.nextFollowUpDate) }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <p *ngIf="!calls.length" class="muted">لا توجد مكالمات مسجلة</p>
+      </div>
+    </section>
+
+    <section class="glass-card detail-section">
+      <h2>سجل الزيارات المنزلية</h2>
+      <div class="table-wrap">
+        <table *ngIf="visits.length">
+          <thead>
+            <tr>
+              <th>المخدوم</th>
+              <th>التاريخ</th>
+              <th>النتيجة</th>
+              <th>ملاحظات</th>
+              <th>زيارة قادمة</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let v of visits">
+              <td><a [routerLink]="['/dashboard/students', v.studentId]" class="student-link">{{ v.studentName || '—' }}</a></td>
+              <td>{{ formatDate(v.visitDate) }}</td>
+              <td>{{ visitOutcomeLabel(v.visitOutcome) }}</td>
+              <td>{{ v.notes || '—' }}</td>
+              <td>{{ formatDate(v.nextVisitDate) }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <p *ngIf="!visits.length" class="muted">لا توجد زيارات مسجلة</p>
+      </div>
+    </section>
+  </div>
+
+  <div *ngIf="!loading && !servant" class="p-4 text-center muted">الخادم غير موجود</div>
+</div>

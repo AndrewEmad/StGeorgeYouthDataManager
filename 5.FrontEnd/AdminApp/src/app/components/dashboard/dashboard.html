@@ -1,0 +1,58 @@
+<div class="main-layout">
+  <button type="button" class="burger-btn" (click)="toggleSidebar()" aria-label="القائمة">
+    <span class="material-icons">{{ sidebarOpen ? 'close' : 'menu' }}</span>
+  </button>
+
+  <div class="sidebar-overlay" [class.is-open]="sidebarOpen" (click)="closeSidebar()" aria-hidden="true"></div>
+
+  <aside class="glass-card sidebar" [class.is-open]="sidebarOpen">
+    <div class="sidebar-header">
+      <span class="material-icons brand-icon">hub</span>
+      <h2>الإدارة</h2>
+      <button type="button" class="sidebar-close" (click)="closeSidebar()" aria-label="إغلاق">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <nav class="side-nav">
+      <a routerLink="/dashboard/stats" routerLinkActive="active" class="nav-item" (click)="closeSidebar()">
+        <span class="material-icons">analytics</span>
+        <span>الإحصائيات</span>
+      </a>
+      <a routerLink="/dashboard/servants" routerLinkActive="active" class="nav-item" (click)="closeSidebar()">
+        <span class="material-icons">badge</span>
+        <span>الخدام</span>
+      </a>
+      <a routerLink="/dashboard/students" routerLinkActive="active" class="nav-item" (click)="closeSidebar()">
+        <span class="material-icons">groups</span>
+        <span>المخدومين</span>
+      </a>
+      <a routerLink="/dashboard/removal-requests" routerLinkActive="active" class="nav-item" (click)="closeSidebar()">
+        <span class="material-icons">person_remove</span>
+        <span>طلبات الإزالة</span>
+      </a>
+      <a routerLink="/dashboard/backups" routerLinkActive="active" class="nav-item" (click)="closeSidebar()">
+        <span class="material-icons">settings_backup_restore</span>
+        <span>النسخ الاحتياطي</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="admin-profile">
+        <span class="material-icons">account_circle</span>
+        <div class="p-info">
+          <p>{{adminName}}</p>
+          <span>مدير النظام</span>
+        </div>
+      </div>
+      <button (click)="logout()" class="btn-logout">
+        <span class="material-icons">logout</span>
+        <span>خروج</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="content-area">
+    <router-outlet></router-outlet>
+  </main>
+</div>

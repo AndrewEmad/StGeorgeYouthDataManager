@@ -1,0 +1,65 @@
+<div class="dashboard-wrapper">
+  <nav class="glass-card main-nav">
+    <div class="user-info">
+      <span class="material-icons">account_circle</span>
+      <span>مرحباً، {{servantName}}</span>
+    </div>
+    <div class="nav-links">
+      <button (click)="logout()" class="btn-logout">
+        <span>تسجيل الخروج</span>
+        <span class="material-icons">logout</span>
+      </button>
+    </div>
+  </nav>
+
+  <main class="container">
+    <header class="animate-fade">
+      <h1>لوحة التحكم</h1>
+      <p class="text-muted">نظرة عامة على المخدومين والمتابعة اليومية</p>
+    </header>
+
+    <div class="stats-grid">
+      <div class="glass-card stat-card animate-fade" style="animation-delay: 0.1s">
+        <span class="material-icons icon-box indigo">people</span>
+        <div class="stat-info">
+          <h3>{{stats?.totalStudents || 0}}</h3>
+          <p>إجمالي المخدومين</p>
+        </div>
+      </div>
+
+      <div class="glass-card stat-card animate-fade" style="animation-delay: 0.2s">
+        <span class="material-icons icon-box cyan">phone</span>
+        <div class="stat-info">
+          <h3>{{stats?.callsToday || 0}}</h3>
+          <p>مكالمات اليوم</p>
+        </div>
+      </div>
+
+      <div class="glass-card stat-card animate-fade" style="animation-delay: 0.3s">
+        <span class="material-icons icon-box emerald">home</span>
+        <div class="stat-info">
+          <h3>{{stats?.visitsToday || 0}}</h3>
+          <p>زيارات اليوم</p>
+        </div>
+      </div>
+
+      <div class="glass-card stat-card animate-fade" style="animation-delay: 0.4s">
+        <span class="material-icons icon-box amber">event_note</span>
+        <div class="stat-info">
+          <h3>{{stats?.studentsNeedingFollowUp || 0}}</h3>
+          <p>متابعات مطلوبة</p>
+        </div>
+      </div>
+    </div>
+
+    <section class="actions-section animate-fade" style="animation-delay: 0.5s">
+      <h2>روابط سريعة</h2>
+      <div class="actions-grid">
+        <a routerLink="/students" class="glass-card action-item">
+          <span class="material-icons">list_alt</span>
+          <span>قائمة المخدومين</span>
+        </a>
+      </div>
+    </section>
+  </main>
+</div>

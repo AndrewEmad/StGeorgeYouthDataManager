@@ -1,0 +1,45 @@
+<div class="login-container">
+  <div class="glass-card login-card animate-slide">
+    <div class="login-header">
+      <div class="logo">
+        <span class="material-icons logo-icon">admin_panel_settings</span>
+      </div>
+      <h1>مدير النظام</h1>
+      <p class="text-muted">نظام إدارة بيانات وخدمة الشباب - الإدارة</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+      <div class="form-group">
+        <label>اسم المستخدم</label>
+        <input 
+          type="text" 
+          [(ngModel)]="username" 
+          name="username" 
+          class="form-input" 
+          placeholder="أدخل اسم المستخدم"
+          required>
+      </div>
+
+      <div class="form-group">
+        <label>كلمة المرور</label>
+        <input 
+          type="password" 
+          [(ngModel)]="password" 
+          name="password" 
+          class="form-input" 
+          placeholder="أدخل كلمة المرور"
+          required>
+      </div>
+
+      <div *ngIf="error" class="error-msg">
+        <span class="material-icons">error_outline</span>
+        {{error}}
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="loading">
+        <span *ngIf="!loading">دخول لوحة الإدارة</span>
+        <span *ngIf="loading" class="spinner"></span>
+      </button>
+    </form>
+  </div>
+</div>

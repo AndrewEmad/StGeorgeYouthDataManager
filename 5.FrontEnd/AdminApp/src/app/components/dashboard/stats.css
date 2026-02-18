@@ -1,0 +1,191 @@
+.content-header {
+  margin-bottom: 40px;
+}
+
+.content-header h1 {
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 25px;
+  margin-bottom: 50px;
+}
+
+.stat-item {
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.stat-item .material-icons {
+  font-size: 40px;
+}
+
+.stat-item.indigo .material-icons {
+  color: #818cf8;
+}
+
+.stat-item.purple .material-icons {
+  color: #a855f7;
+}
+
+.stat-item.emerald .material-icons {
+  color: #10b981;
+}
+
+.stat-item.amber .material-icons {
+  color: #f59e0b;
+}
+
+.stat-item.teal .material-icons {
+  color: #14b8a6;
+}
+
+.stat-item.rose .material-icons {
+  color: #fb7185;
+}
+
+.servant-performance {
+  margin-top: 40px;
+}
+
+.servant-performance h2 {
+  margin-bottom: 20px;
+  font-size: clamp(1.1rem, 3vw, 1.35rem);
+}
+
+.servant-performance table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: right;
+}
+
+.servant-performance th,
+.servant-performance td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.servant-performance th {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.servant-performance tr.row-clickable {
+  cursor: pointer;
+}
+
+.servant-performance tr.row-clickable:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.s-info h3 {
+  font-size: 2.2rem;
+  line-height: 1.2;
+}
+
+.s-info p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.recent-activity h2 {
+  margin-bottom: 25px;
+  font-size: clamp(1.1rem, 3vw, 1.35rem);
+}
+
+.activity-list {
+  padding: 20px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.activity-item:last-child {
+  border: none;
+}
+
+.activity-item .time {
+  margin-right: auto;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.loader {
+  text-align: center;
+  padding: 50px;
+  font-size: 1.2rem;
+}
+
+@media (max-width: 600px) {
+  .content-header {
+    margin-bottom: 24px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .stat-item {
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .stat-item .material-icons {
+    font-size: 32px;
+  }
+
+  .s-info h3 {
+    font-size: 1.75rem;
+  }
+
+  .s-info p {
+    font-size: 0.85rem;
+  }
+
+  .recent-activity h2 {
+    margin-bottom: 16px;
+  }
+
+  .activity-list {
+    padding: 16px;
+  }
+
+  .activity-item {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 0;
+  }
+
+  .activity-item .time {
+    margin-right: 0;
+    width: 100%;
+  }
+
+  .loader {
+    padding: 32px 20px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-item {
+    padding: 16px;
+  }
+
+  .s-info h3 {
+    font-size: 1.5rem;
+  }
+}

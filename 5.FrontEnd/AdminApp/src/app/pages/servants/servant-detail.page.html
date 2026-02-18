@@ -12,11 +12,27 @@
     <section class="glass-card detail-section">
       <h2>بيانات الخادم</h2>
       <dl class="detail-grid">
-        <dt>الاسم الكامل</dt><dd>{{ servant.fullName }}</dd>
-        <dt>اسم المستخدم</dt><dd>{{ servant.userName }}</dd>
-        <dt>الهاتف</dt><dd>{{ servant.phone || '—' }}</dd>
-        <dt>الدور</dt><dd>{{ servant.role === 'Manager' ? 'أمين خدمة' : (servant.role === 'Priest' ? 'الاب الكاهن المسئول' : 'خادم') }}</dd>
-        <dt>الحالة</dt><dd><span class="status-dot" [class.active]="servant.isActive"></span> {{ servant.isActive ? 'نشط' : 'متوقف' }}</dd>
+        <dt>الاسم الكامل</dt>
+        <dd>{{ servant.fullName }}</dd>
+        <dt>اسم المستخدم</dt>
+        <dd>{{ servant.userName }}</dd>
+        <dt>الهاتف</dt>
+        <dd>{{ servant.phone || '—' }}</dd>
+        <dt>الدور</dt>
+        <dd>
+          {{
+            servant.role === 'Manager'
+              ? 'مسئول'
+              : servant.role === 'Priest'
+                ? 'الاب الكاهن المسئول'
+                : 'خادم'
+          }}
+        </dd>
+        <dt>الحالة</dt>
+        <dd>
+          <span class="status-dot" [class.active]="servant.isActive"></span>
+          {{ servant.isActive ? 'نشط' : 'متوقف' }}
+        </dd>
       </dl>
       <button type="button" class="btn-secondary mt-2" (click)="openChangePassword()">
         <span class="material-icons">lock_reset</span>
@@ -66,7 +82,11 @@
           </thead>
           <tbody>
             <tr *ngFor="let c of calls">
-              <td><a [routerLink]="['/dashboard/students', c.studentId]" class="student-link">{{ c.studentName || '—' }}</a></td>
+              <td>
+                <a [routerLink]="['/dashboard/students', c.studentId]" class="student-link">{{
+                  c.studentName || '—'
+                }}</a>
+              </td>
               <td>{{ formatDate(c.callDate) }}</td>
               <td>{{ callStatusLabel(c.callStatus) }}</td>
               <td>{{ c.notes || '—' }}</td>
@@ -93,7 +113,11 @@
           </thead>
           <tbody>
             <tr *ngFor="let v of visits">
-              <td><a [routerLink]="['/dashboard/students', v.studentId]" class="student-link">{{ v.studentName || '—' }}</a></td>
+              <td>
+                <a [routerLink]="['/dashboard/students', v.studentId]" class="student-link">{{
+                  v.studentName || '—'
+                }}</a>
+              </td>
               <td>{{ formatDate(v.visitDate) }}</td>
               <td>{{ visitOutcomeLabel(v.visitOutcome) }}</td>
               <td>{{ v.notes || '—' }}</td>
@@ -115,16 +139,31 @@
       <p class="muted small">سيُطلب من الخادم اختيار كلمة مرور جديدة عند أول دخول له.</p>
       <div class="form-group">
         <label>كلمة المرور الجديدة</label>
-        <input type="password" [(ngModel)]="newPassword" class="form-input" placeholder="6 أحرف على الأقل" />
+        <input
+          type="password"
+          [(ngModel)]="newPassword"
+          class="form-input"
+          placeholder="6 أحرف على الأقل"
+        />
       </div>
       <div class="form-group">
         <label>تأكيد كلمة المرور</label>
-        <input type="password" [(ngModel)]="confirmPassword" class="form-input" placeholder="تأكيد كلمة المرور" />
+        <input
+          type="password"
+          [(ngModel)]="confirmPassword"
+          class="form-input"
+          placeholder="تأكيد كلمة المرور"
+        />
       </div>
       <p *ngIf="passwordError" class="error-msg">{{ passwordError }}</p>
       <div class="modal-actions">
         <button type="button" class="btn-secondary" (click)="closeChangePassword()">إلغاء</button>
-        <button type="button" class="btn-primary" (click)="submitChangePassword()" [disabled]="passwordLoading">
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="submitChangePassword()"
+          [disabled]="passwordLoading"
+        >
           {{ passwordLoading ? 'جاري الحفظ...' : 'تعيين كلمة المرور' }}
         </button>
       </div>

@@ -26,7 +26,7 @@
           <select [(ngModel)]="filters.role" (ngModelChange)="applyFilters()" class="form-input">
             <option value="">— الكل —</option>
             <option value="Servant">خادم</option>
-            <option value="Manager">أمين خدمة</option>
+            <option value="Manager">مسئول</option>
             <option value="Priest">الاب الكاهن المسئول</option>
           </select>
         </div>
@@ -129,7 +129,7 @@
           <label>الدور</label>
           <select [(ngModel)]="newServant.role" name="role" class="form-input">
             <option value="Servant">خادم</option>
-            <option value="Manager">أمين خدمة</option>
+            <option value="Manager">مسئول</option>
             <option value="Priest" [disabled]="priestAlreadyExists">الاب الكاهن المسئول (مستخدم واحد فقط)</option>
           </select>
           <p class="muted sm" *ngIf="priestAlreadyExists">يوجد بالفعل مستخدم بدور الاب الكاهن المسئول.</p>

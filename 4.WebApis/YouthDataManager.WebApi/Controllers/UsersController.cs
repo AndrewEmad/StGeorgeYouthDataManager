@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using YouthDataManager.Shared.Service.Abstractions;
 using YouthDataManager.Users.Service.Abstractions;
 using YouthDataManager.Users.Service.Abstractions.DTOs;
+using YouthDataManager.WebApi.Authorization;
 
 namespace YouthDataManager.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = RolePolicies.AdminManagerPriestRoles)]
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;

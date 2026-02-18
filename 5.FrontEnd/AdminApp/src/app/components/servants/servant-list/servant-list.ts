@@ -10,7 +10,7 @@ import { ReportsService } from '../../../services/reports.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './servant-list.html',
-  styleUrls: ['./servant-list.css']
+  styleUrls: ['./servant-list.css'],
 })
 export class ServantListComponent implements OnInit {
   servants: User[] = [];
@@ -22,8 +22,15 @@ export class ServantListComponent implements OnInit {
   showModal = false;
   showEditModal = false;
   showFilters = false;
-  filters = { search: '', role: '' as '' | 'Servant' | 'Manager' | 'Priest', status: '' as '' | 'active' | 'inactive' };
-  servantStatsMap: Record<string, { assignedStudentsCount: number; lastCallDate: string | null; lastVisitDate: string | null }> = {};
+  filters = {
+    search: '',
+    role: '' as '' | 'Servant' | 'Manager' | 'Priest' | 'Admin',
+    status: '' as '' | 'active' | 'inactive',
+  };
+  servantStatsMap: Record<
+    string,
+    { assignedStudentsCount: number; lastCallDate: string | null; lastVisitDate: string | null }
+  > = {};
   priestAlreadyExists = false;
 
   editingServant: User | null = null;
@@ -35,10 +42,14 @@ export class ServantListComponent implements OnInit {
     email: '',
     phone: '',
     password: '',
-    role: 'Servant'
+    role: 'Servant',
   };
 
-  constructor(private usersService: UsersService, private router: Router, private reportsService: ReportsService) {}
+  constructor(
+    private usersService: UsersService,
+    private router: Router,
+    private reportsService: ReportsService,
+  ) {}
 
   viewServant(s: User) {
     this.router.navigate(['/dashboard/servants', s.id]);
@@ -49,45 +60,65 @@ export class ServantListComponent implements OnInit {
   }
 
   loadServants() {
-    const isActive = this.filters.status === 'active' ? true : this.filters.status === 'inactive' ? false : undefined;
-    this.usersService.getPaged({
-      page: this.page,
-      pageSize: this.pageSize,
-      search: this.filters.search.trim() || undefined,
-      role: this.filters.role || undefined,
-      isActive: isActive as boolean | undefined
-    }).subscribe({
-      next: (res) => {
-        this.servants = res.items;
-        this.totalCount = res.totalCount;
-        this.page = res.page;
-        const ids = res.items.map((u: User) => u.id);
-        if (ids.length) {
-          this.reportsService.getServantStats(ids).subscribe({
-            next: (stats) => {
-              this.servantStatsMap = {};
-              stats.forEach((st: any) => { this.servantStatsMap[st.servantId] = { assignedStudentsCount: st.assignedStudentsCount, lastCallDate: st.lastCallDate ?? null, lastVisitDate: st.lastVisitDate ?? null }; });
-              this.loading = false;
-            },
-            error: () => this.loading = false
-          });
-        } else {
-          this.servantStatsMap = {};
-          this.loading = false;
-        }
-      },
-      error: () => this.loading = false
-    });
+    const isActive =
+      this.filters.status === 'active'
+        ? true
+        : this.filters.status === 'inactive'
+          ? false
+          : undefined;
+    this.usersService
+      .getPaged({
+        page: this.page,
+        pageSize: this.pageSize,
+        search: this.filters.search.trim() || undefined,
+        role: this.filters.role || undefined,
+        isActive: isActive as boolean | undefined,
+      })
+      .subscribe({
+        next: (res) => {
+          this.servants = res.items;
+          this.totalCount = res.totalCount;
+          this.page = res.page;
+          const ids = res.items.map((u: User) => u.id);
+          if (ids.length) {
+            this.reportsService.getServantStats(ids).subscribe({
+              next: (stats) => {
+                this.servantStatsMap = {};
+                stats.forEach((st: any) => {
+                  this.servantStatsMap[st.servantId] = {
+                    assignedStudentsCount: st.assignedStudentsCount,
+                    lastCallDate: st.lastCallDate ?? null,
+                    lastVisitDate: st.lastVisitDate ?? null,
+                  };
+                });
+                this.loading = false;
+              },
+              error: () => (this.loading = false),
+            });
+          } else {
+            this.servantStatsMap = {};
+            this.loading = false;
+          }
+        },
+        error: () => (this.loading = false),
+      });
   }
 
   roleLabel(role: string): string {
-    const map: Record<string, string> = { Servant: 'خادم', Manager: 'أمين خدمة', Priest: 'الاب الكاهن المسئول' };
+    const map: Record<string, string> = {
+      Servant: 'خادم',
+      Manager: 'مسئول',
+      Priest: 'الاب الكاهن المسئول',
+    };
     return map[role] ?? role;
   }
 
   openAddModal() {
     this.usersService.getPaged({ page: 1, pageSize: 1, role: 'Priest' }).subscribe({
-      next: (r) => { this.priestAlreadyExists = r.totalCount > 0; this.showModal = true; }
+      next: (r) => {
+        this.priestAlreadyExists = r.totalCount > 0;
+        this.showModal = true;
+      },
     });
   }
 
@@ -135,7 +166,8 @@ export class ServantListComponent implements OnInit {
         this.loadServants();
         this.resetForm();
       },
-      error: (err: any) => alert('خطأ في إنشاء الخادم: ' + (err.error?.message ?? err.error ?? err.message))
+      error: (err: any) =>
+        alert('خطأ في إنشاء الخادم: ' + (err.error?.message ?? err.error ?? err.message)),
     });
   }
 
@@ -146,7 +178,7 @@ export class ServantListComponent implements OnInit {
       email: '',
       phone: '',
       password: '',
-      role: 'Servant'
+      role: 'Servant',
     };
   }
 
@@ -170,7 +202,7 @@ export class ServantListComponent implements OnInit {
         this.editingServant!.isActive = this.editForm.isActive;
         this.closeEdit();
       },
-      error: (err: any) => alert('خطأ في التحديث: ' + (err.error || err.message))
+      error: (err: any) => alert('خطأ في التحديث: ' + (err.error || err.message)),
     });
   }
 
@@ -178,7 +210,7 @@ export class ServantListComponent implements OnInit {
     if (!confirm(`حذف الخادم «${s.fullName}»؟ لا يمكن التراجع.`)) return;
     this.usersService.delete(s.id).subscribe({
       next: () => this.loadServants(),
-      error: (err: any) => alert('خطأ في الحذف: ' + (err.error?.message || err.message))
+      error: (err: any) => alert('خطأ في الحذف: ' + (err.error?.message || err.message)),
     });
   }
 }

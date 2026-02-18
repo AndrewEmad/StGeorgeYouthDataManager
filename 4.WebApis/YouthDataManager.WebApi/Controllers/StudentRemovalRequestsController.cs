@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using YouthDataManager.Students.Service.Abstractions.Commands;
 using YouthDataManager.Students.Service.Abstractions.DTOs;
 using YouthDataManager.Shared.Service.Abstractions;
+using YouthDataManager.WebApi.Authorization;
 
 namespace YouthDataManager.WebApi.Controllers;
 
@@ -61,7 +62,7 @@ public class StudentRemovalRequestsController : ControllerBase
     }
 
     [HttpGet("pending")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = RolePolicies.AdminManagerPriestRoles)]
     public async Task<IActionResult> GetPending()
     {
         var result = await _service.GetPendingForAdmin();
@@ -71,7 +72,7 @@ public class StudentRemovalRequestsController : ControllerBase
     }
 
     [HttpPost("{id}/approve")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = RolePolicies.AdminManagerPriestRoles)]
     public async Task<IActionResult> Approve(Guid id)
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -85,7 +86,7 @@ public class StudentRemovalRequestsController : ControllerBase
     }
 
     [HttpPost("{id}/reject")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = RolePolicies.AdminManagerPriestRoles)]
     public async Task<IActionResult> Reject(Guid id)
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);

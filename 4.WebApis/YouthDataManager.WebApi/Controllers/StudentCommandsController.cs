@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using YouthDataManager.Shared.Service.Abstractions;
 using YouthDataManager.Students.Service.Abstractions.Commands;
 using YouthDataManager.Students.Service.Abstractions.DTOs;
+using YouthDataManager.WebApi.Authorization;
 
 namespace YouthDataManager.WebApi.Controllers;
 
@@ -79,7 +80,7 @@ public class StudentCommandsController : ControllerBase
 
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
         Guid? userId = Guid.TryParse(userIdClaim, out var u) ? u : null;
-        var isAdmin = User.IsInRole("Admin");
+        var isAdmin = User.IsAdminOrManagerOrPriest();
 
         var result = await _service.Update(request, userId, isAdmin);
         

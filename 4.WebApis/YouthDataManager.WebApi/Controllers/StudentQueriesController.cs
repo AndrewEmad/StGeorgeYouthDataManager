@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using YouthDataManager.Shared.Service.Abstractions;
 using YouthDataManager.Students.Service.Abstractions.DTOs;
 using YouthDataManager.Students.Service.Abstractions.Queries;
+using YouthDataManager.WebApi.Authorization;
 
 namespace YouthDataManager.WebApi.Controllers;
 
@@ -70,7 +71,7 @@ public class StudentQueriesController : ControllerBase
         var result = await _service.GetById(id);
         if (result.Status != ServiceResultStatus.Success)
             return NotFound(result);
-        if (result.Data != null && !User.IsInRole("Admin"))
+        if (result.Data != null && !User.IsAdminOrManagerOrPriest())
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (Guid.TryParse(userIdClaim, out var userId) && result.Data.ServantId != userId)

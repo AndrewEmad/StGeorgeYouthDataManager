@@ -38,7 +38,7 @@ export class AuthService {
   login(credentials: { username: string; password: string }): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap((response) => {
-        if (response.role !== 'Admin') {
+        if (response.role !== 'Admin' && response.role !== 'Priest' && response.role !== 'Manager') {
           throw new Error('Unauthorized');
         }
         localStorage.setItem('user', JSON.stringify(response));

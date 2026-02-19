@@ -20,7 +20,31 @@
         <dt>السنة الدراسية</dt><dd>{{ student.academicYear || '—' }}</dd>
         <dt>أب الاعتراف</dt><dd>{{ student.confessionFather || '—' }}</dd>
         <dt>الخادم</dt><dd><span *ngIf="student.servantName" class="badge">{{ student.servantName }}</span><span *ngIf="!student.servantName">—</span></dd>
+        <dt>تاريخ الإنشاء</dt><dd>{{ student.createdAt ? formatDate(student.createdAt) : '—' }}</dd>
+        <dt>آخر تحديث</dt><dd>{{ student.updatedAt ? formatDate(student.updatedAt) : '—' }}</dd>
       </dl>
+    </section>
+
+    <section class="glass-card detail-section" *ngIf="editHistory.length">
+      <h2>سجل التعديلات</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>التاريخ</th>
+              <th>من قام بالتعديل</th>
+              <th>التفاصيل</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let e of editHistory">
+              <td>{{ formatDate(e.updatedAt) }}</td>
+              <td>{{ e.updatedByUserName }}</td>
+              <td>{{ e.details }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </section>
 
     <section class="glass-card detail-section">

@@ -11,7 +11,11 @@ import { BackupsPage } from './pages/backups/backups.page';
 import { RemovalRequestsPage } from './pages/removal-requests/removal-requests.page';
 import { ReportsPage } from './pages/reports/reports.page';
 import { ServantFollowUpPage } from './pages/reports/servant-follow-up.page';
-import { StudentDistributionPage } from './pages/reports/student-distribution.page';
+import { ServantActivityReportPage } from './pages/reports/servant-activity-report.page';
+import { StudentsNoContactReportPage } from './pages/reports/students-no-contact-report.page';
+import { StudentsByAreaReportPage } from './pages/reports/students-by-area-report.page';
+import { StudentsByYearReportPage } from './pages/reports/students-by-year-report.page';
+import { AttendancePage } from './pages/attendance/attendance.page';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -23,6 +27,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: 'stats', component: StatsPage },
+      { path: 'attendance', component: AttendancePage },
       { path: 'servants', component: ServantsPage },
       { path: 'servants/:id', component: ServantDetailPage },
       { path: 'students/:id', component: StudentDetailPage },
@@ -33,7 +38,11 @@ export const routes: Routes = [
         component: ReportsPage,
         children: [
           { path: 'servant-follow-up', component: ServantFollowUpPage },
-          { path: 'student-distribution', component: StudentDistributionPage },
+          { path: 'student-distribution', redirectTo: 'servant-follow-up', pathMatch: 'full' },
+          { path: 'servant-activity', component: ServantActivityReportPage },
+          { path: 'students-no-contact', component: StudentsNoContactReportPage },
+          { path: 'students-by-area', component: StudentsByAreaReportPage },
+          { path: 'students-by-year', component: StudentsByYearReportPage },
           { path: '', redirectTo: 'servant-follow-up', pathMatch: 'full' }
         ]
       },

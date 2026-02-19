@@ -47,6 +47,10 @@ export class StudentQueriesService {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
+  getEditHistory(id: string): Observable<StudentEditLogDto[]> {
+    return this.http.get<StudentEditLogDto[]>(`${this.apiUrl}/${id}/edit-history`);
+  }
+
   getDistinctAreas(): Observable<string[]> {
     return this.http.get<string[]>(`${this.apiUrl}/areas`);
   }
@@ -54,4 +58,13 @@ export class StudentQueriesService {
   getDistinctAcademicYears(): Observable<string[]> {
     return this.http.get<string[]>(`${this.apiUrl}/academic-years`);
   }
+}
+
+export interface StudentEditLogDto {
+  id: string;
+  studentId: string;
+  updatedAt: string;
+  updatedByUserId: string;
+  updatedByUserName: string;
+  details: string;
 }

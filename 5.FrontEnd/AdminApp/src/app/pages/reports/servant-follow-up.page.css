@@ -2,36 +2,50 @@
   margin-bottom: 32px;
 }
 
-.report-tabs {
+.report-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.report-card {
   display: flex;
-  gap: 12px;
-  margin-top: 20px;
-}
-
-.report-tabs .tab {
-  padding: 8px 16px;
-  border-radius: 8px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 20px;
   text-decoration: none;
-  color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.report-tabs .tab:hover {
   color: var(--text-primary, #fff);
+  border-radius: 12px;
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  min-height: 140px;
 }
 
-.report-tabs .tab.active {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-primary, #fff);
+.report-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
-.report-section {
-  margin-bottom: 40px;
-}
-
-.report-section h2 {
+.report-card-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
   margin-bottom: 16px;
-  font-size: clamp(1.1rem, 3vw, 1.35rem);
+  opacity: 0.9;
+}
+
+.report-card:hover .report-card-icon {
+  opacity: 1;
+}
+
+.report-card-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.4;
 }
 
 .filters {
@@ -55,8 +69,22 @@
   padding: 8px 12px;
   border-radius: 6px;
   border: 1px solid var(--glass-border);
-  background: rgba(255, 255, 255, 0.05);
-  color: inherit;
+  background: var(--bg-dark);
+  color: var(--text-main);
+}
+
+.filters select option {
+  background: var(--bg-dark);
+  color: var(--text-main);
+}
+
+.date-input-wrap {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.date-input-wrap input {
+  cursor: pointer;
 }
 
 .table-container {

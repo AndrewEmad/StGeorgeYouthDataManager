@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { StudentQueriesService } from '../../../services/student-queries.service';
 import { UsersService, User } from '../../../services/users.service';
@@ -65,12 +65,19 @@ export class StudentListAdminComponent implements OnInit {
     private studentQueries: StudentQueriesService,
     private studentCommands: StudentCommandsService,
     private usersService: UsersService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
+    this.route.queryParams.subscribe((params) => {
+      this.filters.area = params['area'] ?? '';
+      this.filters.academicYear = params['academicYear'] ?? '';
+      if (this.filters.area || this.filters.academicYear) this.showFilters = true;
+      this.page = 1;
+      this.loadData();
+    });
     this.loadOptionsAndServants();
-    this.loadData();
   }
 
   loadData() {

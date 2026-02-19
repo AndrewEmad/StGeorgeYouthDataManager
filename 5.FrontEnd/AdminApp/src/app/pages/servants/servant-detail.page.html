@@ -33,6 +33,10 @@
           <span class="status-dot" [class.active]="servant.isActive"></span>
           {{ servant.isActive ? 'نشط' : 'متوقف' }}
         </dd>
+        <dt>تاريخ الإنشاء</dt>
+        <dd>{{ servant.createdAt ? (servant.createdAt | date:'dd/MM/yyyy') : '—' }}</dd>
+        <dt>آخر تحديث</dt>
+        <dd>{{ servant.updatedAt ? (servant.updatedAt | date:'dd/MM/yyyy') : '—' }}</dd>
       </dl>
       <p *ngIf="servant.role === 'Priest'" class="priest-notice muted small">لا يُخصص للاب الكاهن مخدومين ولا يسجل مكالمات أو زيارات — عرض البيانات والإدارة فقط.</p>
       <button type="button" class="btn-secondary mt-2" (click)="openChangePassword()">

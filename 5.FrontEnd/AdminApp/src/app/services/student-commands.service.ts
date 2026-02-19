@@ -49,9 +49,7 @@ export class StudentCommandsService {
   }
 
   private static readonly CSV_TEMPLATE =
-    'الاسم الكامل,رقم التليفون,تاريخ الميلاد,العنوان,المنطقة,الكلية,السنة الدراسية,أب الاعتراف,النوع\n' +
-    'أحمد محمد,01234567890,2000-01-15,,المنطقة أ,كلية هندسة,ثالثة,أب متى,0\n' +
-    'مريم سعيد,01112223334,,,المنطقة ب,كلية آداب,ثانية,,1\n';
+  "الاسم الكامل,العنوان,المنطقة,رقم التليفون,تاريخ الميلاد,الكلية,السنة الدراسية,أب الاعتراف,النوع\n";
 
   downloadCsvTemplate(): void {
     const blob = new Blob(['\ufeff' + StudentCommandsService.CSV_TEMPLATE], { type: 'text/csv;charset=utf-8' });

@@ -54,30 +54,49 @@ export class ReportsService {
     });
   }
 
-  getServantActivitySummary(params: { dateFrom?: string; dateTo?: string; servantId?: string }): Observable<ServantActivitySummary[]> {
+  getServantActivitySummary(params: { dateFrom?: string; dateTo?: string; servantId?: string; page?: number; pageSize?: number }): Observable<PagedReport<ServantActivitySummary>> {
     const q = new URLSearchParams();
     if (params.dateFrom) q.set('dateFrom', params.dateFrom);
     if (params.dateTo) q.set('dateTo', params.dateTo);
     if (params.servantId) q.set('servantId', params.servantId);
+    if (params.page != null) q.set('page', String(params.page));
+    if (params.pageSize != null) q.set('pageSize', String(params.pageSize));
     const query = q.toString();
-    return this.http.get<ServantActivitySummary[]>(`${this.apiUrl}/servant-activity${query ? '?' + query : ''}`);
+    return this.http.get<PagedReport<ServantActivitySummary>>(`${this.apiUrl}/servant-activity${query ? '?' + query : ''}`);
   }
 
-  getStudentsWithNoRecentContact(params: { days?: number; servantId?: string }): Observable<StudentNoContact[]> {
+  getStudentsWithNoRecentContact(params: { days?: number; servantId?: string; page?: number; pageSize?: number }): Observable<PagedReport<StudentNoContact>> {
     const q = new URLSearchParams();
     if (params.days != null) q.set('days', String(params.days));
     if (params.servantId) q.set('servantId', params.servantId);
+    if (params.page != null) q.set('page', String(params.page));
+    if (params.pageSize != null) q.set('pageSize', String(params.pageSize));
     const query = q.toString();
-    return this.http.get<StudentNoContact[]>(`${this.apiUrl}/students-no-contact${query ? '?' + query : ''}`);
+    return this.http.get<PagedReport<StudentNoContact>>(`${this.apiUrl}/students-no-contact${query ? '?' + query : ''}`);
   }
 
-  getStudentsByArea(): Observable<StudentsByGroup[]> {
-    return this.http.get<StudentsByGroup[]>(`${this.apiUrl}/students-by-area`);
+  getStudentsByArea(params: { page?: number; pageSize?: number } = {}): Observable<PagedReport<StudentsByGroup>> {
+    const q = new URLSearchParams();
+    if (params.page != null) q.set('page', String(params.page));
+    if (params.pageSize != null) q.set('pageSize', String(params.pageSize));
+    const query = q.toString();
+    return this.http.get<PagedReport<StudentsByGroup>>(`${this.apiUrl}/students-by-area${query ? '?' + query : ''}`);
   }
 
-  getStudentsByAcademicYear(): Observable<StudentsByGroup[]> {
-    return this.http.get<StudentsByGroup[]>(`${this.apiUrl}/students-by-academic-year`);
+  getStudentsByAcademicYear(params: { page?: number; pageSize?: number } = {}): Observable<PagedReport<StudentsByGroup>> {
+    const q = new URLSearchParams();
+    if (params.page != null) q.set('page', String(params.page));
+    if (params.pageSize != null) q.set('pageSize', String(params.pageSize));
+    const query = q.toString();
+    return this.http.get<PagedReport<StudentsByGroup>>(`${this.apiUrl}/students-by-academic-year${query ? '?' + query : ''}`);
   }
+}
+
+export interface PagedReport<T> {
+  items: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
 }
 
 export interface ServantActivitySummary {

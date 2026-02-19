@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { StudentQueriesService } from '../../services/student-queries.service';
+import { StudentQueriesService, StudentEditLogDto } from '../../services/student-queries.service';
 import { FollowUpService, CallLogDto, HomeVisitDto } from '../../services/follow-up.service';
 
 @Component({
@@ -15,6 +15,7 @@ export class StudentDetailPage implements OnInit {
   student: any = null;
   calls: CallLogDto[] = [];
   visits: HomeVisitDto[] = [];
+  editHistory: StudentEditLogDto[] = [];
   loading = true;
 
   constructor(
@@ -32,6 +33,7 @@ export class StudentDetailPage implements OnInit {
         this.student = s;
         this.followUp.getCallHistory(id).subscribe({ next: (c) => this.calls = c || [] });
         this.followUp.getVisitHistory(id).subscribe({ next: (v) => this.visits = v || [] });
+        this.studentQueries.getEditHistory(id).subscribe({ next: (h) => this.editHistory = h || [] });
         this.loading = false;
       },
       error: () => this.loading = false

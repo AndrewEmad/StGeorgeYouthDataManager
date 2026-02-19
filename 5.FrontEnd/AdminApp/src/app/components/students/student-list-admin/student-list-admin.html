@@ -107,6 +107,7 @@
           <th class="sortable" (click)="setSort('academicYear')">السنة الدراسية <span class="sort-icon" *ngIf="sortBy === 'academicYear'">{{ sortDesc ? '▼' : '▲' }}</span></th>
           <th class="sortable" (click)="setSort('servantName')">الخادم الحالي <span class="sort-icon" *ngIf="sortBy === 'servantName'">{{ sortDesc ? '▼' : '▲' }}</span></th>
           <th class="sortable" (click)="setSort('lastFollowUpDate')">آخر متابعة <span class="sort-icon" *ngIf="sortBy === 'lastFollowUpDate'">{{ sortDesc ? '▼' : '▲' }}</span></th>
+          <th>آخر حضور</th>
           <th>آخر ملاحظة</th>
           <th>الإجراءات</th>
         </tr>
@@ -123,6 +124,7 @@
             <span *ngIf="!s.servantName" class="text-error">غير مخصص</span>
           </td>
           <td>{{ s.lastFollowUpDate ? (s.lastFollowUpDate | date:'dd/MM/yyyy') : '—' }}</td>
+          <td>{{ s.lastAttendanceDate ? (s.lastAttendanceDate | date:'dd/MM/yyyy') : '—' }}</td>
           <td class="col-note" [title]="s.lastFollowUpNote || ''">{{ (s.lastFollowUpNote | slice:0:40) || '—' }}{{ s.lastFollowUpNote && s.lastFollowUpNote.length > 40 ? '…' : '' }}</td>
           <td class="col-actions" (click)="$event.stopPropagation()">
             <button class="btn-outline sm" (click)="openAssignModal(s)">تخصيص</button>
@@ -163,7 +165,7 @@
       </div>
       <div class="form-group">
         <label>تاريخ الميلاد</label>
-        <input type="date" [(ngModel)]="newStudent.birthDate" class="form-input" />
+        <span class="date-input-wrap" (click)="birthDateInput.showPicker?.()"><input #birthDateInput type="date" [(ngModel)]="newStudent.birthDate" class="form-input" /></span>
       </div>
       <div class="form-group">
         <label>العنوان</label>

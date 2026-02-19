@@ -416,3 +416,12 @@ th.sortable:hover {
   color: var(--text-muted);
   font-size: 0.9rem;
 }
+
+.date-input-wrap {
+  display: block;
+  cursor: pointer;
+}
+
+.date-input-wrap input {
+  cursor: pointer;
+}

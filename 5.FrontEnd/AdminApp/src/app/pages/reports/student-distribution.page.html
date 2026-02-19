@@ -9,56 +9,10 @@
   </header>
 
   <section class="report-section">
-    <h2>حسب المنطقة</h2>
-    <div *ngIf="loadingArea" class="loader">جاري التحميل...</div>
-    <p *ngIf="errorArea" class="error-msg">{{ errorArea }}</p>
-    <div *ngIf="!loadingArea && !errorArea" class="glass-card table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>المنطقة</th>
-            <th>العدد</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let row of byArea">
-            <td>{{ row.groupKey || '—' }}</td>
-            <td>{{ row.count }}</td>
-            <td><a [routerLink]="['/dashboard/students']" [queryParams]="{ area: row.groupKey }" class="btn-outline sm">عرض المخدومين</a></td>
-          </tr>
-          <tr *ngIf="byArea.length === 0">
-            <td colspan="3" class="text-muted">لا توجد بيانات</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <h2 class="section-title-row">حسب المنطقة <a routerLink="/dashboard/reports/students-by-area" class="btn-outline sm">عرض في صفحة منفصلة</a></h2>
   </section>
 
   <section class="report-section">
-    <h2>حسب السنة الدراسية</h2>
-    <div *ngIf="loadingYear" class="loader">جاري التحميل...</div>
-    <p *ngIf="errorYear" class="error-msg">{{ errorYear }}</p>
-    <div *ngIf="!loadingYear && !errorYear" class="glass-card table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>السنة الدراسية</th>
-            <th>العدد</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let row of byAcademicYear">
-            <td>{{ row.groupKey || '—' }}</td>
-            <td>{{ row.count }}</td>
-            <td><a [routerLink]="['/dashboard/students']" [queryParams]="{ academicYear: row.groupKey }" class="btn-outline sm">عرض المخدومين</a></td>
-          </tr>
-          <tr *ngIf="byAcademicYear.length === 0">
-            <td colspan="3" class="text-muted">لا توجد بيانات</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <h2 class="section-title-row">حسب السنة الدراسية <a routerLink="/dashboard/reports/students-by-year" class="btn-outline sm">عرض في صفحة منفصلة</a></h2>
   </section>
 </div>

@@ -1,20 +1,32 @@
-<div class="main-layout">
-  <button type="button" class="burger-btn" (click)="toggleSidebar()" aria-label="القائمة">
-    <span class="material-icons">{{ sidebarOpen ? 'close' : 'menu' }}</span>
-  </button>
+<div class="app-wrapper">
+  <header class="top-bar">
+    <span class="top-bar-name">
+      <span class="material-icons">account_circle</span>
+      {{ adminName }}
+    </span>
+    <button type="button" class="btn-logout" (click)="logout()">
+      <span class="material-icons">logout</span>
+      <span>خروج</span>
+    </button>
+  </header>
 
-  <div class="sidebar-overlay" [class.is-open]="sidebarOpen" (click)="closeSidebar()" aria-hidden="true"></div>
+  <div class="main-layout">
+    <button type="button" class="burger-btn" (click)="toggleSidebar()" aria-label="القائمة">
+      <span class="material-icons">{{ sidebarOpen ? 'close' : 'menu' }}</span>
+    </button>
 
-  <aside class="glass-card sidebar" [class.is-open]="sidebarOpen">
-    <div class="sidebar-header">
-      <span class="material-icons brand-icon">hub</span>
-      <h2>الإدارة</h2>
-      <button type="button" class="sidebar-close" (click)="closeSidebar()" aria-label="إغلاق">
-        <span class="material-icons">close</span>
-      </button>
-    </div>
+    <div class="sidebar-overlay" [class.is-open]="sidebarOpen" (click)="closeSidebar()" aria-hidden="true"></div>
 
-    <nav class="side-nav">
+    <aside class="glass-card sidebar" [class.is-open]="sidebarOpen">
+      <div class="sidebar-header">
+        <span class="material-icons brand-icon">hub</span>
+        <h2>الإدارة</h2>
+        <button type="button" class="sidebar-close" (click)="closeSidebar()" aria-label="إغلاق">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <nav class="side-nav">
       <a routerLink="/dashboard/stats" routerLinkActive="active" class="nav-item" (click)="closeSidebar()">
         <span class="material-icons">analytics</span>
         <span>الإحصائيات</span>
@@ -26,6 +38,10 @@
       <a routerLink="/dashboard/students" routerLinkActive="active" class="nav-item" (click)="closeSidebar()">
         <span class="material-icons">groups</span>
         <span>المخدومين</span>
+      </a>
+      <a routerLink="/dashboard/attendance" routerLinkActive="active" class="nav-item" (click)="closeSidebar()">
+        <span class="material-icons">event_available</span>
+        <span>تسجيل الحضور</span>
       </a>
       <a routerLink="/dashboard/removal-requests" routerLinkActive="active" class="nav-item" (click)="closeSidebar()">
         <span class="material-icons">person_remove</span>
@@ -40,23 +56,10 @@
         <span>النسخ الاحتياطي</span>
       </a>
     </nav>
-
-    <div class="sidebar-footer">
-      <div class="admin-profile">
-        <span class="material-icons">account_circle</span>
-        <div class="p-info">
-          <p>{{adminName}}</p>
-          <span>مدير النظام</span>
-        </div>
-      </div>
-      <button (click)="logout()" class="btn-logout">
-        <span class="material-icons">logout</span>
-        <span>خروج</span>
-      </button>
-    </div>
   </aside>
 
   <main class="content-area">
     <router-outlet></router-outlet>
   </main>
+  </div>
 </div>

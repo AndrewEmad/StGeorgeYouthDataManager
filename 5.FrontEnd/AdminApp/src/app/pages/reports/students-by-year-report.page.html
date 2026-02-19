@@ -1,0 +1,39 @@
+<div class="animate-slide">
+  <header class="content-header reports-header">
+    <h1>توزيع المخدومين حسب السنة الدراسية</h1>
+    <p class="text-muted">تقرير منفصل</p>
+    <a routerLink="/dashboard/reports/student-distribution" class="btn-outline">← العودة لتوزيع المخدومين</a>
+  </header>
+  <section class="report-section">
+    <div *ngIf="loading" class="loader">جاري التحميل...</div>
+    <p *ngIf="error" class="error-msg">{{ error }}</p>
+    <div *ngIf="!loading && !error" class="glass-card table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>السنة الدراسية</th>
+            <th>العدد</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of list">
+            <td>{{ row.groupKey || '—' }}</td>
+            <td>{{ row.count }}</td>
+            <td><a [routerLink]="['/dashboard/students']" [queryParams]="{ academicYear: row.groupKey }" class="btn-outline sm">عرض المخدومين</a></td>
+          </tr>
+          <tr *ngIf="list.length === 0">
+            <td colspan="3" class="text-muted">لا توجد بيانات</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination" *ngIf="totalCount > 0">
+      <span class="pagination-info">{{ (page - 1) * pageSize + 1 }} - {{ (page - 1) * pageSize + list.length }} من {{ totalCount }}</span>
+      <label class="pagination-size">عرض <select class="form-input sm" [ngModel]="pageSize" (ngModelChange)="setPageSize($event)"><option *ngFor="let n of pageSizeOptions" [value]="n">{{ n }}</option></select></label>
+      <button type="button" class="btn-outline sm" [disabled]="page <= 1" (click)="goToPage(page - 1)">السابق</button>
+      <span class="page-num">صفحة {{ page }} من {{ totalPages }}</span>
+      <button type="button" class="btn-outline sm" [disabled]="page >= totalPages" (click)="goToPage(page + 1)">التالي</button>
+    </div>
+  </section>
+</div>

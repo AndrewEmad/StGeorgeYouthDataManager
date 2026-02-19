@@ -13,13 +13,16 @@ namespace YouthDataManager.Students.Service.Implementations.Queries;
 public class StudentQueriesService : IStudentQueriesService
 {
     private readonly IStudentNoTrackingRepository _repository;
+    private readonly IStudentEditLogNoTrackingRepository _editLogRepository;
     private readonly ILogger<StudentQueriesService> _logger;
 
     public StudentQueriesService(
         IStudentNoTrackingRepository repository,
+        IStudentEditLogNoTrackingRepository editLogRepository,
         ILogger<StudentQueriesService> logger)
     {
         _repository = repository;
+        _editLogRepository = editLogRepository;
         _logger = logger;
     }
 
@@ -45,7 +48,10 @@ public class StudentQueriesService : IStudentQueriesService
                 s.CallLogs.Select(c => (DateTime?)c.CallDate).Concat(s.HomeVisits.Select(v => (DateTime?)v.VisitDate)).Max(),
                 (s.CallLogs.Any() && (!s.HomeVisits.Any() || s.CallLogs.Max(c => c.CallDate) >= s.HomeVisits.Max(v => v.VisitDate)))
                     ? (s.CallLogs.OrderByDescending(c => c.CallDate).Select(c => c.Notes).FirstOrDefault() ?? s.HomeVisits.OrderByDescending(v => v.VisitDate).Select(v => v.Notes).FirstOrDefault())
-                    : (s.HomeVisits.OrderByDescending(v => v.VisitDate).Select(v => v.Notes).FirstOrDefault() ?? s.CallLogs.OrderByDescending(c => c.CallDate).Select(c => c.Notes).FirstOrDefault())
+                    : (s.HomeVisits.OrderByDescending(v => v.VisitDate).Select(v => v.Notes).FirstOrDefault() ?? s.CallLogs.OrderByDescending(c => c.CallDate).Select(c => c.Notes).FirstOrDefault()),
+                s.LastAttendanceDate,
+                s.CreatedAt,
+                s.UpdatedAt
             ));
 
             if (result == null)
@@ -82,7 +88,10 @@ public class StudentQueriesService : IStudentQueriesService
                 s.CallLogs.Select(c => (DateTime?)c.CallDate).Concat(s.HomeVisits.Select(v => (DateTime?)v.VisitDate)).Max(),
                 (s.CallLogs.Any() && (!s.HomeVisits.Any() || s.CallLogs.Max(c => c.CallDate) >= s.HomeVisits.Max(v => v.VisitDate)))
                     ? (s.CallLogs.OrderByDescending(c => c.CallDate).Select(c => c.Notes).FirstOrDefault() ?? s.HomeVisits.OrderByDescending(v => v.VisitDate).Select(v => v.Notes).FirstOrDefault())
-                    : (s.HomeVisits.OrderByDescending(v => v.VisitDate).Select(v => v.Notes).FirstOrDefault() ?? s.CallLogs.OrderByDescending(c => c.CallDate).Select(c => c.Notes).FirstOrDefault())
+                    : (s.HomeVisits.OrderByDescending(v => v.VisitDate).Select(v => v.Notes).FirstOrDefault() ?? s.CallLogs.OrderByDescending(c => c.CallDate).Select(c => c.Notes).FirstOrDefault()),
+                s.LastAttendanceDate,
+                s.CreatedAt,
+                s.UpdatedAt
             ));
 
             return ServiceResult<IEnumerable<StudentDto>>.Success(result);
@@ -116,7 +125,10 @@ public class StudentQueriesService : IStudentQueriesService
                 s.CallLogs.Select(c => (DateTime?)c.CallDate).Concat(s.HomeVisits.Select(v => (DateTime?)v.VisitDate)).Max(),
                 (s.CallLogs.Any() && (!s.HomeVisits.Any() || s.CallLogs.Max(c => c.CallDate) >= s.HomeVisits.Max(v => v.VisitDate)))
                     ? (s.CallLogs.OrderByDescending(c => c.CallDate).Select(c => c.Notes).FirstOrDefault() ?? s.HomeVisits.OrderByDescending(v => v.VisitDate).Select(v => v.Notes).FirstOrDefault())
-                    : (s.HomeVisits.OrderByDescending(v => v.VisitDate).Select(v => v.Notes).FirstOrDefault() ?? s.CallLogs.OrderByDescending(c => c.CallDate).Select(c => c.Notes).FirstOrDefault())
+                    : (s.HomeVisits.OrderByDescending(v => v.VisitDate).Select(v => v.Notes).FirstOrDefault() ?? s.CallLogs.OrderByDescending(c => c.CallDate).Select(c => c.Notes).FirstOrDefault()),
+                s.LastAttendanceDate,
+                s.CreatedAt,
+                s.UpdatedAt
             ));
 
             return ServiceResult<IEnumerable<StudentDto>>.Success(result);
@@ -145,7 +157,10 @@ public class StudentQueriesService : IStudentQueriesService
                     s.CallLogs.Select(c => (DateTime?)c.CallDate).Concat(s.HomeVisits.Select(v => (DateTime?)v.VisitDate)).Max(),
                     (s.CallLogs.Any() && (!s.HomeVisits.Any() || s.CallLogs.Max(c => c.CallDate) >= s.HomeVisits.Max(v => v.VisitDate)))
                         ? s.CallLogs.OrderByDescending(c => c.CallDate).Select(c => c.Notes).FirstOrDefault()
-                        : s.HomeVisits.OrderByDescending(v => v.VisitDate).Select(v => v.Notes).FirstOrDefault()));
+                        : s.HomeVisits.OrderByDescending(v => v.VisitDate).Select(v => v.Notes).FirstOrDefault(),
+                    s.LastAttendanceDate,
+                    s.CreatedAt,
+                    s.UpdatedAt));
             var paged = new PagedResult<StudentDto>(items.ToList(), totalCount, page, pageSize);
             return ServiceResult<PagedResult<StudentDto>>.Success(paged);
         }
@@ -181,6 +196,27 @@ public class StudentQueriesService : IStudentQueriesService
         {
             _logger.LogError(ex, "Error getting distinct academic years");
             return ServiceResult<IEnumerable<string>>.Failure("An error occurred while retrieving academic years.");
+        }
+    }
+
+    public async Task<ServiceResult<IEnumerable<StudentEditLogDto>>> GetEditHistory(Guid studentId)
+    {
+        try
+        {
+            var items = await _editLogRepository.GetByStudentId(studentId, e => new StudentEditLogDto(
+                e.Id,
+                e.StudentId,
+                e.UpdatedAt,
+                e.UpdatedByUserId,
+                e.UpdatedByUserName,
+                e.Details
+            ));
+            return ServiceResult<IEnumerable<StudentEditLogDto>>.Success(items);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting edit history for student {StudentId}", studentId);
+            return ServiceResult<IEnumerable<StudentEditLogDto>>.Failure("An error occurred while retrieving edit history.");
         }
     }
 }

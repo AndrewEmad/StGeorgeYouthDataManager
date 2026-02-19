@@ -37,6 +37,14 @@ public class ReportsController : ControllerBase
         return Ok(result.Data);
     }
 
+    [HttpGet("servant-performances-paged")]
+    public async Task<IActionResult> GetServantPerformancesPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var result = await _service.GetServantPerformancesPaged(page, pageSize);
+        if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
+        return Ok(result.Data);
+    }
+
     [HttpGet("servant/{servantId:guid}/performance")]
     public async Task<IActionResult> GetServantPerformance(Guid servantId)
     {
@@ -79,5 +87,37 @@ public class ReportsController : ControllerBase
         if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
         
         return File(result.Data!, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Visits.xlsx");
+    }
+
+    [HttpGet("servant-activity")]
+    public async Task<IActionResult> GetServantActivitySummary([FromQuery] DateTime? dateFrom, [FromQuery] DateTime? dateTo, [FromQuery] Guid? servantId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var result = await _service.GetServantActivitySummary(dateFrom, dateTo, servantId, page, pageSize);
+        if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
+        return Ok(result.Data);
+    }
+
+    [HttpGet("students-no-contact")]
+    public async Task<IActionResult> GetStudentsWithNoRecentContact([FromQuery] int days = 14, [FromQuery] Guid? servantId = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var result = await _service.GetStudentsWithNoRecentContact(days, servantId, page, pageSize);
+        if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
+        return Ok(result.Data);
+    }
+
+    [HttpGet("students-by-area")]
+    public async Task<IActionResult> GetStudentsByArea([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var result = await _service.GetStudentsByArea(page, pageSize);
+        if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
+        return Ok(result.Data);
+    }
+
+    [HttpGet("students-by-academic-year")]
+    public async Task<IActionResult> GetStudentsByAcademicYear([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var result = await _service.GetStudentsByAcademicYear(page, pageSize);
+        if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
+        return Ok(result.Data);
     }
 }

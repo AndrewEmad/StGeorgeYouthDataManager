@@ -23,7 +23,13 @@ export class AuthService {
   constructor(private http: HttpClient, private router: Router) {
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
-      this.currentUser.set(JSON.parse(savedUser));
+      const user = JSON.parse(savedUser);
+      this.currentUser.set(user);
+      if (user.role === 'Admin' || this.isTokenExpired()) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        this.currentUser.set(null);
+      }
     }
   }
 
@@ -63,6 +69,30 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return !!this.currentUser();
+  }
+
+  hasRequiredRole(): boolean {
+    const r = this.currentUser()?.role;
+    return r != null && r !== 'Admin';
+  }
+
+  isTokenExpired(): boolean {
+    const token = localStorage.getItem('token');
+    if (!token) return true;
+    try {
+      const payload = token.split('.')[1];
+      if (!payload) return false;
+      const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+      const exp = decoded?.exp as number | undefined;
+      if (exp == null) return false;
+      return exp * 1000 - 30 * 1000 < Date.now();
+    } catch {
+      return false;
+    }
+  }
+
+  shouldRedirectToHome(): boolean {
+    return this.isLoggedIn() && this.hasRequiredRole() && !this.isTokenExpired();
   }
 
   getToken(): string | null {

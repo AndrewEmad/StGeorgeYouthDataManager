@@ -415,6 +415,15 @@
   min-height: 80px;
 }
 
+.date-input-wrap {
+  display: block;
+  cursor: pointer;
+}
+
+.date-input-wrap input {
+  cursor: pointer;
+}
+
 .modal .error-msg {
   margin: 12px 0;
   text-align: center;

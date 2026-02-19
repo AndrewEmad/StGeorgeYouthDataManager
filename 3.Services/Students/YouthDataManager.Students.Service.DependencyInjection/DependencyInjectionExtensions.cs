@@ -24,7 +24,8 @@ public static class DependencyInjectionExtensions
     {
         return services
             .AddTransient<IStudentCommandsService, StudentCommandsService>()
-            .AddTransient<IStudentRemovalRequestService, StudentRemovalRequestService>();
+            .AddTransient<IStudentRemovalRequestService, StudentRemovalRequestService>()
+            .AddTransient<IAttendanceService, AttendanceService>();
     }
 
     public static IServiceCollection AddStudentsQueriesService(

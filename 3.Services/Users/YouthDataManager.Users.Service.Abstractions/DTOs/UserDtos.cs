@@ -13,7 +13,8 @@ public record UserDto(
     string Phone,
     string Role,
     bool IsActive,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    DateTime? UpdatedAt
 );
 
 public record CreateUserDto(

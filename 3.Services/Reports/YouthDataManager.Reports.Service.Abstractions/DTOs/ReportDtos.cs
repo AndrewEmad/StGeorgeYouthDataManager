@@ -19,7 +19,6 @@ public record ManagerDashboardDto(
     int CallsThisWeek,
     int VisitsThisWeek,
     Dictionary<string, int> StudentsPerServant,
-    IEnumerable<ServantPerformanceDto> ServantPerformances,
     IEnumerable<RecentActivityDto> RecentActivities
 );
 
@@ -50,3 +49,27 @@ public record ReportRequestDto(
     string? Area,
     string? College
 );
+
+public record ServantActivitySummaryDto(
+    Guid ServantId,
+    string FullName,
+    int AssignedCount,
+    int CallsInPeriod,
+    int VisitsInPeriod
+);
+
+public record StudentNoContactDto(
+    Guid StudentId,
+    string FullName,
+    Guid? ServantId,
+    string? ServantName,
+    DateTime? LastContactDate
+);
+
+public record StudentsByGroupDto(
+    string GroupKey,
+    int Count,
+    IReadOnlyList<Guid>? StudentIds
+);
+
+public record PagedReportResult<T>(IReadOnlyList<T> Items, int TotalCount, int Page, int PageSize);

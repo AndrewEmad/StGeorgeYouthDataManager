@@ -15,6 +15,13 @@ export class ReportsService {
     return this.http.get(`${this.apiUrl}/dashboard/manager`);
   }
 
+  getServantPerformancesPaged(params: { page: number; pageSize: number }): Observable<PagedReport<ServantPerformance>> {
+    return this.http.get<PagedReport<ServantPerformance>>(
+      `${this.apiUrl}/servant-performances-paged`,
+      { params: { page: params.page, pageSize: params.pageSize } }
+    );
+  }
+
   getServantPerformance(
     servantId: string,
   ): Observable<{
@@ -97,6 +104,14 @@ export interface PagedReport<T> {
   totalCount: number;
   page: number;
   pageSize: number;
+}
+
+export interface ServantPerformance {
+  servantId: string;
+  fullName: string;
+  assignedStudentsCount: number;
+  callsThisWeek: number;
+  visitsThisWeek: number;
 }
 
 export interface ServantActivitySummary {

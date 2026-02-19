@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using YouthDataManager.Domain.Entities;
 using YouthDataManager.Domain.Repositories.Tracking;
@@ -13,19 +15,25 @@ namespace YouthDataManager.Students.Service.Implementations.Commands;
 public class StudentCommandsService : IStudentCommandsService
 {
     private readonly IStudentRepository _repository;
+    private readonly IStudentEditLogRepository _editLogRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IActivityLogger _activityLogger;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<StudentCommandsService> _logger;
 
     public StudentCommandsService(
         IStudentRepository repository,
+        IStudentEditLogRepository editLogRepository,
         IUnitOfWork unitOfWork,
         IActivityLogger activityLogger,
+        IHttpContextAccessor httpContextAccessor,
         ILogger<StudentCommandsService> logger)
     {
         _repository = repository;
+        _editLogRepository = editLogRepository;
         _unitOfWork = unitOfWork;
         _activityLogger = activityLogger;
+        _httpContextAccessor = httpContextAccessor;
         _logger = logger;
     }
 
@@ -91,6 +99,21 @@ public class StudentCommandsService : IStudentCommandsService
             student.UpdatedAt = DateTime.UtcNow;
 
             _repository.Update(student);
+
+            var userName = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value
+                ?? _httpContextAccessor.HttpContext?.User?.Identity?.Name
+                ?? "غير معروف";
+            var userId = currentUserId ?? Guid.Empty;
+            _editLogRepository.Add(new StudentEditLog
+            {
+                Id = Guid.NewGuid(),
+                StudentId = student.Id,
+                UpdatedAt = student.UpdatedAt.Value,
+                UpdatedByUserId = userId,
+                UpdatedByUserName = userName,
+                Details = "تحديث بيانات المخدوم"
+            });
+
             await _unitOfWork.SaveChangesAsync();
 
             await _activityLogger.LogAsync("تحديث مخدوم", $"تم تحديث بيانات المخدوم: {student.FullName}");

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using YouthDataManager.Domain.Entities;
 using YouthDataManager.Domain.Repositories.NoTracking;
+using YouthDataManager.Reports.Service.Abstractions.Data;
 using YouthDataManager.Reports.Service.Abstractions.DTOs;
 using YouthDataManager.Reports.Service.Abstractions.Queries;
 using YouthDataManager.Reports.Service.Implementations.Services;
@@ -23,6 +24,7 @@ public class ReportQueriesService : IReportQueriesService
     private readonly ExcelExportService _excelService;
     private readonly IActivityLogger _activityLogger;
     private readonly ILogger<ReportQueriesService> _logger;
+    private readonly IReportDataProvider _reportDataProvider;
 
     public ReportQueriesService(
         IStudentNoTrackingRepository studentRepository,
@@ -32,7 +34,8 @@ public class ReportQueriesService : IReportQueriesService
         UserManager<ApplicationUser> userManager,
         ExcelExportService excelService,
         IActivityLogger activityLogger,
-        ILogger<ReportQueriesService> logger)
+        ILogger<ReportQueriesService> logger,
+        IReportDataProvider reportDataProvider)
     {
         _studentRepository = studentRepository;
         _callRepository = callRepository;
@@ -42,6 +45,7 @@ public class ReportQueriesService : IReportQueriesService
         _excelService = excelService;
         _activityLogger = activityLogger;
         _logger = logger;
+        _reportDataProvider = reportDataProvider;
     }
 
     public async Task<ServiceResult<ServantDashboardDto>> GetServantDashboard(Guid servantId)
@@ -102,15 +106,6 @@ public class ReportQueriesService : IReportQueriesService
             var callsThisWeek = (await _callRepository.GetByFilter(weekStart, weekEnd, null, null, null, c => c.Id)).Count();
             var visitsThisWeek = (await _visitRepository.GetByFilter(weekStart, weekEnd, null, null, null, v => v.Id)).Count();
 
-            var servantPerformances = new List<ServantPerformanceDto>();
-            foreach (var servant in servants)
-            {
-                var assignedCount = (await _studentRepository.GetByServantId(servant.Id, s => s.Id)).Count();
-                var callsWeek = (await _callRepository.GetByFilter(weekStart, weekEnd, servant.Id, null, null, c => c.Id)).Count();
-                var visitsWeek = (await _visitRepository.GetByFilter(weekStart, weekEnd, servant.Id, null, null, v => v.Id)).Count();
-                servantPerformances.Add(new ServantPerformanceDto(servant.Id, servant.FullName ?? servant.UserName ?? "", assignedCount, callsWeek, visitsWeek));
-            }
-
             var recentActivities = await _activityRepository.GetRecent(10, a => new RecentActivityDto(
                 $"{a.UserName} ({a.UserRole}): {a.Action} - {a.Details}",
                 a.Timestamp
@@ -124,7 +119,6 @@ public class ReportQueriesService : IReportQueriesService
                 callsThisWeek,
                 visitsThisWeek,
                 students.Where(s => s.ServantId.HasValue).GroupBy(s => s.Servant?.FullName ?? "Other").ToDictionary(g => g.Key, g => g.Count()),
-                servantPerformances,
                 recentActivities
             );
 
@@ -182,6 +176,32 @@ public class ReportQueriesService : IReportQueriesService
         }
     }
 
+    public async Task<ServiceResult<PagedReportResult<ServantPerformanceDto>>> GetServantPerformancesPaged(int page, int pageSize)
+    {
+        try
+        {
+            var servants = await _userManager.GetUsersInRoleAsync("Servant");
+            var totalCount = servants.Count;
+            var (weekStart, weekEnd) = GetCurrentWeekRange();
+            var pagedServants = servants.Skip((page - 1) * pageSize).Take(pageSize);
+            var result = new List<ServantPerformanceDto>();
+            foreach (var servant in pagedServants)
+            {
+                var assignedCount = (await _studentRepository.GetByServantId(servant.Id, s => s.Id)).Count();
+                var callsWeek = (await _callRepository.GetByFilter(weekStart, weekEnd, servant.Id, null, null, c => c.Id)).Count();
+                var visitsWeek = (await _visitRepository.GetByFilter(weekStart, weekEnd, servant.Id, null, null, v => v.Id)).Count();
+                result.Add(new ServantPerformanceDto(servant.Id, servant.FullName ?? servant.UserName ?? "", assignedCount, callsWeek, visitsWeek));
+            }
+            var paged = new PagedReportResult<ServantPerformanceDto>(result, totalCount, page, pageSize);
+            return ServiceResult<PagedReportResult<ServantPerformanceDto>>.Success(paged);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting servant performances paged");
+            return ServiceResult<PagedReportResult<ServantPerformanceDto>>.Failure("An error occurred while loading servant performances.");
+        }
+    }
+
     public async Task<ServiceResult<byte[]>> ExportStudentsExcel(ReportRequestDto filter)
     {
         try
@@ -233,6 +253,80 @@ public class ReportQueriesService : IReportQueriesService
         {
             _logger.LogError(ex, "Error exporting visits excel");
             return ServiceResult<byte[]>.Failure("An error occurred during excel export.");
+        }
+    }
+
+    public async Task<ServiceResult<PagedReportResult<ServantActivitySummaryDto>>> GetServantActivitySummary(DateTime? dateFrom, DateTime? dateTo, Guid? servantId, int page, int pageSize)
+    {
+        try
+        {
+            var servants = servantId.HasValue
+                ? (await _userManager.FindByIdAsync(servantId.Value.ToString()) is { } u ? new[] { u } : Array.Empty<ApplicationUser>())
+                : (await _userManager.GetUsersInRoleAsync("Servant"));
+            var totalCount = servants.Count;
+            var dateStart = dateFrom ?? DateTime.UtcNow.Date.AddMonths(-1);
+            var dateEnd = dateTo ?? DateTime.UtcNow;
+            var pagedServants = servants.Skip((page - 1) * pageSize).Take(pageSize);
+            var result = new List<ServantActivitySummaryDto>();
+            foreach (var servant in pagedServants)
+            {
+                var assignedCount = (await _studentRepository.GetByServantId(servant.Id, s => s.Id)).Count();
+                var callsInPeriod = (await _callRepository.GetByFilter(dateStart, dateEnd, servant.Id, null, null, c => c.Id)).Count();
+                var visitsInPeriod = (await _visitRepository.GetByFilter(dateStart, dateEnd, servant.Id, null, null, v => v.Id)).Count();
+                result.Add(new ServantActivitySummaryDto(servant.Id, servant.FullName ?? servant.UserName ?? "", assignedCount, callsInPeriod, visitsInPeriod));
+            }
+            var paged = new PagedReportResult<ServantActivitySummaryDto>(result, totalCount, page, pageSize);
+            return ServiceResult<PagedReportResult<ServantActivitySummaryDto>>.Success(paged);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting servant activity summary");
+            return ServiceResult<PagedReportResult<ServantActivitySummaryDto>>.Failure("An error occurred while loading servant activity summary.");
+        }
+    }
+
+    public async Task<ServiceResult<PagedReportResult<StudentNoContactDto>>> GetStudentsWithNoRecentContact(int days, Guid? servantId, int page, int pageSize)
+    {
+        try
+        {
+            var (items, totalCount) = await _reportDataProvider.GetStudentsWithNoRecentContactPagedAsync(days, servantId, page, pageSize);
+            var paged = new PagedReportResult<StudentNoContactDto>(items, totalCount, page, pageSize);
+            return ServiceResult<PagedReportResult<StudentNoContactDto>>.Success(paged);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting students with no recent contact");
+            return ServiceResult<PagedReportResult<StudentNoContactDto>>.Failure("An error occurred while loading students with no recent contact.");
+        }
+    }
+
+    public async Task<ServiceResult<PagedReportResult<StudentsByGroupDto>>> GetStudentsByArea(int page, int pageSize)
+    {
+        try
+        {
+            var (items, totalCount) = await _reportDataProvider.GetStudentsByAreaPagedAsync(page, pageSize);
+            var paged = new PagedReportResult<StudentsByGroupDto>(items, totalCount, page, pageSize);
+            return ServiceResult<PagedReportResult<StudentsByGroupDto>>.Success(paged);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting students by area");
+            return ServiceResult<PagedReportResult<StudentsByGroupDto>>.Failure("An error occurred while loading students by area.");
+        }
+    }
+
+    public async Task<ServiceResult<PagedReportResult<StudentsByGroupDto>>> GetStudentsByAcademicYear(int page, int pageSize)
+    {
+        try
+        {
+            var (items, totalCount) = await _reportDataProvider.GetStudentsByAcademicYearPagedAsync(page, pageSize);
+            var paged = new PagedReportResult<StudentsByGroupDto>(items, totalCount, page, pageSize);
+            return ServiceResult<PagedReportResult<StudentsByGroupDto>>.Success(paged);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting students by academic year");
+            return ServiceResult<PagedReportResult<StudentsByGroupDto>>.Failure("An error occurred while loading students by academic year.");
         }
     }
 }

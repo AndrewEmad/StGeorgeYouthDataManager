@@ -25,8 +25,11 @@ public class Student
     public DateTime? UpdatedAt { get; set; }
     public string? LastUpdateNotes { get; set; }
     public bool IsDeleted { get; set; }
+    public DateTime? LastAttendanceDate { get; set; }
 
     // Navigation properties
     public ICollection<CallLog> CallLogs { get; set; } = new List<CallLog>();
     public ICollection<HomeVisit> HomeVisits { get; set; } = new List<HomeVisit>();
+    public ICollection<StudentAttendance> AttendanceRecords { get; set; } = new List<StudentAttendance>();
+    public ICollection<StudentEditLog> EditLogs { get; set; } = new List<StudentEditLog>();
 }

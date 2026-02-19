@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YouthDataManager.Shared.Service.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using YouthDataManager.Students.Service.Abstractions.DTOs;
 using YouthDataManager.Students.Service.Abstractions.Queries;
 using YouthDataManager.WebApi.Authorization;
@@ -77,6 +78,16 @@ public class StudentQueriesController : ControllerBase
             if (Guid.TryParse(userIdClaim, out var userId) && result.Data.ServantId != userId)
                 return Forbid();
         }
+        return Ok(result.Data);
+    }
+
+    [HttpGet("{id}/edit-history")]
+    [Authorize(Roles = RolePolicies.AdminManagerPriestRoles)]
+    public async Task<IActionResult> GetEditHistory(Guid id)
+    {
+        var result = await _service.GetEditHistory(id);
+        if (result.Status != ServiceResultStatus.Success)
+            return BadRequest(result);
         return Ok(result.Data);
     }
 }

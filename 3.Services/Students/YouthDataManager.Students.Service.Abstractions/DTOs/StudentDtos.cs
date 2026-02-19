@@ -32,7 +32,10 @@ public record StudentDto(
     DateTime? BirthDate,
     int Gender,
     DateTime? LastFollowUpDate,
-    string? LastFollowUpNote
+    string? LastFollowUpNote,
+    DateTime? LastAttendanceDate,
+    DateTime? CreatedAt,
+    DateTime? UpdatedAt
 );
 
 public record CreateStudentRequest(
@@ -76,3 +79,12 @@ public record StudentRemovalRequestDto(
 );
 
 public record CreateRemovalRequestDto(Guid StudentId);
+
+public record StudentEditLogDto(
+    Guid Id,
+    Guid StudentId,
+    DateTime UpdatedAt,
+    Guid UpdatedByUserId,
+    string UpdatedByUserName,
+    string Details
+);

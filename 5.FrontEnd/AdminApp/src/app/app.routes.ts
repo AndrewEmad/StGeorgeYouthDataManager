@@ -17,9 +17,10 @@ import { StudentsByAreaReportPage } from './pages/reports/students-by-area-repor
 import { StudentsByYearReportPage } from './pages/reports/students-by-year-report.page';
 import { AttendancePage } from './pages/attendance/attendance.page';
 import { authGuard } from './guards/auth.guard';
+import { redirectIfAuthGuard } from './guards/redirect-if-auth.guard';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginPage },
+  { path: 'login', component: LoginPage, canActivate: [redirectIfAuthGuard] },
   { path: 'change-password', component: ChangePasswordPage, canActivate: [authGuard] },
   {
     path: 'dashboard',

@@ -27,6 +27,7 @@
         <h3>{{student.fullName}}</h3>
         <p><span class="material-icons">place</span> {{student.area}}</p>
         <p><span class="material-icons">school</span> {{student.college}}</p>
+        <p *ngIf="student.lastAttendanceDate" class="last-attendance"><span class="material-icons">event_available</span> آخر حضور: {{ student.lastAttendanceDate | date:'dd/MM/yyyy' }}</p>
       </div>
       <div class="student-actions">
         <a [href]="'tel:' + student.phone" class="btn-icon call">

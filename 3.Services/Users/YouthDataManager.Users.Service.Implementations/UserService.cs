@@ -43,7 +43,8 @@ public class UserService : IUserService
                 user.Phone,
                 roles.FirstOrDefault() ?? "Unknown",
                 user.IsActive,
-                user.CreatedAt
+                user.CreatedAt,
+                user.UpdatedAt
             ));
         }
 
@@ -59,6 +60,13 @@ public class UserService : IUserService
         var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
         var adminIds = adminUsers.Select(u => u.Id).ToList();
         var query = _userManager.Users.AsQueryable().Where(u => !adminIds.Contains(u.Id));
+
+        if (role != "Priest")
+        {
+            var priestUsers = await _userManager.GetUsersInRoleAsync("Priest");
+            var priestIds = priestUsers.Select(u => u.Id).ToList();
+            query = query.Where(u => !priestIds.Contains(u.Id));
+        }
 
         if (!string.IsNullOrWhiteSpace(role))
         {
@@ -84,7 +92,7 @@ public class UserService : IUserService
         foreach (var user in users)
         {
             var roles = await _userManager.GetRolesAsync(user);
-            dtos.Add(new UserDto(user.Id, user.UserName!, user.FullName, user.Email!, user.Phone, roles.FirstOrDefault() ?? "Unknown", user.IsActive, user.CreatedAt));
+            dtos.Add(new UserDto(user.Id, user.UserName!, user.FullName, user.Email!, user.Phone, roles.FirstOrDefault() ?? "Unknown", user.IsActive, user.CreatedAt, user.UpdatedAt));
         }
         return ServiceResult<PagedResult<UserDto>>.Success(new PagedResult<UserDto>(dtos, totalCount, page, pageSize));
     }
@@ -103,7 +111,8 @@ public class UserService : IUserService
             user.Phone,
             roles.FirstOrDefault() ?? "Unknown",
             user.IsActive,
-            user.CreatedAt
+            user.CreatedAt,
+            user.UpdatedAt
         );
 
         return ServiceResult<UserDto>.Success(dto);

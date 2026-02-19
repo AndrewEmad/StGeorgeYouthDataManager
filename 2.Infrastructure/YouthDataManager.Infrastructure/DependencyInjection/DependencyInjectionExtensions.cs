@@ -8,6 +8,8 @@ using YouthDataManager.Domain.Repositories.Tracking;
 using YouthDataManager.Infrastructure.Data;
 using YouthDataManager.Infrastructure.Repositories.NoTracking;
 using YouthDataManager.Infrastructure.Repositories.Tracking;
+using YouthDataManager.Infrastructure.Reports;
+using YouthDataManager.Reports.Service.Abstractions.Data;
 
 namespace YouthDataManager.Infrastructure.DependencyInjection;
 
@@ -40,11 +42,16 @@ public static class DependencyInjectionExtensions
             .AddTransient<ICallLogRepository, CallLogRepository>()
             .AddTransient<IHomeVisitRepository, HomeVisitRepository>()
             .AddTransient<IStudentRemovalRequestRepository, StudentRemovalRequestRepository>()
+            .AddTransient<IStudentAttendanceRepository, StudentAttendanceRepository>()
+            .AddTransient<IServantAttendanceRepository, ServantAttendanceRepository>()
+            .AddTransient<IStudentEditLogRepository, StudentEditLogRepository>()
             
             // NoTracking repositories
             .AddTransient<IStudentNoTrackingRepository, StudentNoTrackingRepository>()
             .AddTransient<ICallLogNoTrackingRepository, CallLogNoTrackingRepository>()
             .AddTransient<IHomeVisitNoTrackingRepository, HomeVisitNoTrackingRepository>()
-            .AddTransient<IActivityLogNoTrackingRepository, ActivityLogNoTrackingRepository>();
+            .AddTransient<IActivityLogNoTrackingRepository, ActivityLogNoTrackingRepository>()
+            .AddTransient<IStudentEditLogNoTrackingRepository, StudentEditLogNoTrackingRepository>()
+            .AddTransient<IReportDataProvider, ReportDataProvider>();
     }
 }

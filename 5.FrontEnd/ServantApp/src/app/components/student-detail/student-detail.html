@@ -93,6 +93,27 @@
             <p>{{ student.gender === 1 ? 'أنثى' : 'ذكر' }}</p>
           </div>
         </div>
+        <div class="info-item" *ngIf="student.lastAttendanceDate">
+          <span class="material-icons">event_available</span>
+          <div class="info-content">
+            <label>آخر حضور</label>
+            <p>{{ student.lastAttendanceDate | date:'dd/MM/yyyy' }}</p>
+          </div>
+        </div>
+        <div class="info-item" *ngIf="student.createdAt">
+          <span class="material-icons">add_circle</span>
+          <div class="info-content">
+            <label>تاريخ الإنشاء</label>
+            <p>{{ student.createdAt | date:'dd/MM/yyyy' }}</p>
+          </div>
+        </div>
+        <div class="info-item" *ngIf="student.updatedAt">
+          <span class="material-icons">edit_calendar</span>
+          <div class="info-content">
+            <label>آخر تحديث</label>
+            <p>{{ student.updatedAt | date:'dd/MM/yyyy' }}</p>
+          </div>
+        </div>
         <div class="info-item" *ngIf="student.notes">
           <span class="material-icons">note</span>
           <div class="info-content">
@@ -140,7 +161,7 @@
         </div>
         <div class="form-group">
           <label>تاريخ الميلاد</label>
-          <input type="date" [(ngModel)]="editForm.birthDate" class="form-input" />
+          <span class="date-input-wrap" (click)="birthDateInput.showPicker?.()"><input #birthDateInput type="date" [(ngModel)]="editForm.birthDate" class="form-input" /></span>
         </div>
         <p class="error-msg" *ngIf="editError">{{ editError }}</p>
         <div class="form-actions">
@@ -201,7 +222,7 @@
     <h3>تسجيل مكالمة</h3>
     <div class="form-group">
       <label>التاريخ والوقت</label>
-      <input type="datetime-local" [(ngModel)]="callDate" class="form-input" />
+      <span class="date-input-wrap" (click)="callDateInput.showPicker?.()"><input #callDateInput type="datetime-local" [(ngModel)]="callDate" class="form-input" /></span>
     </div>
     <div class="form-group">
       <label>الحالة</label>
@@ -215,7 +236,7 @@
     </div>
     <div class="form-group">
       <label>موعد المتابعة القادمة (اختياري)</label>
-      <input type="datetime-local" [(ngModel)]="callNextDate" class="form-input" />
+      <span class="date-input-wrap" (click)="callNextDateInput.showPicker?.()"><input #callNextDateInput type="datetime-local" [(ngModel)]="callNextDate" class="form-input" /></span>
     </div>
     <p class="error-msg" *ngIf="callError">{{ callError }}</p>
     <div class="modal-actions">
@@ -231,7 +252,7 @@
     <h3>تسجيل زيارة</h3>
     <div class="form-group">
       <label>التاريخ والوقت</label>
-      <input type="datetime-local" [(ngModel)]="visitDate" class="form-input" />
+      <span class="date-input-wrap" (click)="visitDateInput.showPicker?.()"><input #visitDateInput type="datetime-local" [(ngModel)]="visitDate" class="form-input" /></span>
     </div>
     <div class="form-group">
       <label>النتيجة</label>
@@ -245,7 +266,7 @@
     </div>
     <div class="form-group">
       <label>موعد الزيارة القادمة (اختياري)</label>
-      <input type="datetime-local" [(ngModel)]="visitNextDate" class="form-input" />
+      <span class="date-input-wrap" (click)="visitNextDateInput.showPicker?.()"><input #visitNextDateInput type="datetime-local" [(ngModel)]="visitNextDate" class="form-input" /></span>
     </div>
     <p class="error-msg" *ngIf="visitError">{{ visitError }}</p>
     <div class="modal-actions">

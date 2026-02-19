@@ -14,4 +14,5 @@ public interface IStudentQueriesService
     Task<ServiceResult<PagedResult<StudentDto>>> GetPaged(StudentListFilter filter, int page, int pageSize);
     Task<ServiceResult<IEnumerable<string>>> GetDistinctAreas();
     Task<ServiceResult<IEnumerable<string>>> GetDistinctAcademicYears();
+    Task<ServiceResult<IEnumerable<StudentEditLogDto>>> GetEditHistory(Guid studentId);
 }

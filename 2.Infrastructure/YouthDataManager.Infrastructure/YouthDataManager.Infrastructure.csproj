@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\1.Domain\YouthDataManager.Domain\YouthDataManager.Domain.csproj" />
+    <ProjectReference Include="..\..\3.Services\Reports\YouthDataManager.Reports.Service.Abstractions\YouthDataManager.Reports.Service.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

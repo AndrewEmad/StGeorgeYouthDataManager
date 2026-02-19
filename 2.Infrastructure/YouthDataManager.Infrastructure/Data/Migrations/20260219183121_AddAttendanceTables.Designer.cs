@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using YouthDataManager.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using YouthDataManager.Infrastructure.Data;
 namespace YouthDataManager.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260219183121_AddAttendanceTables")]
+    partial class AddAttendanceTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -488,40 +491,6 @@ namespace YouthDataManager.Infrastructure.Data.Migrations
                     b.ToTable("StudentAttendances", "dbo");
                 });
 
-            modelBuilder.Entity("YouthDataManager.Domain.Entities.StudentEditLog", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Details")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UpdatedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("UpdatedByUserName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StudentId");
-
-                    b.HasIndex("UpdatedAt");
-
-                    b.ToTable("StudentEditLogs", "dbo");
-                });
-
             modelBuilder.Entity("YouthDataManager.Domain.Entities.StudentRemovalRequest", b =>
                 {
                     b.Property<Guid>("Id")
@@ -682,17 +651,6 @@ namespace YouthDataManager.Infrastructure.Data.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("YouthDataManager.Domain.Entities.StudentEditLog", b =>
-                {
-                    b.HasOne("YouthDataManager.Domain.Entities.Student", "Student")
-                        .WithMany("EditLogs")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Student");
-                });
-
             modelBuilder.Entity("YouthDataManager.Domain.Entities.StudentRemovalRequest", b =>
                 {
                     b.HasOne("YouthDataManager.Domain.Entities.ApplicationUser", "ProcessedByUser")
@@ -735,8 +693,6 @@ namespace YouthDataManager.Infrastructure.Data.Migrations
                     b.Navigation("AttendanceRecords");
 
                     b.Navigation("CallLogs");
-
-                    b.Navigation("EditLogs");
 
                     b.Navigation("HomeVisits");
                 });

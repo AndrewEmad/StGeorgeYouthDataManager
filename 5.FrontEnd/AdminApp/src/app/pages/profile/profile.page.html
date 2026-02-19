@@ -1,0 +1,50 @@
+<div class="animate-slide">
+  <header class="content-header">
+    <h1>الملف الشخصي</h1>
+    <p class="text-muted">تعديل البريد الإلكتروني ورقم التليفون وكلمة المرور</p>
+  </header>
+
+  <div *ngIf="profileLoading" class="loader">جاري التحميل...</div>
+
+  <div *ngIf="!profileLoading && profile" class="profile-sections">
+    <section class="glass-card profile-section">
+      <h2>البيانات الشخصية</h2>
+      <form (ngSubmit)="saveProfile()">
+        <div class="form-group">
+          <label>الاسم الكامل</label>
+          <input type="text" [(ngModel)]="fullName" name="fullName" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label>البريد الإلكتروني</label>
+          <input type="email" [(ngModel)]="email" name="email" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label>رقم التليفون</label>
+          <input type="tel" [(ngModel)]="phone" name="phone" class="form-input" />
+        </div>
+        <p *ngIf="profileError" class="error-msg">{{ profileError }}</p>
+        <button type="submit" class="btn-primary" [disabled]="profileSaving">{{ profileSaving ? 'جاري الحفظ...' : 'حفظ التعديلات' }}</button>
+      </form>
+    </section>
+
+    <section class="glass-card profile-section">
+      <h2>تغيير كلمة المرور</h2>
+      <form (ngSubmit)="changePassword()">
+        <div class="form-group">
+          <label>كلمة المرور الحالية</label>
+          <input type="password" [(ngModel)]="currentPassword" name="currentPassword" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label>كلمة المرور الجديدة</label>
+          <input type="password" [(ngModel)]="newPassword" name="newPassword" class="form-input" placeholder="6 أحرف على الأقل" />
+        </div>
+        <div class="form-group">
+          <label>تأكيد كلمة المرور الجديدة</label>
+          <input type="password" [(ngModel)]="confirmPassword" name="confirmPassword" class="form-input" />
+        </div>
+        <p *ngIf="passwordError" class="error-msg">{{ passwordError }}</p>
+        <button type="submit" class="btn-outline" [disabled]="passwordSaving">{{ passwordSaving ? 'جاري التغيير...' : 'تغيير كلمة المرور' }}</button>
+      </form>
+    </section>
+  </div>
+</div>

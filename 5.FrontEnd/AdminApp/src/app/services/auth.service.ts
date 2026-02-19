@@ -104,4 +104,33 @@ export class AuthService {
   shouldRedirectToHome(): boolean {
     return this.isLoggedIn() && this.hasRequiredRole() && !this.isTokenExpired();
   }
+
+  getProfile(): Observable<ProfileDto> {
+    return this.http.get<ProfileDto>(`${environment.apiUrl}/Profile`);
+  }
+
+  updateProfile(dto: { fullName?: string; email?: string; phone?: string }): Observable<void> {
+    return this.http.put<void>(`${environment.apiUrl}/Profile`, dto);
+  }
+
+  refreshCurrentUserFullName(fullName: string): void {
+    const u = this.currentUser();
+    if (u) {
+      const updated = { ...u, fullName };
+      localStorage.setItem('user', JSON.stringify(updated));
+      this.currentUser.set(updated);
+    }
+  }
+}
+
+export interface ProfileDto {
+  id: string;
+  userName: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  role: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string | null;
 }

@@ -44,10 +44,39 @@
   padding-left: 45px;
 }
 
+.list-section {
+  margin-bottom: 32px;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  margin: 0 0 16px 0;
+  color: var(--text-muted);
+}
+
 .students-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
+}
+
+.unassigned-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+  margin-bottom: 8px;
+}
+
+.student-card.unassigned {
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.btn-primary.sm {
+  padding: 8px 14px;
+  font-size: 0.9rem;
 }
 
 .student-card {

@@ -33,3 +33,5 @@ public record UpdateUserDto(
 );
 
 public record SetPasswordDto(string NewPassword);
+
+public record UpdateMyProfileDto(string? FullName, string? Email, string? Phone);

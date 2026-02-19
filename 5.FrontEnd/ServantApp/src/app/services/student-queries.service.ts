@@ -22,4 +22,20 @@ export class StudentQueriesService {
   getByServantId(servantId: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/servant/${servantId}`);
   }
+
+  getPaged(params: {
+    page: number;
+    pageSize: number;
+    search?: string;
+    hasServant?: boolean | null;
+  }): Observable<{ items: any[]; totalCount: number; page: number; pageSize: number }> {
+    const httpParams: Record<string, string> = {
+      page: String(params.page),
+      pageSize: String(params.pageSize),
+    };
+    if (params.search) httpParams['search'] = params.search;
+    if (params.hasServant === true) httpParams['hasServant'] = 'true';
+    if (params.hasServant === false) httpParams['hasServant'] = 'false';
+    return this.http.get<{ items: any[]; totalCount: number; page: number; pageSize: number }>(`${this.apiUrl}/paged`, { params: httpParams });
+  }
 }

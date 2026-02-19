@@ -16,4 +16,5 @@ public interface IUserService
     Task<ServiceResult> ToggleStatusAsync(Guid id);
     Task<ServiceResult> DeleteAsync(Guid id);
     Task<ServiceResult> SetPasswordAsync(Guid id, SetPasswordDto dto);
+    Task<ServiceResult> UpdateMyProfileAsync(Guid id, UpdateMyProfileDto dto);
 }

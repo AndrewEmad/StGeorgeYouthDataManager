@@ -1,9 +1,9 @@
 <div class="app-wrapper">
   <header class="top-bar">
-    <span class="top-bar-name">
+    <a routerLink="/dashboard/profile" class="top-bar-name link-name">
       <span class="material-icons">account_circle</span>
       {{ adminName }}
-    </span>
+    </a>
     <button type="button" class="btn-logout" (click)="logout()">
       <span class="material-icons">logout</span>
       <span>خروج</span>

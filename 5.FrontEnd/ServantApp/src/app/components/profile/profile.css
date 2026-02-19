@@ -1,0 +1,92 @@
+.profile-wrapper {
+  padding-bottom: 50px;
+}
+
+.profile-wrapper .main-nav {
+  margin: 20px;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 16px;
+}
+
+.profile-wrapper .user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+}
+
+.profile-wrapper .nav-links {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-wrapper .btn-logout {
+  background: transparent;
+  border: none;
+  color: var(--error);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.profile-wrapper .container {
+  margin: 0 20px;
+}
+
+.profile-wrapper header {
+  margin: 40px 0 24px 0;
+  text-align: right;
+}
+
+.profile-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.profile-section {
+  padding: 24px;
+}
+
+.profile-section h2 {
+  margin: 0 0 20px 0;
+  font-size: 1.15rem;
+}
+
+.profile-section .form-group {
+  margin-bottom: 16px;
+}
+
+.profile-section .form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.profile-section .form-input {
+  width: 100%;
+  max-width: 360px;
+}
+
+.profile-section .error-msg {
+  color: #f87171;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.profile-section .btn-primary,
+.profile-section .btn-outline {
+  margin-top: 8px;
+}
+
+.loader {
+  text-align: center;
+  padding: 32px;
+}

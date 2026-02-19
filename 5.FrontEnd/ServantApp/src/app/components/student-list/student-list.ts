@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { forkJoin } from 'rxjs';
 import { StudentQueriesService } from '../../services/student-queries.service';
+import { StudentCommandsService } from '../../services/student-commands.service';
 import { AuthService } from '../../services/auth.service';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -13,51 +15,83 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./student-list.css']
 })
 export class StudentListComponent implements OnInit {
-  students: any[] = [];
-  filteredStudents: any[] = [];
+  assignedStudents: any[] = [];
+  unassignedStudents: any[] = [];
   searchTerm = '';
   loading = true;
+  assigningId: string | null = null;
 
   constructor(
     private studentQueriesService: StudentQueriesService,
+    private studentCommandsService: StudentCommandsService,
     private authService: AuthService
   ) {}
+
+  get currentUserId(): string | null {
+    return this.authService.currentUser()?.userId ?? null;
+  }
+
+  get filteredAssigned(): any[] {
+    if (!this.searchTerm.trim()) return this.assignedStudents;
+    const t = this.searchTerm.trim().toLowerCase();
+    return this.assignedStudents.filter(s =>
+      (s.fullName && s.fullName.toLowerCase().includes(t)) ||
+      (s.area && s.area.toLowerCase().includes(t))
+    );
+  }
+
+  get filteredUnassigned(): any[] {
+    if (!this.searchTerm.trim()) return this.unassignedStudents;
+    const t = this.searchTerm.trim().toLowerCase();
+    return this.unassignedStudents.filter(s =>
+      (s.fullName && s.fullName.toLowerCase().includes(t)) ||
+      (s.area && s.area.toLowerCase().includes(t))
+    );
+  }
 
   ngOnInit() {
     this.loadStudents();
   }
 
   loadStudents() {
-    const userId = this.authService.currentUser()?.userId;
+    const userId = this.currentUserId;
     if (!userId) {
-      this.students = [];
-      this.filteredStudents = [];
+      this.assignedStudents = [];
+      this.unassignedStudents = [];
       this.loading = false;
       return;
     }
-    this.studentQueriesService.getByServantId(userId).subscribe({
-      next: (data: any) => {
-        this.students = data || [];
-        this.filteredStudents = [...this.students];
+    this.loading = true;
+    forkJoin({
+      assigned: this.studentQueriesService.getByServantId(userId),
+      unassigned: this.studentQueriesService.getPaged({ page: 1, pageSize: 100, hasServant: false })
+    }).subscribe({
+      next: ({ assigned, unassigned }) => {
+        this.assignedStudents = assigned || [];
+        this.unassignedStudents = unassigned?.items || [];
         this.loading = false;
       },
       error: () => {
-        // Mock data for UI demonstration
-        this.students = [
-          { id: '1', fullName: 'أبانوب عادل', area: 'المعادي', college: 'هندسة', phone: '0123456789' },
-          { id: '2', fullName: 'مينا سمير', area: 'حلوان', college: 'تجارة', phone: '0111111111' },
-          { id: '3', fullName: 'بيشوي ناصر', area: 'المعادي', college: 'طب', phone: '0100000000' }
-        ];
-        this.filteredStudents = [...this.students];
+        this.assignedStudents = [];
+        this.unassignedStudents = [];
         this.loading = false;
       }
     });
   }
 
-  onSearch() {
-    this.filteredStudents = this.students.filter(s => 
-      s.fullName.includes(this.searchTerm) || 
-      s.area.includes(this.searchTerm)
-    );
+  onSearch() {}
+
+  assignToMe(student: any) {
+    const userId = this.currentUserId;
+    if (!userId || this.assigningId) return;
+    this.assigningId = student.id;
+    this.studentCommandsService.assignToServant(student.id, userId).subscribe({
+      next: () => {
+        this.unassignedStudents = this.unassignedStudents.filter(s => s.id !== student.id);
+        this.assignedStudents = [...this.assignedStudents, { ...student, servantId: userId }];
+        this.assigningId = null;
+      },
+      error: () => { this.assigningId = null; }
+    });
   }
 }

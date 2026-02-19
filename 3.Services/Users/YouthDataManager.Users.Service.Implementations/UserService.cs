@@ -173,6 +173,25 @@ public class UserService : IUserService
         return ServiceResult.Failure("Update failed");
     }
 
+    public async Task<ServiceResult> UpdateMyProfileAsync(Guid id, UpdateMyProfileDto dto)
+    {
+        var user = await _userManager.FindByIdAsync(id.ToString());
+        if (user == null) return ServiceResult.Failure("User not found");
+
+        if (dto.FullName != null) user.FullName = dto.FullName;
+        if (dto.Email != null) user.Email = dto.Email;
+        if (dto.Phone != null) user.Phone = dto.Phone;
+        user.UpdatedAt = DateTime.UtcNow;
+
+        var result = await _userManager.UpdateAsync(user);
+        if (result.Succeeded)
+        {
+            await _logger.LogAsync("تحديث الملف الشخصي", $"تم تحديث الملف الشخصي: {user.FullName}");
+            return ServiceResult.Success();
+        }
+        return ServiceResult.Failure(result.Errors?.FirstOrDefault()?.Description ?? "Update failed");
+    }
+
     public async Task<ServiceResult> ToggleStatusAsync(Guid id)
     {
         var user = await _userManager.FindByIdAsync(id.ToString());

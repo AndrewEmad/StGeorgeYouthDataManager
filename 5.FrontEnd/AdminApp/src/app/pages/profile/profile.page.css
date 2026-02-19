@@ -1,0 +1,45 @@
+.profile-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.profile-section {
+  padding: 24px;
+}
+
+.profile-section h2 {
+  margin: 0 0 20px 0;
+  font-size: 1.15rem;
+}
+
+.profile-section .form-group {
+  margin-bottom: 16px;
+}
+
+.profile-section .form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.profile-section .form-input {
+  width: 100%;
+  max-width: 360px;
+}
+
+.profile-section .error-msg {
+  color: #f87171;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.profile-section .btn-primary,
+.profile-section .btn-outline {
+  margin-top: 8px;
+}
+
+.loader {
+  text-align: center;
+  padding: 32px;
+}

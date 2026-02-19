@@ -16,6 +16,7 @@ import { StudentsNoContactReportPage } from './pages/reports/students-no-contact
 import { StudentsByAreaReportPage } from './pages/reports/students-by-area-report.page';
 import { StudentsByYearReportPage } from './pages/reports/students-by-year-report.page';
 import { AttendancePage } from './pages/attendance/attendance.page';
+import { ProfilePage } from './pages/profile/profile.page';
 import { authGuard } from './guards/auth.guard';
 import { redirectIfAuthGuard } from './guards/redirect-if-auth.guard';
 
@@ -48,6 +49,7 @@ export const routes: Routes = [
         ]
       },
       { path: 'backups', component: BackupsPage },
+      { path: 'profile', component: ProfilePage },
       { path: '', redirectTo: 'stats', pathMatch: 'full' }
     ]
   },

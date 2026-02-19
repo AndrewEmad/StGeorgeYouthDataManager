@@ -4,12 +4,12 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using YouthDataManager.WebApi.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YouthDataManager.Shared.Service.Abstractions;
 using YouthDataManager.Students.Service.Abstractions.Commands;
 using YouthDataManager.Students.Service.Abstractions.DTOs;
-using YouthDataManager.WebApi.Authorization;
 
 namespace YouthDataManager.WebApi.Controllers;
 
@@ -104,11 +104,14 @@ public class StudentCommandsController : ControllerBase
     [HttpPost("{id}/assign/{servantId}")]
     public async Task<IActionResult> Assign(Guid id, Guid servantId)
     {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            return Unauthorized();
+        if (!User.IsAdminOrManagerOrPriest() && servantId != userId)
+            return Forbid();
         var result = await _service.AssignToServant(id, servantId);
-        
         if (result.Status != ServiceResultStatus.Success)
             return BadRequest(result);
-
         return Ok();
     }
 }

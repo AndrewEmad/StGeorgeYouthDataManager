@@ -25,7 +25,7 @@ export class AuthService {
     if (savedUser) {
       const user = JSON.parse(savedUser);
       this.currentUser.set(user);
-      if (user.role === 'Admin' || this.isTokenExpired()) {
+      if (user.role === 'Admin' || user.role === 'Priest' || this.isTokenExpired()) {
         localStorage.removeItem('user');
         localStorage.removeItem('token');
         this.currentUser.set(null);
@@ -36,7 +36,7 @@ export class AuthService {
   login(credentials: { username: string; password: string }): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap(response => {
-        if (response.role === 'Admin') {
+        if (response.role === 'Admin' || response.role === 'Priest') {
           throw new Error('Unauthorized');
         }
         localStorage.setItem('user', JSON.stringify(response));
@@ -73,7 +73,7 @@ export class AuthService {
 
   hasRequiredRole(): boolean {
     const r = this.currentUser()?.role;
-    return r != null && r !== 'Admin';
+    return r != null && r !== 'Admin' && r !== 'Priest';
   }
 
   isTokenExpired(): boolean {
@@ -98,4 +98,33 @@ export class AuthService {
   getToken(): string | null {
     return localStorage.getItem('token');
   }
+
+  getProfile(): Observable<ProfileDto> {
+    return this.http.get<ProfileDto>(`${environment.apiUrl}/Profile`);
+  }
+
+  updateProfile(dto: { fullName?: string; email?: string; phone?: string }): Observable<void> {
+    return this.http.put<void>(`${environment.apiUrl}/Profile`, dto);
+  }
+
+  refreshCurrentUserFullName(fullName: string): void {
+    const u = this.currentUser();
+    if (u) {
+      const updated = { ...u, fullName };
+      localStorage.setItem('user', JSON.stringify(updated));
+      this.currentUser.set(updated);
+    }
+  }
+}
+
+export interface ProfileDto {
+  id: string;
+  userName: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  role: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string | null;
 }

@@ -6,6 +6,17 @@
 
   <div *ngIf="loading" class="loader">جاري التحميل...</div>
 
+  <section *ngIf="priest" class="priest-card-section">
+    <div class="glass-card stat-item priest-card row-clickable" (click)="viewServant(priest.id)">
+      <span class="material-icons">person</span>
+      <div class="s-info">
+        <h3>الاب الكاهن المسئول</h3>
+        <p>{{ priest.fullName }}</p>
+      </div>
+      <a [routerLink]="['/dashboard/servants', priest.id]" class="btn-outline sm" (click)="$event.stopPropagation()">تفاصيل</a>
+    </div>
+  </section>
+
   <div *ngIf="!loading" class="stats-grid">
     <div class="glass-card stat-item indigo">
       <span class="material-icons">people</span>

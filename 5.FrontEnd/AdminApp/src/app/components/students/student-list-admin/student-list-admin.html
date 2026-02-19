@@ -5,15 +5,10 @@
       <p class="text-muted">عرض وتوزيع المخدومين على الخدام</p>
     </div>
     <div class="header-actions">
-      <a class="btn-outline" (click)="downloadCsvTemplate()" href="javascript:void(0)">
-        <span class="material-icons">download</span>
-        تحميل نموذج CSV
-      </a>
-      <button type="button" class="btn-outline" (click)="csvFileInput.click()" [disabled]="uploadingCsv">
+      <button type="button" class="btn-outline" (click)="openBulkUploadModal()" [disabled]="uploadingCsv">
         <span class="material-icons">upload_file</span>
         {{ uploadingCsv ? 'جاري الاستيراد...' : 'استيراد من ملف' }}
       </button>
-      <input #csvFileInput type="file" accept=".csv" (change)="onCsvFileSelected($event)" style="display: none" />
       <button class="btn-primary" (click)="openAddModal()">
         <span class="material-icons">person_add</span>
         إضافة مخدوم
@@ -152,6 +147,8 @@
   </div>
 </div>
 
+<input #csvFileInput type="file" accept=".csv" (change)="onCsvFileSelected($event)" class="hidden-file-input" />
+
 <!-- Modals outside animate-slide so position:fixed is relative to viewport -->
 <div class="modal-overlay" *ngIf="showAddModal">
     <div class="glass-card modal-content animate-slide add-modal">
@@ -231,6 +228,26 @@
     <div class="modal-actions">
       <button class="btn-outline" (click)="showAssignModal = false">إلغاء</button>
       <button class="btn-primary" [disabled]="!targetServantId" (click)="onAssign()">تأكيد التخصيص</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay bulk-upload-modal-overlay" *ngIf="showBulkUploadModal" (click)="closeBulkUploadModal()">
+  <div class="glass-card modal-content bulk-upload-modal-content animate-slide" (click)="$event.stopPropagation()">
+    <h3>استيراد من ملف CSV</h3>
+    <p class="text-muted small">حمّل النموذج واملأه ثم اختر الملف للاستيراد.</p>
+    <div class="bulk-upload-modal-buttons">
+      <button type="button" class="btn-outline bulk-upload-btn" (click)="downloadCsvTemplate()">
+        <span class="material-icons">download</span>
+        تحميل النموذج
+      </button>
+      <button type="button" class="btn-primary bulk-upload-btn" (click)="triggerCsvFileSelect()">
+        <span class="material-icons">upload_file</span>
+        اختيار ملف CSV
+      </button>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-outline" (click)="closeBulkUploadModal()">إغلاق</button>
     </div>
   </div>
 </div>

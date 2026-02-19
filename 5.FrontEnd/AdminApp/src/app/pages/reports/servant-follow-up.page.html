@@ -1,0 +1,98 @@
+<div class="animate-slide">
+  <header class="content-header reports-header">
+    <h1>تقارير الخدام والمتابعة</h1>
+    <p class="text-muted">ملخص النشاط والمخدومين بدون تواصل حديث</p>
+    <div class="report-tabs">
+      <a routerLink="/dashboard/reports/servant-follow-up" routerLinkActive="active" class="tab">متابعة الخدام</a>
+      <a routerLink="/dashboard/reports/student-distribution" routerLinkActive="active" class="tab">توزيع المخدومين</a>
+    </div>
+  </header>
+
+  <section class="report-section">
+    <h2>ملخص نشاط الخدام</h2>
+    <div class="filters glass-card">
+      <label>من تاريخ <input type="date" [(ngModel)]="dateFrom" /></label>
+      <label>إلى تاريخ <input type="date" [(ngModel)]="dateTo" /></label>
+      <label>
+        الخادم
+        <select [(ngModel)]="servantIdFilter">
+          <option value="">الكل</option>
+          <option *ngFor="let s of servants" [value]="s.id">{{ s.fullName }}</option>
+        </select>
+      </label>
+      <button type="button" class="btn-outline" (click)="onApplyActivityFilters()">تطبيق</button>
+    </div>
+    <div *ngIf="loadingActivity" class="loader">جاري التحميل...</div>
+    <p *ngIf="errorActivity" class="error-msg">{{ errorActivity }}</p>
+    <div *ngIf="!loadingActivity && !errorActivity" class="glass-card table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>الخادم</th>
+            <th>عدد المخدومين المخصصين</th>
+            <th>مكالمات في الفترة</th>
+            <th>زيارات في الفترة</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of activitySummary">
+            <td>{{ row.fullName }}</td>
+            <td>{{ row.assignedCount }}</td>
+            <td>{{ row.callsInPeriod }}</td>
+            <td>{{ row.visitsInPeriod }}</td>
+          </tr>
+          <tr *ngIf="activitySummary.length === 0">
+            <td colspan="4" class="text-muted">لا توجد بيانات</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="report-section">
+    <h2>مخدومون بدون تواصل حديث</h2>
+    <div class="filters glass-card">
+      <label>
+        خلال (يوم)
+        <select [(ngModel)]="daysNoContact">
+          <option [value]="7">7</option>
+          <option [value]="14">14</option>
+          <option [value]="30">30</option>
+        </select>
+      </label>
+      <label>
+        الخادم
+        <select [(ngModel)]="servantIdNoContact">
+          <option value="">الكل</option>
+          <option *ngFor="let s of servants" [value]="s.id">{{ s.fullName }}</option>
+        </select>
+      </label>
+      <button type="button" class="btn-outline" (click)="onApplyNoContactFilters()">تطبيق</button>
+    </div>
+    <div *ngIf="loadingNoContact" class="loader">جاري التحميل...</div>
+    <p *ngIf="errorNoContact" class="error-msg">{{ errorNoContact }}</p>
+    <div *ngIf="!loadingNoContact && !errorNoContact" class="glass-card table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>المخدوم</th>
+            <th>الخادم</th>
+            <th>آخر تواصل</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of noContactList">
+            <td>{{ row.fullName }}</td>
+            <td>{{ row.servantName || '—' }}</td>
+            <td>{{ row.lastContactDate ? (row.lastContactDate | date:'dd/MM/yyyy') : 'لم يُتواصل معه' }}</td>
+            <td><a [routerLink]="['/dashboard/students', row.studentId]" class="btn-outline sm">تفاصيل</a></td>
+          </tr>
+          <tr *ngIf="noContactList.length === 0">
+            <td colspan="4" class="text-muted">لا يوجد مخدومون بدون تواصل في الفترة المحددة</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

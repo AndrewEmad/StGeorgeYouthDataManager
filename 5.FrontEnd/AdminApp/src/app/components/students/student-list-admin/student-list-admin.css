@@ -278,6 +278,57 @@ th.sortable:hover {
   overflow-y: auto;
 }
 
+/* Bulk upload modal – centered on whole screen */
+.bulk-upload-modal-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  padding: 12px;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.bulk-upload-modal-content {
+  max-width: min(calc(100vw - 24px), 420px);
+}
+
+.bulk-upload-modal-content .small {
+  font-size: 0.875rem;
+  margin-bottom: 20px;
+}
+
+.bulk-upload-modal-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.bulk-upload-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 20px;
+}
+
+.hidden-file-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;

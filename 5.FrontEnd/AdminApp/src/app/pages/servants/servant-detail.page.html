@@ -34,13 +34,14 @@
           {{ servant.isActive ? 'نشط' : 'متوقف' }}
         </dd>
       </dl>
+      <p *ngIf="servant.role === 'Priest'" class="priest-notice muted small">لا يُخصص للاب الكاهن مخدومين ولا يسجل مكالمات أو زيارات — عرض البيانات والإدارة فقط.</p>
       <button type="button" class="btn-secondary mt-2" (click)="openChangePassword()">
         <span class="material-icons">lock_reset</span>
         تغيير كلمة المرور
       </button>
     </section>
 
-    <section class="glass-card detail-section" *ngIf="performance">
+    <section class="glass-card detail-section" *ngIf="performance && servant.role !== 'Priest'">
       <h2>أداء المتابعة (هذا الأسبوع: جمعة–خميس)</h2>
       <div class="perf-grid">
         <div class="glass-card stat-item indigo">
@@ -67,7 +68,7 @@
       </div>
     </section>
 
-    <section class="glass-card detail-section">
+    <section class="glass-card detail-section" *ngIf="servant.role !== 'Priest'">
       <h2>سجل المتابعة الهاتفية</h2>
       <div class="table-wrap">
         <table *ngIf="calls.length">
@@ -98,7 +99,7 @@
       </div>
     </section>
 
-    <section class="glass-card detail-section">
+    <section class="glass-card detail-section" *ngIf="servant.role !== 'Priest'">
       <h2>سجل الزيارات المنزلية</h2>
       <div class="table-wrap">
         <table *ngIf="visits.length">

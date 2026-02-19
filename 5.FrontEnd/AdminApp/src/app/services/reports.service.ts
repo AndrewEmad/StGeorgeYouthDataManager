@@ -53,4 +53,51 @@ export class ReportsService {
       responseType: 'blob',
     });
   }
+
+  getServantActivitySummary(params: { dateFrom?: string; dateTo?: string; servantId?: string }): Observable<ServantActivitySummary[]> {
+    const q = new URLSearchParams();
+    if (params.dateFrom) q.set('dateFrom', params.dateFrom);
+    if (params.dateTo) q.set('dateTo', params.dateTo);
+    if (params.servantId) q.set('servantId', params.servantId);
+    const query = q.toString();
+    return this.http.get<ServantActivitySummary[]>(`${this.apiUrl}/servant-activity${query ? '?' + query : ''}`);
+  }
+
+  getStudentsWithNoRecentContact(params: { days?: number; servantId?: string }): Observable<StudentNoContact[]> {
+    const q = new URLSearchParams();
+    if (params.days != null) q.set('days', String(params.days));
+    if (params.servantId) q.set('servantId', params.servantId);
+    const query = q.toString();
+    return this.http.get<StudentNoContact[]>(`${this.apiUrl}/students-no-contact${query ? '?' + query : ''}`);
+  }
+
+  getStudentsByArea(): Observable<StudentsByGroup[]> {
+    return this.http.get<StudentsByGroup[]>(`${this.apiUrl}/students-by-area`);
+  }
+
+  getStudentsByAcademicYear(): Observable<StudentsByGroup[]> {
+    return this.http.get<StudentsByGroup[]>(`${this.apiUrl}/students-by-academic-year`);
+  }
+}
+
+export interface ServantActivitySummary {
+  servantId: string;
+  fullName: string;
+  assignedCount: number;
+  callsInPeriod: number;
+  visitsInPeriod: number;
+}
+
+export interface StudentNoContact {
+  studentId: string;
+  fullName: string;
+  servantId: string | null;
+  servantName: string | null;
+  lastContactDate: string | null;
+}
+
+export interface StudentsByGroup {
+  groupKey: string;
+  count: number;
+  studentIds: string[] | null;
 }

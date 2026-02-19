@@ -9,6 +9,9 @@ import { StudentsPage } from './pages/students/students.page';
 import { StudentDetailPage } from './pages/students/student-detail.page';
 import { BackupsPage } from './pages/backups/backups.page';
 import { RemovalRequestsPage } from './pages/removal-requests/removal-requests.page';
+import { ReportsPage } from './pages/reports/reports.page';
+import { ServantFollowUpPage } from './pages/reports/servant-follow-up.page';
+import { StudentDistributionPage } from './pages/reports/student-distribution.page';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -25,6 +28,15 @@ export const routes: Routes = [
       { path: 'students/:id', component: StudentDetailPage },
       { path: 'students', component: StudentsPage },
       { path: 'removal-requests', component: RemovalRequestsPage },
+      {
+        path: 'reports',
+        component: ReportsPage,
+        children: [
+          { path: 'servant-follow-up', component: ServantFollowUpPage },
+          { path: 'student-distribution', component: StudentDistributionPage },
+          { path: '', redirectTo: 'servant-follow-up', pathMatch: 'full' }
+        ]
+      },
       { path: 'backups', component: BackupsPage },
       { path: '', redirectTo: 'stats', pathMatch: 'full' }
     ]

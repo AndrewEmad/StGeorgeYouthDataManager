@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -32,6 +32,7 @@ export class StudentListAdminComponent implements OnInit {
   bulkAssignSaving = false;
   showAddModal = false;
   addSaving = false;
+  showBulkUploadModal = false;
   uploadingCsv = false;
   uploadResult: { created: number; errors: { row: number; message: string }[] } | null = null;
   showFilters = false;
@@ -106,7 +107,7 @@ export class StudentListAdminComponent implements OnInit {
       next: (years) => { this.academicYearOptions = years || []; }
     });
     this.usersService.getAll().subscribe(data => {
-      this.servants = data.filter(u => String(u.role) === 'Servant' || (u as any).role === 0);
+      this.servants = data.filter(u => u.role !== 'Priest' && (String(u.role) === 'Servant' || (u as any).role === 0 || u.role === 'Manager'));
     });
   }
 
@@ -152,11 +153,26 @@ export class StudentListAdminComponent implements OnInit {
     this.router.navigate(['/dashboard/students', s.id]);
   }
 
+  @ViewChild('csvFileInput') csvFileInputRef?: ElementRef<HTMLInputElement>;
+
+  openBulkUploadModal() {
+    this.showBulkUploadModal = true;
+  }
+
+  closeBulkUploadModal() {
+    this.showBulkUploadModal = false;
+  }
+
+  triggerCsvFileSelect() {
+    this.csvFileInputRef?.nativeElement?.click();
+  }
+
   downloadCsvTemplate() {
     this.studentCommands.downloadCsvTemplate();
   }
 
   onCsvFileSelected(event: Event) {
+    this.showBulkUploadModal = false;
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     input.value = '';

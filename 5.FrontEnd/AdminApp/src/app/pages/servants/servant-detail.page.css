@@ -147,6 +147,7 @@
 
 .servant-detail .mt-2 { margin-top: 12px; }
 .servant-detail .btn-secondary { display: inline-flex; align-items: center; gap: 6px; }
+.servant-detail .priest-notice { margin-top: 12px; font-size: 0.875rem; }
 
 /* تغيير كلمة المرور – توسيط على كامل الشاشة */
 .password-modal-overlay {

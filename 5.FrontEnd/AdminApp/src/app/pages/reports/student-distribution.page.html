@@ -1,0 +1,64 @@
+<div class="animate-slide">
+  <header class="content-header reports-header">
+    <h1>توزيع المخدومين</h1>
+    <p class="text-muted">حسب المنطقة والسنة الدراسية</p>
+    <div class="report-tabs">
+      <a routerLink="/dashboard/reports/servant-follow-up" routerLinkActive="active" class="tab">متابعة الخدام</a>
+      <a routerLink="/dashboard/reports/student-distribution" routerLinkActive="active" class="tab">توزيع المخدومين</a>
+    </div>
+  </header>
+
+  <section class="report-section">
+    <h2>حسب المنطقة</h2>
+    <div *ngIf="loadingArea" class="loader">جاري التحميل...</div>
+    <p *ngIf="errorArea" class="error-msg">{{ errorArea }}</p>
+    <div *ngIf="!loadingArea && !errorArea" class="glass-card table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>المنطقة</th>
+            <th>العدد</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of byArea">
+            <td>{{ row.groupKey || '—' }}</td>
+            <td>{{ row.count }}</td>
+            <td><a [routerLink]="['/dashboard/students']" [queryParams]="{ area: row.groupKey }" class="btn-outline sm">عرض المخدومين</a></td>
+          </tr>
+          <tr *ngIf="byArea.length === 0">
+            <td colspan="3" class="text-muted">لا توجد بيانات</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="report-section">
+    <h2>حسب السنة الدراسية</h2>
+    <div *ngIf="loadingYear" class="loader">جاري التحميل...</div>
+    <p *ngIf="errorYear" class="error-msg">{{ errorYear }}</p>
+    <div *ngIf="!loadingYear && !errorYear" class="glass-card table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>السنة الدراسية</th>
+            <th>العدد</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of byAcademicYear">
+            <td>{{ row.groupKey || '—' }}</td>
+            <td>{{ row.count }}</td>
+            <td><a [routerLink]="['/dashboard/students']" [queryParams]="{ academicYear: row.groupKey }" class="btn-outline sm">عرض المخدومين</a></td>
+          </tr>
+          <tr *ngIf="byAcademicYear.length === 0">
+            <td colspan="3" class="text-muted">لا توجد بيانات</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

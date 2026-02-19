@@ -53,9 +53,8 @@ export class ProfileComponent implements OnInit {
   saveProfile() {
     this.profileError = '';
     this.profileSaving = true;
-    this.authService.updateProfile({ fullName: this.fullName.trim() || undefined, email: this.email.trim() || undefined, phone: this.phone.trim() || undefined }).subscribe({
+    this.authService.updateProfile({ email: this.email.trim() || undefined, phone: this.phone.trim() || undefined }).subscribe({
       next: () => {
-        this.authService.refreshCurrentUserFullName(this.fullName.trim());
         this.profileSaving = false;
       },
       error: (err) => {

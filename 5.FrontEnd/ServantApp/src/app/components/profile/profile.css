@@ -75,6 +75,13 @@
   max-width: 360px;
 }
 
+.profile-section .form-readonly {
+  margin: 0;
+  padding: 8px 0;
+  color: var(--text-muted, #6b7280);
+  font-size: 1rem;
+}
+
 .profile-section .error-msg {
   color: #f87171;
   margin-bottom: 12px;

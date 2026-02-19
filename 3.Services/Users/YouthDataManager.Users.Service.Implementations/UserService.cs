@@ -178,7 +178,8 @@ public class UserService : IUserService
         var user = await _userManager.FindByIdAsync(id.ToString());
         if (user == null) return ServiceResult.Failure("User not found");
 
-        if (dto.FullName != null) user.FullName = dto.FullName;
+        var roles = await _userManager.GetRolesAsync(user);
+        if (roles.Contains("Admin") && dto.FullName != null) user.FullName = dto.FullName;
         if (dto.Email != null) user.Email = dto.Email;
         if (dto.Phone != null) user.Phone = dto.Phone;
         user.UpdatedAt = DateTime.UtcNow;

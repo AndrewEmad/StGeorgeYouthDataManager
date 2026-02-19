@@ -7,14 +7,16 @@
       <h1>قائمة المخدومين</h1>
     </div>
     <div class="search-box">
-      <span class="material-icons search-icon">search</span>
-      <input
-        type="text"
-        [(ngModel)]="searchTerm"
-        (keyup.enter)="onSearch()"
-        class="form-input"
-        placeholder="ابحث بالاسم أو المنطقة...">
-      <button type="button" class="btn-primary sm" (click)="onSearch()">بحث</button>
+      <div class="search-input-wrap">
+        <span class="material-icons search-icon">search</span>
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (keyup.enter)="onSearch()"
+          class="form-input"
+          placeholder="ابحث بالاسم أو المنطقة...">
+      </div>
+      <button type="button" class="btn-primary sm search-btn" (click)="onSearch()">بحث</button>
     </div>
   </header>
 

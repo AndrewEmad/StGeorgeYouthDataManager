@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using YouthDataManager.Domain.Entities;
+using YouthDataManager.Domain.Enums;
 using YouthDataManager.Domain.Repositories.NoTracking;
 using YouthDataManager.Infrastructure.Data;
 
@@ -92,6 +93,40 @@ public class StudentNoTrackingRepository : IStudentNoTrackingRepository
             .AsSingleQuery();
         var items = await pagedQuery.Select(selector).ToListAsync();
         return (items, totalCount);
+    }
+
+    public async Task<(IReadOnlyList<(Guid Id, int Segment)>, int TotalCount)> GetPagedForServantCombinedAsync(Guid servantId, string? search, int page, int pageSize)
+    {
+        var searchLower = search?.Trim().ToLower();
+        var assigned = _context.Students.AsNoTracking().Where(s => s.ServantId == servantId);
+        var requested = _context.Students.AsNoTracking().Where(s => s.ServantId == null
+            && _context.StudentAssignmentRequests.Any(r => r.StudentId == s.Id && r.RequestedByUserId == servantId && r.Status == AssignmentRequestStatus.Pending));
+        var unassigned = _context.Students.AsNoTracking().Where(s => s.ServantId == null
+            && !_context.StudentAssignmentRequests.Any(r => r.StudentId == s.Id && r.Status == AssignmentRequestStatus.Pending));
+
+        if (!string.IsNullOrEmpty(searchLower))
+        {
+            assigned = assigned.Where(s => (s.FullName != null && s.FullName.ToLower().Contains(searchLower)) || (s.Phone != null && s.Phone.ToLower().Contains(searchLower)) || (s.Area != null && s.Area.ToLower().Contains(searchLower)) || (s.College != null && s.College.ToLower().Contains(searchLower)));
+            requested = requested.Where(s => (s.FullName != null && s.FullName.ToLower().Contains(searchLower)) || (s.Phone != null && s.Phone.ToLower().Contains(searchLower)) || (s.Area != null && s.Area.ToLower().Contains(searchLower)) || (s.College != null && s.College.ToLower().Contains(searchLower)));
+            unassigned = unassigned.Where(s => (s.FullName != null && s.FullName.ToLower().Contains(searchLower)) || (s.Phone != null && s.Phone.ToLower().Contains(searchLower)) || (s.Area != null && s.Area.ToLower().Contains(searchLower)) || (s.College != null && s.College.ToLower().Contains(searchLower)));
+        }
+
+        var q1 = assigned.Select(s => new { s.Id, s.FullName, Seg = 1 });
+        var q2 = requested.Select(s => new { s.Id, s.FullName, Seg = 2 });
+        var q3 = unassigned.Select(s => new { s.Id, s.FullName, Seg = 3 });
+        var combined = q1.Concat(q2).Concat(q3).OrderBy(x => x.Seg).ThenBy(x => x.FullName).ThenBy(x => x.Id);
+
+        var totalCount = await combined.CountAsync();
+        var idSegmentList = await combined.Skip((page - 1) * pageSize).Take(pageSize).Select(x => new { x.Id, x.Seg }).ToListAsync();
+        var result = idSegmentList.Select(x => (x.Id, x.Seg)).ToList();
+        return (result, totalCount);
+    }
+
+    public async Task<IReadOnlyList<T>> GetByIds<T>(IEnumerable<Guid> ids, Expression<Func<Student, T>> selector)
+    {
+        var idList = ids.ToList();
+        if (idList.Count == 0) return new List<T>();
+        return await _context.Students.AsNoTracking().Where(s => idList.Contains(s.Id)).Select(selector).ToListAsync();
     }
 
     public async Task<IEnumerable<string>> GetDistinctAreasAsync()

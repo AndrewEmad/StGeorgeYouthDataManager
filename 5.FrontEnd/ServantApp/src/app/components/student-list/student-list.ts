@@ -1,15 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { forkJoin } from 'rxjs';
 import { StudentQueriesService } from '../../services/student-queries.service';
 import { AssignmentRequestService } from '../../services/assignment-request.service';
 import { AuthService } from '../../services/auth.service';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
-export interface UnassignedItem {
+export interface ServantStudentItem {
   student: any;
-  hasPendingRequestByMe: boolean;
+  segment: string;
 }
 
 @Component({
@@ -20,8 +19,10 @@ export interface UnassignedItem {
   styleUrls: ['./student-list.css']
 })
 export class StudentListComponent implements OnInit {
-  assignedStudents: any[] = [];
-  unassignedForServantItems: UnassignedItem[] = [];
+  items: ServantStudentItem[] = [];
+  totalCount = 0;
+  page = 1;
+  pageSize = 20;
   searchTerm = '';
   loading = true;
   requestingId: string | null = null;
@@ -36,76 +37,62 @@ export class StudentListComponent implements OnInit {
     return this.authService.currentUser()?.userId ?? null;
   }
 
-  get filteredAssigned(): any[] {
-    if (!this.searchTerm.trim()) return this.assignedStudents;
-    const t = this.searchTerm.trim().toLowerCase();
-    return this.assignedStudents.filter(s =>
-      (s.fullName && s.fullName.toLowerCase().includes(t)) ||
-      (s.area && s.area.toLowerCase().includes(t))
-    );
-  }
-
-  get filteredUnassignedAvailable(): UnassignedItem[] {
-    const items = this.unassignedForServantItems.filter(i => !i.hasPendingRequestByMe);
-    if (!this.searchTerm.trim()) return items;
-    const t = this.searchTerm.trim().toLowerCase();
-    return items.filter(i =>
-      (i.student?.fullName && i.student.fullName.toLowerCase().includes(t)) ||
-      (i.student?.area && i.student.area.toLowerCase().includes(t))
-    );
-  }
-
-  get filteredRequestedPending(): UnassignedItem[] {
-    const items = this.unassignedForServantItems.filter(i => i.hasPendingRequestByMe);
-    if (!this.searchTerm.trim()) return items;
-    const t = this.searchTerm.trim().toLowerCase();
-    return items.filter(i =>
-      (i.student?.fullName && i.student.fullName.toLowerCase().includes(t)) ||
-      (i.student?.area && i.student.area.toLowerCase().includes(t))
-    );
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalCount / this.pageSize));
   }
 
   ngOnInit() {
-    this.loadStudents();
+    this.loadPage();
   }
 
-  loadStudents() {
+  loadPage() {
     const userId = this.currentUserId;
     if (!userId) {
-      this.assignedStudents = [];
-      this.unassignedForServantItems = [];
+      this.items = [];
+      this.totalCount = 0;
       this.loading = false;
       return;
     }
     this.loading = true;
-    forkJoin({
-      assigned: this.studentQueriesService.getByServantId(userId),
-      unassigned: this.studentQueriesService.getUnassignedForServant({ page: 1, pageSize: 100 })
+    this.studentQueriesService.getPagedForServant({
+      page: this.page,
+      pageSize: this.pageSize,
+      search: this.searchTerm.trim() || undefined
     }).subscribe({
-      next: ({ assigned, unassigned }) => {
-        this.assignedStudents = assigned || [];
-        this.unassignedForServantItems = unassigned?.items || [];
+      next: (res) => {
+        this.items = res.items ?? [];
+        this.totalCount = res.totalCount ?? 0;
+        this.page = res.page ?? this.page;
+        this.pageSize = res.pageSize ?? this.pageSize;
         this.loading = false;
       },
       error: () => {
-        this.assignedStudents = [];
-        this.unassignedForServantItems = [];
+        this.items = [];
+        this.totalCount = 0;
         this.loading = false;
       }
     });
   }
 
-  onSearch() {}
+  onSearch() {
+    this.page = 1;
+    this.loadPage();
+  }
 
-  requestAssignToMe(item: UnassignedItem) {
+  goToPage(p: number) {
+    if (p < 1 || p > this.totalPages) return;
+    this.page = p;
+    this.loadPage();
+  }
+
+  requestAssignToMe(item: ServantStudentItem) {
     const student = item.student;
-    if (!student?.id || this.requestingId) return;
+    if (!student?.id || this.requestingId || item.segment !== 'Unassigned') return;
     this.requestingId = student.id;
     this.assignmentRequestService.create(student.id).subscribe({
       next: () => {
-        this.unassignedForServantItems = this.unassignedForServantItems.map(i =>
-          i.student?.id === student.id ? { ...i, hasPendingRequestByMe: true } : i
-        );
+        const idx = this.items.findIndex(i => i.student?.id === student.id);
+        if (idx !== -1) this.items = this.items.slice(0, idx).concat([{ student, segment: 'Requested' }], this.items.slice(idx + 1));
         this.requestingId = null;
       },
       error: () => { this.requestingId = null; }

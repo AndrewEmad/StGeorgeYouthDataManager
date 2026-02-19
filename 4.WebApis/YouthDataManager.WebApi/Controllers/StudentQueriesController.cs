@@ -79,6 +79,19 @@ public class StudentQueriesController : ControllerBase
         return Ok(result.Data);
     }
 
+    [HttpGet("students-for-servant")]
+    public async Task<IActionResult> GetPagedForServant([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string? search = null)
+    {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var servantId))
+            return Unauthorized();
+
+        var result = await _service.GetPagedForServant(servantId, page, pageSize, search);
+        if (result.Status != ServiceResultStatus.Success)
+            return BadRequest(result);
+        return Ok(result.Data);
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {

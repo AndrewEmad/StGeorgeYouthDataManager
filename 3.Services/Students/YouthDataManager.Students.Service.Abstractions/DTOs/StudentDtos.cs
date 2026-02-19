@@ -19,6 +19,9 @@ public record StudentListFilter(
 
 public record UnassignedStudentForServantDto(StudentDto Student, bool HasPendingRequestByMe);
 
+/// <summary>Single paged list for servant: Assigned, then Requested, then Unassigned.</summary>
+public record ServantStudentPageItemDto(StudentDto Student, string Segment);
+
 public record StudentDto(
     Guid Id,
     string FullName,

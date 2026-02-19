@@ -60,6 +60,16 @@
   gap: 20px;
 }
 
+.assigned-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  margin-bottom: 8px;
+}
+
 .unassigned-badge {
   display: inline-block;
   font-size: 0.75rem;
@@ -150,4 +160,17 @@
 .empty-state .material-icons {
   font-size: 64px;
   margin-bottom: 20px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.page-info {
+  font-size: 0.9rem;
+  color: var(--text-muted);
 }

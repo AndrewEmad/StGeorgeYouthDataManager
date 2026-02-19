@@ -48,4 +48,13 @@ export class StudentQueriesService {
       Object.keys(httpParams).length ? { params: httpParams } : {}
     );
   }
+
+  getPagedForServant(params: { page: number; pageSize: number; search?: string }): Observable<{ items: Array<{ student: any; segment: string }>; totalCount: number; page: number; pageSize: number }> {
+    const httpParams: Record<string, string> = { page: String(params.page), pageSize: String(params.pageSize) };
+    if (params.search) httpParams['search'] = params.search;
+    return this.http.get<{ items: Array<{ student: any; segment: string }>; totalCount: number; page: number; pageSize: number }>(
+      `${this.apiUrl}/students-for-servant`,
+      { params: httpParams }
+    );
+  }
 }

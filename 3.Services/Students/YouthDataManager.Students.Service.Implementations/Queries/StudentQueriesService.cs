@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using YouthDataManager.Domain.Entities;
 using YouthDataManager.Domain.Repositories.NoTracking;
 using YouthDataManager.Domain.Repositories.Tracking;
 using YouthDataManager.Shared.Service.Abstractions;
@@ -34,29 +36,7 @@ public class StudentQueriesService : IStudentQueriesService
     {
         try
         {
-            var result = await _repository.GetById(id, s => new StudentDto(
-                s.Id,
-                s.FullName,
-                s.Phone,
-                s.SecondaryPhone,
-                s.Address,
-                s.Area,
-                s.College,
-                s.AcademicYear,
-                s.ConfessionFather,
-                s.Notes,
-                s.Servant != null ? s.Servant.FullName : null,
-                s.ServantId,
-                s.BirthDate,
-                (int)s.Gender,
-                s.CallLogs.Select(c => (DateTime?)c.CallDate).Concat(s.HomeVisits.Select(v => (DateTime?)v.VisitDate)).Max(),
-                (s.CallLogs.Any() && (!s.HomeVisits.Any() || s.CallLogs.Max(c => c.CallDate) >= s.HomeVisits.Max(v => v.VisitDate)))
-                    ? (s.CallLogs.OrderByDescending(c => c.CallDate).Select(c => c.Notes).FirstOrDefault() ?? s.HomeVisits.OrderByDescending(v => v.VisitDate).Select(v => v.Notes).FirstOrDefault())
-                    : (s.HomeVisits.OrderByDescending(v => v.VisitDate).Select(v => v.Notes).FirstOrDefault() ?? s.CallLogs.OrderByDescending(c => c.CallDate).Select(c => c.Notes).FirstOrDefault()),
-                s.LastAttendanceDate,
-                s.CreatedAt,
-                s.UpdatedAt
-            ));
+            var result = await _repository.GetById(id, StudentDtoSelector());
 
             if (result == null)
                 return ServiceResult<StudentDto>.Failure("Student not found");
@@ -249,5 +229,59 @@ public class StudentQueriesService : IStudentQueriesService
             _logger.LogError(ex, "Error getting unassigned students for servant {ServantId}", servantId);
             return ServiceResult<PagedResult<UnassignedStudentForServantDto>>.Failure("An error occurred while retrieving the list.");
         }
+    }
+
+    public async Task<ServiceResult<PagedResult<ServantStudentPageItemDto>>> GetPagedForServant(Guid servantId, int page, int pageSize, string? search)
+    {
+        try
+        {
+            if (page < 1) page = 1;
+            if (pageSize > 50) pageSize = 50;
+            if (pageSize < 1) pageSize = 10;
+
+            var (pageData, totalCount) = await _repository.GetPagedForServantCombinedAsync(servantId, search, page, pageSize);
+            if (pageData.Count == 0)
+                return ServiceResult<PagedResult<ServantStudentPageItemDto>>.Success(new PagedResult<ServantStudentPageItemDto>(new List<ServantStudentPageItemDto>(), totalCount, page, pageSize));
+
+            var ids = pageData.Select(x => x.Id).ToList();
+            var students = await _repository.GetByIds(ids, StudentDtoSelector());
+            var studentDict = students.ToDictionary(s => s.Id);
+            var items = pageData.Select(p => new ServantStudentPageItemDto(
+                studentDict[p.Id],
+                p.Segment == 1 ? "Assigned" : p.Segment == 2 ? "Requested" : "Unassigned")).ToList();
+            return ServiceResult<PagedResult<ServantStudentPageItemDto>>.Success(new PagedResult<ServantStudentPageItemDto>(items, totalCount, page, pageSize));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting paged students for servant {ServantId}", servantId);
+            return ServiceResult<PagedResult<ServantStudentPageItemDto>>.Failure("An error occurred while retrieving the list.");
+        }
+    }
+
+    private static Expression<Func<Student, StudentDto>> StudentDtoSelector()
+    {
+        return s => new StudentDto(
+            s.Id,
+            s.FullName,
+            s.Phone,
+            s.SecondaryPhone,
+            s.Address,
+            s.Area,
+            s.College,
+            s.AcademicYear,
+            s.ConfessionFather,
+            s.Notes,
+            s.Servant != null ? s.Servant.FullName : null,
+            s.ServantId,
+            s.BirthDate,
+            (int)s.Gender,
+            s.CallLogs.Select(c => (DateTime?)c.CallDate).Concat(s.HomeVisits.Select(v => (DateTime?)v.VisitDate)).Max(),
+            (s.CallLogs.Any() && (!s.HomeVisits.Any() || s.CallLogs.Max(c => c.CallDate) >= s.HomeVisits.Max(v => v.VisitDate)))
+                ? (s.CallLogs.OrderByDescending(c => c.CallDate).Select(c => c.Notes).FirstOrDefault() ?? s.HomeVisits.OrderByDescending(v => v.VisitDate).Select(v => v.Notes).FirstOrDefault())
+                : (s.HomeVisits.OrderByDescending(v => v.VisitDate).Select(v => v.Notes).FirstOrDefault() ?? s.CallLogs.OrderByDescending(c => c.CallDate).Select(c => c.Notes).FirstOrDefault()),
+            s.LastAttendanceDate,
+            s.CreatedAt,
+            s.UpdatedAt
+        );
     }
 }

@@ -11,9 +11,10 @@
       <input
         type="text"
         [(ngModel)]="searchTerm"
-        (input)="onSearch()"
+        (keyup.enter)="onSearch()"
         class="form-input"
         placeholder="ابحث بالاسم أو المنطقة...">
+      <button type="button" class="btn-primary sm" (click)="onSearch()">بحث</button>
     </div>
   </header>
 
@@ -22,31 +23,18 @@
   </div>
 
   <ng-container *ngIf="!loading">
-    <section *ngIf="filteredAssigned.length > 0" class="list-section">
-      <h2 class="section-title">مخدوموني ({{ filteredAssigned.length }})</h2>
+    <section *ngIf="items.length > 0" class="list-section">
+      <p class="section-title">المجموع: {{ totalCount }}</p>
       <div class="students-grid">
-        <div *ngFor="let student of filteredAssigned" class="glass-card student-card">
+        <div *ngFor="let item of items" class="glass-card student-card" [class.unassigned]="item.segment === 'Unassigned'" [class.requested]="item.segment === 'Requested'">
           <div class="student-info">
-            <h3>{{ student.fullName }}</h3>
-            <p><span class="material-icons">place</span> {{ student.area || '—' }}</p>
-            <p><span class="material-icons">school</span> {{ student.college || '—' }}</p>
-            <p><span class="material-icons">calendar_today</span> {{ student.academicYear || '—' }}</p>
-            <p *ngIf="student.lastAttendanceDate" class="last-attendance"><span class="material-icons">event_available</span> آخر حضور: {{ student.lastAttendanceDate | date:'dd/MM/yyyy' }}</p>
-          </div>
-          <div class="student-actions">
-            <a [href]="'tel:' + student.phone" class="btn-icon call"><span class="material-icons">phone</span></a>
-            <a [routerLink]="['/students', student.id]" class="btn-outline">التفاصيل</a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section *ngIf="filteredUnassignedAvailable.length > 0" class="list-section">
-      <h2 class="section-title">مخدومون غير مخصصين ({{ filteredUnassignedAvailable.length }})</h2>
-      <div class="students-grid">
-        <div *ngFor="let item of filteredUnassignedAvailable" class="glass-card student-card unassigned">
-          <div class="student-info">
-            <span class="badge unassigned-badge">غير مخصص</span>
+            <span class="badge" [ngClass]="{
+              'assigned-badge': item.segment === 'Assigned',
+              'requested-badge': item.segment === 'Requested',
+              'unassigned-badge': item.segment === 'Unassigned'
+            }">
+              {{ item.segment === 'Assigned' ? 'مخصص' : item.segment === 'Requested' ? 'طلب تخصيص قيد المراجعة' : 'غير مخصص' }}
+            </span>
             <h3>{{ item.student.fullName }}</h3>
             <p><span class="material-icons">place</span> {{ item.student.area || '—' }}</p>
             <p><span class="material-icons">school</span> {{ item.student.college || '—' }}</p>
@@ -54,35 +42,31 @@
             <p *ngIf="item.student.lastAttendanceDate" class="last-attendance"><span class="material-icons">event_available</span> آخر حضور: {{ item.student.lastAttendanceDate | date:'dd/MM/yyyy' }}</p>
           </div>
           <div class="student-actions">
-            <button type="button" class="btn-primary sm" [disabled]="requestingId === item.student.id" (click)="requestAssignToMe(item)">
-              {{ requestingId === item.student.id ? 'جاري الإرسال...' : 'طلب تخصيص لي' }}
-            </button>
+            <ng-container *ngIf="item.segment === 'Assigned'">
+              <a [href]="'tel:' + item.student.phone" class="btn-icon call"><span class="material-icons">phone</span></a>
+              <a [routerLink]="['/students', item.student.id]" class="btn-outline">التفاصيل</a>
+            </ng-container>
+            <ng-container *ngIf="item.segment === 'Requested'">
+              <span class="text-muted small">بانتظار موافقة المدير</span>
+            </ng-container>
+            <ng-container *ngIf="item.segment === 'Unassigned'">
+              <button type="button" class="btn-primary sm" [disabled]="requestingId === item.student.id" (click)="requestAssignToMe(item)">
+                {{ requestingId === item.student.id ? 'جاري الإرسال...' : 'طلب تخصيص لي' }}
+              </button>
+            </ng-container>
           </div>
         </div>
       </div>
     </section>
 
-    <section *ngIf="filteredRequestedPending.length > 0" class="list-section">
-      <h2 class="section-title">طلبات تخصيص قيد المراجعة ({{ filteredRequestedPending.length }})</h2>
-      <div class="students-grid">
-        <div *ngFor="let item of filteredRequestedPending" class="glass-card student-card unassigned requested">
-          <div class="student-info">
-            <span class="badge requested-badge">طلب تخصيص قيد المراجعة</span>
-            <h3>{{ item.student.fullName }}</h3>
-            <p><span class="material-icons">place</span> {{ item.student.area || '—' }}</p>
-            <p><span class="material-icons">school</span> {{ item.student.college || '—' }}</p>
-            <p><span class="material-icons">calendar_today</span> {{ item.student.academicYear || '—' }}</p>
-            <p *ngIf="item.student.lastAttendanceDate" class="last-attendance"><span class="material-icons">event_available</span> آخر حضور: {{ item.student.lastAttendanceDate | date:'dd/MM/yyyy' }}</p>
-          </div>
-          <div class="student-actions">
-            <span class="text-muted small">بانتظار موافقة المدير</span>
-          </div>
-        </div>
-      </div>
-    </section>
+    <div *ngIf="items.length > 0 && totalPages > 1" class="pagination">
+      <button type="button" class="btn-outline sm" [disabled]="page <= 1" (click)="goToPage(page - 1)">السابق</button>
+      <span class="page-info">{{ page }} / {{ totalPages }}</span>
+      <button type="button" class="btn-outline sm" [disabled]="page >= totalPages" (click)="goToPage(page + 1)">التالي</button>
+    </div>
   </ng-container>
 
-  <div *ngIf="!loading && filteredAssigned.length === 0 && filteredUnassignedAvailable.length === 0 && filteredRequestedPending.length === 0" class="empty-state">
+  <div *ngIf="!loading && items.length === 0" class="empty-state">
     <span class="material-icons">search_off</span>
     <p>لم يتم العثور على مخدومين</p>
   </div>

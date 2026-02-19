@@ -43,7 +43,7 @@ public class StudentNoTrackingRepository : IStudentNoTrackingRepository
             .ToListAsync();
     }
 
-    public async Task<(IEnumerable<T> Items, int TotalCount)> GetPaged<T>(string? search, string? area, string? academicYear, int? gender, Guid? servantId, bool? hasServant, string? sortBy, bool sortDesc, int page, int pageSize, Expression<Func<Student, T>> selector)
+    public async Task<(IEnumerable<T> Items, int TotalCount)> GetPaged<T>(string? search, string? area, string? academicYear, int? gender, Guid? servantId, bool? hasServant, string? sortBy, bool sortDesc, int page, int pageSize, Expression<Func<Student, T>> selector, IEnumerable<Guid>? excludeStudentIds = null)
     {
         var query = _context.Students.AsNoTracking().AsQueryable();
         var searchTrim = search?.Trim();
@@ -62,6 +62,8 @@ public class StudentNoTrackingRepository : IStudentNoTrackingRepository
         if (servantId.HasValue) query = query.Where(s => s.ServantId == servantId.Value);
         if (hasServant == true) query = query.Where(s => s.ServantId != null);
         if (hasServant == false) query = query.Where(s => s.ServantId == null);
+        if (excludeStudentIds != null && excludeStudentIds.Any())
+            query = query.Where(s => !excludeStudentIds.Contains(s.Id));
 
         var totalCount = await query.CountAsync();
         var sortKey = (sortBy ?? "").Trim().ToLowerInvariant();

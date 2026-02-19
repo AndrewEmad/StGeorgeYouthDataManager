@@ -40,30 +40,46 @@
       </div>
     </section>
 
-    <section *ngIf="filteredUnassigned.length > 0" class="list-section">
-      <h2 class="section-title">مخدومون غير مخصصين ({{ filteredUnassigned.length }})</h2>
+    <section *ngIf="filteredUnassignedAvailable.length > 0" class="list-section">
+      <h2 class="section-title">مخدومون غير مخصصين ({{ filteredUnassignedAvailable.length }})</h2>
       <div class="students-grid">
-        <div *ngFor="let student of filteredUnassigned" class="glass-card student-card unassigned">
+        <div *ngFor="let item of filteredUnassignedAvailable" class="glass-card student-card unassigned">
           <div class="student-info">
             <span class="badge unassigned-badge">غير مخصص</span>
-            <h3>{{ student.fullName }}</h3>
-            <p><span class="material-icons">place</span> {{ student.area || '—' }}</p>
-            <p><span class="material-icons">school</span> {{ student.college || '—' }}</p>
-            <p *ngIf="student.lastAttendanceDate" class="last-attendance"><span class="material-icons">event_available</span> آخر حضور: {{ student.lastAttendanceDate | date:'dd/MM/yyyy' }}</p>
+            <h3>{{ item.student.fullName }}</h3>
+            <p><span class="material-icons">place</span> {{ item.student.area || '—' }}</p>
+            <p><span class="material-icons">school</span> {{ item.student.college || '—' }}</p>
+            <p *ngIf="item.student.lastAttendanceDate" class="last-attendance"><span class="material-icons">event_available</span> آخر حضور: {{ item.student.lastAttendanceDate | date:'dd/MM/yyyy' }}</p>
           </div>
           <div class="student-actions">
-            <button type="button" class="btn-primary sm" [disabled]="assigningId === student.id" (click)="assignToMe(student)">
-              {{ assigningId === student.id ? 'جاري التخصيص...' : 'تخصيص لي' }}
+            <button type="button" class="btn-primary sm" [disabled]="requestingId === item.student.id" (click)="requestAssignToMe(item)">
+              {{ requestingId === item.student.id ? 'جاري الإرسال...' : 'طلب تخصيص لي' }}
             </button>
-            <a [href]="'tel:' + student.phone" class="btn-icon call"><span class="material-icons">phone</span></a>
-            <a [routerLink]="['/students', student.id]" class="btn-outline">التفاصيل</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section *ngIf="filteredRequestedPending.length > 0" class="list-section">
+      <h2 class="section-title">طلبات تخصيص قيد المراجعة ({{ filteredRequestedPending.length }})</h2>
+      <div class="students-grid">
+        <div *ngFor="let item of filteredRequestedPending" class="glass-card student-card unassigned requested">
+          <div class="student-info">
+            <span class="badge requested-badge">طلب تخصيص قيد المراجعة</span>
+            <h3>{{ item.student.fullName }}</h3>
+            <p><span class="material-icons">place</span> {{ item.student.area || '—' }}</p>
+            <p><span class="material-icons">school</span> {{ item.student.college || '—' }}</p>
+            <p *ngIf="item.student.lastAttendanceDate" class="last-attendance"><span class="material-icons">event_available</span> آخر حضور: {{ item.student.lastAttendanceDate | date:'dd/MM/yyyy' }}</p>
+          </div>
+          <div class="student-actions">
+            <span class="text-muted small">بانتظار موافقة المدير</span>
           </div>
         </div>
       </div>
     </section>
   </ng-container>
 
-  <div *ngIf="!loading && filteredAssigned.length === 0 && filteredUnassigned.length === 0" class="empty-state">
+  <div *ngIf="!loading && filteredAssigned.length === 0 && filteredUnassignedAvailable.length === 0 && filteredRequestedPending.length === 0" class="empty-state">
     <span class="material-icons">search_off</span>
     <p>لم يتم العثور على مخدومين</p>
   </div>

@@ -13,8 +13,11 @@ public record StudentListFilter(
     Guid? ServantId,
     bool? HasServant,
     string? SortBy,
-    bool? SortDesc
+    bool? SortDesc,
+    IEnumerable<Guid>? ExcludeStudentIds = null
 );
+
+public record UnassignedStudentForServantDto(StudentDto Student, bool HasPendingRequestByMe);
 
 public record StudentDto(
     Guid Id,
@@ -79,6 +82,21 @@ public record StudentRemovalRequestDto(
 );
 
 public record CreateRemovalRequestDto(Guid StudentId);
+
+// Assignment request (servant requests to be assigned; admin approves → assign)
+public record StudentAssignmentRequestDto(
+    Guid Id,
+    Guid StudentId,
+    string StudentName,
+    Guid RequestedByUserId,
+    string RequestedByUserName,
+    DateTime RequestedAt,
+    string Status,
+    DateTime? ProcessedAt,
+    Guid? ProcessedByUserId
+);
+
+public record CreateAssignmentRequestDto(Guid StudentId);
 
 public record StudentEditLogDto(
     Guid Id,

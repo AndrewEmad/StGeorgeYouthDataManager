@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using YouthDataManager.Domain.Repositories.NoTracking;
+using YouthDataManager.Domain.Repositories.Tracking;
 using YouthDataManager.Shared.Service.Abstractions;
 using YouthDataManager.Students.Service.Abstractions.Queries;
 using YouthDataManager.Students.Service.Abstractions.DTOs;
@@ -14,15 +15,18 @@ public class StudentQueriesService : IStudentQueriesService
 {
     private readonly IStudentNoTrackingRepository _repository;
     private readonly IStudentEditLogNoTrackingRepository _editLogRepository;
+    private readonly IStudentAssignmentRequestRepository _assignmentRequestRepository;
     private readonly ILogger<StudentQueriesService> _logger;
 
     public StudentQueriesService(
         IStudentNoTrackingRepository repository,
         IStudentEditLogNoTrackingRepository editLogRepository,
+        IStudentAssignmentRequestRepository assignmentRequestRepository,
         ILogger<StudentQueriesService> logger)
     {
         _repository = repository;
         _editLogRepository = editLogRepository;
+        _assignmentRequestRepository = assignmentRequestRepository;
         _logger = logger;
     }
 
@@ -160,7 +164,8 @@ public class StudentQueriesService : IStudentQueriesService
                         : s.HomeVisits.OrderByDescending(v => v.VisitDate).Select(v => v.Notes).FirstOrDefault(),
                     s.LastAttendanceDate,
                     s.CreatedAt,
-                    s.UpdatedAt));
+                    s.UpdatedAt),
+                filter.ExcludeStudentIds);
             var paged = new PagedResult<StudentDto>(items.ToList(), totalCount, page, pageSize);
             return ServiceResult<PagedResult<StudentDto>>.Success(paged);
         }
@@ -217,6 +222,32 @@ public class StudentQueriesService : IStudentQueriesService
         {
             _logger.LogError(ex, "Error getting edit history for student {StudentId}", studentId);
             return ServiceResult<IEnumerable<StudentEditLogDto>>.Failure("An error occurred while retrieving edit history.");
+        }
+    }
+
+    public async Task<ServiceResult<PagedResult<UnassignedStudentForServantDto>>> GetUnassignedForServant(Guid servantId, int page, int pageSize)
+    {
+        try
+        {
+            if (page < 1) page = 1;
+            if (pageSize > 100) pageSize = 100;
+            if (pageSize < 1) pageSize = 10;
+
+            var excludeIds = await _assignmentRequestRepository.GetStudentIdsWithPendingRequestByOtherThan(servantId);
+            var filter = new StudentListFilter(null, null, null, null, null, false, null, null, excludeIds);
+            var pagedResult = await GetPaged(filter, page, pageSize);
+            if (pagedResult.Status != ServiceResultStatus.Success || pagedResult.Data == null)
+                return ServiceResult<PagedResult<UnassignedStudentForServantDto>>.Failure(pagedResult.Message ?? "Failed to get unassigned students.");
+
+            var myPendingIds = (await _assignmentRequestRepository.GetStudentIdsWithPendingRequestByUser(servantId)).ToHashSet();
+            var items = pagedResult.Data.Items.Select(s => new UnassignedStudentForServantDto(s, myPendingIds.Contains(s.Id))).ToList();
+            var result = new PagedResult<UnassignedStudentForServantDto>(items, pagedResult.Data.TotalCount, page, pageSize);
+            return ServiceResult<PagedResult<UnassignedStudentForServantDto>>.Success(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting unassigned students for servant {ServantId}", servantId);
+            return ServiceResult<PagedResult<UnassignedStudentForServantDto>>.Failure("An error occurred while retrieving the list.");
         }
     }
 }

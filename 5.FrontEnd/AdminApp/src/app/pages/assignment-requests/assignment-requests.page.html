@@ -1,0 +1,35 @@
+<div class="animate-slide assignment-requests-page">
+  <header class="page-header">
+    <h1>طلبات التخصيص</h1>
+    <p class="text-muted">طلبات الخدام لتخصيص مخدوم لأنفسهم — بالموافقة يتم تعيين المخدوم للخادم</p>
+  </header>
+
+  <div *ngIf="loading" class="loader-container">
+    <div class="spinner"></div>
+  </div>
+
+  <p class="error-msg" *ngIf="error">{{ error }}</p>
+
+  <div *ngIf="!loading && requests.length === 0" class="empty-state">
+    <span class="material-icons">inbox</span>
+    <p>لا توجد طلبات قيد المراجعة</p>
+  </div>
+
+  <div *ngIf="!loading && requests.length" class="requests-list">
+    <div class="glass-card request-card" *ngFor="let r of requests">
+      <div class="request-info">
+        <h3>{{ r.studentName }}</h3>
+        <p>طلب من: {{ r.requestedByUserName }}</p>
+        <p class="date">{{ r.requestedAt | date:'short' }}</p>
+      </div>
+      <div class="request-actions">
+        <button type="button" class="btn-outline danger" (click)="reject(r.id)" [disabled]="processingId === r.id">
+          رفض
+        </button>
+        <button type="button" class="btn-primary" (click)="approve(r.id)" [disabled]="processingId === r.id">
+          {{ processingId === r.id ? 'جاري...' : 'موافقة (تخصيص للخادم)' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

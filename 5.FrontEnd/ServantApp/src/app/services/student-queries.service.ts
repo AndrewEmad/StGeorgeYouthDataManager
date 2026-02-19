@@ -38,4 +38,14 @@ export class StudentQueriesService {
     if (params.hasServant === false) httpParams['hasServant'] = 'false';
     return this.http.get<{ items: any[]; totalCount: number; page: number; pageSize: number }>(`${this.apiUrl}/paged`, { params: httpParams });
   }
+
+  getUnassignedForServant(params: { page?: number; pageSize?: number } = {}): Observable<{ items: Array<{ student: any; hasPendingRequestByMe: boolean }>; totalCount: number; page: number; pageSize: number }> {
+    const httpParams: Record<string, string> = {};
+    if (params.page != null) httpParams['page'] = String(params.page);
+    if (params.pageSize != null) httpParams['pageSize'] = String(params.pageSize);
+    return this.http.get<{ items: Array<{ student: any; hasPendingRequestByMe: boolean }>; totalCount: number; page: number; pageSize: number }>(
+      `${this.apiUrl}/unassigned-for-servant`,
+      Object.keys(httpParams).length ? { params: httpParams } : {}
+    );
+  }
 }

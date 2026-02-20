@@ -1,5 +1,8 @@
 <div class="app-wrapper">
   <header class="top-bar">
+    <button type="button" class="burger-btn" (click)="toggleSidebar()" aria-label="القائمة">
+      <span class="material-icons">{{ sidebarOpen ? 'close' : 'menu' }}</span>
+    </button>
     <a routerLink="/dashboard/profile" class="top-bar-name link-name">
       <span class="material-icons">account_circle</span>
       {{ adminName }}
@@ -11,9 +14,6 @@
   </header>
 
   <div class="main-layout">
-    <button type="button" class="burger-btn" (click)="toggleSidebar()" aria-label="القائمة">
-      <span class="material-icons">{{ sidebarOpen ? 'close' : 'menu' }}</span>
-    </button>
 
     <div class="sidebar-overlay" [class.is-open]="sidebarOpen" (click)="closeSidebar()" aria-hidden="true"></div>
 

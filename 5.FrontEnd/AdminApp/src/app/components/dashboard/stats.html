@@ -62,45 +62,6 @@
     </div>
   </div>
 
-  <section class="servant-performance" *ngIf="!loading && perfResult !== null">
-    <h2>أداء الخدام ومتابعة المخدومين</h2>
-    <div *ngIf="perfLoading" class="loader">جاري التحميل...</div>
-    <div *ngIf="!perfLoading" class="glass-card table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>الخادم</th>
-            <th>عدد المخدومين المخصصين</th>
-            <th>مكالمات هذا الأسبوع</th>
-            <th>زيارات هذا الأسبوع</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let sp of perfResult!.items" class="row-clickable" (click)="viewServant(sp.servantId)">
-            <td>{{ sp.fullName }}</td>
-            <td>{{ sp.assignedStudentsCount }}</td>
-            <td>{{ sp.callsThisWeek }}</td>
-            <td>{{ sp.visitsThisWeek }}</td>
-            <td (click)="$event.stopPropagation()">
-              <a [routerLink]="['/dashboard/servants', sp.servantId]" class="btn-outline sm">تفاصيل</a>
-            </td>
-          </tr>
-          <tr *ngIf="perfResult!.items.length === 0">
-            <td colspan="5" class="text-muted">لا يوجد خدام</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="pagination" *ngIf="!perfLoading && perfResult && perfResult.totalCount > 0">
-      <span class="pagination-info">{{ (perfPage - 1) * perfPageSize + 1 }} - {{ (perfPage - 1) * perfPageSize + perfResult.items.length }} من {{ perfResult.totalCount }}</span>
-      <label class="pagination-size">عرض <select class="form-input sm" [ngModel]="perfPageSize" (ngModelChange)="setPerfPageSize($event)"><option *ngFor="let n of perfPageSizeOptions" [value]="n">{{ n }}</option></select></label>
-      <button type="button" class="btn-outline sm" [disabled]="perfPage <= 1" (click)="goToPerfPage(perfPage - 1)">السابق</button>
-      <span class="page-num">صفحة {{ perfPage }} من {{ servantPerformancesTotalPages }}</span>
-      <button type="button" class="btn-outline sm" [disabled]="perfPage >= servantPerformancesTotalPages" (click)="goToPerfPage(perfPage + 1)">التالي</button>
-    </div>
-  </section>
-
   <section class="recent-activity" *ngIf="!loading">
     <h2>النشاط الأخير</h2>
     <div class="glass-card activity-list">

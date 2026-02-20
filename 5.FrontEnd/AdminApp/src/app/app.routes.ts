@@ -16,6 +16,7 @@ import { ServantActivityReportPage } from './pages/reports/servant-activity-repo
 import { StudentsNoContactReportPage } from './pages/reports/students-no-contact-report.page';
 import { StudentsByAreaReportPage } from './pages/reports/students-by-area-report.page';
 import { StudentsByYearReportPage } from './pages/reports/students-by-year-report.page';
+import { ServantPerformanceReportPage } from './pages/reports/servant-performance-report.page';
 import { AttendancePage } from './pages/attendance/attendance.page';
 import { ProfilePage } from './pages/profile/profile.page';
 import { authGuard } from './guards/auth.guard';
@@ -43,6 +44,7 @@ export const routes: Routes = [
         children: [
           { path: 'servant-follow-up', component: ServantFollowUpPage },
           { path: 'student-distribution', redirectTo: 'servant-follow-up', pathMatch: 'full' },
+          { path: 'servant-performance', component: ServantPerformanceReportPage },
           { path: 'servant-activity', component: ServantActivityReportPage },
           { path: 'students-no-contact', component: StudentsNoContactReportPage },
           { path: 'students-by-area', component: StudentsByAreaReportPage },

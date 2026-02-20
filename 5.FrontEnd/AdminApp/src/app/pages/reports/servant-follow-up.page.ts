@@ -17,6 +17,7 @@ interface ReportCard {
 })
 export class ServantFollowUpPage {
   reportCards: ReportCard[] = [
+    { title: 'أداء الخدام ومتابعة المخدومين', icon: 'analytics', route: '/dashboard/reports/servant-performance' },
     { title: 'ملخص نشاط الخدام', icon: 'assessment', route: '/dashboard/reports/servant-activity' },
     { title: 'مخدومون بدون تواصل حديث', icon: 'contact_phone', route: '/dashboard/reports/students-no-contact' },
     { title: 'توزيع المخدومين حسب المنطقة', icon: 'map', route: '/dashboard/reports/students-by-area' },

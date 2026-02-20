@@ -1,0 +1,44 @@
+<div class="animate-slide">
+  <header class="content-header reports-header">
+    <h1>أداء الخدام ومتابعة المخدومين</h1>
+    <p class="text-muted">مكالمات وزيارات هذا الأسبوع (جمعة–خميس)</p>
+    <a routerLink="/dashboard/reports/servant-follow-up" class="btn-outline">← العودة للتقارير</a>
+  </header>
+  <section class="report-section">
+    <div *ngIf="loading" class="loader">جاري التحميل...</div>
+    <div *ngIf="!loading && perfResult" class="glass-card table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>الخادم</th>
+            <th>عدد المخدومين المخصصين</th>
+            <th>مكالمات هذا الأسبوع</th>
+            <th>زيارات هذا الأسبوع</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let sp of perfResult.items" class="row-clickable" (click)="viewServant(sp.servantId)">
+            <td>{{ sp.fullName }}</td>
+            <td>{{ sp.assignedStudentsCount }}</td>
+            <td>{{ sp.callsThisWeek }}</td>
+            <td>{{ sp.visitsThisWeek }}</td>
+            <td (click)="$event.stopPropagation()">
+              <a [routerLink]="['/dashboard/servants', sp.servantId]" class="btn-outline sm">تفاصيل</a>
+            </td>
+          </tr>
+          <tr *ngIf="perfResult.items.length === 0">
+            <td colspan="5" class="text-muted">لا يوجد خدام</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination" *ngIf="!loading && perfResult && perfResult.totalCount > 0">
+      <span class="pagination-info">{{ (page - 1) * pageSize + 1 }} - {{ (page - 1) * pageSize + perfResult.items.length }} من {{ perfResult.totalCount }}</span>
+      <label class="pagination-size">عرض <select class="form-input sm" [ngModel]="pageSize" (ngModelChange)="setPageSize($event)"><option *ngFor="let n of pageSizeOptions" [value]="n">{{ n }}</option></select></label>
+      <button type="button" class="btn-outline sm" [disabled]="page <= 1" (click)="goToPage(page - 1)">السابق</button>
+      <span class="page-num">صفحة {{ page }} من {{ totalPages }}</span>
+      <button type="button" class="btn-outline sm" [disabled]="page >= totalPages" (click)="goToPage(page + 1)">التالي</button>
+    </div>
+  </section>
+</div>

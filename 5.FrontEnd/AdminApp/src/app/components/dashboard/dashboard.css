@@ -56,7 +56,9 @@
   position: fixed;
   top: 72px;
   right: 16px;
-  z-index: 1001;
+  z-index: 1004;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   width: 48px;
   height: 48px;
   border-radius: 12px;
@@ -88,11 +90,14 @@
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s, visibility 0.3s;
+  pointer-events: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .sidebar-overlay.is-open {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 
 .sidebar {
@@ -142,6 +147,13 @@
   .sidebar.is-open {
     transform: translateX(0);
     box-shadow: -8px 0 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .sidebar,
+  .sidebar .nav-item,
+  .sidebar-close {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .sidebar-header {

@@ -15,10 +15,26 @@
     <button type="button" class="btn-outline" (click)="openAddVisit()">تسجيل زيارة</button>
     <button type="button" class="btn-outline" (click)="startEdit()" *ngIf="canEdit()">تعديل البيانات</button>
     <button type="button" class="btn-outline danger" (click)="requestRemoval()" *ngIf="canEdit() && !removalRequest" [disabled]="requestRemovalLoading">
-      {{ requestRemovalLoading ? 'جاري الإرسال...' : 'طلب إزالة من قائمتي' }}
+      {{ requestRemovalLoading ? 'جاري الإرسال...' : 'طلب إزالة' }}
     </button>
     <p class="text-muted small" *ngIf="canEdit() && removalRequest">طلب إزالة قيد المراجعة</p>
     <p class="error-msg" *ngIf="removalError">{{ removalError }}</p>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showRemovalChoiceModal" (click)="showRemovalChoiceModal = false">
+    <div class="glass-card modal-content removal-choice-modal" (click)="$event.stopPropagation()">
+      <h3>نوع الإزالة</h3>
+      <p class="text-muted small">اختر ماذا تريد طلبه من الإدارة:</p>
+      <div class="removal-options">
+        <button type="button" class="btn-outline" (click)="submitRemovalRequest(0)" [disabled]="requestRemovalLoading">
+          إزالة من قائمتي فقط
+        </button>
+        <button type="button" class="btn-outline danger" (click)="submitRemovalRequest(1)" [disabled]="requestRemovalLoading">
+          إزالة من النظام
+        </button>
+      </div>
+      <button type="button" class="btn-outline sm mt-2" (click)="showRemovalChoiceModal = false">إلغاء</button>
+    </div>
   </div>
 
   <div class="grid-layout">

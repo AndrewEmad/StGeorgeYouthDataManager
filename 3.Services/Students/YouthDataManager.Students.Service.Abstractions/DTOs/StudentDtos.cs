@@ -73,7 +73,7 @@ public record UpdateStudentRequest(
     DateTime? BirthDate
 );
 
-// Removal request (servant requests to remove student; admin approves → unassign + flag student as deleted)
+// Removal request (servant requests to remove student; admin approves → unassign and/or flag deleted per RemovalType)
 public record StudentRemovalRequestDto(
     Guid Id,
     Guid StudentId,
@@ -82,11 +82,12 @@ public record StudentRemovalRequestDto(
     string RequestedByUserName,
     DateTime RequestedAt,
     string Status,
+    int RemovalType,
     DateTime? ProcessedAt,
     Guid? ProcessedByUserId
 );
 
-public record CreateRemovalRequestDto(Guid StudentId);
+public record CreateRemovalRequestDto(Guid StudentId, int RemovalType = 1);
 
 // Assignment request (servant requests to be assigned; admin approves → assign)
 public record StudentAssignmentRequestDto(

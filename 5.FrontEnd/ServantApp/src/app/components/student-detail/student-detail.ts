@@ -40,6 +40,7 @@ export class StudentDetailComponent implements OnInit {
   editForm: any = {};
   showAddCall = false;
   showAddVisit = false;
+  showRemovalChoiceModal = false;
   removalRequest: any = null;
 
   callDate = '';
@@ -259,12 +260,19 @@ export class StudentDetailComponent implements OnInit {
 
   requestRemoval() {
     if (!this.student?.id || this.removalRequest) return;
+    this.showRemovalChoiceModal = true;
+    this.removalError = '';
+  }
+
+  submitRemovalRequest(removalType: number) {
+    if (!this.student?.id || this.removalRequest) return;
     this.requestRemovalLoading = true;
     this.removalError = '';
-    this.removalRequestService.create(this.student.id).subscribe({
+    this.removalRequestService.create(this.student.id, removalType).subscribe({
       next: () => {
         this.removalRequest = { status: 'Pending' };
         this.requestRemovalLoading = false;
+        this.showRemovalChoiceModal = false;
       },
       error: (err) => {
         this.removalError = err.error?.message || 'فشل تقديم الطلب';

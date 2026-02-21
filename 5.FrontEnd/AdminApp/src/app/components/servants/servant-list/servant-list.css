@@ -130,9 +130,29 @@ tr.row-clickable { cursor: pointer; }
   background: var(--success);
 }
 
+/* Keep role (badge) and actions columns on one line */
+.table-container th:nth-child(3),
+.table-container td:nth-child(3) {
+  min-width: 90px;
+  white-space: nowrap;
+}
+
+.table-container th:nth-child(8),
+.table-container td:nth-child(8) {
+  min-width: 240px;
+  white-space: nowrap;
+}
+
+.table-container td:nth-child(8) {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
 .btn-outline.sm {
   padding: 6px 14px;
   font-size: 0.85rem;
+  flex-shrink: 0;
 }
 
 /* Modal – overlay centering in styles.css */

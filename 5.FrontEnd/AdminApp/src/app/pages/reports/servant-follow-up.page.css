@@ -97,6 +97,13 @@
   text-align: right;
 }
 
+/* Keep button/link columns on one line */
+.table-container th:last-child,
+.table-container td:last-child {
+  min-width: 100px;
+  white-space: nowrap;
+}
+
 .table-container th,
 .table-container td {
   padding: 14px 18px;

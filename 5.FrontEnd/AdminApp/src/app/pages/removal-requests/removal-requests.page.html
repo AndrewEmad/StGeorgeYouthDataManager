@@ -1,7 +1,7 @@
 <div class="animate-slide removal-requests-page">
   <header class="page-header">
     <h1>طلبات إزالة مخدومين</h1>
-    <p class="text-muted">طلبات الخدام لإزالة مخدوم من قائمتهم — بالموافقة يتم إلغاء التعيين وتفعيل الحذف</p>
+    <p class="text-muted">طلبات الخدام لإزالة مخدوم — بالموافقة يتم إما إلغاء التخصيص فقط أو إلغاء التخصيص وتفعيل الحذف حسب نوع الطلب</p>
   </header>
 
   <div *ngIf="loading" class="loader-container">
@@ -20,6 +20,8 @@
       <div class="request-info">
         <h3>{{ r.studentName }}</h3>
         <p>طلب من: {{ r.requestedByUserName }}</p>
+        <p class="removal-type" *ngIf="r.removalType === 0"><span class="badge">من قائمته فقط</span></p>
+        <p class="removal-type" *ngIf="r.removalType !== 0"><span class="badge">من النظام</span></p>
         <p class="date">{{ r.requestedAt | date:'short' }}</p>
       </div>
       <div class="request-actions">
@@ -27,7 +29,7 @@
           رفض
         </button>
         <button type="button" class="btn-primary" (click)="approve(r.id)" [disabled]="processingId === r.id">
-          {{ processingId === r.id ? 'جاري...' : 'موافقة (إزالة وتفعيل الحذف)' }}
+          {{ processingId === r.id ? 'جاري...' : (r.removalType === 0 ? 'موافقة (إزالة من القائمة فقط)' : 'موافقة (إزالة وتفعيل الحذف)') }}
         </button>
       </div>
     </div>

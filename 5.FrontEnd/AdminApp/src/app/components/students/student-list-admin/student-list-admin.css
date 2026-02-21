@@ -172,11 +172,19 @@ th.sortable:hover {
   gap: 8px;
 }
 
+/* Keep actions and badge columns on one line */
+.table-container th:nth-child(4),
+.table-container td:nth-child(4) {
+  min-width: 110px;
+  white-space: nowrap;
+}
+
 .col-actions {
   display: flex;
   flex-wrap: nowrap;
   gap: 8px;
   white-space: nowrap;
+  min-width: 200px;
 }
 .col-actions .btn-outline.sm {
   flex: 0 0 auto;

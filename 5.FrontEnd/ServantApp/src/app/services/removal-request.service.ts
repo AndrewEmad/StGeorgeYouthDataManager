@@ -3,6 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
+export const RemovalType = { UnassignOnly: 0, DeleteFromSystem: 1 } as const;
+
 export interface StudentRemovalRequestDto {
   id: string;
   studentId: string;
@@ -11,6 +13,7 @@ export interface StudentRemovalRequestDto {
   requestedByUserName: string;
   requestedAt: string;
   status: string;
+  removalType: number;
   processedAt?: string;
   processedByUserId?: string;
 }
@@ -23,8 +26,8 @@ export class RemovalRequestService {
 
   constructor(private http: HttpClient) {}
 
-  create(studentId: string): Observable<{ id: string }> {
-    return this.http.post<{ id: string }>(this.apiUrl, { studentId });
+  create(studentId: string, removalType: number): Observable<{ id: string }> {
+    return this.http.post<{ id: string }>(this.apiUrl, { studentId, removalType });
   }
 
   getMyRequests(): Observable<StudentRemovalRequestDto[]> {

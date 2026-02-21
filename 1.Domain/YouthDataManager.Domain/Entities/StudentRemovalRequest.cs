@@ -11,6 +11,7 @@ public class StudentRemovalRequest
     public ApplicationUser RequestedByUser { get; set; } = null!;
     public DateTime RequestedAt { get; set; }
     public RemovalRequestStatus Status { get; set; }
+    public RemovalRequestType RemovalType { get; set; } = RemovalRequestType.DeleteFromSystem;
     public DateTime? ProcessedAt { get; set; }
     public Guid? ProcessedByUserId { get; set; }
     public ApplicationUser? ProcessedByUser { get; set; }

@@ -33,7 +33,7 @@ public class StudentRemovalRequestService : IStudentRemovalRequestService
         _logger = logger;
     }
 
-    public async Task<ServiceResult<Guid>> CreateRequest(Guid studentId, Guid requestedByUserId)
+    public async Task<ServiceResult<Guid>> CreateRequest(Guid studentId, Guid requestedByUserId, RemovalRequestType removalType)
     {
         try
         {
@@ -53,7 +53,8 @@ public class StudentRemovalRequestService : IStudentRemovalRequestService
                 StudentId = studentId,
                 RequestedByUserId = requestedByUserId,
                 RequestedAt = DateTime.UtcNow,
-                Status = RemovalRequestStatus.Pending
+                Status = RemovalRequestStatus.Pending,
+                RemovalType = removalType
             };
             _requestRepository.Add(request);
             await _unitOfWork.SaveChangesAsync();
@@ -131,7 +132,8 @@ public class StudentRemovalRequestService : IStudentRemovalRequestService
             if (student != null)
             {
                 student.ServantId = null;
-                student.IsDeleted = true;
+                if (request.RemovalType == RemovalRequestType.DeleteFromSystem)
+                    student.IsDeleted = true;
                 student.UpdatedAt = DateTime.UtcNow;
                 _studentRepository.Update(student);
             }
@@ -181,6 +183,7 @@ public class StudentRemovalRequestService : IStudentRemovalRequestService
             r.RequestedByUser?.FullName ?? "",
             r.RequestedAt,
             r.Status.ToString(),
+            (int)r.RemovalType,
             r.ProcessedAt,
             r.ProcessedByUserId
         );

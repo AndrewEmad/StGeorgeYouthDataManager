@@ -114,6 +114,9 @@
   margin: 15px;
   height: calc(100vh - 56px - 30px);
   border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .sidebar-header {
@@ -225,6 +228,8 @@
   gap: 8px;
   padding: 0 10px;
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .nav-item {

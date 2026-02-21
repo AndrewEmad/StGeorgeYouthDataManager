@@ -11,6 +11,7 @@ public class StudentRemovalRequestConfiguration : IEntityTypeConfiguration<Stude
     {
         builder.HasKey(e => e.Id);
         builder.Property(e => e.Status).HasConversion<string>().HasMaxLength(20);
+        builder.Property(e => e.RemovalType).HasConversion<int>();
 
         builder.HasOne(e => e.Student)
             .WithMany()

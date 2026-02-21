@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using YouthDataManager.Domain.Enums;
 using YouthDataManager.Students.Service.Abstractions.Commands;
 using YouthDataManager.Students.Service.Abstractions.DTOs;
 using YouthDataManager.Shared.Service.Abstractions;
@@ -29,7 +30,10 @@ public class StudentRemovalRequestsController : ControllerBase
         if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
             return Unauthorized();
 
-        var result = await _service.CreateRequest(dto.StudentId, userId);
+        if (dto.RemovalType != (int)RemovalRequestType.UnassignOnly && dto.RemovalType != (int)RemovalRequestType.DeleteFromSystem)
+            return BadRequest(new { message = "RemovalType must be 0 (UnassignOnly) or 1 (DeleteFromSystem)." });
+
+        var result = await _service.CreateRequest(dto.StudentId, userId, (RemovalRequestType)dto.RemovalType);
         if (result.Status != ServiceResultStatus.Success)
             return BadRequest(result);
         return Ok(new { id = result.Data });

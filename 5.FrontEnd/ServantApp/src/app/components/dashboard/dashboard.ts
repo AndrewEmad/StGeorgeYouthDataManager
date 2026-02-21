@@ -34,8 +34,8 @@ export class DashboardComponent implements OnInit {
         // Fallback or mock if API fails
         this.stats = {
           totalStudents: 0,
-          callsToday: 0,
-          visitsToday: 0,
+          callsThisWeek: 0,
+          visitsThisWeek: 0,
           studentsNeedingFollowUp: 0,
           studentsNotContacted: 0
         };

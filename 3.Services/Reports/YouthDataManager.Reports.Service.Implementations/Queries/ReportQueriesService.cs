@@ -53,6 +53,7 @@ public class ReportQueriesService : IReportQueriesService
         try
         {
             var today = DateTime.UtcNow.Date;
+            var (weekStart, weekEnd) = GetCurrentWeekRange();
 
             // Use repository projections for efficient calculations
             var studentStats = await _studentRepository.GetByServantId(servantId, s => new 
@@ -62,13 +63,13 @@ public class ReportQueriesService : IReportQueriesService
                 IsNew = !s.CallLogs.Any() && !s.HomeVisits.Any()
             });
 
-            var callsTodayCount = (await _callRepository.GetByServantId(servantId, c => c.CallDate.Date == today)).Count(x => x);
-            var visitsTodayCount = (await _visitRepository.GetByServantId(servantId, v => v.VisitDate.Date == today)).Count(x => x);
+            var callsThisWeekCount = (await _callRepository.GetByFilter(weekStart, weekEnd, servantId, null, null, c => c.Id)).Count();
+            var visitsThisWeekCount = (await _visitRepository.GetByFilter(weekStart, weekEnd, servantId, null, null, v => v.Id)).Count();
 
             var dto = new ServantDashboardDto(
                 studentStats.Count(),
-                callsTodayCount,
-                visitsTodayCount,
+                callsThisWeekCount,
+                visitsThisWeekCount,
                 studentStats.Count(s => s.HasFollowUpToday),
                 studentStats.Count(s => s.IsNew)
             );

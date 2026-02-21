@@ -15,7 +15,7 @@
   <main class="container">
     <header class="animate-fade">
       <h1>لوحة التحكم</h1>
-      <p class="text-muted">نظرة عامة على المخدومين والمتابعة اليومية</p>
+      <p class="text-muted">نظرة عامة على المخدومين ومتابعة الأسبوع (جمعة–خميس)</p>
     </header>
 
     <div class="stats-grid">
@@ -30,16 +30,16 @@
       <div class="glass-card stat-card animate-fade" style="animation-delay: 0.2s">
         <span class="material-icons icon-box cyan">phone</span>
         <div class="stat-info">
-          <h3>{{stats?.callsToday || 0}}</h3>
-          <p>مكالمات اليوم</p>
+          <h3>{{stats?.callsThisWeek ?? 0}}</h3>
+          <p>مكالمات هذا الأسبوع (جمعة–خميس)</p>
         </div>
       </div>
 
       <div class="glass-card stat-card animate-fade" style="animation-delay: 0.3s">
         <span class="material-icons icon-box emerald">home</span>
         <div class="stat-info">
-          <h3>{{stats?.visitsToday || 0}}</h3>
-          <p>زيارات اليوم</p>
+          <h3>{{stats?.visitsThisWeek ?? 0}}</h3>
+          <p>زيارات هذا الأسبوع (جمعة–خميس)</p>
         </div>
       </div>
 

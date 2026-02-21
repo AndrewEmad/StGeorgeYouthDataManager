@@ -5,8 +5,8 @@ namespace YouthDataManager.Reports.Service.Abstractions.DTOs;
 
 public record ServantDashboardDto(
     int TotalStudents,
-    int CallsToday,
-    int VisitsToday,
+    int CallsThisWeek,
+    int VisitsThisWeek,
     int StudentsNeedingFollowUp,
     int StudentsNotContacted
 );

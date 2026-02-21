@@ -80,6 +80,7 @@
   background: var(--glass);
   border: 1px solid var(--glass-border);
   border-radius: 16px;
+  margin-top: 180px;
 }
 
 .filters-title {

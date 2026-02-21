@@ -1,15 +1,22 @@
 <div class="reminders-wrapper">
+  <nav class="glass-card main-nav reminders-nav">
+    <a routerLink="/dashboard" class="btn-back">
+      <span class="material-icons">arrow_forward</span>
+    </a>
+  </nav>
   <main class="container">
     <header class="animate-fade">
       <h1>تذكيرات المتابعة</h1>
-      <p class="text-muted">التذكيرات تعمل عند فتح التطبيق. اضبط وقتاً وأيام الأسبوع لكل تذكير.</p>
+      <p class="text-muted">اضبط وقتاً وأيام الأسبوع لكل تذكير.</p>
     </header>
 
     <section class="glass-card reminders-section">
       <h2>الإشعارات</h2>
       @if (!permissionGranted && !permissionDenied) {
         <p class="section-msg">للحصول على تذكيرات، يرجى السماح بالإشعارات.</p>
-        <button type="button" class="btn-primary" (click)="requestPermission()">تفعيل التذكيرات</button>
+        <button type="button" class="btn-primary" (click)="requestPermission()">
+          تفعيل التذكيرات
+        </button>
       }
       @if (permissionDenied) {
         <p class="section-msg">الإشعارات مُرفوضة. يمكنك تفعيلها من إعدادات المتصفح.</p>
@@ -29,13 +36,26 @@
         <div class="form-group">
           <label>الأيام</label>
           <div class="days-row">
-            <label class="day-check"><input type="checkbox" [checked]="allDaysChecked" (change)="toggleAllDays()" /> كل الأيام</label>
+            <label class="day-check"
+              ><input type="checkbox" [checked]="allDaysChecked" (change)="toggleAllDays()" /> كل
+              الأيام</label
+            >
             @for (i of dayNumbers; track i) {
-              <label class="day-check"><input type="checkbox" [checked]="isDaySelected(i)" (change)="toggleDay(i)" /> {{ dayNames[i] }}</label>
+              <label class="day-check"
+                ><input type="checkbox" [checked]="isDaySelected(i)" (change)="toggleDay(i)" />
+                {{ dayNames[i] }}</label
+              >
             }
           </div>
         </div>
-        <button type="button" class="btn-primary" (click)="addSlot()" [disabled]="(allDaysChecked ? 7 : newDays.length) === 0">إضافة</button>
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="addSlot()"
+          [disabled]="(allDaysChecked ? 7 : newDays.length) === 0"
+        >
+          إضافة
+        </button>
       </div>
     </section>
 

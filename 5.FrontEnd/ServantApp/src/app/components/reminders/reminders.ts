@@ -1,14 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { ReminderService, ReminderSlot } from '../../services/reminder.service';
+import { AuthService } from '../../services/auth.service';
 
 const DAY_NAMES = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
 @Component({
   selector: 'app-reminders',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './reminders.html',
   styleUrls: ['./reminders.css']
 })
@@ -22,7 +24,14 @@ export class RemindersComponent implements OnInit {
   readonly dayNames = DAY_NAMES;
   readonly dayNumbers = [0, 1, 2, 3, 4, 5, 6];
 
-  constructor(public reminderService: ReminderService) {}
+  constructor(
+    public reminderService: ReminderService,
+    private authService: AuthService
+  ) {}
+
+  logout(): void {
+    this.authService.logout();
+  }
 
   ngOnInit(): void {
     this.loadSlots();

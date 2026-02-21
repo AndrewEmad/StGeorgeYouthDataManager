@@ -1,5 +1,42 @@
 .profile-wrapper {
   padding-bottom: 24px;
+  padding-top: 72px;
+}
+
+.profile-wrapper .profile-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  margin: 0;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  border-radius: 0;
+  border-bottom: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.profile-wrapper .btn-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.profile-wrapper .btn-back:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.profile-wrapper .btn-back .material-icons {
+  font-size: 24px;
 }
 
 .profile-wrapper .container {

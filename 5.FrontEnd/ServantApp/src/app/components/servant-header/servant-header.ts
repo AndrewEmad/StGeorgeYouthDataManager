@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -11,14 +11,7 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./servant-header.css']
 })
 export class ServantHeaderComponent {
-  constructor(
-    public authService: AuthService,
-    private router: Router
-  ) {}
-
-  get isProfilePage(): boolean {
-    return this.router.url.includes('/profile');
-  }
+  constructor(public authService: AuthService) {}
 
   get servantName(): string {
     return this.authService.currentUser()?.fullName ?? '';

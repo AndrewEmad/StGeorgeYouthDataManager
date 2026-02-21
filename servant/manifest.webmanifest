@@ -5,22 +5,22 @@
   "theme_color": "#818cf8",
   "background_color": "#0f172a",
   "display": "standalone",
-  "scope": "/",
-  "start_url": "/",
+  "scope": "https://andrewemad.github.io/StGeorgeYouthDataManager/servant/#/",
+  "start_url": "https://andrewemad.github.io/StGeorgeYouthDataManager/servant/#/",
   "orientation": "any",
   "lang": "ar",
   "dir": "rtl",
   "icons": [
     {
-      "src": "favicon.png",
+      "src": "app.ico",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/x-icon",
       "purpose": "any maskable"
     },
     {
-      "src": "favicon.png",
+      "src": "app.ico",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/x-icon",
       "purpose": "any maskable"
     }
   ]

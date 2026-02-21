@@ -58,10 +58,6 @@ export class AddToHomeScreenComponent implements OnInit, OnDestroy {
     this.deferredPrompt.prompt();
     const { outcome } = await this.deferredPrompt.userChoice;
     this.deferredPrompt = null;
-    this.show = false;
-  }
-
-  dismiss() {
-    this.show = false;
+    if (outcome === 'accepted') this.show = false;
   }
 }

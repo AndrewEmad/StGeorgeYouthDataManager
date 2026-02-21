@@ -33,29 +33,6 @@
   font-size: 24px;
 }
 
-.fab-close {
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 50%;
-  background: var(--glass, rgba(255, 255, 255, 0.08));
-  color: var(--text-muted, #94a3b8);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s, color 0.2s;
-}
-
-.fab-close:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--text-main, #f8fafc);
-}
-
-.fab-close .material-icons {
-  font-size: 20px;
-}
-
 @media (max-width: 480px) {
   .fab-label {
     display: none;

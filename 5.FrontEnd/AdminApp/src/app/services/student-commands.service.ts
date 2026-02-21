@@ -16,6 +16,20 @@ export interface CreateStudentRequest {
   birthDate?: string | null; // ISO date string for API
 }
 
+export interface UpdateStudentRequest {
+  id: string;
+  fullName: string;
+  phone: string;
+  address?: string | null;
+  area?: string | null;
+  college?: string | null;
+  academicYear?: string | null;
+  confessionFather?: string | null;
+  gender: number;
+  servantId?: string | null;
+  birthDate?: string | null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -42,6 +56,23 @@ export class StudentCommandsService {
 
   assignToServant(studentId: string, servantId: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/${studentId}/assign/${servantId}`, {});
+  }
+
+  update(request: UpdateStudentRequest): Observable<void> {
+    const body = {
+      id: request.id,
+      fullName: request.fullName,
+      phone: request.phone,
+      address: request.address ?? null,
+      area: request.area ?? null,
+      college: request.college ?? null,
+      academicYear: request.academicYear ?? null,
+      confessionFather: request.confessionFather ?? null,
+      gender: Number(request.gender) ?? 0,
+      servantId: request.servantId ?? null,
+      birthDate: request.birthDate || null
+    };
+    return this.http.put<void>(`${this.apiUrl}/${request.id}`, body);
   }
 
   delete(id: string): Observable<void> {

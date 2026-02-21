@@ -1,0 +1,75 @@
+.student-addition-requests-page {
+  padding: 24px;
+}
+
+.page-header {
+  margin-bottom: 28px;
+}
+
+.page-header h1 {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+
+.requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.request-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px;
+}
+
+.request-info h3 {
+  font-size: 1.1rem;
+  margin-bottom: 6px;
+}
+
+.request-info p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.request-info .date {
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+.request-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-outline.danger {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text-muted);
+}
+
+.empty-state .material-icons {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.loader-container {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.error-msg {
+  color: var(--error);
+  margin-bottom: 16px;
+}

@@ -5,7 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { StudentQueriesService } from '../../../services/student-queries.service';
 import { UsersService, User } from '../../../services/users.service';
-import { StudentCommandsService, CreateStudentRequest } from '../../../services/student-commands.service';
+import { StudentCommandsService, CreateStudentRequest, UpdateStudentRequest } from '../../../services/student-commands.service';
 
 @Component({
   selector: 'app-student-list-admin',
@@ -315,6 +315,30 @@ export class StudentListAdminComponent implements OnInit {
 
   onAssign() {
     if (!this.targetServantId) return;
+
+    if (this.targetServantId === '_none') {
+      const req: UpdateStudentRequest = {
+        id: this.selectedStudent.id,
+        fullName: this.selectedStudent.fullName,
+        phone: this.selectedStudent.phone,
+        address: this.selectedStudent.address ?? null,
+        area: this.selectedStudent.area ?? null,
+        college: this.selectedStudent.college ?? null,
+        academicYear: this.selectedStudent.academicYear ?? null,
+        confessionFather: this.selectedStudent.confessionFather ?? null,
+        gender: this.selectedStudent.gender ?? 0,
+        servantId: null,
+        birthDate: this.selectedStudent.birthDate || null
+      };
+      this.studentCommands.update(req).subscribe({
+        next: () => {
+          this.showAssignModal = false;
+          this.loadData();
+        },
+        error: (err) => alert('خطأ: ' + (err.error?.message || 'فشل إلغاء التخصيص'))
+      });
+      return;
+    }
 
     this.studentCommands.assignToServant(this.selectedStudent.id, this.targetServantId).subscribe({
       next: () => {

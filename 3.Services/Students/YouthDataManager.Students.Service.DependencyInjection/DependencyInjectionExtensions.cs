@@ -26,6 +26,7 @@ public static class DependencyInjectionExtensions
             .AddTransient<IStudentCommandsService, StudentCommandsService>()
             .AddTransient<IStudentRemovalRequestService, StudentRemovalRequestService>()
             .AddTransient<IStudentAssignmentRequestService, StudentAssignmentRequestService>()
+            .AddTransient<IStudentAdditionRequestService, StudentAdditionRequestService>()
             .AddTransient<IAttendanceService, AttendanceService>();
     }
 

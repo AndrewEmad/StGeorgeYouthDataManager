@@ -10,6 +10,7 @@ import { StudentDetailPage } from './pages/students/student-detail.page';
 import { BackupsPage } from './pages/backups/backups.page';
 import { RemovalRequestsPage } from './pages/removal-requests/removal-requests.page';
 import { AssignmentRequestsPage } from './pages/assignment-requests/assignment-requests.page';
+import { StudentAdditionRequestsPage } from './pages/student-addition-requests/student-addition-requests.page';
 import { ReportsPage } from './pages/reports/reports.page';
 import { ServantFollowUpPage } from './pages/reports/servant-follow-up.page';
 import { ServantActivityReportPage } from './pages/reports/servant-activity-report.page';
@@ -38,6 +39,7 @@ export const routes: Routes = [
       { path: 'students', component: StudentsPage },
       { path: 'removal-requests', component: RemovalRequestsPage },
       { path: 'assignment-requests', component: AssignmentRequestsPage },
+      { path: 'student-addition-requests', component: StudentAdditionRequestsPage },
       {
         path: 'reports',
         component: ReportsPage,

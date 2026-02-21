@@ -1,14 +1,21 @@
 .profile-wrapper {
   padding-bottom: 50px;
+  padding-top: 72px;
 }
 
 .profile-wrapper .main-nav {
-  margin: 20px;
-  padding: 15px 30px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  margin: 0;
+  padding: 15px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-radius: 16px;
+  border-radius: 0;
+  border-bottom: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
 }
 
 .profile-wrapper .user-info {

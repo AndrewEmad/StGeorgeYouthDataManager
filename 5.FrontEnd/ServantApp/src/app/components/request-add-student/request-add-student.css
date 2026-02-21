@@ -1,0 +1,111 @@
+.request-add-student-container {
+  padding: 20px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.request-add-student-container .form-card {
+  padding: 28px;
+}
+
+.form-header {
+  margin-bottom: 24px;
+}
+
+.form-header .btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  text-decoration: none;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.form-header .btn-back:hover {
+  color: var(--primary);
+}
+
+.form-header h1 {
+  font-size: 1.4rem;
+  margin-bottom: 6px;
+}
+
+.form-header .text-muted {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px;
+}
+
+.form-group {
+  text-align: right;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.form-group.required label::after {
+  content: ' *';
+  color: var(--error);
+}
+
+.form-group .form-input {
+  width: 100%;
+}
+
+.form-group textarea.form-input {
+  resize: vertical;
+  min-height: 72px;
+}
+
+.error-msg {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--error);
+  padding: 12px;
+  border-radius: 8px;
+  margin: 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  text-align: right;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.form-actions .spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: ras-spin 1s ease-in-out infinite;
+}
+
+@keyframes ras-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 560px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

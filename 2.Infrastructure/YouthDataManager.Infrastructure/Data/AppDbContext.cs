@@ -19,6 +19,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
     public DbSet<ActivityLog> ActivityLogs => Set<ActivityLog>();
     public DbSet<StudentRemovalRequest> StudentRemovalRequests => Set<StudentRemovalRequest>();
     public DbSet<StudentAssignmentRequest> StudentAssignmentRequests => Set<StudentAssignmentRequest>();
+    public DbSet<StudentAdditionRequest> StudentAdditionRequests => Set<StudentAdditionRequest>();
     public DbSet<StudentAttendance> StudentAttendances => Set<StudentAttendance>();
     public DbSet<ServantAttendance> ServantAttendances => Set<ServantAttendance>();
     public DbSet<StudentEditLog> StudentEditLogs => Set<StudentEditLog>();

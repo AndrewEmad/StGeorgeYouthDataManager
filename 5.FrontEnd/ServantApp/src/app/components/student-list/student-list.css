@@ -1,10 +1,22 @@
 .list-header {
-  margin: 40px 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  margin: 0;
+  padding: 16px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 20px;
+  background: var(--bg-darker, #020617);
+  border-bottom: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+}
+
+.student-list .container {
+  padding-top: 100px;
 }
 
 .header-main {
@@ -60,6 +72,58 @@
 
 .search-btn {
   flex-shrink: 0;
+}
+
+.filters-section {
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+}
+
+.filters-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: var(--text-muted);
+}
+
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.filter-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.filter-select {
+  min-width: 140px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  background: var(--bg-dark, #0f172a);
+  color: var(--text-main);
+}
+
+@media (max-width: 600px) {
+  .filters-row {
+    flex-direction: column;
+  }
+  .filter-label {
+    width: 100%;
+  }
+  .filter-select {
+    width: 100%;
+    min-width: 0;
+  }
 }
 
 .list-section {

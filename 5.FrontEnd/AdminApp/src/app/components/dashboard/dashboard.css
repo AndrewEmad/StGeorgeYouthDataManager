@@ -5,7 +5,16 @@
   min-height: 100vh;
 }
 
+.main-layout {
+  padding-top: 56px;
+}
+
 .top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
   flex-shrink: 0;
   height: 56px;
   display: flex;

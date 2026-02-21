@@ -231,7 +231,7 @@ public class StudentQueriesService : IStudentQueriesService
         }
     }
 
-    public async Task<ServiceResult<PagedResult<ServantStudentPageItemDto>>> GetPagedForServant(Guid servantId, int page, int pageSize, string? search)
+    public async Task<ServiceResult<PagedResult<ServantStudentPageItemDto>>> GetPagedForServant(Guid servantId, int page, int pageSize, string? search, string? area = null, string? academicYear = null, int? gender = null)
     {
         try
         {
@@ -239,7 +239,7 @@ public class StudentQueriesService : IStudentQueriesService
             if (pageSize > 50) pageSize = 50;
             if (pageSize < 1) pageSize = 10;
 
-            var (pageData, totalCount) = await _repository.GetPagedForServantCombinedAsync(servantId, search, page, pageSize);
+            var (pageData, totalCount) = await _repository.GetPagedForServantCombinedAsync(servantId, search, area, academicYear, gender, page, pageSize);
             if (pageData.Count == 0)
                 return ServiceResult<PagedResult<ServantStudentPageItemDto>>.Success(new PagedResult<ServantStudentPageItemDto>(new List<ServantStudentPageItemDto>(), totalCount, page, pageSize));
 

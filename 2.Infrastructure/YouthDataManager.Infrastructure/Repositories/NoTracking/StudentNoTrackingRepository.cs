@@ -95,7 +95,7 @@ public class StudentNoTrackingRepository : IStudentNoTrackingRepository
         return (items, totalCount);
     }
 
-    public async Task<(IReadOnlyList<(Guid Id, int Segment)>, int TotalCount)> GetPagedForServantCombinedAsync(Guid servantId, string? search, int page, int pageSize)
+    public async Task<(IReadOnlyList<(Guid Id, int Segment)>, int TotalCount)> GetPagedForServantCombinedAsync(Guid servantId, string? search, string? area, string? academicYear, int? gender, int page, int pageSize)
     {
         var searchLower = search?.Trim().ToLower();
         var assigned = _context.Students.AsNoTracking().Where(s => s.ServantId == servantId);
@@ -109,6 +109,27 @@ public class StudentNoTrackingRepository : IStudentNoTrackingRepository
             assigned = assigned.Where(s => (s.FullName != null && s.FullName.ToLower().Contains(searchLower)) || (s.Phone != null && s.Phone.ToLower().Contains(searchLower)) || (s.Area != null && s.Area.ToLower().Contains(searchLower)) || (s.College != null && s.College.ToLower().Contains(searchLower)));
             requested = requested.Where(s => (s.FullName != null && s.FullName.ToLower().Contains(searchLower)) || (s.Phone != null && s.Phone.ToLower().Contains(searchLower)) || (s.Area != null && s.Area.ToLower().Contains(searchLower)) || (s.College != null && s.College.ToLower().Contains(searchLower)));
             unassigned = unassigned.Where(s => (s.FullName != null && s.FullName.ToLower().Contains(searchLower)) || (s.Phone != null && s.Phone.ToLower().Contains(searchLower)) || (s.Area != null && s.Area.ToLower().Contains(searchLower)) || (s.College != null && s.College.ToLower().Contains(searchLower)));
+        }
+        if (!string.IsNullOrWhiteSpace(area))
+        {
+            var areaTrim = area.Trim();
+            assigned = assigned.Where(s => s.Area != null && s.Area == areaTrim);
+            requested = requested.Where(s => s.Area != null && s.Area == areaTrim);
+            unassigned = unassigned.Where(s => s.Area != null && s.Area == areaTrim);
+        }
+        if (!string.IsNullOrWhiteSpace(academicYear))
+        {
+            var yearTrim = academicYear.Trim();
+            assigned = assigned.Where(s => s.AcademicYear != null && s.AcademicYear == yearTrim);
+            requested = requested.Where(s => s.AcademicYear != null && s.AcademicYear == yearTrim);
+            unassigned = unassigned.Where(s => s.AcademicYear != null && s.AcademicYear == yearTrim);
+        }
+        if (gender.HasValue)
+        {
+            var g = (Gender)gender.Value;
+            assigned = assigned.Where(s => s.Gender == g);
+            requested = requested.Where(s => s.Gender == g);
+            unassigned = unassigned.Where(s => s.Gender == g);
         }
 
         var q1 = assigned.Select(s => new { s.Id, s.FullName, Seg = 1 });

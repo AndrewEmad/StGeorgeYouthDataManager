@@ -47,11 +47,13 @@ public record StudentDto(
 public record CreateStudentRequest(
     string FullName,
     string Phone,
+    string? SecondaryPhone,
     string? Address,
     string? Area,
     string? College,
     string? AcademicYear,
     string? ConfessionFather,
+    string? Notes,
     YouthDataManager.Domain.Enums.Gender Gender,
     Guid? ServantId,
     DateTime? BirthDate
@@ -100,6 +102,37 @@ public record StudentAssignmentRequestDto(
 );
 
 public record CreateAssignmentRequestDto(Guid StudentId);
+
+// Addition request (servant requests to add a new student; admin approves → create student and assign to servant)
+public record StudentAdditionRequestDto(
+    Guid Id,
+    string FullName,
+    string Phone,
+    string? SecondaryPhone,
+    string? Area,
+    string? College,
+    string? AcademicYear,
+    string? Notes,
+    int Gender,
+    Guid RequestedByUserId,
+    string RequestedByUserName,
+    DateTime RequestedAt,
+    string Status
+);
+
+public record CreateStudentAdditionRequestDto(
+    string FullName,
+    string Phone,
+    string? SecondaryPhone,
+    string? Address,
+    string? Area,
+    string? College,
+    string? AcademicYear,
+    string? ConfessionFather,
+    string? Notes,
+    int Gender,
+    DateTime? BirthDate
+);
 
 public record StudentEditLogDto(
     Guid Id,

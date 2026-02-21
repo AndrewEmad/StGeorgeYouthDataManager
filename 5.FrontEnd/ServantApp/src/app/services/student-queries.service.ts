@@ -49,12 +49,23 @@ export class StudentQueriesService {
     );
   }
 
-  getPagedForServant(params: { page: number; pageSize: number; search?: string }): Observable<{ items: Array<{ student: any; segment: string }>; totalCount: number; page: number; pageSize: number }> {
+  getPagedForServant(params: { page: number; pageSize: number; search?: string; area?: string; academicYear?: string; gender?: number }): Observable<{ items: Array<{ student: any; segment: string }>; totalCount: number; page: number; pageSize: number }> {
     const httpParams: Record<string, string> = { page: String(params.page), pageSize: String(params.pageSize) };
     if (params.search) httpParams['search'] = params.search;
+    if (params.area) httpParams['area'] = params.area;
+    if (params.academicYear) httpParams['academicYear'] = params.academicYear;
+    if (params.gender !== undefined && params.gender !== null) httpParams['gender'] = String(params.gender);
     return this.http.get<{ items: Array<{ student: any; segment: string }>; totalCount: number; page: number; pageSize: number }>(
       `${this.apiUrl}/students-for-servant`,
       { params: httpParams }
     );
+  }
+
+  getDistinctAreas(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/areas`);
+  }
+
+  getDistinctAcademicYears(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/academic-years`);
   }
 }

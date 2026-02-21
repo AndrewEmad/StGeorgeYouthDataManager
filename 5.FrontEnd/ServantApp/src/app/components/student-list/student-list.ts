@@ -24,8 +24,18 @@ export class StudentListComponent implements OnInit {
   page = 1;
   pageSize = 20;
   searchTerm = '';
+  filterArea = '';
+  filterAcademicYear = '';
+  filterGender: number | null = null;
+  areas: string[] = [];
+  academicYears: string[] = [];
   loading = true;
   requestingId: string | null = null;
+
+  readonly genderOptions: { value: number; label: string }[] = [
+    { value: 0, label: 'ذكر' },
+    { value: 1, label: 'أنثى' }
+  ];
 
   constructor(
     private studentQueriesService: StudentQueriesService,
@@ -42,6 +52,8 @@ export class StudentListComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.studentQueriesService.getDistinctAreas().subscribe({ next: (r) => { this.areas = Array.isArray(r) ? r : []; } });
+    this.studentQueriesService.getDistinctAcademicYears().subscribe({ next: (r) => { this.academicYears = Array.isArray(r) ? r : []; } });
     this.loadPage();
   }
 
@@ -57,7 +69,10 @@ export class StudentListComponent implements OnInit {
     this.studentQueriesService.getPagedForServant({
       page: this.page,
       pageSize: this.pageSize,
-      search: this.searchTerm.trim() || undefined
+      search: this.searchTerm.trim() || undefined,
+      area: this.filterArea.trim() || undefined,
+      academicYear: this.filterAcademicYear.trim() || undefined,
+      gender: this.filterGender ?? undefined
     }).subscribe({
       next: (res) => {
         this.items = res.items ?? [];
@@ -75,6 +90,19 @@ export class StudentListComponent implements OnInit {
   }
 
   onSearch() {
+    this.page = 1;
+    this.loadPage();
+  }
+
+  onApplyFilters() {
+    this.page = 1;
+    this.loadPage();
+  }
+
+  clearFilters() {
+    this.filterArea = '';
+    this.filterAcademicYear = '';
+    this.filterGender = null;
     this.page = 1;
     this.loadPage();
   }

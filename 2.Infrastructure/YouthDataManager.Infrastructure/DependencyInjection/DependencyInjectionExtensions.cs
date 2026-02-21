@@ -43,6 +43,7 @@ public static class DependencyInjectionExtensions
             .AddTransient<IHomeVisitRepository, HomeVisitRepository>()
             .AddTransient<IStudentRemovalRequestRepository, StudentRemovalRequestRepository>()
             .AddTransient<IStudentAssignmentRequestRepository, StudentAssignmentRequestRepository>()
+            .AddTransient<IStudentAdditionRequestRepository, StudentAdditionRequestRepository>()
             .AddTransient<IStudentAttendanceRepository, StudentAttendanceRepository>()
             .AddTransient<IServantAttendanceRepository, ServantAttendanceRepository>()
             .AddTransient<IStudentEditLogRepository, StudentEditLogRepository>()

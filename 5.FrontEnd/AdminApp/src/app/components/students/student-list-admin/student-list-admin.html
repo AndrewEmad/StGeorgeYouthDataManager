@@ -220,16 +220,17 @@
     <p>تخصيص المخدوم: <strong>{{selectedStudent?.fullName}}</strong></p>
     
     <div class="form-group mt-4">
-      <label>اختر الخادم</label>
+      <label>الخادم</label>
       <select [(ngModel)]="targetServantId" class="form-input">
         <option value="">-- اختر خادماً --</option>
+        <option value="_none">— إلغاء التخصيص (بدون خادم) —</option>
         <option *ngFor="let serv of servants" [value]="serv.id">{{serv.fullName}}</option>
       </select>
     </div>
 
     <div class="modal-actions">
       <button class="btn-outline" (click)="showAssignModal = false">إلغاء</button>
-      <button class="btn-primary" [disabled]="!targetServantId" (click)="onAssign()">تأكيد التخصيص</button>
+      <button class="btn-primary" [disabled]="!targetServantId" (click)="onAssign()">{{ targetServantId === '_none' ? 'حفظ (إلغاء التخصيص)' : 'تأكيد التخصيص' }}</button>
     </div>
   </div>
 </div>

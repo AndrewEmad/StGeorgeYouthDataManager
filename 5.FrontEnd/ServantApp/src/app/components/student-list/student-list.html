@@ -1,10 +1,11 @@
-<div class="container animate-fade">
+<div class="container student-list animate-fade">
   <header class="list-header">
     <div class="header-main">
       <a routerLink="/dashboard" class="btn-back">
         <span class="material-icons">arrow_forward</span>
       </a>
       <h1>قائمة المخدومين</h1>
+      <a routerLink="/request-add-student" class="btn-primary sm">طلب إضافة مخدوم</a>
     </div>
     <div class="search-box">
       <div class="search-input-wrap">
@@ -19,6 +20,35 @@
       <button type="button" class="btn-primary sm search-btn" (click)="onSearch()">بحث</button>
     </div>
   </header>
+
+  <section class="filters-section">
+    <h3 class="filters-title">فلاتر متقدمة</h3>
+    <div class="filters-row">
+      <label class="filter-label">
+        <span>المنطقة</span>
+        <select class="form-input filter-select" [(ngModel)]="filterArea">
+          <option value="">الكل</option>
+          <option *ngFor="let a of areas" [value]="a">{{ a }}</option>
+        </select>
+      </label>
+      <label class="filter-label">
+        <span>السنة الدراسية</span>
+        <select class="form-input filter-select" [(ngModel)]="filterAcademicYear">
+          <option value="">الكل</option>
+          <option *ngFor="let y of academicYears" [value]="y">{{ y }}</option>
+        </select>
+      </label>
+      <label class="filter-label">
+        <span>النوع</span>
+        <select class="form-input filter-select" [(ngModel)]="filterGender">
+          <option [ngValue]="null">الكل</option>
+          <option *ngFor="let g of genderOptions" [ngValue]="g.value">{{ g.label }}</option>
+        </select>
+      </label>
+      <button type="button" class="btn-primary sm" (click)="onApplyFilters()">تطبيق</button>
+      <button type="button" class="btn-outline sm" (click)="clearFilters()">مسح الفلاتر</button>
+    </div>
+  </section>
 
   <div *ngIf="loading" class="loader-container">
     <div class="spinner"></div>

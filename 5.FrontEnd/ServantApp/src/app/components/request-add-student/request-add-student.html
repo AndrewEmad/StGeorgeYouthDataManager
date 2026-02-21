@@ -1,0 +1,75 @@
+<div class="request-add-student-container">
+  <div class="glass-card form-card animate-fade">
+    <div class="form-header">
+      <a routerLink="/students" class="btn-back">
+        <span class="material-icons">arrow_forward</span>
+      </a>
+      <h1>طلب إضافة مخدوم</h1>
+      <p class="text-muted">أدخل بيانات المخدوم وستتم مراجعته من الإدارة</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #f="ngForm">
+      <div class="form-grid">
+        <div class="form-group required">
+          <label>الاسم الكامل</label>
+          <input type="text" [(ngModel)]="dto.fullName" name="fullName" class="form-input" placeholder="الاسم الكامل" required />
+        </div>
+        <div class="form-group required">
+          <label>رقم الهاتف</label>
+          <input type="tel" [(ngModel)]="dto.phone" name="phone" class="form-input" placeholder="رقم الهاتف" required />
+        </div>
+        <div class="form-group">
+          <label>هاتف بديل</label>
+          <input type="tel" [(ngModel)]="dto.secondaryPhone" name="secondaryPhone" class="form-input" placeholder="اختياري" />
+        </div>
+        <div class="form-group">
+          <label>النوع</label>
+          <select [(ngModel)]="dto.gender" name="gender" class="form-input">
+            <option *ngFor="let g of genderOptions" [value]="g.value">{{ g.label }}</option>
+          </select>
+        </div>
+        <div class="form-group full-width">
+          <label>العنوان</label>
+          <input type="text" [(ngModel)]="dto.address" name="address" class="form-input" placeholder="العنوان" />
+        </div>
+        <div class="form-group">
+          <label>المنطقة</label>
+          <input type="text" [(ngModel)]="dto.area" name="area" class="form-input" placeholder="المنطقة" />
+        </div>
+        <div class="form-group">
+          <label>الكلية</label>
+          <input type="text" [(ngModel)]="dto.college" name="college" class="form-input" placeholder="الكلية" />
+        </div>
+        <div class="form-group">
+          <label>السنة الدراسية</label>
+          <input type="text" [(ngModel)]="dto.academicYear" name="academicYear" class="form-input" placeholder="مثال: أولى" />
+        </div>
+        <div class="form-group">
+          <label>تاريخ الميلاد</label>
+          <input type="date" [(ngModel)]="dto.birthDate" name="birthDate" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label>أب الاعتراف</label>
+          <input type="text" [(ngModel)]="dto.confessionFather" name="confessionFather" class="form-input" placeholder="اختياري" />
+        </div>
+        <div class="form-group full-width">
+          <label>ملاحظات</label>
+          <textarea [(ngModel)]="dto.notes" name="notes" class="form-input" rows="3" placeholder="ملاحظات إضافية"></textarea>
+        </div>
+      </div>
+
+      <div *ngIf="error" class="error-msg">
+        <span class="material-icons">error_outline</span>
+        {{ error }}
+      </div>
+
+      <div class="form-actions">
+        <a routerLink="/students" class="btn-outline">إلغاء</a>
+        <button type="submit" class="btn-primary" [disabled]="loading || !dto.fullName?.trim() || !dto.phone?.trim()">
+          <span *ngIf="!loading">إرسال الطلب</span>
+          <span *ngIf="loading" class="spinner"></span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -16,5 +16,5 @@ public interface IStudentQueriesService
     Task<ServiceResult<IEnumerable<string>>> GetDistinctAcademicYears();
     Task<ServiceResult<IEnumerable<StudentEditLogDto>>> GetEditHistory(Guid studentId);
     Task<ServiceResult<PagedResult<UnassignedStudentForServantDto>>> GetUnassignedForServant(Guid servantId, int page, int pageSize);
-    Task<ServiceResult<PagedResult<ServantStudentPageItemDto>>> GetPagedForServant(Guid servantId, int page, int pageSize, string? search);
+    Task<ServiceResult<PagedResult<ServantStudentPageItemDto>>> GetPagedForServant(Guid servantId, int page, int pageSize, string? search, string? area = null, string? academicYear = null, int? gender = null);
 }

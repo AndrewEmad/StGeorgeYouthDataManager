@@ -51,6 +51,10 @@
         <span class="material-icons">person_add</span>
         <span>طلبات التخصيص</span>
       </a>
+      <a routerLink="/dashboard/student-addition-requests" routerLinkActive="active" class="nav-item" (click)="closeSidebar()">
+        <span class="material-icons">person_add_alt_1</span>
+        <span>طلبات إضافة مخدومين</span>
+      </a>
       <a routerLink="/dashboard/reports" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }" class="nav-item" (click)="closeSidebar()">
         <span class="material-icons">assessment</span>
         <span>التقارير</span>

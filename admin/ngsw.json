@@ -1,0 +1,58 @@
+{
+  "configVersion": 1,
+  "timestamp": 1771698404992,
+  "index": "/StGeorgeYouthDataManager/admin/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/StGeorgeYouthDataManager/admin/index.html",
+        "/StGeorgeYouthDataManager/admin/main-QJ2RAHOA.js",
+        "/StGeorgeYouthDataManager/admin/polyfills-5CFQRCPP.js",
+        "/StGeorgeYouthDataManager/admin/styles-7EPVGNKK.css"
+      ],
+      "patterns": []
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [],
+      "patterns": []
+    }
+  ],
+  "dataGroups": [],
+  "hashTable": {
+    "/StGeorgeYouthDataManager/admin/index.html": "588ebc67f16e132ac46562b939c5e26c4f8510a9",
+    "/StGeorgeYouthDataManager/admin/main-QJ2RAHOA.js": "bd78363bbd6085f5740283e2b5d0a9d535eada1a",
+    "/StGeorgeYouthDataManager/admin/polyfills-5CFQRCPP.js": "f2241e9a25858f895ce299d15f6f22e849e2fd72",
+    "/StGeorgeYouthDataManager/admin/styles-7EPVGNKK.css": "9cb9558bad0a95e126952cdecdb3512593dbbf58"
+  },
+  "navigationUrls": [
+    {
+      "positive": true,
+      "regex": "^\\/.*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*\\.[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*\\/.*$"
+    }
+  ],
+  "navigationRequestStrategy": "performance"
+}

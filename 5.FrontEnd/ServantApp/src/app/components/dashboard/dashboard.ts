@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReportsService } from '../../services/reports.service';
-import { AuthService } from '../../services/auth.service';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -14,11 +13,8 @@ import { RouterLink } from '@angular/router';
 export class DashboardComponent implements OnInit {
   stats: any = null;
   loading = true;
-  servantName = '';
 
-  constructor(private reportsService: ReportsService, private authService: AuthService) {
-    this.servantName = this.authService.currentUser()?.fullName || '';
-  }
+  constructor(private reportsService: ReportsService) {}
 
   ngOnInit() {
     this.loadStats();
@@ -31,7 +27,6 @@ export class DashboardComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        // Fallback or mock if API fails
         this.stats = {
           totalStudents: 0,
           callsThisWeek: 0,
@@ -42,9 +37,5 @@ export class DashboardComponent implements OnInit {
         this.loading = false;
       }
     });
-  }
-
-  logout() {
-    this.authService.logout();
   }
 }

@@ -1,19 +1,4 @@
 <div class="profile-wrapper">
-  <nav class="glass-card main-nav">
-    <div class="user-info">
-      <span class="material-icons">account_circle</span>
-      <span>مرحباً، {{ authService.currentUser()?.fullName || '' }}</span>
-    </div>
-    <div class="nav-links">
-      <a routerLink="/dashboard" class="btn-outline">لوحة التحكم</a>
-      <a routerLink="/reminders" class="btn-outline">تذكيرات المتابعة</a>
-      <button (click)="authService.logout()" class="btn-logout">
-        <span>تسجيل الخروج</span>
-        <span class="material-icons">logout</span>
-      </button>
-    </div>
-  </nav>
-
   <main class="container">
     <header class="animate-fade">
       <h1>الملف الشخصي</h1>

@@ -1,0 +1,26 @@
+<nav class="glass-card main-nav">
+  @if (isProfilePage) {
+    <a routerLink="/dashboard" class="btn-back">
+      <span class="material-icons">arrow_forward</span>
+    </a>
+  } @else {
+    <div class="nav-start">
+      <a routerLink="/dashboard" class="btn-back">
+        <span class="material-icons">arrow_forward</span>
+      </a>
+      <a routerLink="/profile" class="user-info link-name">
+        <span class="material-icons">account_circle</span>
+        <span>مرحباً، {{ servantName }}</span>
+      </a>
+    </div>
+    <div class="nav-links">
+      <a routerLink="/reminders" class="btn-icon" title="تذكيرات المتابعة" aria-label="تذكيرات المتابعة">
+        <span class="material-icons">notifications</span>
+      </a>
+      <button type="button" class="btn-logout" (click)="logout()">
+        <span>تسجيل الخروج</span>
+        <span class="material-icons">logout</span>
+      </button>
+    </div>
+  }
+</nav>

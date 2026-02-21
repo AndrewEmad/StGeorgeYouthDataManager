@@ -1,46 +1,5 @@
 .reminders-wrapper {
-  padding-bottom: 50px;
-  padding-top: 72px;
-}
-
-.reminders-wrapper .main-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  margin: 0;
-  padding: 15px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-radius: 0;
-  border-bottom: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
-}
-
-.reminders-wrapper .user-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-weight: 600;
-}
-
-.reminders-wrapper .nav-links {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.reminders-wrapper .btn-logout {
-  background: transparent;
-  border: none;
-  color: var(--error);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 1rem;
+  padding-bottom: 24px;
 }
 
 .reminders-wrapper .container {

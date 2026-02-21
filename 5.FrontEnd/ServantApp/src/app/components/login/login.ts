@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { ReminderService } from '../../services/reminder.service';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +18,11 @@ export class LoginComponent {
   error = '';
   loading = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private reminderService: ReminderService
+  ) {}
 
   onSubmit() {
     if (!this.username || !this.password) return;
@@ -27,6 +32,7 @@ export class LoginComponent {
     
     this.authService.login({ username: this.username, password: this.password }).subscribe({
       next: (res) => {
+        this.reminderService.startChecking();
         this.router.navigate(res.requiresPasswordChange ? ['/change-password'] : ['/dashboard']);
       },
       error: (err) => {

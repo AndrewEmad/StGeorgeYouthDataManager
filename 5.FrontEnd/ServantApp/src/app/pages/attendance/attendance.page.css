@@ -104,6 +104,20 @@
   cursor: pointer;
 }
 
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+}
+
+.page-info {
+  font-size: 0.9rem;
+  color: var(--text-muted, #888);
+}
+
 .loader,
 .empty {
   padding: 24px;

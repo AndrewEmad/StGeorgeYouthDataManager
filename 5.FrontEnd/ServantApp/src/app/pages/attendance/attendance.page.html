@@ -22,10 +22,10 @@
     <div class="list-section">
       <div class="list-header">
         <label class="checkbox-label">
-          <input type="checkbox" [checked]="selectedStudentIds.size === studentList.length && studentList.length > 0" (change)="selectAllStudents()" />
-          تحديد الكل
+          <input type="checkbox" [checked]="allOnPageSelected" (change)="selectAllStudents()" />
+          تحديد الكل (الصفحة الحالية)
         </label>
-        <span class="count">{{ selectedStudentIds.size }} من {{ studentList.length }}</span>
+        <span class="count">{{ selectedStudentIds.size }} محدد من {{ totalCount }}</span>
       </div>
       <div class="list-body">
         <app-loader *ngIf="loading" />
@@ -35,6 +35,13 @@
           <span>{{ s.fullName }}</span>
         </label>
       </div>
+      @if (!loading && totalPages > 1) {
+        <div class="pagination-bar">
+          <button type="button" class="btn-outline sm" [disabled]="page <= 1" (click)="goPrev()">السابق</button>
+          <span class="page-info">صفحة {{ page }} من {{ totalPages }}</span>
+          <button type="button" class="btn-outline sm" [disabled]="page >= totalPages" (click)="goNext()">التالي</button>
+        </div>
+      }
     </div>
 
     <div class="form-actions">

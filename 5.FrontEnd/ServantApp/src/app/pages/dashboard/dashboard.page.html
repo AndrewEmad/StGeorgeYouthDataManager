@@ -47,7 +47,7 @@
             <span class="material-icons">person_add</span>
             <span>طلب إضافة مخدوم</span>
           </a>
-          @if (authService.isSecretary()) {
+          @if (authService.canRecordStudentAttendance()) {
             <a routerLink="/attendance" class="glass-card action-item">
               <span class="material-icons">event_available</span>
               <span>تسجيل الحضور</span>

@@ -6,7 +6,7 @@ export const secretaryGuard = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (authService.isSecretary()) {
+  if (authService.canRecordStudentAttendance()) {
     return true;
   }
   router.navigate(['/dashboard']);

@@ -80,6 +80,15 @@ export class AuthService {
     return this.currentUser()?.role === 'Secretary';
   }
 
+  isManager(): boolean {
+    return this.currentUser()?.role === 'Manager';
+  }
+
+  canRecordStudentAttendance(): boolean {
+    const r = this.currentUser()?.role;
+    return r === 'Secretary' || r === 'Manager';
+  }
+
   isTokenExpired(): boolean {
     const token = localStorage.getItem('token');
     if (!token) return true;

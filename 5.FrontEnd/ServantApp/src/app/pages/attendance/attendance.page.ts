@@ -18,6 +18,7 @@ export class AttendancePage implements OnInit {
   nameFilter = '';
   studentList: { id: string; fullName: string }[] = [];
   selectedStudentIds = new Set<string>();
+  selectedStudentEntries: { id: string; fullName: string }[] = [];
   totalCount = 0;
   page = 1;
   pageSize = 20;
@@ -67,6 +68,7 @@ export class AttendancePage implements OnInit {
             id: it.student?.id ?? it.student?.studentId ?? '',
             fullName: it.student?.fullName ?? ''
           }));
+          this.studentList.sort((a, b) => (a.fullName || '').localeCompare(b.fullName || '', 'ar'));
           this.totalCount = res.totalCount ?? 0;
           this.page = res.page ?? this.page;
           this.pageSize = res.pageSize ?? this.pageSize;
@@ -98,18 +100,32 @@ export class AttendancePage implements OnInit {
     }
   }
 
-  toggleStudent(id: string) {
-    if (this.selectedStudentIds.has(id)) this.selectedStudentIds.delete(id);
-    else this.selectedStudentIds.add(id);
+  toggleStudent(id: string, fullName?: string) {
+    if (this.selectedStudentIds.has(id)) {
+      this.selectedStudentIds.delete(id);
+      this.selectedStudentEntries = this.selectedStudentEntries.filter((e) => e.id !== id);
+    } else {
+      this.selectedStudentIds.add(id);
+      this.selectedStudentEntries = [...this.selectedStudentEntries, { id, fullName: fullName ?? '' }];
+    }
     this.selectedStudentIds = new Set(this.selectedStudentIds);
   }
 
   selectAllStudents() {
     const allOnPageSelected = this.studentList.length > 0 && this.studentList.every((s) => this.selectedStudentIds.has(s.id));
-    if (allOnPageSelected)
-      this.studentList.forEach((s) => this.selectedStudentIds.delete(s.id));
-    else
-      this.studentList.forEach((s) => this.selectedStudentIds.add(s.id));
+    if (allOnPageSelected) {
+      this.studentList.forEach((s) => {
+        this.selectedStudentIds.delete(s.id);
+        this.selectedStudentEntries = this.selectedStudentEntries.filter((e) => e.id !== s.id);
+      });
+    } else {
+      this.studentList.forEach((s) => {
+        if (!this.selectedStudentIds.has(s.id)) {
+          this.selectedStudentIds.add(s.id);
+          this.selectedStudentEntries = [...this.selectedStudentEntries, { id: s.id, fullName: s.fullName }];
+        }
+      });
+    }
     this.selectedStudentIds = new Set(this.selectedStudentIds);
   }
 

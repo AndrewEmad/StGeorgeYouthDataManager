@@ -23,6 +23,11 @@ export class AttendancePage implements OnInit {
   servantList: User[] = [];
   selectedStudentIds = new Set<string>();
   selectedServantIds = new Set<string>();
+  selectedStudentEntries: { id: string; fullName: string }[] = [];
+  selectedServantEntries: { id: string; fullName: string }[] = [];
+  page = 1;
+  pageSize = 20;
+  totalCount = 0;
   loading = false;
   saving = false;
   error = '';
@@ -34,31 +39,50 @@ export class AttendancePage implements OnInit {
     private usersService: UsersService
   ) {}
 
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+  }
+
+  get allOnPageSelected(): boolean {
+    if (this.mode === 'students')
+      return this.studentList.length > 0 && this.studentList.every((s) => this.selectedStudentIds.has(s.id));
+    return this.servantList.length > 0 && this.servantList.every((s) => this.selectedServantIds.has(s.id));
+  }
+
   ngOnInit() {
-    this.load();
+    this.loadPage();
   }
 
   setMode(m: Mode) {
     this.mode = m;
     this.selectedStudentIds.clear();
     this.selectedServantIds.clear();
-    this.load();
+    this.selectedStudentEntries = [];
+    this.selectedServantEntries = [];
+    this.page = 1;
+    this.loadPage();
   }
 
-  load() {
+  loadPage() {
     this.loading = true;
     this.error = '';
     this.success = '';
     if (this.mode === 'students') {
       this.studentQueries
         .getPaged({
-          page: 1,
-          pageSize: 500,
-          search: this.nameFilter.trim() || undefined
+          page: this.page,
+          pageSize: this.pageSize,
+          search: this.nameFilter.trim() || undefined,
+          sortBy: 'fullName',
+          sortDesc: false
         })
         .subscribe({
           next: (res) => {
             this.studentList = (res.items || []).map((s: any) => ({ id: s.id, fullName: s.fullName || '' }));
+            this.studentList.sort((a, b) => (a.fullName || '').localeCompare(b.fullName || '', 'ar'));
+            this.totalCount = res.totalCount ?? 0;
+            this.page = res.page ?? this.page;
+            this.pageSize = res.pageSize ?? this.pageSize;
             this.loading = false;
           },
           error: () => {
@@ -68,10 +92,13 @@ export class AttendancePage implements OnInit {
         });
     } else {
       this.usersService
-        .getPaged({ page: 1, pageSize: 500, search: this.nameFilter.trim() || undefined })
+        .getPaged({ page: this.page, pageSize: this.pageSize, search: this.nameFilter.trim() || undefined })
         .subscribe({
           next: (res) => {
-            this.servantList = res.items ?? [];
+            this.servantList = (res.items ?? []).slice().sort((a, b) => (a.fullName || '').localeCompare(b.fullName || '', 'ar'));
+            this.totalCount = res.totalCount ?? 0;
+            this.page = res.page ?? this.page;
+            this.pageSize = res.pageSize ?? this.pageSize;
             this.loading = false;
           },
           error: () => {
@@ -83,32 +110,79 @@ export class AttendancePage implements OnInit {
   }
 
   onFilterChange() {
-    this.load();
+    this.page = 1;
+    this.loadPage();
   }
 
-  toggleStudent(id: string) {
-    if (this.selectedStudentIds.has(id)) this.selectedStudentIds.delete(id);
-    else this.selectedStudentIds.add(id);
+  goPrev() {
+    if (this.page > 1) {
+      this.page--;
+      this.loadPage();
+    }
+  }
+
+  goNext() {
+    if (this.page < this.totalPages) {
+      this.page++;
+      this.loadPage();
+    }
+  }
+
+  toggleStudent(id: string, fullName?: string) {
+    if (this.selectedStudentIds.has(id)) {
+      this.selectedStudentIds.delete(id);
+      this.selectedStudentEntries = this.selectedStudentEntries.filter((e) => e.id !== id);
+    } else {
+      this.selectedStudentIds.add(id);
+      this.selectedStudentEntries = [...this.selectedStudentEntries, { id, fullName: fullName ?? '' }];
+    }
     this.selectedStudentIds = new Set(this.selectedStudentIds);
   }
 
-  toggleServant(id: string) {
-    if (this.selectedServantIds.has(id)) this.selectedServantIds.delete(id);
-    else this.selectedServantIds.add(id);
+  toggleServant(id: string, fullName?: string) {
+    if (this.selectedServantIds.has(id)) {
+      this.selectedServantIds.delete(id);
+      this.selectedServantEntries = this.selectedServantEntries.filter((e) => e.id !== id);
+    } else {
+      this.selectedServantIds.add(id);
+      this.selectedServantEntries = [...this.selectedServantEntries, { id, fullName: fullName ?? '' }];
+    }
     this.selectedServantIds = new Set(this.selectedServantIds);
   }
 
   selectAllStudents() {
-    if (this.selectedStudentIds.size === this.studentList.length)
-      this.selectedStudentIds.clear();
-    else this.studentList.forEach((s) => this.selectedStudentIds.add(s.id));
+    const allSelected = this.studentList.length > 0 && this.studentList.every((s) => this.selectedStudentIds.has(s.id));
+    if (allSelected) {
+      this.studentList.forEach((s) => {
+        this.selectedStudentIds.delete(s.id);
+        this.selectedStudentEntries = this.selectedStudentEntries.filter((e) => e.id !== s.id);
+      });
+    } else {
+      this.studentList.forEach((s) => {
+        if (!this.selectedStudentIds.has(s.id)) {
+          this.selectedStudentIds.add(s.id);
+          this.selectedStudentEntries = [...this.selectedStudentEntries, { id: s.id, fullName: s.fullName }];
+        }
+      });
+    }
     this.selectedStudentIds = new Set(this.selectedStudentIds);
   }
 
   selectAllServants() {
-    if (this.selectedServantIds.size === this.servantList.length)
-      this.selectedServantIds.clear();
-    else this.servantList.forEach((s) => this.selectedServantIds.add(s.id));
+    const allSelected = this.servantList.length > 0 && this.servantList.every((s) => this.selectedServantIds.has(s.id));
+    if (allSelected) {
+      this.servantList.forEach((s) => {
+        this.selectedServantIds.delete(s.id);
+        this.selectedServantEntries = this.selectedServantEntries.filter((e) => e.id !== s.id);
+      });
+    } else {
+      this.servantList.forEach((s) => {
+        if (!this.selectedServantIds.has(s.id)) {
+          this.selectedServantIds.add(s.id);
+          this.selectedServantEntries = [...this.selectedServantEntries, { id: s.id, fullName: s.fullName }];
+        }
+      });
+    }
     this.selectedServantIds = new Set(this.selectedServantIds);
   }
 

@@ -31,7 +31,7 @@
         <app-loader *ngIf="loading" />
         <div *ngIf="!loading && studentList.length === 0" class="empty">لا يوجد مخدومين أو لا توجد نتائج للبحث</div>
         <label *ngFor="let s of studentList" class="list-item">
-          <input type="checkbox" [checked]="selectedStudentIds.has(s.id)" (change)="toggleStudent(s.id)" />
+          <input type="checkbox" [checked]="selectedStudentIds.has(s.id)" (change)="toggleStudent(s.id, s.fullName)" />
           <span>{{ s.fullName }}</span>
         </label>
       </div>
@@ -42,6 +42,13 @@
           <button type="button" class="btn-outline sm" [disabled]="page >= totalPages" (click)="goNext()">التالي</button>
         </div>
       }
+    </div>
+
+    <div class="selected-names" *ngIf="selectedStudentIds.size > 0">
+      <h3 class="selected-names-title">المحددون للحضور</h3>
+      <ul class="selected-names-list">
+        <li *ngFor="let e of selectedStudentEntries; let i = index">{{ i + 1 }}. {{ e.fullName || '—' }}</li>
+      </ul>
     </div>
 
     <div class="form-actions">

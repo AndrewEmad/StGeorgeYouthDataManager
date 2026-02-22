@@ -27,17 +27,17 @@
     <div class="list-section">
       <div class="list-header">
         <label class="checkbox-label">
-          <input type="checkbox" [checked]="mode === 'students' ? selectedStudentIds.size === studentList.length && studentList.length > 0 : selectedServantIds.size === servantList.length && servantList.length > 0" (change)="mode === 'students' ? selectAllStudents() : selectAllServants()" />
-          تحديد الكل
+          <input type="checkbox" [checked]="allOnPageSelected" (change)="mode === 'students' ? selectAllStudents() : selectAllServants()" />
+          تحديد الكل (الصفحة الحالية)
         </label>
-        <span class="count" *ngIf="mode === 'students'">{{ selectedStudentIds.size }} من {{ studentList.length }}</span>
-        <span class="count" *ngIf="mode === 'servants'">{{ selectedServantIds.size }} من {{ servantList.length }}</span>
+        <span class="count" *ngIf="mode === 'students'">{{ selectedStudentIds.size }} محدد من {{ totalCount }}</span>
+        <span class="count" *ngIf="mode === 'servants'">{{ selectedServantIds.size }} محدد من {{ totalCount }}</span>
       </div>
       <div class="list-body" *ngIf="mode === 'students'">
         <app-loader *ngIf="loading" />
         <div *ngIf="!loading && studentList.length === 0" class="empty">لا يوجد مخدومين أو لا توجد نتائج للبحث</div>
         <label *ngFor="let s of studentList" class="list-item">
-          <input type="checkbox" [checked]="selectedStudentIds.has(s.id)" (change)="toggleStudent(s.id)" />
+          <input type="checkbox" [checked]="selectedStudentIds.has(s.id)" (change)="toggleStudent(s.id, s.fullName)" />
           <span>{{ s.fullName }}</span>
         </label>
       </div>
@@ -45,10 +45,28 @@
         <app-loader *ngIf="loading" />
         <div *ngIf="!loading && servantList.length === 0" class="empty">لا يوجد خدام أو لا توجد نتائج للبحث</div>
         <label *ngFor="let u of servantList" class="list-item">
-          <input type="checkbox" [checked]="selectedServantIds.has(u.id)" (change)="toggleServant(u.id)" />
+          <input type="checkbox" [checked]="selectedServantIds.has(u.id)" (change)="toggleServant(u.id, u.fullName)" />
           <span>{{ u.fullName }}</span>
         </label>
       </div>
+      <div class="pagination-bar" *ngIf="!loading && totalPages > 1">
+        <button type="button" class="btn-outline sm" [disabled]="page <= 1" (click)="goPrev()">السابق</button>
+        <span class="page-info">صفحة {{ page }} من {{ totalPages }}</span>
+        <button type="button" class="btn-outline sm" [disabled]="page >= totalPages" (click)="goNext()">التالي</button>
+      </div>
+    </div>
+
+    <div class="selected-names" *ngIf="mode === 'students' && selectedStudentIds.size > 0">
+      <h3 class="selected-names-title">المحددون للحضور</h3>
+      <ul class="selected-names-list">
+        <li *ngFor="let e of selectedStudentEntries; let i = index">{{ i + 1 }}. {{ e.fullName || '—' }}</li>
+      </ul>
+    </div>
+    <div class="selected-names" *ngIf="mode === 'servants' && selectedServantIds.size > 0">
+      <h3 class="selected-names-title">الخدام المحددون للحضور</h3>
+      <ul class="selected-names-list">
+        <li *ngFor="let e of selectedServantEntries; let i = index">{{ i + 1 }}. {{ e.fullName || '—' }}</li>
+      </ul>
     </div>
 
     <div class="form-actions">

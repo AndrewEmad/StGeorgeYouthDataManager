@@ -1,3 +1,7 @@
 :host {
   display: block;
 }
+
+.glass-card {
+  padding: 20px;
+}

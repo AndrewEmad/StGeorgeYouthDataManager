@@ -116,7 +116,9 @@
   z-index: 1002;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s, visibility 0.3s;
+  transition:
+    opacity 0.3s,
+    visibility 0.3s;
   pointer-events: none;
   -webkit-tap-highlight-color: transparent;
 }
@@ -150,6 +152,10 @@
 }
 
 @media (max-width: 768px) {
+  .top-bar-title {
+    display: none;
+  }
+
   .sidebar-overlay {
     display: block;
   }
@@ -231,7 +237,7 @@
   }
 
   .content-area {
-    padding-top: 0;
+    padding-top: 20px;
   }
 }
 

@@ -51,9 +51,10 @@ export class ServantListComponent implements OnInit {
     { assignedStudentsCount: number; lastCallDate: string | null; lastVisitDate: string | null }
   > = {};
   priestAlreadyExists = false;
+  priestOptionDisabledInEdit = false;
 
   editingServant: User | null = null;
-  editForm = { fullName: '', phone: '', isActive: true };
+  editForm = { fullName: '', phone: '', isActive: true, role: 'Servant' as string };
 
   newServant = {
     userName: '',
@@ -204,7 +205,12 @@ export class ServantListComponent implements OnInit {
 
   openEdit(s: User) {
     this.editingServant = s;
-    this.editForm = { fullName: s.fullName || '', phone: s.phone || '', isActive: s.isActive };
+    this.editForm = { fullName: s.fullName || '', phone: s.phone || '', isActive: s.isActive, role: s.role ?? 'Servant' };
+    this.usersService.getPaged({ page: 1, pageSize: 10, role: 'Priest' }).subscribe({
+      next: (r) => {
+        this.priestOptionDisabledInEdit = r.items.some((u: User) => u.id !== s.id);
+      },
+    });
     this.showEditModal = true;
   }
 
@@ -220,6 +226,7 @@ export class ServantListComponent implements OnInit {
         this.editingServant!.fullName = this.editForm.fullName;
         this.editingServant!.phone = this.editForm.phone;
         this.editingServant!.isActive = this.editForm.isActive;
+        this.editingServant!.role = this.editForm.role;
         this.closeEdit();
       },
       error: (err: any) => alert('خطأ في التحديث: ' + (err.error || err.message)),

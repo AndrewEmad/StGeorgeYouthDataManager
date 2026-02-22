@@ -29,7 +29,8 @@ public record CreateUserDto(
 public record UpdateUserDto(
     string FullName,
     string Phone,
-    bool IsActive
+    bool IsActive,
+    string? Role
 );
 
 public record SetPasswordDto(string NewPassword);

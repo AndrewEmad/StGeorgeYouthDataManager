@@ -137,6 +137,15 @@
           <option [value]="false">متوقف</option>
         </select>
       </app-form-field>
+      <app-form-field label="الدور">
+        <select [(ngModel)]="editForm.role" name="editRole" class="form-input">
+          <option value="Servant">خادم</option>
+          <option value="Manager">مسئول</option>
+          <option value="Secretary">سكرتارية</option>
+          <option value="Priest" [disabled]="priestOptionDisabledInEdit">الاب الكاهن المسئول (مستخدم واحد فقط)</option>
+        </select>
+        <p class="muted sm" *ngIf="priestOptionDisabledInEdit">يوجد بالفعل مستخدم بدور الاب الكاهن المسئول.</p>
+      </app-form-field>
     </div>
     <p class="muted" *ngIf="editingServant">اسم المستخدم: {{ editingServant.userName }}</p>
     </form>

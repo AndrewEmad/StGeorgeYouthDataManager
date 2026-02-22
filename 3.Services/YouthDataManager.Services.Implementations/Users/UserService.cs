@@ -152,6 +152,8 @@ public class UserService : IUserService
         return ServiceResult<Guid>.Success(user.Id);
     }
 
+    private static readonly string[] AppRoles = { "Servant", "Manager", "Secretary", "Priest" };
+
     public async Task<ServiceResult> UpdateAsync(Guid id, UpdateUserDto dto)
     {
         var user = await _userManager.FindByIdAsync(id.ToString());
@@ -161,6 +163,24 @@ public class UserService : IUserService
         user.Phone = dto.Phone;
         user.IsActive = dto.IsActive;
         user.UpdatedAt = DateTime.UtcNow;
+
+        if (!string.IsNullOrWhiteSpace(dto.Role))
+        {
+            if (dto.Role == "Priest")
+            {
+                var existingPriests = await _userManager.GetUsersInRoleAsync("Priest");
+                if (existingPriests.Count > 0 && existingPriests.All(p => p.Id != id))
+                    return ServiceResult.Failure("يسمح بوجود مستخدم واحد فقط بدور الاب الكاهن المسئول.");
+            }
+
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            foreach (var role in AppRoles)
+            {
+                if (currentRoles.Contains(role))
+                    await _userManager.RemoveFromRoleAsync(user, role);
+            }
+            await _userManager.AddToRoleAsync(user, dto.Role);
+        }
 
         var result = await _userManager.UpdateAsync(user);
         

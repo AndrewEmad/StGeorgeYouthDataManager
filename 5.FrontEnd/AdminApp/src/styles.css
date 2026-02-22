@@ -52,7 +52,9 @@ body {
   border: 1px solid var(--glass-border);
   border-radius: 20px;
   box-shadow: var(--card-shadow);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 @media (hover: hover) {
@@ -64,7 +66,9 @@ body {
 }
 
 /* Typography */
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   font-weight: 700;
   letter-spacing: -0.5px;
 }
@@ -220,6 +224,8 @@ select.form-input option {
   .content-area {
     padding: 16px 12px;
     width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
   }
 
   .content-header {
@@ -245,6 +251,18 @@ select.form-input option {
     overflow: hidden;
     position: fixed;
     width: 100%;
+  }
+
+  /* Keep table inside the card on mobile: constrain width so horizontal scroll is inside card */
+  .glass-card.table-container {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    max-height: calc(100dvh - 56px - 120px);
+    overflow-x: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    display: block;
   }
 }
 
@@ -305,8 +323,14 @@ select.form-input option {
 
 /* Modal slide animation – keeps translate(-50%, -50%) so centering is preserved */
 @keyframes modalSlideUp {
-  from { opacity: 0; transform: translate(-50%, -50%) translateY(20px); }
-  to { opacity: 1; transform: translate(-50%, -50%) translateY(0); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) translateY(0);
+  }
 }
 
 .modal-overlay .animate-slide {
@@ -315,8 +339,14 @@ select.form-input option {
 
 /* Animations */
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-slide {

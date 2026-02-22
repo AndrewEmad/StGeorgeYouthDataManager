@@ -1,0 +1,28 @@
+.request-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px;
+}
+
+.request-info h3 {
+  font-size: 1.1rem;
+  margin-bottom: 6px;
+}
+
+.request-info p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.request-info .date {
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+.request-actions {
+  display: flex;
+  gap: 12px;
+}

@@ -1,8 +1,8 @@
 <div class="animate-slide">
-  <header class="content-header reports-header">
-    <h1>التقارير</h1>
-    <p class="text-muted">اختر التقرير لعرضه</p>
-  </header>
+  <app-content-header
+    title="التقارير"
+    subtitle="اختر التقرير لعرضه"
+  />
 
   <div class="report-cards">
     <a *ngFor="let card of reportCards" [routerLink]="card.route" class="report-card glass-card">

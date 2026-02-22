@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StudentAdditionRequestService } from '../../services/student-addition-request.service';
+import { ContentHeaderComponent, LoaderComponent, EmptyStateComponent, RequestCardComponent } from '../../components/common/common';
 
 @Component({
   selector: 'app-student-addition-requests-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ContentHeaderComponent, LoaderComponent, EmptyStateComponent, RequestCardComponent],
   templateUrl: './student-addition-requests.page.html',
   styleUrls: ['./student-addition-requests.page.css']
 })

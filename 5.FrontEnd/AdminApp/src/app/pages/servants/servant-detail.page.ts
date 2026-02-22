@@ -5,11 +5,12 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { UsersService } from '../../services/users.service';
 import { ReportsService } from '../../services/reports.service';
 import { FollowUpService, CallLogDto, HomeVisitDto } from '../../services/follow-up.service';
+import { ContentHeaderComponent, LoaderComponent, DetailSectionComponent, StatItemComponent, ModalComponent } from '../../components/common/common';
 
 @Component({
   selector: 'app-servant-detail-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, ContentHeaderComponent, LoaderComponent, DetailSectionComponent, StatItemComponent, ModalComponent],
   templateUrl: './servant-detail.page.html',
   styleUrls: ['./servant-detail.page.css']
 })

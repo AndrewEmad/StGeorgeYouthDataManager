@@ -1,16 +1,13 @@
 <div class="animate-slide student-detail">
-  <header class="content-header">
-    <a routerLink="/dashboard/students" class="back-link">
-      <span class="material-icons">arrow_forward</span>
-      العودة لقائمة المخدومين
-    </a>
-  </header>
+  <app-content-header
+    backLink="/dashboard/students"
+    backLabel="العودة لقائمة المخدومين"
+  />
 
-  <div *ngIf="loading" class="p-4 text-center">جاري التحميل...</div>
+  <app-loader *ngIf="loading" />
 
   <div *ngIf="!loading && student" class="detail-content">
-    <section class="glass-card detail-section">
-      <h2>بيانات المخدوم</h2>
+    <app-detail-section title="بيانات المخدوم">
       <dl class="detail-grid">
         <dt>الاسم الكامل</dt><dd>{{ student.fullName }}</dd>
         <dt>رقم التليفون</dt><dd>{{ student.phone }}</dd>
@@ -23,10 +20,9 @@
         <dt>تاريخ الإنشاء</dt><dd>{{ student.createdAt ? formatDate(student.createdAt) : '—' }}</dd>
         <dt>آخر تحديث</dt><dd>{{ student.updatedAt ? formatDate(student.updatedAt) : '—' }}</dd>
       </dl>
-    </section>
+    </app-detail-section>
 
-    <section class="glass-card detail-section" *ngIf="editHistory.length">
-      <h2>سجل التعديلات</h2>
+    <app-detail-section *ngIf="editHistory.length" title="سجل التعديلات">
       <div class="table-wrap">
         <table>
           <thead>
@@ -45,10 +41,9 @@
           </tbody>
         </table>
       </div>
-    </section>
+    </app-detail-section>
 
-    <section class="glass-card detail-section">
-      <h2>سجل المتابعة الهاتفية</h2>
+    <app-detail-section title="سجل المتابعة الهاتفية">
       <div class="table-wrap">
         <table *ngIf="calls.length">
           <thead>
@@ -70,10 +65,9 @@
         </table>
         <p *ngIf="!calls.length" class="muted">لا توجد مكالمات مسجلة</p>
       </div>
-    </section>
+    </app-detail-section>
 
-    <section class="glass-card detail-section">
-      <h2>سجل الزيارات المنزلية</h2>
+    <app-detail-section title="سجل الزيارات المنزلية">
       <div class="table-wrap">
         <table *ngIf="visits.length">
           <thead>
@@ -95,7 +89,7 @@
         </table>
         <p *ngIf="!visits.length" class="muted">لا توجد زيارات مسجلة</p>
       </div>
-    </section>
+    </app-detail-section>
   </div>
 
   <div *ngIf="!loading && !student" class="p-4 text-center muted">المخدوم غير موجود</div>

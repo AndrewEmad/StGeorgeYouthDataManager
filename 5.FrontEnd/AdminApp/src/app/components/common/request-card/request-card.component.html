@@ -1,0 +1,15 @@
+<div class="glass-card request-card">
+  <div class="request-info">
+    <h3>{{ title() }}</h3>
+    @if (subtitle()) {
+      <p>{{ subtitle() }}</p>
+    }
+    <ng-content select="[badges]" />
+    @if (date()) {
+      <p class="date">{{ date() | date:'short' }}</p>
+    }
+  </div>
+  <div class="request-actions">
+    <ng-content select="[actions]" />
+  </div>
+</div>

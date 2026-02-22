@@ -1,0 +1,49 @@
+.filters-bar {
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  border-radius: 16px;
+}
+
+.filters-toggle {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.filters-toggle .toggle-icon {
+  font-size: 20px;
+}
+
+.filters-panel {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--glass-border);
+}
+
+.filters-panel > ng-content + .filters-actions {
+  margin-top: 12px;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.filters-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filter-count {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+@media (max-width: 600px) {
+  .filters-grid {
+    grid-template-columns: 1fr;
+  }
+}

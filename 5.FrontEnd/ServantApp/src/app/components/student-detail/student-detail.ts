@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { StudentQueriesService } from '../../services/student-queries.service';
@@ -27,7 +27,7 @@ const VISIT_OUTCOME_OPTIONS = [
 @Component({
   selector: 'app-student-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './student-detail.html',
   styleUrls: ['./student-detail.css']
 })

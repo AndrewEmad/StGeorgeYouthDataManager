@@ -226,6 +226,10 @@ tr.row-clickable { cursor: pointer; }
     justify-content: center;
   }
 
+  .table-container .btn-outline.sm {
+    width: auto;
+  }
+
   .table-container {
     margin: 0 -12px;
     border-radius: 12px;

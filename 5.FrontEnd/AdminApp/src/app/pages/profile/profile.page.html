@@ -1,50 +1,42 @@
 <div class="animate-slide">
-  <header class="content-header">
-    <h1>الملف الشخصي</h1>
-    <p class="text-muted">تعديل البريد الإلكتروني ورقم التليفون وكلمة المرور</p>
-  </header>
+  <app-content-header
+    title="الملف الشخصي"
+    subtitle="تعديل البريد الإلكتروني ورقم التليفون وكلمة المرور"
+  />
 
-  <div *ngIf="profileLoading" class="loader">جاري التحميل...</div>
+  <app-loader *ngIf="profileLoading" />
 
   <div *ngIf="!profileLoading && profile" class="profile-sections">
-    <section class="glass-card profile-section">
-      <h2>البيانات الشخصية</h2>
+    <app-detail-section title="البيانات الشخصية">
       <form (ngSubmit)="saveProfile()">
-        <div class="form-group">
-          <label>الاسم الكامل</label>
+        <app-form-field label="الاسم الكامل">
           <input type="text" [(ngModel)]="fullName" name="fullName" class="form-input" />
-        </div>
-        <div class="form-group">
-          <label>البريد الإلكتروني</label>
+        </app-form-field>
+        <app-form-field label="البريد الإلكتروني">
           <input type="email" [(ngModel)]="email" name="email" class="form-input" />
-        </div>
-        <div class="form-group">
-          <label>رقم التليفون</label>
+        </app-form-field>
+        <app-form-field label="رقم التليفون">
           <input type="tel" [(ngModel)]="phone" name="phone" class="form-input" />
-        </div>
+        </app-form-field>
         <p *ngIf="profileError" class="error-msg">{{ profileError }}</p>
         <button type="submit" class="btn-primary" [disabled]="profileSaving">{{ profileSaving ? 'جاري الحفظ...' : 'حفظ التعديلات' }}</button>
       </form>
-    </section>
+    </app-detail-section>
 
-    <section class="glass-card profile-section">
-      <h2>تغيير كلمة المرور</h2>
+    <app-detail-section title="تغيير كلمة المرور">
       <form (ngSubmit)="changePassword()">
-        <div class="form-group">
-          <label>كلمة المرور الحالية</label>
+        <app-form-field label="كلمة المرور الحالية">
           <input type="password" [(ngModel)]="currentPassword" name="currentPassword" class="form-input" />
-        </div>
-        <div class="form-group">
-          <label>كلمة المرور الجديدة</label>
+        </app-form-field>
+        <app-form-field label="كلمة المرور الجديدة">
           <input type="password" [(ngModel)]="newPassword" name="newPassword" class="form-input" placeholder="6 أحرف على الأقل" />
-        </div>
-        <div class="form-group">
-          <label>تأكيد كلمة المرور الجديدة</label>
+        </app-form-field>
+        <app-form-field label="تأكيد كلمة المرور الجديدة">
           <input type="password" [(ngModel)]="confirmPassword" name="confirmPassword" class="form-input" />
-        </div>
+        </app-form-field>
         <p *ngIf="passwordError" class="error-msg">{{ passwordError }}</p>
         <button type="submit" class="btn-outline" [disabled]="passwordSaving">{{ passwordSaving ? 'جاري التغيير...' : 'تغيير كلمة المرور' }}</button>
       </form>
-    </section>
+    </app-detail-section>
   </div>
 </div>

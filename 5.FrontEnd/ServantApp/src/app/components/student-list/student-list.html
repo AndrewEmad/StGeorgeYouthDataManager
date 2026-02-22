@@ -1,11 +1,5 @@
 <div class="container student-list animate-fade">
   <header class="list-header">
-    <div class="header-main">
-      <a routerLink="/dashboard" class="btn-back">
-        <span class="material-icons">arrow_forward</span>
-      </a>
-      <h1>المخدومين</h1>
-    </div>
     <div class="search-box">
       <div class="search-input-wrap">
         <span class="material-icons search-icon">search</span>
@@ -49,9 +43,9 @@
     </div>
   </section>
 
-  <div *ngIf="loading" class="loader-container">
-    <div class="spinner"></div>
-  </div>
+  @if (loading) {
+    <app-loader [fullScreen]="false" />
+  }
 
   <ng-container *ngIf="!loading">
     <section *ngIf="items.length > 0" class="list-section">
@@ -97,8 +91,7 @@
     </div>
   </ng-container>
 
-  <div *ngIf="!loading && items.length === 0" class="empty-state">
-    <span class="material-icons">search_off</span>
-    <p>لم يتم العثور على مخدومين</p>
-  </div>
+  @if (!loading && items.length === 0) {
+    <app-empty-state icon="search_off" message="لم يتم العثور على مخدومين" />
+  }
 </div>

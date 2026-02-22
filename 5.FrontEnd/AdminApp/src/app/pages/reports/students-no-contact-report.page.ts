@@ -4,11 +4,12 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ReportsService, StudentNoContact } from '../../services/reports.service';
 import { UsersService, User } from '../../services/users.service';
+import { ContentHeaderComponent, LoaderComponent, CardComponent, PaginationComponent } from '../../components/common/common';
 
 @Component({
   selector: 'app-students-no-contact-report-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, ContentHeaderComponent, LoaderComponent, CardComponent, PaginationComponent],
   templateUrl: './students-no-contact-report.page.html',
   styleUrls: ['./servant-follow-up.page.css']
 })

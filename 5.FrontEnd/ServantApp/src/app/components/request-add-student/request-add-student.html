@@ -1,10 +1,6 @@
 <div class="request-add-student-container">
   <div class="glass-card form-card animate-fade">
     <div class="form-header">
-      <a routerLink="/students" class="btn-back">
-        <span class="material-icons">arrow_forward</span>
-      </a>
-      <h1>طلب إضافة مخدوم</h1>
       <p class="text-muted">أدخل بيانات المخدوم وستتم مراجعته من الإدارة</p>
     </div>
 
@@ -65,7 +61,7 @@
 
       <div class="form-actions">
         <a routerLink="/students" class="btn-outline">إلغاء</a>
-        <button type="submit" class="btn-primary" [disabled]="loading || !dto.fullName?.trim() || !dto.phone?.trim()">
+        <button type="submit" class="btn-primary" [disabled]="loading || !dto.fullName.trim() || !dto.phone.trim()">
           <span *ngIf="!loading">إرسال الطلب</span>
           <span *ngIf="loading" class="spinner"></span>
         </button>

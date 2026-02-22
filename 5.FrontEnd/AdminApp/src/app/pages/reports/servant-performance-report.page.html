@@ -1,12 +1,13 @@
 <div class="animate-slide">
-  <header class="content-header reports-header">
-    <h1>أداء الخدام ومتابعة المخدومين</h1>
-    <p class="text-muted">مكالمات وزيارات هذا الأسبوع</p>
-    <a routerLink="/dashboard/reports/servant-follow-up" class="btn-outline">← العودة للتقارير</a>
-  </header>
+  <app-content-header
+    title="أداء الخدام ومتابعة المخدومين"
+    subtitle="مكالمات وزيارات هذا الأسبوع"
+    backLink="/dashboard/reports/servant-follow-up"
+    backLabel="العودة للتقارير"
+  />
   <section class="report-section">
-    <div *ngIf="loading" class="loader">جاري التحميل...</div>
-    <div *ngIf="!loading && perfResult" class="glass-card table-container">
+    <app-loader *ngIf="loading" />
+    <app-card *ngIf="!loading && perfResult" class="table-container">
       <table>
         <thead>
           <tr>
@@ -32,13 +33,16 @@
           </tr>
         </tbody>
       </table>
-    </div>
-    <div class="pagination" *ngIf="!loading && perfResult && perfResult.totalCount > 0">
-      <span class="pagination-info">{{ (page - 1) * pageSize + 1 }} - {{ (page - 1) * pageSize + perfResult.items.length }} من {{ perfResult.totalCount }}</span>
-      <label class="pagination-size">عرض <select class="form-input sm" [ngModel]="pageSize" (ngModelChange)="setPageSize($event)"><option *ngFor="let n of pageSizeOptions" [value]="n">{{ n }}</option></select></label>
-      <button type="button" class="btn-outline sm" [disabled]="page <= 1" (click)="goToPage(page - 1)">السابق</button>
-      <span class="page-num">صفحة {{ page }} من {{ totalPages }}</span>
-      <button type="button" class="btn-outline sm" [disabled]="page >= totalPages" (click)="goToPage(page + 1)">التالي</button>
-    </div>
+    </app-card>
+    <app-pagination
+      *ngIf="!loading && perfResult && perfResult.totalCount > 0"
+      [total]="perfResult.totalCount"
+      [page]="page"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [currentPageCount]="perfResult.items.length"
+      (pageChange)="goToPage($event)"
+      (pageSizeChange)="setPageSize($event)"
+    />
   </section>
 </div>

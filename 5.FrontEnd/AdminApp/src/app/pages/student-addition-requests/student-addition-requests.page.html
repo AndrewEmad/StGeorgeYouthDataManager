@@ -1,35 +1,31 @@
 <div class="animate-slide student-addition-requests-page">
-  <header class="page-header">
-    <h1>طلبات إضافة مخدومين</h1>
-    <p class="text-muted">طلبات الخدام لإضافة مخدوم جديد — بالموافقة يتم إنشاء المخدوم وتخصيصه للخادم</p>
-  </header>
+  <app-content-header
+    title="طلبات إضافة مخدومين"
+    [subtitle]="'طلبات الخدام لإضافة مخدوم جديد — بالموافقة يتم إنشاء المخدوم وتخصيصه للخادم'"
+  />
 
-  <div *ngIf="loading" class="loader-container">
-    <div class="spinner"></div>
-  </div>
+  <app-loader [fullScreen]="true" *ngIf="loading" />
 
   <p class="error-msg" *ngIf="error">{{ error }}</p>
 
-  <div *ngIf="!loading && requests.length === 0" class="empty-state">
-    <span class="material-icons">inbox</span>
-    <p>لا توجد طلبات قيد المراجعة</p>
-  </div>
+  <app-empty-state
+    *ngIf="!loading && requests.length === 0"
+    message="لا توجد طلبات قيد المراجعة"
+  />
 
   <div *ngIf="!loading && requests.length" class="requests-list">
-    <div class="glass-card request-card" *ngFor="let r of requests">
-      <div class="request-info">
-        <h3>{{ r.fullName }}</h3>
-        <p>طلب من: {{ r.requestedByUserName }}</p>
-        <p class="date">{{ r.requestedAt | date:'short' }}</p>
-      </div>
-      <div class="request-actions">
-        <button type="button" class="btn-outline danger" (click)="reject(r.id)" [disabled]="processingId === r.id">
-          رفض
-        </button>
+    <app-request-card
+      *ngFor="let r of requests"
+      [title]="r.fullName"
+      [subtitle]="'طلب من: ' + r.requestedByUserName"
+      [date]="r.requestedAt"
+    >
+      <div actions>
+        <button type="button" class="btn-outline danger" (click)="reject(r.id)" [disabled]="processingId === r.id">رفض</button>
         <button type="button" class="btn-primary" (click)="approve(r.id)" [disabled]="processingId === r.id">
           {{ processingId === r.id ? 'جاري...' : 'موافقة (إضافة وتخصيص للخادم)' }}
         </button>
       </div>
-    </div>
+    </app-request-card>
   </div>
 </div>

@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { ReportsService } from '../../services/reports.service';
 import { UsersService, User } from '../../services/users.service';
+import { ContentHeaderComponent, LoaderComponent, StatItemComponent, CardComponent } from '../common/common';
 
 @Component({
   selector: 'app-stats',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ContentHeaderComponent, LoaderComponent, StatItemComponent, CardComponent],
   templateUrl: './stats.html',
   styleUrls: ['./stats.css']
 })

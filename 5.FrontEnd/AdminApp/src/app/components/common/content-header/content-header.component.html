@@ -1,0 +1,19 @@
+<header class="content-header">
+  @if (backLink()) {
+    <a [routerLink]="backLink()!" class="back-link">
+      <span class="material-icons">arrow_forward</span>
+      {{ backLabel() }}
+    </a>
+  }
+  <div class="header-main">
+    <div>
+      @if (title()) {
+        <h1>{{ title() }}</h1>
+      }
+      @if (subtitle()) {
+        <p class="text-muted">{{ subtitle() }}</p>
+      }
+    </div>
+    <ng-content select="[actions]" />
+  </div>
+</header>

@@ -5,6 +5,7 @@ import { AssignmentRequestService } from '../../services/assignment-request.serv
 import { AuthService } from '../../services/auth.service';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { LoaderComponent, EmptyStateComponent } from '../common/common';
 
 export interface ServantStudentItem {
   student: any;
@@ -14,7 +15,7 @@ export interface ServantStudentItem {
 @Component({
   selector: 'app-student-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, LoaderComponent, EmptyStateComponent],
   templateUrl: './student-list.html',
   styleUrls: ['./student-list.css']
 })

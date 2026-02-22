@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { ReminderService, ReminderSlot } from '../../services/reminder.service';
 import { AuthService } from '../../services/auth.service';
 
@@ -10,7 +9,7 @@ const DAY_NAMES = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأر
 @Component({
   selector: 'app-reminders',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './reminders.html',
   styleUrls: ['./reminders.css']
 })

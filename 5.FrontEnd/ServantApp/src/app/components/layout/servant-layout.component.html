@@ -1,0 +1,22 @@
+<header class="layout-header glass-card">
+  <div class="header-right">
+    <h1 class="page-title">{{ pageTitle }}</h1>
+    @if (!isDashboard) {
+      <a routerLink="/dashboard" class="layout-nav-btn btn-back" aria-label="رجوع">
+        <span class="material-icons">arrow_forward</span>
+      </a>
+    }
+  </div>
+  <div class="header-left">
+    <a routerLink="/profile" class="profile-link" aria-label="الملف الشخصي">
+      <span class="material-icons">account_circle</span>
+      <span class="profile-name">{{ servantName }}</span>
+    </a>
+    <button type="button" class="btn-logout" (click)="logout()" aria-label="تسجيل الخروج">
+      <span class="material-icons">logout</span>
+    </button>
+  </div>
+</header>
+<div class="layout-content">
+  <router-outlet></router-outlet>
+</div>

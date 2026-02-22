@@ -8,7 +8,7 @@ namespace YouthDataManager.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = RolePolicies.AdminManagerPriestRoles)]
+[Authorize]
 public class AttendanceController : ControllerBase
 {
     private readonly IAttendanceService _attendanceService;
@@ -19,6 +19,7 @@ public class AttendanceController : ControllerBase
     }
 
     [HttpPost("students")]
+    [Authorize(Roles = RolePolicies.CanRecordStudentAttendance)]
     public async Task<IActionResult> RecordStudentAttendance([FromBody] RecordAttendanceRequest request)
     {
         if (request?.Date == null || request.Ids == null || request.Ids.Count == 0)
@@ -30,6 +31,7 @@ public class AttendanceController : ControllerBase
     }
 
     [HttpPost("servants")]
+    [Authorize(Roles = RolePolicies.AdminManagerPriestRoles)]
     public async Task<IActionResult> RecordServantAttendance([FromBody] RecordAttendanceRequest request)
     {
         if (request?.Date == null || request.Ids == null || request.Ids.Count == 0)

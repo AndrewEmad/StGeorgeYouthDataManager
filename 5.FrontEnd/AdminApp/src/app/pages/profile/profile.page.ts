@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService, ProfileDto } from '../../services/auth.service';
+import { ContentHeaderComponent, LoaderComponent, DetailSectionComponent, FormFieldComponent } from '../../components/common/common';
 
 @Component({
   selector: 'app-profile-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ContentHeaderComponent, LoaderComponent, DetailSectionComponent, FormFieldComponent],
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.css']
 })

@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ReportsService, ServantActivitySummary } from '../../services/reports.service';
 import { UsersService, User } from '../../services/users.service';
+import { ContentHeaderComponent, LoaderComponent, CardComponent, PaginationComponent } from '../../components/common/common';
 
 @Component({
   selector: 'app-servant-activity-report-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, FormsModule, ContentHeaderComponent, LoaderComponent, CardComponent, PaginationComponent],
   templateUrl: './servant-activity-report.page.html',
   styleUrls: ['./servant-follow-up.page.css']
 })

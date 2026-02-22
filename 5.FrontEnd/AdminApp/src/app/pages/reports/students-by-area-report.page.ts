@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ReportsService, StudentsByGroup } from '../../services/reports.service';
+import { ContentHeaderComponent, LoaderComponent, CardComponent, PaginationComponent } from '../../components/common/common';
 
 @Component({
   selector: 'app-students-by-area-report-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, ContentHeaderComponent, LoaderComponent, CardComponent, PaginationComponent],
   templateUrl: './students-by-area-report.page.html',
   styleUrls: ['./servant-follow-up.page.css']
 })

@@ -9,7 +9,11 @@ namespace YouthDataManager.WebApi.Authorization;
 public static class RolePolicies
 {
     public const string AdminManagerPriestRoles = "Admin,Manager,Priest";
+    public const string CanRecordStudentAttendance = "Admin,Manager,Priest,Secretary";
 
     public static bool IsAdminOrManagerOrPriest(this ClaimsPrincipal user) =>
         user.IsInRole("Admin") || user.IsInRole("Manager") || user.IsInRole("Priest");
+
+    public static bool CanRecordStudentAttendanceRole(this ClaimsPrincipal user) =>
+        user.IsInRole("Admin") || user.IsInRole("Manager") || user.IsInRole("Priest") || user.IsInRole("Secretary");
 }

@@ -1,76 +1,74 @@
 <div class="animate-slide">
-  <header class="content-header">
-    <h1>الإحصائيات العامة</h1>
-    <p class="text-muted">نظرة شاملة على أداء الخدمة والبيانات</p>
-  </header>
+  <app-content-header title="الإحصائيات العامة" subtitle="نظرة شاملة على أداء الخدمة والبيانات" />
 
-  <div *ngIf="loading" class="loader">جاري التحميل...</div>
+  <app-loader *ngIf="loading" />
 
   <section *ngIf="priest" class="priest-card-section">
     <div class="glass-card stat-item priest-card row-clickable" (click)="viewServant(priest.id)">
-      <span class="material-icons">person</span>
-      <div class="s-info">
-        <h3>الاب الكاهن المسئول</h3>
-        <p>{{ priest.fullName }}</p>
+      <div class="s-info-container">
+        <span class="material-icons">person</span>
+        <div class="s-info">
+          <h3>الاب الكاهن المسئول</h3>
+          <p>{{ priest.fullName }}</p>
+        </div>
       </div>
-      <a [routerLink]="['/dashboard/servants', priest.id]" class="btn-outline sm" (click)="$event.stopPropagation()">تفاصيل</a>
+      <a
+        [routerLink]="['/dashboard/servants', priest.id]"
+        class="btn-outline sm"
+        (click)="$event.stopPropagation()"
+        >تفاصيل</a
+      >
     </div>
   </section>
 
   <div *ngIf="!loading" class="stats-grid">
-    <div class="glass-card stat-item indigo">
-      <span class="material-icons">people</span>
-      <div class="s-info">
-        <h3>{{ stats?.totalStudents || 0 }}</h3>
-        <p>إجمالي المخدومين</p>
-      </div>
-    </div>
-    <div class="glass-card stat-item purple">
-      <span class="material-icons">badge</span>
-      <div class="s-info">
-        <h3>{{ stats?.totalServants || 0 }}</h3>
-        <p>إجمالي الخدام</p>
-      </div>
-    </div>
-    <div class="glass-card stat-item emerald">
-      <span class="material-icons">call</span>
-      <div class="s-info">
-        <h3>{{ stats?.totalCalls || 0 }}</h3>
-        <p>إجمالي المكالمات</p>
-      </div>
-    </div>
-    <div class="glass-card stat-item amber">
-      <span class="material-icons">home</span>
-      <div class="s-info">
-        <h3>{{ stats?.totalVisits || 0 }}</h3>
-        <p>إجمالي الزيارات</p>
-      </div>
-    </div>
-    <div class="glass-card stat-item teal">
-      <span class="material-icons">phone_in_talk</span>
-      <div class="s-info">
-        <h3>{{ stats?.callsThisWeek ?? 0 }}</h3>
-        <p>مكالمات هذا الأسبوع</p>
-      </div>
-    </div>
-    <div class="glass-card stat-item rose">
-      <span class="material-icons">location_on</span>
-      <div class="s-info">
-        <h3>{{ stats?.visitsThisWeek ?? 0 }}</h3>
-        <p>زيارات هذا الأسبوع</p>
-      </div>
-    </div>
+    <app-stat-item
+      icon="people"
+      [value]="stats?.totalStudents || 0"
+      label="إجمالي المخدومين"
+      variant="indigo"
+    />
+    <app-stat-item
+      icon="badge"
+      [value]="stats?.totalServants || 0"
+      label="إجمالي الخدام"
+      variant="purple"
+    />
+    <app-stat-item
+      icon="call"
+      [value]="stats?.totalCalls || 0"
+      label="إجمالي المكالمات"
+      variant="emerald"
+    />
+    <app-stat-item
+      icon="home"
+      [value]="stats?.totalVisits || 0"
+      label="إجمالي الزيارات"
+      variant="amber"
+    />
+    <app-stat-item
+      icon="phone_in_talk"
+      [value]="stats?.callsThisWeek ?? 0"
+      label="مكالمات هذا الأسبوع"
+      variant="teal"
+    />
+    <app-stat-item
+      icon="location_on"
+      [value]="stats?.visitsThisWeek ?? 0"
+      label="زيارات هذا الأسبوع"
+      variant="rose"
+    />
   </div>
 
   <section class="recent-activity" *ngIf="!loading">
     <h2>النشاط الأخير</h2>
-    <div class="glass-card activity-list">
+    <app-card class="activity-list">
       <p class="text-muted" *ngIf="!stats?.recentActivities?.length">لا يوجد نشاط مؤخراً</p>
       <div class="activity-item" *ngFor="let act of stats?.recentActivities">
         <span class="material-icons">history</span>
         <p>{{ act.description }}</p>
-        <span class="time">{{ act.date | date:'dd/MM/yyyy' }}</span>
+        <span class="time">{{ act.date | date: 'dd/MM/yyyy' }}</span>
       </div>
-    </div>
+    </app-card>
   </section>
 </div>

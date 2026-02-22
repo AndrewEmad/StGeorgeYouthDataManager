@@ -4,13 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { AttendanceService } from '../../services/attendance.service';
 import { StudentQueriesService } from '../../services/student-queries.service';
 import { UsersService, User } from '../../services/users.service';
+import { ContentHeaderComponent, CardComponent, LoaderComponent } from '../../components/common/common';
 
 type Mode = 'students' | 'servants';
 
 @Component({
   selector: 'app-attendance-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ContentHeaderComponent, CardComponent, LoaderComponent],
   templateUrl: './attendance.page.html',
   styleUrls: ['./attendance.page.css']
 })

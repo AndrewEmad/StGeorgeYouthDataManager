@@ -4,11 +4,30 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UsersService, User } from '../../../services/users.service';
 import { ReportsService } from '../../../services/reports.service';
+import {
+  ContentHeaderComponent,
+  FiltersBarComponent,
+  FormFieldComponent,
+  CardComponent,
+  LoaderComponent,
+  PaginationComponent,
+  ModalComponent
+} from '../../common/common';
 
 @Component({
   selector: 'app-servant-list',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ContentHeaderComponent,
+    FiltersBarComponent,
+    FormFieldComponent,
+    CardComponent,
+    LoaderComponent,
+    PaginationComponent,
+    ModalComponent
+  ],
   templateUrl: './servant-list.html',
   styleUrls: ['./servant-list.css'],
 })
@@ -108,6 +127,7 @@ export class ServantListComponent implements OnInit {
     const map: Record<string, string> = {
       Servant: 'خادم',
       Manager: 'مسئول',
+      Secretary: 'سكرتارية',
       Priest: 'الاب الكاهن المسئول',
     };
     return map[role] ?? role;

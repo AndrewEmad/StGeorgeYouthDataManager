@@ -1,16 +1,13 @@
 <div class="animate-slide servant-detail">
-  <header class="content-header">
-    <a routerLink="/dashboard/servants" class="back-link">
-      <span class="material-icons">arrow_forward</span>
-      العودة لقائمة الخدام
-    </a>
-  </header>
+  <app-content-header
+    backLink="/dashboard/servants"
+    backLabel="العودة لقائمة الخدام"
+  />
 
-  <div *ngIf="loading" class="p-4 text-center">جاري التحميل...</div>
+  <app-loader *ngIf="loading" />
 
   <div *ngIf="!loading && servant" class="detail-content">
-    <section class="glass-card detail-section">
-      <h2>بيانات الخادم</h2>
+    <app-detail-section title="بيانات الخادم">
       <dl class="detail-grid">
         <dt>الاسم الكامل</dt>
         <dd>{{ servant.fullName }}</dd>
@@ -19,15 +16,13 @@
         <dt>الهاتف</dt>
         <dd>{{ servant.phone || '—' }}</dd>
         <dt>الدور</dt>
-        <dd>
-          {{
-            servant.role === 'Manager'
-              ? 'مسئول'
-              : servant.role === 'Priest'
-                ? 'الاب الكاهن المسئول'
-                : 'خادم'
-          }}
-        </dd>
+        <dd>{{
+          servant.role === 'Manager'
+            ? 'مسئول'
+            : servant.role === 'Priest'
+              ? 'الاب الكاهن المسئول'
+              : 'خادم'
+        }}</dd>
         <dt>الحالة</dt>
         <dd>
           <span class="status-dot" [class.active]="servant.isActive"></span>
@@ -43,37 +38,17 @@
         <span class="material-icons">lock_reset</span>
         تغيير كلمة المرور
       </button>
-    </section>
+    </app-detail-section>
 
-    <section class="glass-card detail-section" *ngIf="performance && servant.role !== 'Priest'">
-      <h2>أداء المتابعة (هذا الأسبوع: جمعة–خميس)</h2>
+    <app-detail-section *ngIf="performance && servant.role !== 'Priest'" title="أداء المتابعة (هذا الأسبوع: جمعة–خميس)">
       <div class="perf-grid">
-        <div class="glass-card stat-item indigo">
-          <span class="material-icons">people</span>
-          <div class="s-info">
-            <h3>{{ performance.assignedStudentsCount }}</h3>
-            <p>المخدومين المخصصين</p>
-          </div>
-        </div>
-        <div class="glass-card stat-item emerald">
-          <span class="material-icons">call</span>
-          <div class="s-info">
-            <h3>{{ performance.callsThisWeek }}</h3>
-            <p>مكالمات هذا الأسبوع</p>
-          </div>
-        </div>
-        <div class="glass-card stat-item amber">
-          <span class="material-icons">home</span>
-          <div class="s-info">
-            <h3>{{ performance.visitsThisWeek }}</h3>
-            <p>زيارات هذا الأسبوع</p>
-          </div>
-        </div>
+        <app-stat-item icon="people" [value]="performance.assignedStudentsCount" label="المخدومين المخصصين" variant="indigo" />
+        <app-stat-item icon="call" [value]="performance.callsThisWeek" label="مكالمات هذا الأسبوع" variant="emerald" />
+        <app-stat-item icon="home" [value]="performance.visitsThisWeek" label="زيارات هذا الأسبوع" variant="amber" />
       </div>
-    </section>
+    </app-detail-section>
 
-    <section class="glass-card detail-section" *ngIf="servant.role !== 'Priest'">
-      <h2>سجل المتابعة الهاتفية</h2>
+    <app-detail-section *ngIf="servant.role !== 'Priest'" title="سجل المتابعة الهاتفية">
       <div class="table-wrap">
         <table *ngIf="calls.length">
           <thead>
@@ -88,9 +63,7 @@
           <tbody>
             <tr *ngFor="let c of calls">
               <td>
-                <a [routerLink]="['/dashboard/students', c.studentId]" class="student-link">{{
-                  c.studentName || '—'
-                }}</a>
+                <a [routerLink]="['/dashboard/students', c.studentId]" class="student-link">{{ c.studentName || '—' }}</a>
               </td>
               <td>{{ formatDate(c.callDate) }}</td>
               <td>{{ callStatusLabel(c.callStatus) }}</td>
@@ -101,10 +74,9 @@
         </table>
         <p *ngIf="!calls.length" class="muted">لا توجد مكالمات مسجلة</p>
       </div>
-    </section>
+    </app-detail-section>
 
-    <section class="glass-card detail-section" *ngIf="servant.role !== 'Priest'">
-      <h2>سجل الزيارات المنزلية</h2>
+    <app-detail-section *ngIf="servant.role !== 'Priest'" title="سجل الزيارات المنزلية">
       <div class="table-wrap">
         <table *ngIf="visits.length">
           <thead>
@@ -119,9 +91,7 @@
           <tbody>
             <tr *ngFor="let v of visits">
               <td>
-                <a [routerLink]="['/dashboard/students', v.studentId]" class="student-link">{{
-                  v.studentName || '—'
-                }}</a>
+                <a [routerLink]="['/dashboard/students', v.studentId]" class="student-link">{{ v.studentName || '—' }}</a>
               </td>
               <td>{{ formatDate(v.visitDate) }}</td>
               <td>{{ visitOutcomeLabel(v.visitOutcome) }}</td>
@@ -132,46 +102,33 @@
         </table>
         <p *ngIf="!visits.length" class="muted">لا توجد زيارات مسجلة</p>
       </div>
-    </section>
+    </app-detail-section>
   </div>
 
   <div *ngIf="!loading && !servant" class="p-4 text-center muted">الخادم غير موجود</div>
 </div>
 
-<!-- تغيير كلمة المرور – خارج servant-detail لضبط التوسيط على الشاشة -->
-<div *ngIf="showPasswordModal" class="password-modal-overlay" (click)="closeChangePassword()">
-  <div class="glass-card password-modal-content" (click)="$event.stopPropagation()">
-    <h3>تغيير كلمة المرور</h3>
+<app-modal
+  title="تغيير كلمة المرور"
+  [visible]="showPasswordModal"
+  (close)="closeChangePassword()"
+>
+  <div body>
     <p class="muted small">سيُطلب من الخادم اختيار كلمة مرور جديدة عند أول دخول له.</p>
     <div class="form-group">
       <label>كلمة المرور الجديدة</label>
-      <input
-        type="password"
-        [(ngModel)]="newPassword"
-        class="form-input"
-        placeholder="6 أحرف على الأقل"
-      />
+      <input type="password" [(ngModel)]="newPassword" class="form-input" placeholder="6 أحرف على الأقل" />
     </div>
     <div class="form-group">
       <label>تأكيد كلمة المرور</label>
-      <input
-        type="password"
-        [(ngModel)]="confirmPassword"
-        class="form-input"
-        placeholder="تأكيد كلمة المرور"
-      />
+      <input type="password" [(ngModel)]="confirmPassword" class="form-input" placeholder="تأكيد كلمة المرور" />
     </div>
     <p *ngIf="passwordError" class="error-msg">{{ passwordError }}</p>
-    <div class="modal-actions">
-      <button type="button" class="btn-secondary" (click)="closeChangePassword()">إلغاء</button>
-      <button
-        type="button"
-        class="btn-primary"
-        (click)="submitChangePassword()"
-        [disabled]="passwordLoading"
-      >
-        {{ passwordLoading ? 'جاري الحفظ...' : 'تعيين كلمة المرور' }}
-      </button>
-    </div>
   </div>
-</div>
+  <div actions>
+    <button type="button" class="btn-secondary" (click)="closeChangePassword()">إلغاء</button>
+    <button type="button" class="btn-primary" (click)="submitChangePassword()" [disabled]="passwordLoading">
+      {{ passwordLoading ? 'جاري الحفظ...' : 'تعيين كلمة المرور' }}
+    </button>
+  </div>
+</app-modal>

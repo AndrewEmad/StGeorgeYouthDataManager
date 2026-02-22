@@ -76,6 +76,10 @@ export class AuthService {
     return r != null && r !== 'Admin' && r !== 'Priest';
   }
 
+  isSecretary(): boolean {
+    return this.currentUser()?.role === 'Secretary';
+  }
+
   isTokenExpired(): boolean {
     const token = localStorage.getItem('token');
     if (!token) return true;

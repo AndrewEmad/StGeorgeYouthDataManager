@@ -1,13 +1,14 @@
 <div class="animate-slide">
-  <header class="content-header reports-header">
-    <h1>ملخص نشاط الخدام</h1>
-    <p class="text-muted">تقرير منفصل</p>
-    <a routerLink="/dashboard/reports/servant-follow-up" class="btn-outline">← العودة لمتابعة الخدام</a>
-  </header>
+  <app-content-header
+    title="ملخص نشاط الخدام"
+    subtitle="تقرير منفصل"
+    backLink="/dashboard/reports/servant-follow-up"
+    backLabel="العودة لمتابعة الخدام"
+  />
   <section class="report-section">
-    <div class="filters glass-card">
-      <label>من تاريخ <span class="date-input-wrap" (click)="dateFromInput.showPicker?.()"><input #dateFromInput type="date" [(ngModel)]="dateFrom" /></span></label>
-      <label>إلى تاريخ <span class="date-input-wrap" (click)="dateToInput.showPicker?.()"><input #dateToInput type="date" [(ngModel)]="dateTo" /></span></label>
+    <app-card class="filters">
+      <label>من تاريخ <span class="date-input-wrap" (click)="dateFromInput.showPicker()"><input #dateFromInput type="date" [(ngModel)]="dateFrom" /></span></label>
+      <label>إلى تاريخ <span class="date-input-wrap" (click)="dateToInput.showPicker()"><input #dateToInput type="date" [(ngModel)]="dateTo" /></span></label>
       <label>
         الخادم
         <select [(ngModel)]="servantIdFilter">
@@ -16,10 +17,10 @@
         </select>
       </label>
       <button type="button" class="btn-outline" (click)="onApplyFilters()">تطبيق</button>
-    </div>
-    <div *ngIf="loading" class="loader">جاري التحميل...</div>
+    </app-card>
+    <app-loader *ngIf="loading" />
     <p *ngIf="error" class="error-msg">{{ error }}</p>
-    <div *ngIf="!loading && !error" class="glass-card table-container">
+    <app-card *ngIf="!loading && !error" class="table-container">
       <table>
         <thead>
           <tr>
@@ -41,13 +42,16 @@
           </tr>
         </tbody>
       </table>
-    </div>
-    <div class="pagination" *ngIf="totalCount > 0">
-      <span class="pagination-info">{{ (page - 1) * pageSize + 1 }} - {{ (page - 1) * pageSize + activitySummary.length }} من {{ totalCount }}</span>
-      <label class="pagination-size">عرض <select class="form-input sm" [ngModel]="pageSize" (ngModelChange)="setPageSize($event)"><option *ngFor="let n of pageSizeOptions" [value]="n">{{ n }}</option></select></label>
-      <button type="button" class="btn-outline sm" [disabled]="page <= 1" (click)="goToPage(page - 1)">السابق</button>
-      <span class="page-num">صفحة {{ page }} من {{ totalPages }}</span>
-      <button type="button" class="btn-outline sm" [disabled]="page >= totalPages" (click)="goToPage(page + 1)">التالي</button>
-    </div>
+    </app-card>
+    <app-pagination
+      *ngIf="totalCount > 0"
+      [total]="totalCount"
+      [page]="page"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [currentPageCount]="activitySummary.length"
+      (pageChange)="goToPage($event)"
+      (pageSizeChange)="setPageSize($event)"
+    />
   </section>
 </div>

@@ -18,18 +18,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\2.Infrastructure\YouthDataManager.Infrastructure\YouthDataManager.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\3.Services\Auth\YouthDataManager.Auth.Service.Abstractions\YouthDataManager.Auth.Service.Abstractions.csproj" />
-    <ProjectReference Include="..\..\3.Services\Auth\YouthDataManager.Auth.Service.DependencyInjection\YouthDataManager.Auth.Service.DependencyInjection.csproj" />
-    <ProjectReference Include="..\..\3.Services\Students\YouthDataManager.Students.Service.Abstractions\YouthDataManager.Students.Service.Abstractions.csproj" />
-    <ProjectReference Include="..\..\3.Services\Students\YouthDataManager.Students.Service.DependencyInjection\YouthDataManager.Students.Service.DependencyInjection.csproj" />
-    <ProjectReference Include="..\..\3.Services\FollowUp\YouthDataManager.FollowUp.Service.Abstractions\YouthDataManager.FollowUp.Service.Abstractions.csproj" />
-    <ProjectReference Include="..\..\3.Services\FollowUp\YouthDataManager.FollowUp.Service.DependencyInjection\YouthDataManager.FollowUp.Service.DependencyInjection.csproj" />
-    <ProjectReference Include="..\..\3.Services\Reports\YouthDataManager.Reports.Service.Abstractions\YouthDataManager.Reports.Service.Abstractions.csproj" />
-    <ProjectReference Include="..\..\3.Services\Reports\YouthDataManager.Reports.Service.DependencyInjection\YouthDataManager.Reports.Service.DependencyInjection.csproj" />
-    <ProjectReference Include="..\..\3.Services\Shared\YouthDataManager.Shared.Service.Abstractions\YouthDataManager.Shared.Service.Abstractions.csproj" />
-    <ProjectReference Include="..\..\3.Services\Shared\YouthDataManager.Shared.Service.DependencyInjection\YouthDataManager.Shared.Service.DependencyInjection.csproj" />
-    <ProjectReference Include="..\..\3.Services\Users\YouthDataManager.Users.Service.Abstractions\YouthDataManager.Users.Service.Abstractions.csproj" />
-    <ProjectReference Include="..\..\3.Services\Users\YouthDataManager.Users.Service.DependencyInjection\YouthDataManager.Users.Service.DependencyInjection.csproj" />
+    <ProjectReference Include="..\..\3.Services\YouthDataManager.Services.Abstractions\YouthDataManager.Services.Abstractions.csproj" />
+    <ProjectReference Include="..\..\3.Services\YouthDataManager.Services.DependencyInjection\YouthDataManager.Services.DependencyInjection.csproj" />
   </ItemGroup>
 
 </Project>

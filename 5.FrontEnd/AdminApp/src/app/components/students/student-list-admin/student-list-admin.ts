@@ -6,11 +6,28 @@ import { forkJoin } from 'rxjs';
 import { StudentQueriesService } from '../../../services/student-queries.service';
 import { UsersService, User } from '../../../services/users.service';
 import { StudentCommandsService, CreateStudentRequest, UpdateStudentRequest } from '../../../services/student-commands.service';
+import {
+  ContentHeaderComponent,
+  CardComponent,
+  FiltersBarComponent,
+  FormFieldComponent,
+  LoaderComponent,
+  PaginationComponent
+} from '../../common/common';
 
 @Component({
   selector: 'app-student-list-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ContentHeaderComponent,
+    CardComponent,
+    FiltersBarComponent,
+    FormFieldComponent,
+    LoaderComponent,
+    PaginationComponent
+  ],
   templateUrl: './student-list-admin.html',
   styleUrls: ['./student-list-admin.css']
 })

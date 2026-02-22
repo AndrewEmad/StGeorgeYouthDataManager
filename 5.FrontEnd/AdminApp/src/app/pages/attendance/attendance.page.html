@@ -1,10 +1,10 @@
 <div class="animate-slide">
-  <header class="content-header">
-    <h1>تسجيل الحضور</h1>
-    <p class="text-muted">تسجيل حضور المخدومين أو الخدام لليوم المحدد</p>
-  </header>
+  <app-content-header
+    title="تسجيل الحضور"
+    subtitle="تسجيل حضور المخدومين أو الخدام لليوم المحدد"
+  />
 
-  <div class="attendance-card glass-card">
+  <app-card class="attendance-card">
     <div class="mode-tabs">
       <button type="button" class="tab" [class.active]="mode === 'students'" (click)="setMode('students')">حضور المخدومين</button>
       <button type="button" class="tab" [class.active]="mode === 'servants'" (click)="setMode('servants')">حضور الخدام</button>
@@ -13,7 +13,7 @@
     <div class="form-row">
       <div class="form-group">
         <label>التاريخ</label>
-        <span class="date-input-wrap" (click)="dateInput.showPicker?.()"><input #dateInput type="date" [(ngModel)]="attendanceDate" class="form-input" /></span>
+        <span class="date-input-wrap" (click)="dateInput.showPicker()"><input #dateInput type="date" [(ngModel)]="attendanceDate" class="form-input" /></span>
       </div>
       <div class="form-group flex-grow">
         <label>بحث بالاسم</label>
@@ -34,7 +34,7 @@
         <span class="count" *ngIf="mode === 'servants'">{{ selectedServantIds.size }} من {{ servantList.length }}</span>
       </div>
       <div class="list-body" *ngIf="mode === 'students'">
-        <div *ngIf="loading" class="loader">جاري التحميل...</div>
+        <app-loader *ngIf="loading" />
         <div *ngIf="!loading && studentList.length === 0" class="empty">لا يوجد مخدومين أو لا توجد نتائج للبحث</div>
         <label *ngFor="let s of studentList" class="list-item">
           <input type="checkbox" [checked]="selectedStudentIds.has(s.id)" (change)="toggleStudent(s.id)" />
@@ -42,7 +42,7 @@
         </label>
       </div>
       <div class="list-body" *ngIf="mode === 'servants'">
-        <div *ngIf="loading" class="loader">جاري التحميل...</div>
+        <app-loader *ngIf="loading" />
         <div *ngIf="!loading && servantList.length === 0" class="empty">لا يوجد خدام أو لا توجد نتائج للبحث</div>
         <label *ngFor="let u of servantList" class="list-item">
           <input type="checkbox" [checked]="selectedServantIds.has(u.id)" (change)="toggleServant(u.id)" />
@@ -56,5 +56,5 @@
         {{ saving ? 'جاري الحفظ...' : 'تسجيل الحضور' }}
       </button>
     </div>
-  </div>
+  </app-card>
 </div>

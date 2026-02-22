@@ -27,7 +27,7 @@ public class DatabaseSeeder
         await _context.Database.MigrateAsync();
 
         // 2. Seed Roles (Priest = الاب الكاهن المسئول — only one user allowed)
-        string[] roles = { "Admin", "Manager", "Servant", "Priest" };
+        string[] roles = { "Admin", "Manager", "Servant", "Priest", "Secretary" };
         foreach (var role in roles)
         {
             if (!await _roleManager.RoleExistsAsync(role))

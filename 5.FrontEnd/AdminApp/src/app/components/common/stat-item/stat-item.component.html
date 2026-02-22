@@ -1,0 +1,8 @@
+<div class="glass-card stat-item" [class]="variant()">
+  <span class="material-icons">{{ icon() }}</span>
+  <div class="s-info">
+    <h3>{{ value() }}</h3>
+    <p>{{ label() }}</p>
+  </div>
+  <ng-content />
+</div>

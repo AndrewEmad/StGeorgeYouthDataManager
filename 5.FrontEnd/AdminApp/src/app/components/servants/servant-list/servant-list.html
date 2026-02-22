@@ -1,51 +1,39 @@
 <div class="animate-slide">
-  <header class="content-header">
-    <div class="header-main">
-      <h1>إدارة الخدام</h1>
-      <button class="btn-primary" (click)="openAddModal()">
-        <span class="material-icons">person_add</span>
-        إضافة خادم جديد
-      </button>
-    </div>
-  </header>
-
-  <div class="filters-bar glass-card">
-    <button type="button" class="filters-toggle btn-outline sm" (click)="showFilters = !showFilters">
-      <span class="material-icons">filter_list</span>
-     بحث متقدم
-      <span class="material-icons toggle-icon">{{ showFilters ? 'expand_less' : 'expand_more' }}</span>
+  <app-content-header title="إدارة الخدام">
+    <button actions class="btn-primary" (click)="openAddModal()">
+      <span class="material-icons">person_add</span>
+      إضافة خادم جديد
     </button>
-    <div class="filters-panel" *ngIf="showFilters">
-      <div class="filters-grid">
-        <div class="form-group">
-          <label>بحث (اسم، اسم مستخدم)</label>
-          <input type="text" [(ngModel)]="filters.search" (ngModelChange)="applyFilters()" class="form-input" placeholder="بحث..." />
-        </div>
-        <div class="form-group">
-          <label>الدور</label>
-          <select [(ngModel)]="filters.role" (ngModelChange)="applyFilters()" class="form-input">
-            <option value="">— الكل —</option>
-            <option value="Servant">خادم</option>
-            <option value="Manager">مسئول</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>الحالة</label>
-          <select [(ngModel)]="filters.status" (ngModelChange)="applyFilters()" class="form-input">
-            <option value="">— الكل —</option>
-            <option value="active">نشط</option>
-            <option value="inactive">متوقف</option>
-          </select>
-        </div>
-      </div>
-      <div class="filters-actions">
-        <button type="button" class="btn-outline sm" (click)="clearFilters()">مسح خيارات البحث</button>
-        <span class="filter-count">{{ totalCount }} خادم</span>
-      </div>
-    </div>
-  </div>
+  </app-content-header>
 
-  <div class="glass-card table-container">
+  <app-filters-bar [open]="showFilters" (openChange)="showFilters = !showFilters">
+    <div class="filters-grid">
+      <app-form-field label="بحث (اسم، اسم مستخدم)">
+        <input type="text" [(ngModel)]="filters.search" (ngModelChange)="applyFilters()" class="form-input" placeholder="بحث..." />
+      </app-form-field>
+      <app-form-field label="الدور">
+        <select [(ngModel)]="filters.role" (ngModelChange)="applyFilters()" class="form-input">
+          <option value="">— الكل —</option>
+          <option value="Servant">خادم</option>
+          <option value="Manager">مسئول</option>
+          <option value="Secretary">سكرتارية</option>
+        </select>
+      </app-form-field>
+      <app-form-field label="الحالة">
+        <select [(ngModel)]="filters.status" (ngModelChange)="applyFilters()" class="form-input">
+          <option value="">— الكل —</option>
+          <option value="active">نشط</option>
+          <option value="inactive">متوقف</option>
+        </select>
+      </app-form-field>
+    </div>
+    <div class="filters-actions">
+      <button type="button" class="btn-outline sm" (click)="clearFilters()">مسح خيارات البحث</button>
+      <span class="filter-count">{{ totalCount }} خادم</span>
+    </div>
+  </app-filters-bar>
+
+  <app-card class="table-container">
     <table *ngIf="!loading">
       <thead>
         <tr>
@@ -61,8 +49,8 @@
       </thead>
       <tbody>
         <tr *ngFor="let s of servants" class="row-clickable" (click)="viewServant(s)">
-          <td>{{s.fullName}}</td>
-          <td>{{s.userName}}</td>
+          <td>{{ s.fullName }}</td>
+          <td>{{ s.userName }}</td>
           <td>
             <span class="badge" [class.manager]="s.role === 'Manager'" [class.priest]="s.role === 'Priest'">{{ roleLabel(s.role) }}</span>
           </td>
@@ -71,103 +59,90 @@
           <td>{{ servantStatsMap[s.id]?.lastVisitDate ? (servantStatsMap[s.id].lastVisitDate | date:'dd/MM/yyyy') : '—' }}</td>
           <td>
             <span class="status-dot" [class.active]="s.isActive"></span>
-            {{s.isActive ? 'نشط' : 'متوقف'}}
+            {{ s.isActive ? 'نشط' : 'متوقف' }}
           </td>
           <td (click)="$event.stopPropagation()">
             <button class="btn-outline sm" (click)="openEdit(s)">تعديل</button>
-            <button class="btn-outline sm" (click)="toggleServantStatus(s)">{{s.isActive ? 'تعطيل' : 'تفعيل'}}</button>
+            <button class="btn-outline sm" (click)="toggleServantStatus(s)">{{ s.isActive ? 'تعطيل' : 'تفعيل' }}</button>
             <button class="btn-outline sm danger" (click)="deleteServant(s)">حذف</button>
           </td>
         </tr>
       </tbody>
     </table>
-    <div *ngIf="loading" class="p-4 text-center">جاري التحميل...</div>
-  </div>
+    <app-loader *ngIf="loading" />
+  </app-card>
 
-  <div class="pagination" *ngIf="totalCount > 0">
-    <span class="pagination-info">{{ (page - 1) * pageSize + 1 }} - {{ (page - 1) * pageSize + servants.length }} من {{ totalCount }}</span>
-    <label class="pagination-size">
-      عرض
-      <select class="form-input sm" [ngModel]="pageSize" (ngModelChange)="setPageSize($event)">
-        <option *ngFor="let n of pageSizeOptions" [value]="n">{{ n }}</option>
-      </select>
-    </label>
-    <button type="button" class="btn-outline sm" [disabled]="page <= 1" (click)="goToPage(page - 1)">السابق</button>
-    <span class="page-num">صفحة {{ page }} من {{ totalPages }}</span>
-    <button type="button" class="btn-outline sm" [disabled]="page >= totalPages" (click)="goToPage(page + 1)">التالي</button>
-  </div>
+  <app-pagination
+    *ngIf="totalCount > 0"
+    [total]="totalCount"
+    [page]="page"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="pageSizeOptions"
+    [currentPageCount]="servants.length"
+    (pageChange)="goToPage($event)"
+    (pageSizeChange)="setPageSize($event)"
+  />
 </div>
 
-<!-- Modal outside animate-slide so position:fixed is relative to viewport -->
-<div class="modal-overlay" *ngIf="showModal">
-  <div class="glass-card modal-content animate-slide">
-    <h3>إضافة خادم جديد</h3>
-    <form (ngSubmit)="onCreateServant()">
-      <div class="form-grid">
-        <div class="form-group">
-          <label>الاسم الكامل</label>
-          <input type="text" [(ngModel)]="newServant.fullName" name="fullName" class="form-input" required>
-        </div>
-        <div class="form-group">
-          <label>اسم المستخدم</label>
-          <input type="text" [(ngModel)]="newServant.userName" name="userName" class="form-input" required>
-        </div>
-        <div class="form-group">
-          <label>البريد الإلكتروني</label>
-          <input type="email" [(ngModel)]="newServant.email" name="email" class="form-input" required>
-        </div>
-        <div class="form-group">
-          <label>رقم الهاتف</label>
-          <input type="text" [(ngModel)]="newServant.phone" name="phone" class="form-input">
-        </div>
-        <div class="form-group">
-          <label>كلمة المرور</label>
-          <input type="password" [(ngModel)]="newServant.password" name="password" class="form-input" required>
-        </div>
-        <div class="form-group">
-          <label>الدور</label>
-          <select [(ngModel)]="newServant.role" name="role" class="form-input">
-            <option value="Servant">خادم</option>
-            <option value="Manager">مسئول</option>
-            <option value="Priest" [disabled]="priestAlreadyExists">الاب الكاهن المسئول (مستخدم واحد فقط)</option>
-          </select>
-          <p class="muted sm" *ngIf="priestAlreadyExists">يوجد بالفعل مستخدم بدور الاب الكاهن المسئول.</p>
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn-outline" (click)="showModal = false">إلغاء</button>
-        <button type="submit" class="btn-primary">حفظ البيانات</button>
-      </div>
+<app-modal title="إضافة خادم جديد" [visible]="showModal" (close)="showModal = false">
+  <div body>
+    <form (ngSubmit)="onCreateServant()" id="addServantForm">
+    <div class="form-grid">
+      <app-form-field label="الاسم الكامل">
+        <input type="text" [(ngModel)]="newServant.fullName" name="fullName" class="form-input" required />
+      </app-form-field>
+      <app-form-field label="اسم المستخدم">
+        <input type="text" [(ngModel)]="newServant.userName" name="userName" class="form-input" required />
+      </app-form-field>
+      <app-form-field label="البريد الإلكتروني">
+        <input type="email" [(ngModel)]="newServant.email" name="email" class="form-input" required />
+      </app-form-field>
+      <app-form-field label="رقم الهاتف">
+        <input type="text" [(ngModel)]="newServant.phone" name="phone" class="form-input" />
+      </app-form-field>
+      <app-form-field label="كلمة المرور">
+        <input type="password" [(ngModel)]="newServant.password" name="password" class="form-input" required />
+      </app-form-field>
+      <app-form-field label="الدور">
+        <select [(ngModel)]="newServant.role" name="role" class="form-input">
+          <option value="Servant">خادم</option>
+          <option value="Manager">مسئول</option>
+          <option value="Secretary">سكرتارية</option>
+          <option value="Priest" [disabled]="priestAlreadyExists">الاب الكاهن المسئول (مستخدم واحد فقط)</option>
+        </select>
+        <p class="muted sm" *ngIf="priestAlreadyExists">يوجد بالفعل مستخدم بدور الاب الكاهن المسئول.</p>
+      </app-form-field>
+    </div>
     </form>
   </div>
-</div>
+  <div actions>
+    <button type="button" class="btn-outline" (click)="showModal = false">إلغاء</button>
+    <button type="submit" class="btn-primary" form="addServantForm">حفظ البيانات</button>
+  </div>
+</app-modal>
 
-<div class="modal-overlay" *ngIf="showEditModal">
-  <div class="glass-card modal-content animate-slide">
-    <h3>تعديل الخادم</h3>
-    <form (ngSubmit)="onUpdateServant()">
-      <div class="form-grid">
-        <div class="form-group">
-          <label>الاسم الكامل</label>
-          <input type="text" [(ngModel)]="editForm.fullName" name="editFullName" class="form-input" required>
-        </div>
-        <div class="form-group">
-          <label>رقم الهاتف</label>
-          <input type="text" [(ngModel)]="editForm.phone" name="editPhone" class="form-input">
-        </div>
-        <div class="form-group">
-          <label>الحالة</label>
-          <select [(ngModel)]="editForm.isActive" name="editIsActive" class="form-input">
-            <option [value]="true">نشط</option>
-            <option [value]="false">متوقف</option>
-          </select>
-        </div>
-      </div>
-      <p class="muted" *ngIf="editingServant">اسم المستخدم: {{ editingServant.userName }}</p>
-      <div class="modal-actions">
-        <button type="button" class="btn-outline" (click)="closeEdit()">إلغاء</button>
-        <button type="submit" class="btn-primary">حفظ التعديلات</button>
-      </div>
+<app-modal title="تعديل الخادم" [visible]="showEditModal" (close)="closeEdit()">
+  <div body>
+    <form (ngSubmit)="onUpdateServant()" id="editServantForm">
+    <div class="form-grid">
+      <app-form-field label="الاسم الكامل">
+        <input type="text" [(ngModel)]="editForm.fullName" name="editFullName" class="form-input" required />
+      </app-form-field>
+      <app-form-field label="رقم الهاتف">
+        <input type="text" [(ngModel)]="editForm.phone" name="editPhone" class="form-input" />
+      </app-form-field>
+      <app-form-field label="الحالة">
+        <select [(ngModel)]="editForm.isActive" name="editIsActive" class="form-input">
+          <option [value]="true">نشط</option>
+          <option [value]="false">متوقف</option>
+        </select>
+      </app-form-field>
+    </div>
+    <p class="muted" *ngIf="editingServant">اسم المستخدم: {{ editingServant.userName }}</p>
     </form>
   </div>
-</div>
+  <div actions>
+    <button type="button" class="btn-outline" (click)="closeEdit()">إلغاء</button>
+    <button type="submit" class="btn-primary" form="editServantForm">حفظ التعديلات</button>
+  </div>
+</app-modal>

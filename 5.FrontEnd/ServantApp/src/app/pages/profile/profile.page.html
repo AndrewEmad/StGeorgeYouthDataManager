@@ -1,0 +1,61 @@
+<div class="profile-wrapper">
+  <main class="container">
+    <p class="text-muted animate-fade">تعديل البريد الإلكتروني ورقم التليفون وكلمة المرور</p>
+
+    @if (profileLoading) {
+      <app-loader message="جاري التحميل..." />
+    }
+
+    @if (!profileLoading && profile) {
+      <div class="profile-sections">
+        <app-card [class]="'profile-section'">
+          <h2>البيانات الشخصية</h2>
+          <form (ngSubmit)="saveProfile()">
+            <div class="form-group">
+              <label>الاسم الكامل</label>
+              <p class="form-readonly">{{ fullName || '—' }}</p>
+            </div>
+            <div class="form-group">
+              <label>البريد الإلكتروني</label>
+              <input type="email" [(ngModel)]="email" name="email" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label>رقم التليفون</label>
+              <input type="tel" [(ngModel)]="phone" name="phone" class="form-input" />
+            </div>
+            @if (profileError) {
+              <p class="error-msg">{{ profileError }}</p>
+            }
+            <button type="submit" class="btn-primary" [disabled]="profileSaving">
+              {{ profileSaving ? 'جاري الحفظ...' : 'حفظ التعديلات' }}
+            </button>
+          </form>
+        </app-card>
+
+        <app-card [class]="'profile-section'">
+          <h2>تغيير كلمة المرور</h2>
+          <form (ngSubmit)="changePassword()">
+            <div class="form-group">
+              <label>كلمة المرور الحالية</label>
+              <input type="password" [(ngModel)]="currentPassword" name="currentPassword" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label>كلمة المرور الجديدة</label>
+              <input type="password" [(ngModel)]="newPassword" name="newPassword" class="form-input" placeholder="6 أحرف على الأقل" />
+            </div>
+            <div class="form-group">
+              <label>تأكيد كلمة المرور الجديدة</label>
+              <input type="password" [(ngModel)]="confirmPassword" name="confirmPassword" class="form-input" />
+            </div>
+            @if (passwordError) {
+              <p class="error-msg">{{ passwordError }}</p>
+            }
+            <button type="submit" class="btn-outline" [disabled]="passwordSaving">
+              {{ passwordSaving ? 'جاري التغيير...' : 'تغيير كلمة المرور' }}
+            </button>
+          </form>
+        </app-card>
+      </div>
+    }
+  </main>
+</div>

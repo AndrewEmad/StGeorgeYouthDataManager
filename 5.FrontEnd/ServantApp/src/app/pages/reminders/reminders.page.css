@@ -1,0 +1,112 @@
+.reminders-wrapper {
+  padding-bottom: 24px;
+}
+
+.reminders-wrapper .container {
+  margin: 0 20px;
+}
+
+:host ::ng-deep .reminders-section.glass-card {
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.reminders-section h2 {
+  margin: 0 0 20px 0;
+  font-size: 1.15rem;
+}
+
+.reminders-section .form-group {
+  margin-bottom: 16px;
+}
+
+.reminders-section .form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.reminders-section .form-input {
+  width: 100%;
+  max-width: 200px;
+}
+
+.reminders-section .section-msg {
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.reminders-section .btn-primary {
+  margin-top: 8px;
+}
+
+.days-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  align-items: center;
+}
+
+.day-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.day-check input {
+  cursor: pointer;
+}
+
+.add-form .btn-primary {
+  margin-top: 12px;
+}
+
+.slots-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.slot-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.slot-item:last-child {
+  border-bottom: none;
+}
+
+.slot-time {
+  font-weight: 600;
+  min-width: 56px;
+}
+
+.slot-days {
+  flex: 1;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.btn-remove {
+  background: transparent;
+  border: none;
+  color: var(--error);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-remove .material-icons {
+  font-size: 22px;
+}
+
+.error-msg {
+  color: var(--error);
+}

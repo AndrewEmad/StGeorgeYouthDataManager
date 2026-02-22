@@ -1,0 +1,46 @@
+<div class="animate-slide">
+  <div class="page-header">
+    <h2>تسجيل الحضور</h2>
+    <p class="subtitle">تسجيل حضور المخدومين لليوم المحدد</p>
+  </div>
+
+  <app-card class="attendance-card">
+    <div class="form-row">
+      <div class="form-group">
+        <label>التاريخ</label>
+        <span class="date-input-wrap" (click)="dateInput.showPicker()"><input #dateInput type="date" [(ngModel)]="attendanceDate" class="form-input" /></span>
+      </div>
+      <div class="form-group flex-grow">
+        <label>بحث بالاسم</label>
+        <input type="text" [(ngModel)]="nameFilter" (ngModelChange)="onFilterChange()" class="form-input" placeholder="اكتب الاسم للتصفية..." />
+      </div>
+    </div>
+
+    <p class="error-msg" *ngIf="error">{{ error }}</p>
+    <p class="success-msg" *ngIf="success">{{ success }}</p>
+
+    <div class="list-section">
+      <div class="list-header">
+        <label class="checkbox-label">
+          <input type="checkbox" [checked]="selectedStudentIds.size === studentList.length && studentList.length > 0" (change)="selectAllStudents()" />
+          تحديد الكل
+        </label>
+        <span class="count">{{ selectedStudentIds.size }} من {{ studentList.length }}</span>
+      </div>
+      <div class="list-body">
+        <app-loader *ngIf="loading" />
+        <div *ngIf="!loading && studentList.length === 0" class="empty">لا يوجد مخدومين أو لا توجد نتائج للبحث</div>
+        <label *ngFor="let s of studentList" class="list-item">
+          <input type="checkbox" [checked]="selectedStudentIds.has(s.id)" (change)="toggleStudent(s.id)" />
+          <span>{{ s.fullName }}</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-primary" (click)="submit()" [disabled]="saving">
+        {{ saving ? 'جاري الحفظ...' : 'تسجيل الحضور' }}
+      </button>
+    </div>
+  </app-card>
+</div>

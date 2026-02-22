@@ -1,0 +1,14 @@
+<div class="pagination">
+  <span class="pagination-info">{{ from() }} - {{ to() }} من {{ total() }}</span>
+  <label class="pagination-size">
+    عرض
+    <select class="form-input sm" [ngModel]="pageSize()" (ngModelChange)="pageSizeChange.emit(+$event)">
+      @for (n of pageSizeOptions(); track n) {
+        <option [value]="n">{{ n }}</option>
+      }
+    </select>
+  </label>
+  <button type="button" class="btn-outline sm" [disabled]="page() <= 1" (click)="pageChange.emit(page() - 1)">السابق</button>
+  <span class="page-num">صفحة {{ page() }} من {{ totalPages() }}</span>
+  <button type="button" class="btn-outline sm" [disabled]="page() >= totalPages()" (click)="pageChange.emit(page() + 1)">التالي</button>
+</div>

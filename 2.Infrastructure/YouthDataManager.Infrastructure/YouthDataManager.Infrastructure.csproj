@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\1.Domain\YouthDataManager.Domain\YouthDataManager.Domain.csproj" />
-    <ProjectReference Include="..\..\3.Services\Reports\YouthDataManager.Reports.Service.Abstractions\YouthDataManager.Reports.Service.Abstractions.csproj" />
+    <ProjectReference Include="..\..\3.Services\YouthDataManager.Services.Abstractions\YouthDataManager.Services.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,12 @@
+<div class="filters-bar glass-card">
+  <button type="button" class="filters-toggle btn-outline sm" (click)="toggle()">
+    <span class="material-icons">filter_list</span>
+    {{ toggleLabel() }}
+    <span class="material-icons toggle-icon">{{ open() ? 'expand_less' : 'expand_more' }}</span>
+  </button>
+  @if (open()) {
+    <div class="filters-panel">
+      <ng-content />
+    </div>
+  }
+</div>

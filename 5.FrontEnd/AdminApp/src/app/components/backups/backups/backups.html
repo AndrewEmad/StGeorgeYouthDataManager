@@ -1,11 +1,11 @@
 <div class="animate-slide">
-  <header class="content-header">
-    <h1>إدارة البيانات والنسخ الاحتياطي</h1>
-    <p class="text-muted">تصدير التقارير الشاملة وإدارة قواعد البيانات</p>
-  </header>
+  <app-content-header
+    title="إدارة البيانات والنسخ الاحتياطي"
+    subtitle="تصدير التقارير الشاملة وإدارة قواعد البيانات"
+  />
 
   <div class="grid-2">
-    <div class="glass-card p-6">
+    <app-card class="p-6">
       <div class="card-header">
         <span class="material-icons">download</span>
         <h3>تصدير البيانات (Excel)</h3>
@@ -13,13 +13,13 @@
       <p class="text-muted mb-4">تصدير قائمة كاملة بالمخدومين مع بيانات التواصل والخدمة.</p>
       <div class="flex-column gap-2">
         <button class="btn-primary w-full mb-3" (click)="exportStudents()">
-          تصدير ملف Students.xlsx
+         تصدير المخدومين
         </button>
         <button class="btn-outline w-full mb-3" (click)="exportCalls()">
           تصدير سجل الافتقاد التليفوني
         </button>
         <button class="btn-outline w-full" (click)="exportVisits()">تصدير سجل الزيارات</button>
       </div>
-    </div>
+    </app-card>
   </div>
 </div>

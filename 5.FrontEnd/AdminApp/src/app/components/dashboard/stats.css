@@ -18,6 +18,12 @@
   gap: 16px;
 }
 
+.priest-card-section .priest-card .s-info-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .priest-card-section .priest-card .s-info h3 {
   font-size: 1rem;
   margin: 0 0 4px 0;

@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AssignmentRequestService } from '../../services/assignment-request.service';
+import { ContentHeaderComponent, LoaderComponent, EmptyStateComponent, RequestCardComponent } from '../../components/common/common';
 
 @Component({
   selector: 'app-assignment-requests-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ContentHeaderComponent, LoaderComponent, EmptyStateComponent, RequestCardComponent],
   templateUrl: './assignment-requests.page.html',
   styleUrls: ['./assignment-requests.page.css']
 })

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { ContentHeaderComponent } from '../../components/common/common';
 
 interface ReportCard {
   title: string;
@@ -11,7 +12,7 @@ interface ReportCard {
 @Component({
   selector: 'app-servant-follow-up-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ContentHeaderComponent],
   templateUrl: './servant-follow-up.page.html',
   styleUrls: ['./servant-follow-up.page.css']
 })

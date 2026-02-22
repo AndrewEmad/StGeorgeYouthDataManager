@@ -1,0 +1,65 @@
+<div class="reminders-wrapper">
+  <main class="container">
+    <p class="text-muted animate-fade">اضبط وقتاً وأيام الأسبوع لكل تذكير.</p>
+
+    <app-card [class]="'reminders-section'">
+      <h2>الإشعارات</h2>
+      @if (!permissionGranted && !permissionDenied) {
+        <p class="section-msg">للحصول على تذكيرات، يرجى السماح بالإشعارات.</p>
+        <button type="button" class="btn-primary" (click)="requestPermission()">تفعيل التذكيرات</button>
+      }
+      @if (permissionDenied) {
+        <p class="section-msg">الإشعارات مُرفوضة. يمكنك تفعيلها من إعدادات المتصفح.</p>
+      }
+      @if (permissionMessage) {
+        <p class="section-msg" [class.error-msg]="permissionDenied">{{ permissionMessage }}</p>
+      }
+    </app-card>
+
+    <app-card [class]="'reminders-section'">
+      <h2>إضافة تذكير</h2>
+      <div class="add-form">
+        <div class="form-group">
+          <label>الوقت</label>
+          <input type="time" [(ngModel)]="newTime" name="newTime" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label>الأيام</label>
+          <div class="days-row">
+            <label class="day-check">
+              <input type="checkbox" [checked]="allDaysChecked" (change)="toggleAllDays()" /> كل الأيام
+            </label>
+            @for (i of dayNumbers; track i) {
+              <label class="day-check">
+                <input type="checkbox" [checked]="isDaySelected(i)" (change)="toggleDay(i)" />
+                {{ dayNames[i] }}
+              </label>
+            }
+          </div>
+        </div>
+        <button type="button" class="btn-primary" (click)="addSlot()" [disabled]="(allDaysChecked ? 7 : newDays.length) === 0">
+          إضافة
+        </button>
+      </div>
+    </app-card>
+
+    <app-card [class]="'reminders-section'">
+      <h2>التذكيرات الحالية</h2>
+      @if (slots.length === 0) {
+        <p class="section-msg text-muted">لا توجد تذكيرات. أضف تذكيراً أعلاه.</p>
+      } @else {
+        <ul class="slots-list">
+          @for (slot of slots; track $index; let i = $index) {
+            <li class="slot-item">
+              <span class="slot-time">{{ slot.time }}</span>
+              <span class="slot-days">{{ daysLabel(slot) }}</span>
+              <button type="button" class="btn-remove" (click)="removeSlot(i)" title="حذف">
+                <span class="material-icons">delete</span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </app-card>
+  </main>
+</div>

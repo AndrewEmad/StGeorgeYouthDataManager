@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RemovalRequestService } from '../../services/removal-request.service';
+import { ContentHeaderComponent, LoaderComponent, EmptyStateComponent, RequestCardComponent } from '../../components/common/common';
 
 @Component({
   selector: 'app-removal-requests-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ContentHeaderComponent, LoaderComponent, EmptyStateComponent, RequestCardComponent],
   templateUrl: './removal-requests.page.html',
   styleUrls: ['./removal-requests.page.css']
 })

@@ -1,13 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { StudentQueriesService, StudentEditLogDto } from '../../services/student-queries.service';
 import { FollowUpService, CallLogDto, HomeVisitDto } from '../../services/follow-up.service';
+import { ContentHeaderComponent, LoaderComponent, DetailSectionComponent } from '../../components/common/common';
 
 @Component({
   selector: 'app-student-detail-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, ContentHeaderComponent, LoaderComponent, DetailSectionComponent],
   templateUrl: './student-detail.page.html',
   styleUrls: ['./student-detail.page.css']
 })

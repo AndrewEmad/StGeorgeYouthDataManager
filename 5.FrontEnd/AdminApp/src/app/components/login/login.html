@@ -1,5 +1,5 @@
 <div class="login-container">
-  <div class="glass-card login-card animate-slide">
+  <app-card class="login-card animate-slide">
     <div class="login-header">
       <div class="logo">
         <span class="material-icons logo-icon">admin_panel_settings</span>
@@ -9,31 +9,31 @@
     </div>
 
     <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
-      <div class="form-group">
-        <label>اسم المستخدم</label>
-        <input 
-          type="text" 
-          [(ngModel)]="username" 
-          name="username" 
-          class="form-input" 
+      <app-form-field label="اسم المستخدم">
+        <input
+          type="text"
+          [(ngModel)]="username"
+          name="username"
+          class="form-input"
           placeholder="أدخل اسم المستخدم"
-          required>
-      </div>
+          required
+        />
+      </app-form-field>
 
-      <div class="form-group">
-        <label>كلمة المرور</label>
-        <input 
-          type="password" 
-          [(ngModel)]="password" 
-          name="password" 
-          class="form-input" 
+      <app-form-field label="كلمة المرور">
+        <input
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          class="form-input"
           placeholder="أدخل كلمة المرور"
-          required>
-      </div>
+          required
+        />
+      </app-form-field>
 
       <div *ngIf="error" class="error-msg">
         <span class="material-icons">error_outline</span>
-        {{error}}
+        {{ error }}
       </div>
 
       <button type="submit" class="btn-primary" [disabled]="loading">
@@ -41,5 +41,5 @@
         <span *ngIf="loading" class="spinner"></span>
       </button>
     </form>
-  </div>
+  </app-card>
 </div>

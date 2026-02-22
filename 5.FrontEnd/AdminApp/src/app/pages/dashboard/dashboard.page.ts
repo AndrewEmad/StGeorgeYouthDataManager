@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { DashboardComponent } from '../../components/dashboard/dashboard';
+import { LayoutComponent } from '../../components/layout/layout';
 
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [DashboardComponent],
+  imports: [LayoutComponent],
   templateUrl: './dashboard.page.html'
 })
 export class DashboardPage {}

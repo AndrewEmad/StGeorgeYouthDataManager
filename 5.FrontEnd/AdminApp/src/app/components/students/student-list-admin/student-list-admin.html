@@ -1,10 +1,6 @@
 <div class="animate-slide">
-  <header class="content-header flex-header">
-    <div>
-      <h1>إدارة المخدومين</h1>
-      <p class="text-muted">عرض وتوزيع المخدومين على الخدام</p>
-    </div>
-    <div class="header-actions">
+  <app-content-header title="إدارة المخدومين" subtitle="عرض وتوزيع المخدومين على الخدام">
+    <div actions class="header-actions">
       <button type="button" class="btn-outline" (click)="openBulkUploadModal()" [disabled]="uploadingCsv">
         <span class="material-icons">upload_file</span>
         {{ uploadingCsv ? 'جاري الاستيراد...' : 'استيراد من ملف' }}
@@ -14,9 +10,9 @@
         إضافة مخدوم
       </button>
     </div>
-  </header>
+  </app-content-header>
 
-  <div class="upload-result glass-card" *ngIf="uploadResult">
+  <app-card *ngIf="uploadResult" class="upload-result">
     <div class="upload-result-header">
       <span class="material-icons">info</span>
       <strong>نتيجة الاستيراد:</strong> تم استيراد {{ uploadResult.created }} مخدوم.
@@ -28,65 +24,52 @@
         <li *ngFor="let e of uploadResult.errors">صف {{ e.row }}: {{ e.message }}</li>
       </ul>
     </div>
-  </div>
+  </app-card>
 
-  <div class="filters-bar glass-card">
-    <button type="button" class="filters-toggle btn-outline sm" (click)="showFilters = !showFilters">
-      <span class="material-icons">filter_list</span>
-      بحث متقدم
-      <span class="material-icons toggle-icon">{{ showFilters ? 'expand_less' : 'expand_more' }}</span>
-    </button>
-    <div class="filters-panel" *ngIf="showFilters">
-      <div class="filters-grid">
-        <div class="form-group">
-          <label>بحث (اسم، تليفون، منطقة)</label>
-          <input type="text" [(ngModel)]="filters.search" (ngModelChange)="applyFilters()" class="form-input" placeholder="بحث..." />
-        </div>
-        <div class="form-group">
-          <label>المنطقة</label>
-          <select [(ngModel)]="filters.area" (ngModelChange)="applyFilters()" class="form-input">
-            <option value="">— الكل —</option>
-            <option *ngFor="let a of regionOptions" [value]="a">{{ a }}</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>السنة الدراسية</label>
-          <select [(ngModel)]="filters.academicYear" (ngModelChange)="applyFilters()" class="form-input">
-            <option value="">— الكل —</option>
-            <option *ngFor="let y of academicYearOptions" [value]="y">{{ y }}</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>النوع</label>
-          <select [(ngModel)]="filters.gender" (ngModelChange)="applyFilters()" class="form-input">
-            <option value="">— الكل —</option>
-            <option value="0">ذكر</option>
-            <option value="1">أنثى</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>الخادم</label>
-          <select [(ngModel)]="filters.servantId" (ngModelChange)="applyFilters()" class="form-input">
-            <option value="">— الكل —</option>
-            <option value="_none">غير مخصص</option>
-            <option *ngFor="let serv of servants" [value]="serv.id">{{ serv.fullName }}</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>التخصيص</label>
-          <select [(ngModel)]="filters.hasServant" (ngModelChange)="applyFilters()" class="form-input">
-            <option value="">— الكل —</option>
-            <option value="yes">مخصص لخادم</option>
-            <option value="no">غير مخصص</option>
-          </select>
-        </div>
-      </div>
-      <div class="filters-actions">
-        <button type="button" class="btn-outline sm" (click)="clearFilters()">مسح خيارات البحث</button>
-        <span class="filter-count">{{ totalCount }} مخدوم</span>
-      </div>
+  <app-filters-bar [open]="showFilters" (openChange)="showFilters = !showFilters">
+    <div class="filters-grid">
+      <app-form-field label="بحث (اسم، تليفون، منطقة)">
+        <input type="text" [(ngModel)]="filters.search" (ngModelChange)="applyFilters()" class="form-input" placeholder="بحث..." />
+      </app-form-field>
+      <app-form-field label="المنطقة">
+        <select [(ngModel)]="filters.area" (ngModelChange)="applyFilters()" class="form-input">
+          <option value="">— الكل —</option>
+          <option *ngFor="let a of regionOptions" [value]="a">{{ a }}</option>
+        </select>
+      </app-form-field>
+      <app-form-field label="السنة الدراسية">
+        <select [(ngModel)]="filters.academicYear" (ngModelChange)="applyFilters()" class="form-input">
+          <option value="">— الكل —</option>
+          <option *ngFor="let y of academicYearOptions" [value]="y">{{ y }}</option>
+        </select>
+      </app-form-field>
+      <app-form-field label="النوع">
+        <select [(ngModel)]="filters.gender" (ngModelChange)="applyFilters()" class="form-input">
+          <option value="">— الكل —</option>
+          <option value="0">ذكر</option>
+          <option value="1">أنثى</option>
+        </select>
+      </app-form-field>
+      <app-form-field label="الخادم">
+        <select [(ngModel)]="filters.servantId" (ngModelChange)="applyFilters()" class="form-input">
+          <option value="">— الكل —</option>
+          <option value="_none">غير مخصص</option>
+          <option *ngFor="let serv of servants" [value]="serv.id">{{ serv.fullName }}</option>
+        </select>
+      </app-form-field>
+      <app-form-field label="التخصيص">
+        <select [(ngModel)]="filters.hasServant" (ngModelChange)="applyFilters()" class="form-input">
+          <option value="">— الكل —</option>
+          <option value="yes">مخصص لخادم</option>
+          <option value="no">غير مخصص</option>
+        </select>
+      </app-form-field>
     </div>
-  </div>
+    <div class="filters-actions">
+      <button type="button" class="btn-outline sm" (click)="clearFilters()">مسح خيارات البحث</button>
+      <span class="filter-count">{{ totalCount }} مخدوم</span>
+    </div>
+  </app-filters-bar>
 
   <div class="bulk-actions" *ngIf="selectedStudentIds.size > 0">
     <span class="selected-count">{{ selectedStudentIds.size }} مخدوم محدد</span>
@@ -96,7 +79,7 @@
     </button>
   </div>
 
-  <div class="glass-card table-container">
+  <app-card class="table-container">
     <table *ngIf="!loading">
       <thead>
         <tr>
@@ -133,20 +116,19 @@
         </tr>
       </tbody>
     </table>
-  </div>
+    <app-loader *ngIf="loading" />
+  </app-card>
 
-  <div class="pagination" *ngIf="totalCount > 0">
-    <span class="pagination-info">{{ (page - 1) * pageSize + 1 }} - {{ (page - 1) * pageSize + students.length }} من {{ totalCount }}</span>
-    <label class="pagination-size">
-      عرض
-      <select class="form-input sm" [ngModel]="pageSize" (ngModelChange)="setPageSize($event)">
-        <option *ngFor="let n of pageSizeOptions" [value]="n">{{ n }}</option>
-      </select>
-    </label>
-    <button type="button" class="btn-outline sm" [disabled]="page <= 1" (click)="goToPage(page - 1)">السابق</button>
-    <span class="page-num">صفحة {{ page }} من {{ totalPages }}</span>
-    <button type="button" class="btn-outline sm" [disabled]="page >= totalPages" (click)="goToPage(page + 1)">التالي</button>
-  </div>
+  <app-pagination
+    *ngIf="totalCount > 0"
+    [total]="totalCount"
+    [page]="page"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="pageSizeOptions"
+    [currentPageCount]="students.length"
+    (pageChange)="goToPage($event)"
+    (pageSizeChange)="setPageSize($event)"
+  />
 </div>
 
 <input #csvFileInput type="file" accept=".csv" (change)="onCsvFileSelected($event)" class="hidden-file-input" />
@@ -165,7 +147,7 @@
       </div>
       <div class="form-group">
         <label>تاريخ الميلاد</label>
-        <span class="date-input-wrap" (click)="birthDateInput.showPicker?.()"><input #birthDateInput type="date" [(ngModel)]="newStudent.birthDate" class="form-input" /></span>
+        <span class="date-input-wrap" (click)="birthDateInput.showPicker()"><input #birthDateInput type="date" [(ngModel)]="newStudent.birthDate" class="form-input" /></span>
       </div>
       <div class="form-group">
         <label>العنوان</label>
@@ -207,7 +189,7 @@
       </div>
       <div class="modal-actions">
         <button class="btn-outline" (click)="showAddModal = false" [disabled]="addSaving">إلغاء</button>
-        <button class="btn-primary" [disabled]="addSaving || !newStudent.fullName?.trim() || !newStudent.phone?.trim()" (click)="onCreateStudent()">
+        <button class="btn-primary" [disabled]="addSaving || !newStudent.fullName.trim() || !newStudent.phone.trim()" (click)="onCreateStudent()">
           {{ addSaving ? 'جاري الحفظ...' : 'إضافة' }}
         </button>
       </div>

@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 import { ReportsService, PagedReport, ServantPerformance } from '../../services/reports.service';
+import { ContentHeaderComponent, LoaderComponent, CardComponent, PaginationComponent } from '../../components/common/common';
 
 @Component({
   selector: 'app-servant-performance-report-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, ContentHeaderComponent, LoaderComponent, CardComponent, PaginationComponent],
   templateUrl: './servant-performance-report.page.html',
   styleUrls: ['./servant-follow-up.page.css']
 })

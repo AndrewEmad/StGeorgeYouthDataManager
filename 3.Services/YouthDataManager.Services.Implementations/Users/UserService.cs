@@ -152,7 +152,7 @@ public class UserService : IUserService
         return ServiceResult<Guid>.Success(user.Id);
     }
 
-    private static readonly string[] AppRoles = { "Servant", "Manager", "Secretary", "Priest" };
+    private static readonly string[] AppRoles = { "Admin", "Servant", "Manager", "Secretary", "Priest" };
 
     public async Task<ServiceResult> UpdateAsync(Guid id, UpdateUserDto dto)
     {

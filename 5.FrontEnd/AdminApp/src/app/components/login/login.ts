@@ -10,7 +10,7 @@ import { CardComponent, FormFieldComponent } from '../common/common';
   standalone: true,
   imports: [CommonModule, FormsModule, CardComponent, FormFieldComponent],
   templateUrl: './login.html',
-  styleUrls: ['./login.css']
+  styleUrl: './login.css',
 })
 export class LoginComponent {
   username = '';
@@ -18,14 +18,17 @@ export class LoginComponent {
   error = '';
   loading = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+  ) {}
 
   onSubmit() {
     if (!this.username || !this.password) return;
-    
+
     this.loading = true;
     this.error = '';
-    
+
     this.authService.login({ username: this.username, password: this.password }).subscribe({
       next: (res) => {
         this.router.navigate(res.requiresPasswordChange ? ['/change-password'] : ['/dashboard']);
@@ -33,7 +36,7 @@ export class LoginComponent {
       error: (err) => {
         this.error = 'اسم المستخدم أو كلمة المرور غير صحيحة';
         this.loading = false;
-      }
+      },
     });
   }
 }

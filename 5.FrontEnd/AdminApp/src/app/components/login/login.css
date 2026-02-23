@@ -3,7 +3,7 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 100vh;
   padding: 20px;
   box-sizing: border-box;
 }
@@ -65,19 +65,19 @@
   margin-bottom: 15px;
 }
 
-.form-group {
+::ng-deep .form-group {
   margin-bottom: 25px;
   text-align: right;
 }
 
-.form-group label {
+::ng-deep .form-group label {
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
   font-size: 0.95rem;
 }
 
-.error-msg {
+::ng-deep .error-msg {
   background: rgba(239, 68, 68, 0.1);
   color: var(--error);
   padding: 14px;
@@ -99,6 +99,10 @@
   animation: spin 1s linear infinite;
 }
 
+.btn-primary {
+  margin-top: 20px;
+}
+
 @media (max-width: 480px) {
   .btn-primary {
     width: 100%;
@@ -107,5 +111,7 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }

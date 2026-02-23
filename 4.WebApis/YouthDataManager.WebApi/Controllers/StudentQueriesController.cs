@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YouthDataManager.Shared.Service.Abstractions;
-using Microsoft.AspNetCore.Authorization;
 using YouthDataManager.Students.Service.Abstractions.DTOs;
 using YouthDataManager.Students.Service.Abstractions.Queries;
 using YouthDataManager.WebApi.Authorization;

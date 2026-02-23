@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
     <ProjectReference Include="..\..\1.Domain\YouthDataManager.Domain\YouthDataManager.Domain.csproj" />
   </ItemGroup>
 </Project>

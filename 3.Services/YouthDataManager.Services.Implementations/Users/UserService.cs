@@ -132,6 +132,9 @@ public class UserService : IUserService
             CreatedAt = DateTime.UtcNow
         };
 
+        if (!await _roleManager.RoleExistsAsync(dto.Role))
+            return ServiceResult<Guid>.Failure($"الدور «{dto.Role}» غير موجود في النظام.");
+
         if (dto.Role == "Priest")
         {
             var existingPriests = await _userManager.GetUsersInRoleAsync("Priest");
@@ -145,7 +148,12 @@ public class UserService : IUserService
             return ServiceResult<Guid>.Failure(string.Join(", ", result.Errors.Select(e => e.Description)));
         }
 
-        await _userManager.AddToRoleAsync(user, dto.Role);
+        var addRoleResult = await _userManager.AddToRoleAsync(user, dto.Role);
+        if (!addRoleResult.Succeeded)
+        {
+            await _userManager.DeleteAsync(user);
+            return ServiceResult<Guid>.Failure(addRoleResult.Errors?.FirstOrDefault()?.Description ?? "فشل تعيين الدور.");
+        }
         
         await _logger.LogAsync("إضافة مستخدم", $"تم إضافة مستخدم جديد: {user.FullName} ({dto.Role})");
         
@@ -166,6 +174,9 @@ public class UserService : IUserService
 
         if (!string.IsNullOrWhiteSpace(dto.Role))
         {
+            if (!await _roleManager.RoleExistsAsync(dto.Role))
+                return ServiceResult.Failure($"الدور «{dto.Role}» غير موجود في النظام.");
+
             if (dto.Role == "Priest")
             {
                 var existingPriests = await _userManager.GetUsersInRoleAsync("Priest");
@@ -179,7 +190,9 @@ public class UserService : IUserService
                 if (currentRoles.Contains(role))
                     await _userManager.RemoveFromRoleAsync(user, role);
             }
-            await _userManager.AddToRoleAsync(user, dto.Role);
+            var addRoleResult = await _userManager.AddToRoleAsync(user, dto.Role);
+            if (!addRoleResult.Succeeded)
+                return ServiceResult.Failure(addRoleResult.Errors?.FirstOrDefault()?.Description ?? "فشل تعيين الدور.");
         }
 
         var result = await _userManager.UpdateAsync(user);

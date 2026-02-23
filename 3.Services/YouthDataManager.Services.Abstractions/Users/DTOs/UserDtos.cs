@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace YouthDataManager.Users.Service.Abstractions.DTOs;
 
@@ -27,10 +28,10 @@ public record CreateUserDto(
 );
 
 public record UpdateUserDto(
-    string FullName,
-    string Phone,
-    bool IsActive,
-    string? Role
+    [property: JsonPropertyName("fullName")] string FullName,
+    [property: JsonPropertyName("phone")] string Phone,
+    [property: JsonPropertyName("isActive")] bool IsActive,
+    [property: JsonPropertyName("role")] string? Role
 );
 
 public record SetPasswordDto(string NewPassword);

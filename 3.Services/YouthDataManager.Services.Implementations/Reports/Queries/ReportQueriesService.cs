@@ -98,6 +98,7 @@ public class ReportQueriesService : IReportQueriesService
             var students = await _studentRepository.GetAll(s => s);
             var servants = await _userManager.GetUsersInRoleAsync("Servant");
             var managerCount = (await _userManager.GetUsersInRoleAsync("Manager")).Count;
+            var secretaryCount = (await _userManager.GetUsersInRoleAsync("Secretary")).Count;
             var totalCalls = (await _callRepository.GetAll(c => c.Id)).Count();
             var totalVisits = (await _visitRepository.GetAll(v => v.Id)).Count();
 
@@ -112,7 +113,7 @@ public class ReportQueriesService : IReportQueriesService
 
             var dto = new ManagerDashboardDto(
                 students.Count(),
-                servants.Count + managerCount,
+                servants.Count + managerCount + secretaryCount,
                 totalCalls,
                 totalVisits,
                 callsThisWeek,

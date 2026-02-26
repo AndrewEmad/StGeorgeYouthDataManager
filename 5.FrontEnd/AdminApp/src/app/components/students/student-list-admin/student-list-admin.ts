@@ -12,7 +12,9 @@ import {
   FiltersBarComponent,
   FormFieldComponent,
   LoaderComponent,
-  PaginationComponent
+  PaginationComponent,
+  PhotoCropModalComponent,
+  ProfilePhotoInputComponent
 } from '../../common/common';
 
 @Component({
@@ -26,7 +28,9 @@ import {
     FiltersBarComponent,
     FormFieldComponent,
     LoaderComponent,
-    PaginationComponent
+    PaginationComponent,
+    PhotoCropModalComponent,
+    ProfilePhotoInputComponent
   ],
   templateUrl: './student-list-admin.html',
   styleUrls: ['./student-list-admin.css']
@@ -77,6 +81,9 @@ export class StudentListAdminComponent implements OnInit {
     servantId: null,
     birthDate: null
   };
+  newStudentPhoto: File | null = null;
+  newStudentPhotoPreviewUrl: string | null = null;
+  pendingCropFile: File | null = null;
 
   constructor(
     private studentQueries: StudentQueriesService,
@@ -240,7 +247,27 @@ export class StudentListAdminComponent implements OnInit {
       servantId: null,
       birthDate: null
     };
+    if (this.newStudentPhotoPreviewUrl) {
+      URL.revokeObjectURL(this.newStudentPhotoPreviewUrl);
+      this.newStudentPhotoPreviewUrl = null;
+    }
+    this.newStudentPhoto = null;
     this.showAddModal = true;
+  }
+
+  onNewStudentPhotoFile(file: File) {
+    this.pendingCropFile = file;
+  }
+
+  onCropConfirm(file: File) {
+    if (this.newStudentPhotoPreviewUrl) URL.revokeObjectURL(this.newStudentPhotoPreviewUrl);
+    this.newStudentPhoto = file;
+    this.newStudentPhotoPreviewUrl = URL.createObjectURL(file);
+    this.pendingCropFile = null;
+  }
+
+  onCropCancel() {
+    this.pendingCropFile = null;
   }
 
   onCreateStudent() {
@@ -255,16 +282,32 @@ export class StudentListAdminComponent implements OnInit {
       birthDate: this.newStudent.birthDate || null
     };
     this.studentCommands.create(req).subscribe({
-      next: () => {
-        this.showAddModal = false;
-        this.addSaving = false;
-        this.loadData();
+      next: (id) => {
+        if (this.newStudentPhoto) {
+          this.studentCommands.uploadPhoto(id, this.newStudentPhoto).subscribe({
+            next: () => this.finishCreateStudent(),
+            error: () => this.finishCreateStudent()
+          });
+        } else {
+          this.finishCreateStudent();
+        }
       },
       error: () => {
         this.addSaving = false;
         alert('خطأ في إضافة المخدوم');
       }
     });
+  }
+
+  private finishCreateStudent() {
+    this.showAddModal = false;
+    this.addSaving = false;
+    if (this.newStudentPhotoPreviewUrl) {
+      URL.revokeObjectURL(this.newStudentPhotoPreviewUrl);
+      this.newStudentPhotoPreviewUrl = null;
+    }
+    this.newStudentPhoto = null;
+    this.loadData();
   }
 
   openAssignModal(student: any) {

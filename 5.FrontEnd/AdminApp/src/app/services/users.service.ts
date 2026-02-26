@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface User {
@@ -12,6 +13,7 @@ export interface User {
   role: string;
   isActive: boolean;
   createdAt: string;
+  photoPath?: string | null;
 }
 
 @Injectable({
@@ -57,5 +59,18 @@ export class UsersService {
 
   setPassword(id: string, newPassword: string): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/${id}/set-password`, { newPassword });
+  }
+
+  uploadPhoto(id: string, file: File): Observable<{ photoPath: string }> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<{ photoPath: string }>(`${this.apiUrl}/${id}/photo`, form);
+  }
+
+  getPhotoBlobUrl(id: string): Observable<string | null> {
+    return this.http.get(`${this.apiUrl}/${id}/photo`, { responseType: 'blob' }).pipe(
+      map(blob => URL.createObjectURL(blob)),
+      catchError(() => of(null))
+    );
   }
 }

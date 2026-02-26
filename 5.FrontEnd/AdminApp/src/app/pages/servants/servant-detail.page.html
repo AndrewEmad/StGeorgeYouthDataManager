@@ -8,6 +8,9 @@
 
   <div *ngIf="!loading && servant" class="detail-content">
     <app-detail-section title="بيانات الخادم">
+      <div *ngIf="servantPhotoUrl" class="photo-wrap mb-2">
+        <img [src]="servantPhotoUrl" alt="صورة الخادم" class="servant-photo" />
+      </div>
       <dl class="detail-grid">
         <dt>الاسم الكامل</dt>
         <dd>{{ servant.fullName }}</dd>

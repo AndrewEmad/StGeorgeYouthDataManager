@@ -79,6 +79,12 @@ export class StudentCommandsService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
+  uploadPhoto(studentId: string, file: File): Observable<{ photoPath: string }> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<{ photoPath: string }>(`${this.apiUrl}/${studentId}/photo`, form);
+  }
+
   private static readonly CSV_TEMPLATE =
   "الاسم الكامل,العنوان,المنطقة,رقم التليفون,تاريخ الميلاد,الكلية,السنة الدراسية,أب الاعتراف,النوع\n";
 

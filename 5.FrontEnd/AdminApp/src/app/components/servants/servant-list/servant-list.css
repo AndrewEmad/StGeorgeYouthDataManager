@@ -164,6 +164,42 @@ tr.row-clickable { cursor: pointer; }
 
 .modal-content h3 { margin-bottom: 30px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; }
 
+.modal-photo-preview {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.modal-photo-preview img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.photo-saving-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+.photo-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--glass-border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: photo-spin 0.7s linear infinite;
+}
+
+@keyframes photo-spin {
+  to { transform: rotate(360deg); }
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

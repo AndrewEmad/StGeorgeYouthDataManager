@@ -138,6 +138,16 @@
     <div class="glass-card modal-content animate-slide add-modal">
       <h3>إضافة مخدوم جديد</h3>
       <div class="form-group">
+        <label>صورة (اختياري)</label>
+        <app-profile-photo-input
+          [previewUrl]="newStudentPhotoPreviewUrl"
+          [applySizeLimit]="false"
+          [disabled]="addSaving"
+          (photoSelected)="onNewStudentPhotoFile($event)"
+        />
+        <p *ngIf="addSaving" class="photo-saving-indicator"><span class="photo-spinner"></span> جاري الحفظ...</p>
+      </div>
+      <div class="form-group">
         <label>الاسم الكامل *</label>
         <input type="text" [(ngModel)]="newStudent.fullName" class="form-input" placeholder="الاسم الكامل" />
       </div>
@@ -236,6 +246,13 @@
     </div>
   </div>
 </div>
+
+<app-photo-crop-modal
+  *ngIf="pendingCropFile"
+  [sourceFile]="pendingCropFile"
+  (croppedFile)="onCropConfirm($event)"
+  (cancel)="onCropCancel()"
+/>
 
 <div class="modal-overlay" *ngIf="showBulkAssignModal">
   <div class="glass-card modal-content animate-slide sm">

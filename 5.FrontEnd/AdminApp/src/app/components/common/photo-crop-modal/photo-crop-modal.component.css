@@ -1,0 +1,33 @@
+.photo-crop-content {
+  width: 100%;
+  max-width: min(90vw, 560px);
+  padding: 24px;
+}
+
+.photo-crop-content h3 {
+  margin: 0 0 16px 0;
+  border-bottom: 1px solid var(--glass-border, rgba(255,255,255,0.1));
+  padding-bottom: 12px;
+  font-size: 1.1rem;
+}
+
+.crop-area {
+  min-height: 280px;
+  margin-bottom: 16px;
+}
+
+.crop-area image-cropper {
+  max-height: 60vh;
+}
+
+.crop-error {
+  color: #f87171;
+  font-size: 0.9rem;
+  margin: 0 0 12px 0;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -14,8 +14,9 @@ import { ContentHeaderComponent, LoaderComponent, DetailSectionComponent, StatIt
   templateUrl: './servant-detail.page.html',
   styleUrls: ['./servant-detail.page.css']
 })
-export class ServantDetailPage implements OnInit {
+export class ServantDetailPage implements OnInit, OnDestroy {
   servant: any = null;
+  servantPhotoUrl: string | null = null;
   performance: any = null;
   calls: CallLogDto[] = [];
   visits: HomeVisitDto[] = [];
@@ -40,6 +41,9 @@ export class ServantDetailPage implements OnInit {
     this.usersService.getById(id).subscribe({
       next: (user) => {
         this.servant = user;
+        if (user.photoPath) {
+          this.usersService.getPhotoBlobUrl(id).subscribe(url => this.servantPhotoUrl = url);
+        }
         let done = 0;
         const check = () => { if (++done === 3) this.loading = false; };
         this.reportsService.getServantPerformance(id).subscribe({ next: (p) => { this.performance = p; check(); }, error: check });
@@ -48,6 +52,10 @@ export class ServantDetailPage implements OnInit {
       },
       error: () => this.loading = false
     });
+  }
+
+  ngOnDestroy() {
+    if (this.servantPhotoUrl) URL.revokeObjectURL(this.servantPhotoUrl);
   }
 
   formatDate(d: string | null): string {

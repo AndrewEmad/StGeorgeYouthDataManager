@@ -1,0 +1,30 @@
+@if (visible()) {
+  <div class="modal-overlay" (click)="onCancel()">
+    <div class="glass-card modal-content photo-crop-content animate-slide" (click)="$event.stopPropagation()">
+      <h3>قص الصورة (1200×1200، بدون فقدان الجودة)</h3>
+      <div class="crop-area">
+        <image-cropper
+          #cropper
+          [imageFile]="sourceFile() ?? undefined"
+          [maintainAspectRatio]="true"
+          [aspectRatio]="1"
+          [resizeToWidth]="1200"
+          [resizeToHeight]="1200"
+          format="png"
+          output="blob"
+          [autoCrop]="true"
+          (loadImageFailed)="onLoadFailed()"
+        />
+      </div>
+      @if (cropError()) {
+        <p class="crop-error">{{ cropError() }}</p>
+      }
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" (click)="onCancel()">إلغاء</button>
+        <button type="button" class="btn-primary" (click)="onConfirm()" [disabled]="cropping()">
+          {{ cropping() ? 'جاري القص...' : 'تأكيد' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

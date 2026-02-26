@@ -10,3 +10,5 @@ export { DetailSectionComponent } from './detail-section/detail-section.componen
 export { StatItemComponent } from './stat-item/stat-item.component';
 export { BackLinkComponent } from './back-link/back-link.component';
 export { PaginationComponent } from './pagination/pagination.component';
+export { PhotoCropModalComponent } from './photo-crop-modal/photo-crop-modal.component';
+export { ProfilePhotoInputComponent } from './profile-photo-input/profile-photo-input.component';

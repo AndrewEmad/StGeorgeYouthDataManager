@@ -145,6 +145,8 @@
   text-decoration: underline;
 }
 
+.servant-detail .photo-wrap { margin-bottom: 12px; }
+.servant-detail .servant-photo { width: 120px; height: 120px; object-fit: cover; border-radius: 12px; }
 .servant-detail .mt-2 { margin-top: 12px; }
 .servant-detail .btn-secondary { display: inline-flex; align-items: center; gap: 6px; }
 .servant-detail .priest-notice { margin-top: 12px; font-size: 0.875rem; }

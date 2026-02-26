@@ -86,6 +86,15 @@
 
 <app-modal title="إضافة خادم جديد" [visible]="showModal" (close)="showModal = false">
   <div body>
+    <app-form-field label="صورة شخصية (اختياري)">
+      <app-profile-photo-input
+        [previewUrl]="newServantPhotoPreviewUrl"
+        [applySizeLimit]="false"
+        [disabled]="creatingServant"
+        (photoSelected)="onNewServantPhotoFile($event)"
+      />
+      <p *ngIf="creatingServant" class="photo-saving-indicator"><span class="photo-spinner"></span> جاري الحفظ...</p>
+    </app-form-field>
     <form (ngSubmit)="onCreateServant()" id="addServantForm">
     <div class="form-grid">
       <app-form-field label="الاسم الكامل">
@@ -116,13 +125,22 @@
     </form>
   </div>
   <div actions>
-    <button type="button" class="btn-outline" (click)="showModal = false">إلغاء</button>
-    <button type="submit" class="btn-primary" form="addServantForm">حفظ البيانات</button>
+    <button type="button" class="btn-outline" (click)="showModal = false" [disabled]="creatingServant">إلغاء</button>
+    <button type="submit" class="btn-primary" form="addServantForm" [disabled]="creatingServant">{{ creatingServant ? 'جاري الحفظ...' : 'حفظ البيانات' }}</button>
   </div>
 </app-modal>
 
 <app-modal title="تعديل الخادم" [visible]="showEditModal" (close)="closeEdit()">
   <div body>
+    <app-form-field label="تغيير الصورة (اختياري)">
+      <app-profile-photo-input
+        [previewUrl]="editServantPhotoPreviewUrl || editServantExistingPhotoUrl"
+        [applySizeLimit]="false"
+        [disabled]="editSaving"
+        (photoSelected)="onEditServantPhotoFile($event)"
+      />
+      <p *ngIf="editSaving" class="photo-saving-indicator"><span class="photo-spinner"></span> جاري الحفظ...</p>
+    </app-form-field>
     <form (ngSubmit)="onUpdateServant()" id="editServantForm">
     <div class="form-grid">
       <app-form-field label="الاسم الكامل">
@@ -151,7 +169,14 @@
     </form>
   </div>
   <div actions>
-    <button type="button" class="btn-outline" (click)="closeEdit()">إلغاء</button>
-    <button type="submit" class="btn-primary" form="editServantForm">حفظ التعديلات</button>
+    <button type="button" class="btn-outline" (click)="closeEdit()" [disabled]="editSaving">إلغاء</button>
+    <button type="submit" class="btn-primary" form="editServantForm" [disabled]="editSaving">{{ editSaving ? 'جاري الحفظ...' : 'حفظ التعديلات' }}</button>
   </div>
 </app-modal>
+
+<app-photo-crop-modal
+  *ngIf="pendingCropFile"
+  [sourceFile]="pendingCropFile"
+  (croppedFile)="onCropConfirm($event)"
+  (cancel)="onCropCancel()"
+/>

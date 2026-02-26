@@ -4,6 +4,34 @@
   margin: 0 auto;
 }
 
+.student-detail .photo-wrap { margin-bottom: 12px; }
+
+.photo-saving-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+.photo-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--glass-border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: photo-spin 0.7s linear infinite;
+}
+
+@keyframes photo-spin {
+  to { transform: rotate(360deg); }
+}
+.student-detail .student-photo { width: 120px; height: 120px; object-fit: cover; border-radius: 12px; }
+.student-detail .photo-actions .error-msg { color: #f87171; margin-right: 8px; font-size: 0.9rem; }
+
 .content-header {
   margin-bottom: 24px;
 }

@@ -11,7 +11,9 @@ import {
   CardComponent,
   LoaderComponent,
   PaginationComponent,
-  ModalComponent
+  ModalComponent,
+  PhotoCropModalComponent,
+  ProfilePhotoInputComponent
 } from '../../common/common';
 
 @Component({
@@ -26,7 +28,9 @@ import {
     CardComponent,
     LoaderComponent,
     PaginationComponent,
-    ModalComponent
+    ModalComponent,
+    PhotoCropModalComponent,
+    ProfilePhotoInputComponent
   ],
   templateUrl: './servant-list.html',
   styleUrls: ['./servant-list.css'],
@@ -64,6 +68,15 @@ export class ServantListComponent implements OnInit {
     password: '',
     role: 'Servant',
   };
+  newServantPhoto: File | null = null;
+  newServantPhotoPreviewUrl: string | null = null;
+  editServantPhoto: File | null = null;
+  editServantPhotoPreviewUrl: string | null = null;
+  editServantExistingPhotoUrl: string | null = null;
+  creatingServant = false;
+  editSaving = false;
+  pendingCropFile: File | null = null;
+  cropTarget: 'new' | 'edit' | null = null;
 
   constructor(
     private usersService: UsersService,
@@ -180,16 +193,67 @@ export class ServantListComponent implements OnInit {
     });
   }
 
+  onNewServantPhotoFile(file: File) {
+    this.pendingCropFile = file;
+    this.cropTarget = 'new';
+  }
+
+  onEditServantPhotoFile(file: File) {
+    this.pendingCropFile = file;
+    this.cropTarget = 'edit';
+  }
+
+  onCropConfirm(file: File) {
+    if (this.cropTarget === 'new') {
+      if (this.newServantPhotoPreviewUrl) URL.revokeObjectURL(this.newServantPhotoPreviewUrl);
+      this.newServantPhoto = file;
+      this.newServantPhotoPreviewUrl = URL.createObjectURL(file);
+    } else if (this.cropTarget === 'edit') {
+      if (this.editServantPhotoPreviewUrl) URL.revokeObjectURL(this.editServantPhotoPreviewUrl);
+      if (this.editServantExistingPhotoUrl) {
+        URL.revokeObjectURL(this.editServantExistingPhotoUrl);
+        this.editServantExistingPhotoUrl = null;
+      }
+      this.editServantPhoto = file;
+      this.editServantPhotoPreviewUrl = URL.createObjectURL(file);
+    }
+    this.closeCropModal();
+  }
+
+  onCropCancel() {
+    this.closeCropModal();
+  }
+
+  private closeCropModal() {
+    this.pendingCropFile = null;
+    this.cropTarget = null;
+  }
+
   onCreateServant() {
+    this.creatingServant = true;
     this.usersService.create(this.newServant).subscribe({
-      next: () => {
-        this.showModal = false;
-        this.loadServants();
-        this.resetForm();
+      next: (id) => {
+        if (this.newServantPhoto) {
+          this.usersService.uploadPhoto(id, this.newServantPhoto!).subscribe({
+            next: () => { this.finishCreateServant(); },
+            error: () => { this.finishCreateServant(); },
+          });
+        } else {
+          this.finishCreateServant();
+        }
       },
-      error: (err: any) =>
-        alert('خطأ في إنشاء الخادم: ' + (err.error?.message ?? err.error ?? err.message)),
+      error: (err: any) => {
+        this.creatingServant = false;
+        alert('خطأ في إنشاء الخادم: ' + (err.error?.message ?? err.error ?? err.message));
+      },
     });
+  }
+
+  private finishCreateServant() {
+    this.creatingServant = false;
+    this.showModal = false;
+    this.loadServants();
+    this.resetForm();
   }
 
   resetForm() {
@@ -201,11 +265,31 @@ export class ServantListComponent implements OnInit {
       password: '',
       role: 'Servant',
     };
+    if (this.newServantPhotoPreviewUrl) {
+      URL.revokeObjectURL(this.newServantPhotoPreviewUrl);
+      this.newServantPhotoPreviewUrl = null;
+    }
+    this.newServantPhoto = null;
   }
 
   openEdit(s: User) {
     this.editingServant = s;
     this.editForm = { fullName: s.fullName || '', phone: s.phone || '', isActive: s.isActive, role: s.role ?? 'Servant' };
+    this.editServantPhoto = null;
+    if (this.editServantPhotoPreviewUrl) {
+      URL.revokeObjectURL(this.editServantPhotoPreviewUrl);
+      this.editServantPhotoPreviewUrl = null;
+    }
+    if (this.editServantExistingPhotoUrl) {
+      URL.revokeObjectURL(this.editServantExistingPhotoUrl);
+      this.editServantExistingPhotoUrl = null;
+    }
+    if (s.photoPath) {
+      this.usersService.getPhotoBlobUrl(s.id).subscribe({
+        next: (url) => { this.editServantExistingPhotoUrl = url ?? null; },
+        error: () => {},
+      });
+    }
     this.usersService.getPaged({ page: 1, pageSize: 10, role: 'Priest' }).subscribe({
       next: (r) => {
         this.priestOptionDisabledInEdit = r.items.some((u: User) => u.id !== s.id);
@@ -217,19 +301,40 @@ export class ServantListComponent implements OnInit {
   closeEdit() {
     this.showEditModal = false;
     this.editingServant = null;
+    this.editServantPhoto = null;
+    if (this.editServantPhotoPreviewUrl) {
+      URL.revokeObjectURL(this.editServantPhotoPreviewUrl);
+      this.editServantPhotoPreviewUrl = null;
+    }
+    if (this.editServantExistingPhotoUrl) {
+      URL.revokeObjectURL(this.editServantExistingPhotoUrl);
+      this.editServantExistingPhotoUrl = null;
+    }
   }
 
   onUpdateServant() {
     if (!this.editingServant) return;
+    this.editSaving = true;
     this.usersService.update(this.editingServant.id, this.editForm).subscribe({
       next: () => {
         this.editingServant!.fullName = this.editForm.fullName;
         this.editingServant!.phone = this.editForm.phone;
         this.editingServant!.isActive = this.editForm.isActive;
         this.editingServant!.role = this.editForm.role;
-        this.closeEdit();
+        if (this.editServantPhoto) {
+          this.usersService.uploadPhoto(this.editingServant!.id, this.editServantPhoto).subscribe({
+            next: (res) => { this.editingServant!.photoPath = res.photoPath; this.editSaving = false; this.closeEdit(); },
+            error: () => { this.editSaving = false; this.closeEdit(); },
+          });
+        } else {
+          this.editSaving = false;
+          this.closeEdit();
+        }
       },
-      error: (err: any) => alert('خطأ في التحديث: ' + (err.error || err.message)),
+      error: (err: any) => {
+        this.editSaving = false;
+        alert('خطأ في التحديث: ' + (err.error || err.message));
+      },
     });
   }
 

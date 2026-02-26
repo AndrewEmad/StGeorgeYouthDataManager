@@ -322,4 +322,19 @@ public class ReportQueriesService : IReportQueriesService
             return ServiceResult<PagedReportResult<StudentsByGroupDto>>.Failure("An error occurred while loading students by academic year.");
         }
     }
+
+    public async Task<ServiceResult<PagedReportResult<StudentsByGroupDto>>> GetStudentsByBirthMonth(int page, int pageSize)
+    {
+        try
+        {
+            var (items, totalCount) = await _reportDataProvider.GetStudentsByBirthMonthPagedAsync(page, pageSize);
+            var paged = new PagedReportResult<StudentsByGroupDto>(items, totalCount, page, pageSize);
+            return ServiceResult<PagedReportResult<StudentsByGroupDto>>.Success(paged);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting students by birth month");
+            return ServiceResult<PagedReportResult<StudentsByGroupDto>>.Failure("An error occurred while loading students by birth month.");
+        }
+    }
 }

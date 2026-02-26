@@ -8,6 +8,8 @@ using YouthDataManager.FollowUp.Service.Abstractions.Commands;
 using YouthDataManager.FollowUp.Service.Abstractions.Queries;
 using YouthDataManager.FollowUp.Service.Implementations.Commands;
 using YouthDataManager.FollowUp.Service.Implementations.Queries;
+using YouthDataManager.Photo.Service.Abstractions;
+using YouthDataManager.Photo.Service.Implementations;
 using YouthDataManager.Reports.Service.Abstractions.Queries;
 using YouthDataManager.Reports.Service.Implementations.Queries;
 using YouthDataManager.Reports.Service.Implementations.Services;
@@ -124,5 +126,12 @@ public static class DependencyInjectionExtensions
     {
         return services
             .AddTransient<IFollowUpQueriesService, FollowUpQueriesService>();
+    }
+
+    public static IServiceCollection AddPhotoServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<PhotoUploadOptions>(configuration.GetSection(PhotoUploadOptions.SectionName));
+        services.AddScoped<IPhotoUploadService, PhotoUploadService>();
+        return services;
     }
 }

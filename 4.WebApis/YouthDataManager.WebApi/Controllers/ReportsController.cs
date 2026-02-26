@@ -120,4 +120,12 @@ public class ReportsController : ControllerBase
         if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
         return Ok(result.Data);
     }
+
+    [HttpGet("students-by-birth-month")]
+    public async Task<IActionResult> GetStudentsByBirthMonth([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var result = await _service.GetStudentsByBirthMonth(page, pageSize);
+        if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
+        return Ok(result.Data);
+    }
 }

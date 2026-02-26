@@ -74,4 +74,21 @@ public class ReportDataProvider : IReportDataProvider
         var items = pageOfGroups.Select(x => new StudentsByGroupDto(x.Key, x.Count, null)).ToList();
         return (items, totalCount);
     }
+
+    public async Task<(IReadOnlyList<StudentsByGroupDto> Items, int TotalCount)> GetStudentsByBirthMonthPagedAsync(int page, int pageSize)
+    {
+        var baseQuery = _context.Students
+            .AsNoTracking()
+            .GroupBy(s => s.BirthMonth ?? (s.BirthDate.HasValue ? s.BirthDate.Value.Month : 0))
+            .OrderBy(g => g.Key == 0 ? 13 : g.Key)
+            .Select(g => new { Key = g.Key.ToString(), Count = g.Count() });
+
+        var totalCount = await baseQuery.CountAsync();
+        var pageOfGroups = await baseQuery
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+        var items = pageOfGroups.Select(x => new StudentsByGroupDto(x.Key, x.Count, null)).ToList();
+        return (items, totalCount);
+    }
 }

@@ -22,4 +22,5 @@ public interface IReportQueriesService
     Task<ServiceResult<PagedReportResult<StudentNoContactDto>>> GetStudentsWithNoRecentContact(int days, Guid? servantId, int page, int pageSize);
     Task<ServiceResult<PagedReportResult<StudentsByGroupDto>>> GetStudentsByArea(int page, int pageSize);
     Task<ServiceResult<PagedReportResult<StudentsByGroupDto>>> GetStudentsByAcademicYear(int page, int pageSize);
+    Task<ServiceResult<PagedReportResult<StudentsByGroupDto>>> GetStudentsByBirthMonth(int page, int pageSize);
 }

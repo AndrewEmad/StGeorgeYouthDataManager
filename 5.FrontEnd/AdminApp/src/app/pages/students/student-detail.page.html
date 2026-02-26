@@ -1,10 +1,3 @@
-<app-photo-crop-modal
-  *ngIf="pendingCropFile"
-  [sourceFile]="pendingCropFile"
-  (croppedFile)="onCropConfirm($event)"
-  (cancel)="onCropCancel()"
-/>
-
 <div class="animate-slide student-detail">
   <app-content-header
     backLink="/dashboard/students"
@@ -15,16 +8,8 @@
 
   <div *ngIf="!loading && student" class="detail-content">
     <app-detail-section title="بيانات المخدوم">
-      <div class="photo-wrap mb-2">
-        <app-profile-photo-input
-          [previewUrl]="studentPhotoUrl"
-          [disabled]="uploadingPhoto"
-          [applySizeLimit]="false"
-          label="تغيير صورة المخدوم"
-          (photoSelected)="onStudentPhotoSelected($event)"
-        />
-        <p *ngIf="uploadingPhoto" class="photo-saving-indicator"><span class="photo-spinner"></span> جاري الرفع...</p>
-        <span *ngIf="photoError" class="error-msg">{{ photoError }}</span>
+      <div *ngIf="studentPhotoUrl" class="photo-wrap mb-2">
+        <img [src]="studentPhotoUrl" alt="صورة المخدوم" class="student-photo" />
       </div>
       <dl class="detail-grid">
         <dt>الاسم الكامل</dt><dd>{{ student.fullName }}</dd>

@@ -14,6 +14,7 @@ public record StudentListFilter(
     bool? HasServant,
     string? SortBy,
     bool? SortDesc,
+    int? BirthMonth = null,
     IEnumerable<Guid>? ExcludeStudentIds = null
 );
 
@@ -41,7 +42,8 @@ public record StudentDto(
     string? LastFollowUpNote,
     DateTime? LastAttendanceDate,
     DateTime? CreatedAt,
-    DateTime? UpdatedAt
+    DateTime? UpdatedAt,
+    string? PhotoPath = null
 );
 
 public record CreateStudentRequest(

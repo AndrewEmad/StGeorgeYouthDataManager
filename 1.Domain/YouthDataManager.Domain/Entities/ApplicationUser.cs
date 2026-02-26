@@ -10,6 +10,7 @@ public class ApplicationUser : IdentityUser<Guid>
     public bool MustChangePassword { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
+    public string? PhotoPath { get; set; }
 
     // Navigation properties
     public ICollection<Student> Students { get; set; } = new List<Student>();

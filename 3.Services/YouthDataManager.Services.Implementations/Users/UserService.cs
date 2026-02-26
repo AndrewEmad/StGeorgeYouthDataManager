@@ -44,7 +44,8 @@ public class UserService : IUserService
                 roles.FirstOrDefault() ?? "Unknown",
                 user.IsActive,
                 user.CreatedAt,
-                user.UpdatedAt
+                user.UpdatedAt,
+                user.PhotoPath
             ));
         }
 
@@ -92,7 +93,7 @@ public class UserService : IUserService
         foreach (var user in users)
         {
             var roles = await _userManager.GetRolesAsync(user);
-            dtos.Add(new UserDto(user.Id, user.UserName!, user.FullName, user.Email!, user.Phone, roles.FirstOrDefault() ?? "Unknown", user.IsActive, user.CreatedAt, user.UpdatedAt));
+            dtos.Add(new UserDto(user.Id, user.UserName!, user.FullName, user.Email!, user.Phone, roles.FirstOrDefault() ?? "Unknown", user.IsActive, user.CreatedAt, user.UpdatedAt, user.PhotoPath));
         }
         return ServiceResult<PagedResult<UserDto>>.Success(new PagedResult<UserDto>(dtos, totalCount, page, pageSize));
     }
@@ -112,7 +113,8 @@ public class UserService : IUserService
             roles.FirstOrDefault() ?? "Unknown",
             user.IsActive,
             user.CreatedAt,
-            user.UpdatedAt
+            user.UpdatedAt,
+            user.PhotoPath
         );
 
         return ServiceResult<UserDto>.Success(dto);

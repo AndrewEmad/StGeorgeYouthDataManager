@@ -4,12 +4,14 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using YouthDataManager.WebApi.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using YouthDataManager.Domain.Repositories.Tracking;
+using YouthDataManager.Photo.Service.Abstractions;
 using YouthDataManager.Shared.Service.Abstractions;
 using YouthDataManager.Students.Service.Abstractions.Commands;
 using YouthDataManager.Students.Service.Abstractions.DTOs;
+using YouthDataManager.WebApi.Authorization;
 
 namespace YouthDataManager.WebApi.Controllers;
 
@@ -25,10 +27,20 @@ public class StudentCommandsController : ControllerBase
         "مريم سعيد,01112223334,,,المنطقة ب,كلية آداب,ثانية,,1\n");
 
     private readonly IStudentCommandsService _service;
+    private readonly IStudentRepository _studentRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IPhotoUploadService _photoUploadService;
 
-    public StudentCommandsController(IStudentCommandsService service)
+    public StudentCommandsController(
+        IStudentCommandsService service,
+        IStudentRepository studentRepository,
+        IUnitOfWork unitOfWork,
+        IPhotoUploadService photoUploadService)
     {
         _service = service;
+        _studentRepository = studentRepository;
+        _unitOfWork = unitOfWork;
+        _photoUploadService = photoUploadService;
     }
 
     [HttpGet("csv-template")]
@@ -113,6 +125,26 @@ public class StudentCommandsController : ControllerBase
         if (result.Status != ServiceResultStatus.Success)
             return BadRequest(result);
         return Ok();
+    }
+
+    [HttpPost("{id}/photo")]
+    [Authorize(Roles = RolePolicies.AdminManagerPriestRoles)]
+    [RequestSizeLimit(5_242_880)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 5_242_880)]
+    public async Task<IActionResult> UploadPhoto(Guid id, IFormFile? file)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest(new { message = "لم يتم اختيار ملف." });
+        var student = await _studentRepository.GetById(id);
+        if (student == null) return NotFound();
+        var result = await _photoUploadService.ProcessAndSaveAsync(file.OpenReadStream(), file.ContentType ?? "", "student", id);
+        if (result.Status != ServiceResultStatus.Success)
+            return BadRequest(new { message = result.Message });
+        student.PhotoPath = result.Data;
+        student.UpdatedAt = DateTime.UtcNow;
+        _studentRepository.Update(student);
+        await _unitOfWork.SaveChangesAsync();
+        return Ok(new { photoPath = result.Data });
     }
 }
 

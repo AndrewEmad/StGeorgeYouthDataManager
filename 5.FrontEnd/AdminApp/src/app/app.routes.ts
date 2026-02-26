@@ -13,10 +13,12 @@ import { AssignmentRequestsPage } from './pages/assignment-requests/assignment-r
 import { StudentAdditionRequestsPage } from './pages/student-addition-requests/student-addition-requests.page';
 import { ReportsPage } from './pages/reports/reports.page';
 import { ServantFollowUpPage } from './pages/reports/servant-follow-up.page';
+import { StudentDistributionPage } from './pages/reports/student-distribution.page';
 import { ServantActivityReportPage } from './pages/reports/servant-activity-report.page';
 import { StudentsNoContactReportPage } from './pages/reports/students-no-contact-report.page';
 import { StudentsByAreaReportPage } from './pages/reports/students-by-area-report.page';
 import { StudentsByYearReportPage } from './pages/reports/students-by-year-report.page';
+import { StudentsByBirthMonthReportPage } from './pages/reports/students-by-birth-month-report.page';
 import { ServantPerformanceReportPage } from './pages/reports/servant-performance-report.page';
 import { AttendancePage } from './pages/attendance/attendance.page';
 import { ProfilePage } from './pages/profile/profile.page';
@@ -46,12 +48,13 @@ export const routes: Routes = [
         data: { title: 'التقارير' },
         children: [
           { path: 'servant-follow-up', component: ServantFollowUpPage, data: { title: 'متابعة الخادم' } },
-          { path: 'student-distribution', redirectTo: 'servant-follow-up', pathMatch: 'full' },
+          { path: 'student-distribution', component: StudentDistributionPage, data: { title: 'توزيع المخدومين' } },
           { path: 'servant-performance', component: ServantPerformanceReportPage, data: { title: 'أداء الخادم' } },
           { path: 'servant-activity', component: ServantActivityReportPage, data: { title: 'نشاط الخادم' } },
           { path: 'students-no-contact', component: StudentsNoContactReportPage, data: { title: 'بدون اتصال' } },
           { path: 'students-by-area', component: StudentsByAreaReportPage, data: { title: 'حسب المنطقة' } },
           { path: 'students-by-year', component: StudentsByYearReportPage, data: { title: 'حسب السنة' } },
+          { path: 'students-by-birth-month', component: StudentsByBirthMonthReportPage, data: { title: 'حسب شهر الميلاد' } },
           { path: '', redirectTo: 'servant-follow-up', pathMatch: 'full' }
         ]
       },

@@ -26,4 +26,10 @@ export class StudentCommandsService {
   assignToServant(studentId: string, servantId: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/${studentId}/assign/${servantId}`, {});
   }
+
+  uploadPhoto(studentId: string, file: File): Observable<{ photoPath: string }> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<{ photoPath: string }>(`${this.apiUrl}/${studentId}/photo`, form);
+  }
 }

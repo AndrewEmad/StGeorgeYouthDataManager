@@ -44,7 +44,7 @@ public class StudentNoTrackingRepository : IStudentNoTrackingRepository
             .ToListAsync();
     }
 
-    public async Task<(IEnumerable<T> Items, int TotalCount)> GetPaged<T>(string? search, string? area, string? academicYear, int? gender, Guid? servantId, bool? hasServant, string? sortBy, bool sortDesc, int page, int pageSize, Expression<Func<Student, T>> selector, IEnumerable<Guid>? excludeStudentIds = null)
+    public async Task<(IEnumerable<T> Items, int TotalCount)> GetPaged<T>(string? search, string? area, string? academicYear, int? gender, Guid? servantId, bool? hasServant, string? sortBy, bool sortDesc, int page, int pageSize, Expression<Func<Student, T>> selector, IEnumerable<Guid>? excludeStudentIds = null, int? birthMonth = null)
     {
         var query = _context.Students.AsNoTracking().AsQueryable();
         var searchTrim = search?.Trim();
@@ -63,6 +63,8 @@ public class StudentNoTrackingRepository : IStudentNoTrackingRepository
         if (servantId.HasValue) query = query.Where(s => s.ServantId == servantId.Value);
         if (hasServant == true) query = query.Where(s => s.ServantId != null);
         if (hasServant == false) query = query.Where(s => s.ServantId == null);
+        if (birthMonth.HasValue && birthMonth.Value >= 1 && birthMonth.Value <= 12)
+            query = query.Where(s => (s.BirthMonth == birthMonth.Value) || (s.BirthMonth == null && s.BirthDate != null && s.BirthDate.Value.Month == birthMonth.Value));
         if (excludeStudentIds != null && excludeStudentIds.Any())
             query = query.Where(s => !excludeStudentIds.Contains(s.Id));
 

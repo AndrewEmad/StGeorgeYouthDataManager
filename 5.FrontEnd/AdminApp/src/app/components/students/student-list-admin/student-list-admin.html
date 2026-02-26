@@ -110,6 +110,7 @@
           <td>{{ s.lastAttendanceDate ? (s.lastAttendanceDate | date:'dd/MM/yyyy') : '—' }}</td>
           <td class="col-note" [title]="s.lastFollowUpNote || ''">{{ (s.lastFollowUpNote | slice:0:40) || '—' }}{{ s.lastFollowUpNote && s.lastFollowUpNote.length > 40 ? '…' : '' }}</td>
           <td class="col-actions" (click)="$event.stopPropagation()">
+            <button class="btn-outline sm" (click)="openEdit(s)">تعديل</button>
             <button class="btn-outline sm" (click)="openAssignModal(s)">تخصيص</button>
             <button class="btn-outline sm danger" (click)="deleteStudent(s)">حذف</button>
           </td>
@@ -205,6 +206,78 @@
       </div>
     </div>
   </div>
+
+<div class="modal-overlay" *ngIf="showEditModal" (click)="closeEdit()">
+  <div class="glass-card modal-content animate-slide add-modal" (click)="$event.stopPropagation()">
+    <h3>تعديل المخدوم</h3>
+    <div class="form-group">
+      <label>صورة (اختياري)</label>
+      <app-profile-photo-input
+        [previewUrl]="editStudentPhotoPreviewUrl || editStudentExistingPhotoUrl"
+        [applySizeLimit]="false"
+        [disabled]="editSaving"
+        (photoSelected)="onEditStudentPhotoFile($event)"
+      />
+      <p *ngIf="editSaving" class="photo-saving-indicator"><span class="photo-spinner"></span> جاري الحفظ...</p>
+    </div>
+    <div class="form-group">
+      <label>الاسم الكامل *</label>
+      <input type="text" [(ngModel)]="editForm.fullName" class="form-input" placeholder="الاسم الكامل" />
+    </div>
+    <div class="form-group">
+      <label>رقم التليفون *</label>
+      <input type="tel" [(ngModel)]="editForm.phone" class="form-input" placeholder="رقم التليفون" />
+    </div>
+    <div class="form-group">
+      <label>تاريخ الميلاد</label>
+      <span class="date-input-wrap" (click)="editBirthDateInput.showPicker()"><input #editBirthDateInput type="date" [(ngModel)]="editForm.birthDate" class="form-input" /></span>
+    </div>
+    <div class="form-group">
+      <label>العنوان</label>
+      <input type="text" [(ngModel)]="editForm.address" class="form-input" placeholder="العنوان" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>المنطقة</label>
+        <input type="text" [(ngModel)]="editForm.area" class="form-input" placeholder="المنطقة" />
+      </div>
+      <div class="form-group">
+        <label>النوع</label>
+        <select [(ngModel)]="editForm.gender" class="form-input">
+          <option [value]="0">ذكر</option>
+          <option [value]="1">أنثى</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>الكلية</label>
+        <input type="text" [(ngModel)]="editForm.college" class="form-input" placeholder="الكلية" />
+      </div>
+      <div class="form-group">
+        <label>السنة الدراسية</label>
+        <input type="text" [(ngModel)]="editForm.academicYear" class="form-input" placeholder="السنة" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>أب الاعتراف</label>
+      <input type="text" [(ngModel)]="editForm.confessionFather" class="form-input" placeholder="أب الاعتراف" />
+    </div>
+    <div class="form-group">
+      <label>تخصيص لخادم</label>
+      <select [(ngModel)]="editForm.servantId" class="form-input">
+        <option value="">-- بدون تخصيص --</option>
+        <option *ngFor="let serv of servants" [value]="serv.id">{{ serv.fullName }}</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-outline" (click)="closeEdit()" [disabled]="editSaving">إلغاء</button>
+      <button type="button" class="btn-primary" [disabled]="editSaving || !editForm.fullName.trim() || !editForm.phone.trim()" (click)="onUpdateStudent()">
+        {{ editSaving ? 'جاري الحفظ...' : 'حفظ التعديلات' }}
+      </button>
+    </div>
+  </div>
+</div>
 
 <div class="modal-overlay" *ngIf="showAssignModal">
   <div class="glass-card modal-content animate-slide sm">

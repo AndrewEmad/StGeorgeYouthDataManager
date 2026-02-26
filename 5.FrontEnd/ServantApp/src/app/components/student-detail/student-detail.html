@@ -33,9 +33,26 @@
   <div class="grid-layout">
     <section class="glass-card profile-section">
       <div class="profile-header">
-        <div class="avatar">{{ student.fullName?.[0] }}</div>
+        <div class="photo-and-name">
+          <ng-container *ngIf="!editing">
+            <div class="photo-view-only">
+              <img *ngIf="studentPhotoUrl" [src]="studentPhotoUrl" alt="صورة المخدوم" class="photo-img" />
+              <div *ngIf="!studentPhotoUrl" class="avatar">{{ student.fullName?.[0] }}</div>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="editing">
+            <app-profile-photo-input
+              [previewUrl]="studentPhotoUrl"
+              [disabled]="uploadingPhoto"
+              label="تغيير صورة المخدوم"
+              (photoSelected)="onStudentPhotoSelected($event)"
+            />
+            <p *ngIf="uploadingPhoto" class="photo-saving-indicator"><span class="photo-spinner"></span> جاري الرفع...</p>
+            <span *ngIf="photoError" class="error-msg">{{ photoError }}</span>
+          </ng-container>
+        </div>
         <h2>{{ student.fullName }}</h2>
-        <span class="badge">{{ student.college }}</span>
+        <!-- <span class="badge">{{ student.college }}</span> -->
       </div>
 
       <div class="info-list" *ngIf="!editing">
@@ -102,11 +119,11 @@
             <p>{{ student.gender === 1 ? 'أنثى' : 'ذكر' }}</p>
           </div>
         </div>
-        <div class="info-item" *ngIf="student.lastAttendanceDate">
+        <div class="info-item">
           <span class="material-icons">event_available</span>
           <div class="info-content">
             <label>آخر حضور</label>
-            <p>{{ student.lastAttendanceDate | date:'dd/MM/yyyy' }}</p>
+            <p>{{ student.lastAttendanceDate ? (student.lastAttendanceDate | date:'dd/MM/yyyy') : '—' }}</p>
           </div>
         </div>
         <div class="info-item" *ngIf="student.createdAt">

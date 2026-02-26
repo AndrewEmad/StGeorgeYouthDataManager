@@ -26,6 +26,7 @@ public class Student
     public string? LastUpdateNotes { get; set; }
     public bool IsDeleted { get; set; }
     public DateTime? LastAttendanceDate { get; set; }
+    public string? PhotoPath { get; set; }
 
     // Navigation properties
     public ICollection<CallLog> CallLogs { get; set; } = new List<CallLog>();

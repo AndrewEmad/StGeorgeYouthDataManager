@@ -9,7 +9,7 @@ public interface IStudentNoTrackingRepository
     Task<T?> GetById<T>(Guid id, System.Linq.Expressions.Expression<Func<YouthDataManager.Domain.Entities.Student, T>> selector);
     Task<IEnumerable<T>> GetAll<T>(System.Linq.Expressions.Expression<Func<YouthDataManager.Domain.Entities.Student, T>> selector);
     Task<IEnumerable<T>> GetByServantId<T>(Guid servantId, System.Linq.Expressions.Expression<Func<YouthDataManager.Domain.Entities.Student, T>> selector);
-    Task<(IEnumerable<T> Items, int TotalCount)> GetPaged<T>(string? search, string? area, string? academicYear, int? gender, Guid? servantId, bool? hasServant, string? sortBy, bool sortDesc, int page, int pageSize, System.Linq.Expressions.Expression<Func<YouthDataManager.Domain.Entities.Student, T>> selector, IEnumerable<Guid>? excludeStudentIds = null);
+    Task<(IEnumerable<T> Items, int TotalCount)> GetPaged<T>(string? search, string? area, string? academicYear, int? gender, Guid? servantId, bool? hasServant, string? sortBy, bool sortDesc, int page, int pageSize, System.Linq.Expressions.Expression<Func<YouthDataManager.Domain.Entities.Student, T>> selector, IEnumerable<Guid>? excludeStudentIds = null, int? birthMonth = null);
     Task<(IReadOnlyList<(Guid Id, int Segment)>, int TotalCount)> GetPagedForServantCombinedAsync(Guid servantId, string? search, string? area, string? academicYear, int? gender, int page, int pageSize);
     Task<IReadOnlyList<T>> GetByIds<T>(IEnumerable<Guid> ids, System.Linq.Expressions.Expression<Func<YouthDataManager.Domain.Entities.Student, T>> selector);
     Task<IEnumerable<string>> GetDistinctAreasAsync();

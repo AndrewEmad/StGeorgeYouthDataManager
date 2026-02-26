@@ -15,7 +15,8 @@ public record UserDto(
     string Role,
     bool IsActive,
     DateTime CreatedAt,
-    DateTime? UpdatedAt
+    DateTime? UpdatedAt,
+    string? PhotoPath = null
 );
 
 public record CreateUserDto(

@@ -1,0 +1,24 @@
+<div class="profile-photo-wrap" (click)="triggerFileSelect()" [class.disabled]="disabled()">
+  <input
+    #fileInput
+    type="file"
+    accept="image/*"
+    class="hidden-input"
+    (change)="onFileChange($event)"
+  />
+  <div class="photo-circle" role="button" [attr.aria-label]="label()" tabindex="0" (keydown.enter)="triggerFileSelect()" (keydown.space)="triggerFileSelect(); $event.preventDefault()">
+    @if (displayUrl()) {
+      <img [src]="displayUrl()" alt="" class="photo-img" />
+    } @else {
+      <div class="placeholder-avatar">
+        <span class="material-icons avatar-icon" aria-hidden="true">person</span>
+      </div>
+    }
+    <div class="overlay">
+      <span class="material-icons camera-icon" aria-hidden="true">photo_camera</span>
+    </div>
+  </div>
+  @if (errorMessage()) {
+    <p class="photo-error">{{ errorMessage() }}</p>
+  }
+</div>

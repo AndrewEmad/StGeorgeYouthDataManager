@@ -53,6 +53,35 @@ export class StudentListAdminComponent implements OnInit {
   bulkAssignSaving = false;
   showAddModal = false;
   addSaving = false;
+  showEditModal = false;
+  editingStudent: any = null;
+  editForm: {
+    fullName: string;
+    phone: string;
+    address: string | null;
+    area: string | null;
+    college: string | null;
+    academicYear: string | null;
+    confessionFather: string | null;
+    gender: number;
+    servantId: string | null;
+    birthDate: string | null;
+  } = {
+    fullName: '',
+    phone: '',
+    address: null,
+    area: null,
+    college: null,
+    academicYear: null,
+    confessionFather: null,
+    gender: 0,
+    servantId: null,
+    birthDate: null
+  };
+  editStudentPhoto: File | null = null;
+  editStudentPhotoPreviewUrl: string | null = null;
+  editStudentExistingPhotoUrl: string | null = null;
+  editSaving = false;
   showBulkUploadModal = false;
   uploadingCsv = false;
   uploadResult: { created: number; errors: { row: number; message: string }[] } | null = null;
@@ -63,7 +92,8 @@ export class StudentListAdminComponent implements OnInit {
     academicYear: '',
     gender: '' as '' | '0' | '1',
     servantId: '',
-    hasServant: '' as '' | 'yes' | 'no'
+    hasServant: '' as '' | 'yes' | 'no',
+    birthMonth: '' as '' | string
   };
   regionOptions: string[] = [];
   academicYearOptions: string[] = [];
@@ -84,6 +114,7 @@ export class StudentListAdminComponent implements OnInit {
   newStudentPhoto: File | null = null;
   newStudentPhotoPreviewUrl: string | null = null;
   pendingCropFile: File | null = null;
+  cropTarget: 'new' | 'editStudent' | null = null;
 
   constructor(
     private studentQueries: StudentQueriesService,
@@ -97,7 +128,8 @@ export class StudentListAdminComponent implements OnInit {
     this.route.queryParams.subscribe((params) => {
       this.filters.area = params['area'] ?? '';
       this.filters.academicYear = params['academicYear'] ?? '';
-      if (this.filters.area || this.filters.academicYear) this.showFilters = true;
+      this.filters.birthMonth = params['birthMonth'] ?? '';
+      if (this.filters.area || this.filters.academicYear || this.filters.birthMonth) this.showFilters = true;
       this.page = 1;
       this.loadData();
     });
@@ -108,6 +140,7 @@ export class StudentListAdminComponent implements OnInit {
     const genderNum = this.filters.gender === '' ? null : Number(this.filters.gender);
     const hasServant = this.filters.hasServant === 'yes' ? true : this.filters.hasServant === 'no' ? false : null;
     const servantId = this.filters.servantId === '_none' || !this.filters.servantId ? null : this.filters.servantId;
+    const birthMonthNum = this.filters.birthMonth === '' ? null : (() => { const n = +this.filters.birthMonth; return n >= 1 && n <= 12 ? n : null; })();
     this.studentQueries.getPaged({
       page: this.page,
       pageSize: this.pageSize,
@@ -118,7 +151,8 @@ export class StudentListAdminComponent implements OnInit {
       servantId: servantId || undefined,
       hasServant: hasServant ?? undefined,
       sortBy: this.sortBy || 'fullName',
-      sortDesc: this.sortDesc
+      sortDesc: this.sortDesc,
+      birthMonth: birthMonthNum ?? undefined
     }).subscribe({
       next: (res) => {
         this.students = res.items;
@@ -148,7 +182,7 @@ export class StudentListAdminComponent implements OnInit {
   }
 
   clearFilters() {
-    this.filters = { search: '', area: '', academicYear: '', gender: '', servantId: '', hasServant: '' };
+    this.filters = { search: '', area: '', academicYear: '', gender: '', servantId: '', hasServant: '', birthMonth: '' };
     this.page = 1;
     this.loadData();
   }
@@ -257,17 +291,35 @@ export class StudentListAdminComponent implements OnInit {
 
   onNewStudentPhotoFile(file: File) {
     this.pendingCropFile = file;
+    this.cropTarget = 'new';
+  }
+
+  onEditStudentPhotoFile(file: File) {
+    this.pendingCropFile = file;
+    this.cropTarget = 'editStudent';
   }
 
   onCropConfirm(file: File) {
-    if (this.newStudentPhotoPreviewUrl) URL.revokeObjectURL(this.newStudentPhotoPreviewUrl);
-    this.newStudentPhoto = file;
-    this.newStudentPhotoPreviewUrl = URL.createObjectURL(file);
+    if (this.cropTarget === 'new') {
+      if (this.newStudentPhotoPreviewUrl) URL.revokeObjectURL(this.newStudentPhotoPreviewUrl);
+      this.newStudentPhoto = file;
+      this.newStudentPhotoPreviewUrl = URL.createObjectURL(file);
+    } else if (this.cropTarget === 'editStudent') {
+      if (this.editStudentPhotoPreviewUrl) URL.revokeObjectURL(this.editStudentPhotoPreviewUrl);
+      if (this.editStudentExistingPhotoUrl) {
+        URL.revokeObjectURL(this.editStudentExistingPhotoUrl);
+        this.editStudentExistingPhotoUrl = null;
+      }
+      this.editStudentPhoto = file;
+      this.editStudentPhotoPreviewUrl = URL.createObjectURL(file);
+    }
     this.pendingCropFile = null;
+    this.cropTarget = null;
   }
 
   onCropCancel() {
     this.pendingCropFile = null;
+    this.cropTarget = null;
   }
 
   onCreateStudent() {
@@ -359,6 +411,102 @@ export class StudentListAdminComponent implements OnInit {
       error: () => {
         this.bulkAssignSaving = false;
         alert('حدث خطأ في تخصيص بعض المخدومين');
+      }
+    });
+  }
+
+  openEdit(s: any) {
+    this.studentQueries.getById(s.id).subscribe({
+      next: (st) => {
+        this.editingStudent = st;
+        this.editForm = {
+          fullName: st.fullName || '',
+          phone: st.phone || '',
+          address: st.address ?? null,
+          area: st.area ?? null,
+          college: st.college ?? null,
+          academicYear: st.academicYear ?? null,
+          confessionFather: st.confessionFather ?? null,
+          gender: st.gender ?? 0,
+          servantId: st.servantId ?? null,
+          birthDate: st.birthDate || null
+        };
+        this.editStudentPhoto = null;
+        if (this.editStudentPhotoPreviewUrl) {
+          URL.revokeObjectURL(this.editStudentPhotoPreviewUrl);
+          this.editStudentPhotoPreviewUrl = null;
+        }
+        if (this.editStudentExistingPhotoUrl) {
+          URL.revokeObjectURL(this.editStudentExistingPhotoUrl);
+          this.editStudentExistingPhotoUrl = null;
+        }
+        if (st.photoPath) {
+          this.studentQueries.getPhotoBlobUrl(s.id).subscribe({
+            next: (url) => { this.editStudentExistingPhotoUrl = url ?? null; },
+            error: () => {}
+          });
+        }
+        this.showEditModal = true;
+      },
+      error: () => alert('فشل تحميل بيانات المخدوم')
+    });
+  }
+
+  closeEdit() {
+    this.showEditModal = false;
+    this.editingStudent = null;
+    this.editStudentPhoto = null;
+    if (this.editStudentPhotoPreviewUrl) {
+      URL.revokeObjectURL(this.editStudentPhotoPreviewUrl);
+      this.editStudentPhotoPreviewUrl = null;
+    }
+    if (this.editStudentExistingPhotoUrl) {
+      URL.revokeObjectURL(this.editStudentExistingPhotoUrl);
+      this.editStudentExistingPhotoUrl = null;
+    }
+  }
+
+  onUpdateStudent() {
+    if (!this.editingStudent) return;
+    this.editSaving = true;
+    const req: UpdateStudentRequest = {
+      id: this.editingStudent.id,
+      fullName: this.editForm.fullName.trim(),
+      phone: this.editForm.phone.trim(),
+      address: this.editForm.address ?? null,
+      area: this.editForm.area ?? null,
+      college: this.editForm.college ?? null,
+      academicYear: this.editForm.academicYear ?? null,
+      confessionFather: this.editForm.confessionFather ?? null,
+      gender: this.editForm.gender ?? 0,
+      servantId: this.editForm.servantId ?? null,
+      birthDate: this.editForm.birthDate || null
+    };
+    this.studentCommands.update(req).subscribe({
+      next: () => {
+        if (this.editStudentPhoto) {
+          this.studentCommands.uploadPhoto(this.editingStudent.id, this.editStudentPhoto).subscribe({
+            next: (res) => {
+              this.editingStudent.photoPath = res.photoPath;
+              this.editSaving = false;
+              this.closeEdit();
+              this.loadData();
+            },
+            error: () => {
+              this.editSaving = false;
+              this.closeEdit();
+              this.loadData();
+            }
+          });
+        } else {
+          this.editSaving = false;
+          this.closeEdit();
+          this.loadData();
+        }
+      },
+      error: (err: any) => {
+        this.editSaving = false;
+        alert('خطأ في التحديث: ' + (err.error?.message || err.message));
       }
     });
   }

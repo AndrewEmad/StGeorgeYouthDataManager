@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -67,5 +68,12 @@ export class StudentQueriesService {
 
   getDistinctAcademicYears(): Observable<string[]> {
     return this.http.get<string[]>(`${this.apiUrl}/academic-years`);
+  }
+
+  getPhotoBlobUrl(studentId: string): Observable<string | null> {
+    return this.http.get(`${this.apiUrl}/${studentId}/photo`, { responseType: 'blob' }).pipe(
+      map(blob => URL.createObjectURL(blob)),
+      catchError(() => of(null))
+    );
   }
 }

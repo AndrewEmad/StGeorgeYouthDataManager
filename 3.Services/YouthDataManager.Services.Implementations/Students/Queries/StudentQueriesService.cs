@@ -75,7 +75,8 @@ public class StudentQueriesService : IStudentQueriesService
                     : (s.HomeVisits.OrderByDescending(v => v.VisitDate).Select(v => v.Notes).FirstOrDefault() ?? s.CallLogs.OrderByDescending(c => c.CallDate).Select(c => c.Notes).FirstOrDefault()),
                 s.LastAttendanceDate,
                 s.CreatedAt,
-                s.UpdatedAt
+                s.UpdatedAt,
+                s.PhotoPath
             ));
 
             return ServiceResult<IEnumerable<StudentDto>>.Success(result);
@@ -112,7 +113,8 @@ public class StudentQueriesService : IStudentQueriesService
                     : (s.HomeVisits.OrderByDescending(v => v.VisitDate).Select(v => v.Notes).FirstOrDefault() ?? s.CallLogs.OrderByDescending(c => c.CallDate).Select(c => c.Notes).FirstOrDefault()),
                 s.LastAttendanceDate,
                 s.CreatedAt,
-                s.UpdatedAt
+                s.UpdatedAt,
+                s.PhotoPath
             ));
 
             return ServiceResult<IEnumerable<StudentDto>>.Success(result);
@@ -144,8 +146,10 @@ public class StudentQueriesService : IStudentQueriesService
                         : s.HomeVisits.OrderByDescending(v => v.VisitDate).Select(v => v.Notes).FirstOrDefault(),
                     s.LastAttendanceDate,
                     s.CreatedAt,
-                    s.UpdatedAt),
-                filter.ExcludeStudentIds);
+                    s.UpdatedAt,
+                    s.PhotoPath),
+                filter.ExcludeStudentIds,
+                filter.BirthMonth);
             var paged = new PagedResult<StudentDto>(items.ToList(), totalCount, page, pageSize);
             return ServiceResult<PagedResult<StudentDto>>.Success(paged);
         }
@@ -214,7 +218,7 @@ public class StudentQueriesService : IStudentQueriesService
             if (pageSize < 1) pageSize = 10;
 
             var excludeIds = await _assignmentRequestRepository.GetStudentIdsWithPendingRequestByOtherThan(servantId);
-            var filter = new StudentListFilter(null, null, null, null, null, false, null, null, excludeIds);
+            var filter = new StudentListFilter(null, null, null, null, null, false, null, null, null, excludeIds);
             var pagedResult = await GetPaged(filter, page, pageSize);
             if (pagedResult.Status != ServiceResultStatus.Success || pagedResult.Data == null)
                 return ServiceResult<PagedResult<UnassignedStudentForServantDto>>.Failure(pagedResult.Message ?? "Failed to get unassigned students.");
@@ -281,7 +285,8 @@ public class StudentQueriesService : IStudentQueriesService
                 : (s.HomeVisits.OrderByDescending(v => v.VisitDate).Select(v => v.Notes).FirstOrDefault() ?? s.CallLogs.OrderByDescending(c => c.CallDate).Select(c => c.Notes).FirstOrDefault()),
             s.LastAttendanceDate,
             s.CreatedAt,
-            s.UpdatedAt
+            s.UpdatedAt,
+            s.PhotoPath
         );
     }
 }

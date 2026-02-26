@@ -97,6 +97,14 @@ export class ReportsService {
     const query = q.toString();
     return this.http.get<PagedReport<StudentsByGroup>>(`${this.apiUrl}/students-by-academic-year${query ? '?' + query : ''}`);
   }
+
+  getStudentsByBirthMonth(params: { page?: number; pageSize?: number } = {}): Observable<PagedReport<StudentsByGroup>> {
+    const q = new URLSearchParams();
+    if (params.page != null) q.set('page', String(params.page));
+    if (params.pageSize != null) q.set('pageSize', String(params.pageSize));
+    const query = q.toString();
+    return this.http.get<PagedReport<StudentsByGroup>>(`${this.apiUrl}/students-by-birth-month${query ? '?' + query : ''}`);
+  }
 }
 
 export interface PagedReport<T> {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -8,6 +8,7 @@ import { FollowUpService } from '../../services/follow-up.service';
 import { StudentCommandsService } from '../../services/student-commands.service';
 import { RemovalRequestService } from '../../services/removal-request.service';
 import { AuthService } from '../../services/auth.service';
+import { ProfilePhotoInputComponent } from '../common/common';
 
 const CALL_STATUS_OPTIONS = [
   { value: 0, label: 'لم يجب' },
@@ -27,12 +28,15 @@ const VISIT_OUTCOME_OPTIONS = [
 @Component({
   selector: 'app-student-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ProfilePhotoInputComponent],
   templateUrl: './student-detail.html',
   styleUrls: ['./student-detail.css']
 })
-export class StudentDetailComponent implements OnInit {
+export class StudentDetailComponent implements OnInit, OnDestroy {
   student: any = null;
+  studentPhotoUrl: string | null = null;
+  uploadingPhoto = false;
+  photoError = '';
   callHistory: any[] = [];
   visitHistory: any[] = [];
   loading = true;
@@ -81,11 +85,38 @@ export class StudentDetailComponent implements OnInit {
     }
   }
 
+  ngOnDestroy() {
+    if (this.studentPhotoUrl) URL.revokeObjectURL(this.studentPhotoUrl);
+  }
+
+  onStudentPhotoSelected(file: File) {
+    if (!this.student?.id) return;
+    this.photoError = '';
+    this.uploadingPhoto = true;
+    this.studentCommandsService.uploadPhoto(this.student.id, file).subscribe({
+      next: (res) => {
+        this.student.photoPath = res.photoPath;
+        if (this.studentPhotoUrl) URL.revokeObjectURL(this.studentPhotoUrl);
+        this.studentQueriesService.getPhotoBlobUrl(this.student.id).subscribe(url => this.studentPhotoUrl = url);
+        this.uploadingPhoto = false;
+      },
+      error: (err) => {
+        this.photoError = err.error?.message || 'فشل رفع الصورة';
+        this.uploadingPhoto = false;
+      }
+    });
+  }
+
   loadStudent(id: string) {
     this.loading = true;
     this.studentQueriesService.getById(id).subscribe({
       next: (data: any) => {
         this.student = data;
+        if (data.photoPath) {
+          this.studentQueriesService.getPhotoBlobUrl(id).subscribe(url => this.studentPhotoUrl = url);
+        } else {
+          this.studentPhotoUrl = null;
+        }
         this.editForm = {
           id: data.id,
           fullName: data.fullName,

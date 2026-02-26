@@ -1,0 +1,45 @@
+<div class="animate-slide">
+  <app-content-header
+    title="توزيع أعياد الميلاد حسب الشهر"
+    subtitle="تقرير منفصل"
+    backLink="/dashboard/reports/student-distribution"
+    backLabel="العودة لتوزيع المخدومين"
+  />
+  <section class="report-section">
+    <app-loader *ngIf="loading" />
+    <p *ngIf="error" class="error-msg">{{ error }}</p>
+    <app-card *ngIf="!loading && !error" class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>الشهر</th>
+            <th>العدد</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of list">
+            <td>{{ monthLabel(row.groupKey) }}</td>
+            <td>{{ row.count }}</td>
+            <td>
+              <a *ngIf="canViewStudents(row.groupKey)" [routerLink]="['/dashboard/students']" [queryParams]="{ birthMonth: row.groupKey }" class="btn-outline sm">عرض المخدومين</a>
+            </td>
+          </tr>
+          <tr *ngIf="list.length === 0">
+            <td colspan="3" class="text-muted">لا توجد بيانات</td>
+          </tr>
+        </tbody>
+      </table>
+    </app-card>
+    <app-pagination
+      *ngIf="totalCount > 0"
+      [total]="totalCount"
+      [page]="page"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [currentPageCount]="list.length"
+      (pageChange)="goToPage($event)"
+      (pageSizeChange)="setPageSize($event)"
+    />
+  </section>
+</div>

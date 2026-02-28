@@ -1,0 +1,42 @@
+<div class="bulk-whatsapp-modal-overlay" (click)="onClose()">
+  <div class="bulk-whatsapp-modal-content glass-card" (click)="$event.stopPropagation()">
+    <h3 class="bulk-whatsapp-title">إرسال SMS جماعي</h3>
+    @if (step === 1) {
+      <label class="bulk-whatsapp-label">نص الرسالة</label>
+      <textarea [(ngModel)]="message" class="form-input bulk-whatsapp-textarea" placeholder="اكتب الرسالة..." rows="4"></textarea>
+      <div class="bulk-whatsapp-footer">
+        <button type="button" class="btn-outline" (click)="onClose()">إلغاء</button>
+        <button type="button" class="btn-primary" (click)="nextStep()">التالي</button>
+      </div>
+    } @else {
+      @if (loading) {
+        <p class="bulk-whatsapp-loading">جاري تحميل المخدومين...</p>
+      } @else {
+        <div class="bulk-whatsapp-message-preview">
+          <span class="bulk-whatsapp-label">الرسالة التي سيتم إرسالها:</span>
+          <p class="bulk-whatsapp-message-text">{{ message || '—' }}</p>
+        </div>
+        <label class="bulk-whatsapp-label">المخدومين — {{ isAndroid ? 'اختر الإرسال لهم' : 'اضغط إرسال بجانب كل واحد' }}</label>
+        <ul class="bulk-whatsapp-list">
+          @for (s of assignedForBulkSms; track s.id) {
+            <li class="bulk-whatsapp-row">
+              <span class="bulk-whatsapp-name">{{ s.fullName }}</span>
+              @if (isAndroid) {
+                <input type="checkbox" [checked]="s.selected" (change)="toggleSmsSelection(s.id)" class="sms-checkbox">
+              } @else {
+                <a [href]="getSmsUrl(s.phone, message)" target="_blank" rel="noopener noreferrer" class="btn-primary sm">إرسال</a>
+              }
+            </li>
+          }
+        </ul>
+      }
+      <div class="bulk-whatsapp-footer">
+        <button type="button" class="btn-outline" (click)="prevStep()">السابق</button>
+        @if (isAndroid && !loading && assignedForBulkSms.length > 0) {
+          <button type="button" class="btn-primary" (click)="sendBulkSmsAndroid()">إرسال للكل</button>
+        }
+        <button type="button" class="btn-outline" (click)="onClose()">إغلاق</button>
+      </div>
+    }
+  </div>
+</div>

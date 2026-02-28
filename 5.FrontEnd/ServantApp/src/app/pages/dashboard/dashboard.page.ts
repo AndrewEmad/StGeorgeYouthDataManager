@@ -6,31 +6,38 @@ import { ReportsService } from '../../services/reports.service';
 import { AuthService } from '../../services/auth.service';
 import { StudentQueriesService } from '../../services/student-queries.service';
 import { LoaderComponent, CardComponent } from '../../components/common/common';
+import { BulkWhatsAppModalComponent } from '../../components/dashboard/bulk-whatsapp-modal/bulk-whatsapp-modal';
+import { BulkSmsModalComponent } from '../../components/dashboard/bulk-sms-modal/bulk-sms-modal';
 
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, LoaderComponent, CardComponent],
+  imports: [
+    CommonModule, RouterLink, FormsModule,
+    LoaderComponent, CardComponent,
+    BulkWhatsAppModalComponent, BulkSmsModalComponent
+  ],
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.css']
 })
 export class DashboardPage implements OnInit {
   stats: any = null;
   loading = true;
+
   showBulkWhatsAppModal = false;
-  bulkWhatsAppStep: 1 | 2 = 1;
-  bulkWhatsAppMessage = '';
-  assignedForBulk: { id: string; fullName: string; phone: string }[] = [];
-  loadingAssignedForBulk = false;
+  showBulkSmsModal = false;
 
   constructor(
     private reportsService: ReportsService,
-    public authService: AuthService,
-    private studentQueriesService: StudentQueriesService
+    public authService: AuthService
   ) {}
 
   ngOnInit() {
     this.loadStats();
+  }
+
+  get currentUserId() {
+    return this.authService.currentUser()?.userId;
   }
 
   loadStats() {
@@ -53,9 +60,6 @@ export class DashboardPage implements OnInit {
   }
 
   openBulkWhatsAppModal() {
-    this.bulkWhatsAppMessage = '';
-    this.bulkWhatsAppStep = 1;
-    this.assignedForBulk = [];
     this.showBulkWhatsAppModal = true;
   }
 
@@ -63,28 +67,12 @@ export class DashboardPage implements OnInit {
     this.showBulkWhatsAppModal = false;
   }
 
-  nextBulkStep() {
-    const userId = this.authService.currentUser()?.userId;
-    if (!userId) return;
-    this.loadingAssignedForBulk = true;
-    this.studentQueriesService.getByServantId(userId).subscribe({
-      next: (list) => {
-        this.assignedForBulk = (list || []).filter((s: any) => s?.phone).map((s: any) => ({ id: s.id, fullName: s.fullName || '—', phone: s.phone }));
-        this.loadingAssignedForBulk = false;
-        this.bulkWhatsAppStep = 2;
-      },
-      error: () => { this.loadingAssignedForBulk = false; }
-    });
+  openBulkSmsModal() {
+    this.showBulkSmsModal = true;
   }
 
-  prevBulkStep() {
-    this.bulkWhatsAppStep = 1;
-  }
-
-  getWaMeUrl(phone: string, text: string): string {
-    const digits = (phone || '').replace(/\D/g, '');
-    if (!digits) return '#';
-    const q = text?.trim() ? `?text=${encodeURIComponent(text.trim())}` : '';
-    return `https://wa.me/${digits}${q}`;
+  closeBulkSmsModal() {
+    this.showBulkSmsModal = false;
   }
 }
+

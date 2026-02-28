@@ -31,7 +31,6 @@ export class LoginPage {
     this.error = '';
     this.authService.login({ username: this.username, password: this.password }).subscribe({
       next: (res) => {
-        this.reminderService.startChecking();
         this.router.navigate(res.requiresPasswordChange ? ['/change-password'] : ['/dashboard']);
       },
       error: () => {

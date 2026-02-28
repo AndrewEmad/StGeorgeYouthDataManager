@@ -20,8 +20,6 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    if (this.authService.currentUser()) {
-      this.reminderService.startChecking();
-    }
+    // Keep empty or add other init logic
   }
 }

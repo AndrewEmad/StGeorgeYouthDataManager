@@ -57,11 +57,11 @@
         <p class="section-msg text-muted">لا توجد تذكيرات. أضف تذكيراً أعلاه.</p>
       } @else {
         <ul class="slots-list">
-          @for (slot of slots; track $index; let i = $index) {
+          @for (slot of slots; track slot.id) {
             <li class="slot-item">
-              <span class="slot-time">{{ slot.time }}</span>
+              <span class="slot-time">{{ slot.timeOfDay }}</span>
               <span class="slot-days">{{ daysLabel(slot) }}</span>
-              <button type="button" class="btn-remove" (click)="removeSlot(i)" title="حذف">
+              <button type="button" class="btn-remove" (click)="removeSlot(slot.id)" title="حذف">
                 <span class="material-icons">delete</span>
               </button>
             </li>

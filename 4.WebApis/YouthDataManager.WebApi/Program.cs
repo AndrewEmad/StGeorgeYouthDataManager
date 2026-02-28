@@ -1,8 +1,11 @@
 using System.Text;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using YouthDataManager.Auth.Service.Abstractions;
+using YouthDataManager.WebApi.BackgroundWorkers;
 using YouthDataManager.WebApi.DependencyInjection;
 using YouthDataManager.WebApi.Middleware;
 
@@ -67,6 +70,19 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddAuthorization();
+
+// Firebase Admin SDK
+var firebaseKeyPath = builder.Configuration.GetValue<string>("Firebase:ServiceAccountKeyPath") ?? "firebase-service-account.json";
+if (File.Exists(firebaseKeyPath))
+{
+    FirebaseApp.Create(new AppOptions
+    {
+        Credential = GoogleCredential.FromFile(firebaseKeyPath)
+    });
+}
+
+// Background worker for notification reminders
+builder.Services.AddHostedService<NotificationReminderWorker>();
 
 // CORS
 builder.Services.AddCors(options =>

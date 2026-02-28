@@ -54,6 +54,11 @@ public static class DependencyInjectionExtensions
             .AddTransient<IHomeVisitNoTrackingRepository, HomeVisitNoTrackingRepository>()
             .AddTransient<IActivityLogNoTrackingRepository, ActivityLogNoTrackingRepository>()
             .AddTransient<IStudentEditLogNoTrackingRepository, StudentEditLogNoTrackingRepository>()
-            .AddTransient<IReportDataProvider, ReportDataProvider>();
+            .AddTransient<INotificationScheduleNoTrackingRepository, NotificationScheduleNoTrackingRepository>()
+            .AddTransient<IReportDataProvider, ReportDataProvider>()
+
+            // Notification repositories
+            .AddTransient<INotificationScheduleRepository, NotificationScheduleRepository>()
+            .AddTransient<IUserDeviceTokenRepository, UserDeviceTokenRepository>();
     }
 }

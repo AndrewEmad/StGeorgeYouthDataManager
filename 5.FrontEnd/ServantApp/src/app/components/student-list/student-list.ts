@@ -123,4 +123,10 @@ export class StudentListComponent implements OnInit {
     });
   }
 
+  getWaMeUrl(phone: string): string {
+    const digits = (phone || '').replace(/\D/g, '');
+    if (!digits) return '#';
+    return `https://wa.me/${digits}`;
+  }
+
 }

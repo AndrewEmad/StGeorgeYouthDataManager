@@ -23,6 +23,7 @@ public static class DependencyInjectionExtensions
             .AddReportsServices(configuration)
             .AddUsersServices()
             .AddPhotoServices(configuration)
-            .AddSharedServices();
+            .AddSharedServices()
+            .AddNotificationServices();
     }
 }

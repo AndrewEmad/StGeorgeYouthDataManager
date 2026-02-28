@@ -8,6 +8,9 @@
         <p class="section-msg">للحصول على تذكيرات، يرجى السماح بالإشعارات.</p>
         <button type="button" class="btn-primary" (click)="requestPermission()">تفعيل التذكيرات</button>
       }
+      @if (permissionGranted && fcmRegistered) {
+        <p class="section-msg success-msg">✅ الإشعارات مفعّلة</p>
+      }
       @if (permissionDenied) {
         <p class="section-msg">الإشعارات مُرفوضة. يمكنك تفعيلها من إعدادات المتصفح.</p>
       }
@@ -37,23 +40,30 @@
             }
           </div>
         </div>
-        <button type="button" class="btn-primary" (click)="addSlot()" [disabled]="(allDaysChecked ? 7 : newDays.length) === 0">
-          إضافة
+        <button type="button" class="btn-primary" (click)="addSchedule()"
+          [disabled]="saving || (allDaysChecked ? 7 : newDays.length) === 0">
+          @if (saving) {
+            <span class="spinner-inline"></span> جاري الحفظ...
+          } @else {
+            إضافة
+          }
         </button>
       </div>
     </app-card>
 
     <app-card [class]="'reminders-section'">
       <h2>التذكيرات الحالية</h2>
-      @if (slots.length === 0) {
+      @if (loading) {
+        <p class="section-msg text-muted">جاري التحميل...</p>
+      } @else if (schedules.length === 0) {
         <p class="section-msg text-muted">لا توجد تذكيرات. أضف تذكيراً أعلاه.</p>
       } @else {
         <ul class="slots-list">
-          @for (slot of slots; track $index; let i = $index) {
+          @for (schedule of schedules; track schedule.id) {
             <li class="slot-item">
-              <span class="slot-time">{{ slot.time }}</span>
-              <span class="slot-days">{{ daysLabel(slot) }}</span>
-              <button type="button" class="btn-remove" (click)="removeSlot(i)" title="حذف">
+              <span class="slot-time">{{ schedule.timeOfDay }}</span>
+              <span class="slot-days">{{ daysLabel(schedule) }}</span>
+              <button type="button" class="btn-remove" (click)="removeSchedule(schedule.id)" title="حذف">
                 <span class="material-icons">delete</span>
               </button>
             </li>

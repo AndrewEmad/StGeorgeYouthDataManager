@@ -417,3 +417,4 @@ FodyWeavers.xsd
 *.msp
 appSettings.json
 appsettings.Development.json
+/4.WebApis/YouthDataManager.WebApi/firebase-service-account.json

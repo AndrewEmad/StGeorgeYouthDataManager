@@ -170,6 +170,16 @@
   color: #34d399;
 }
 
+.btn-icon.whatsapp {
+  background: rgba(37, 211, 102, 0.2);
+  color: #25d366;
+}
+
+.contact-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .btn-icon:hover {
   filter: brightness(1.2);
 }

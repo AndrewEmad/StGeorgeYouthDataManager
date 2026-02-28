@@ -23,6 +23,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
     public DbSet<StudentAttendance> StudentAttendances => Set<StudentAttendance>();
     public DbSet<ServantAttendance> ServantAttendances => Set<ServantAttendance>();
     public DbSet<StudentEditLog> StudentEditLogs => Set<StudentEditLog>();
+    public DbSet<NotificationSchedule> NotificationSchedules => Set<NotificationSchedule>();
+    public DbSet<UserDeviceToken> UserDeviceTokens => Set<UserDeviceToken>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

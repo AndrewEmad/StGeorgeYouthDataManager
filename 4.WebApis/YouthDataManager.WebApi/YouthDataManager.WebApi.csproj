@@ -22,4 +22,10 @@
     <ProjectReference Include="..\..\3.Services\YouthDataManager.Services.DependencyInjection\YouthDataManager.Services.DependencyInjection.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="firebase-service-account.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

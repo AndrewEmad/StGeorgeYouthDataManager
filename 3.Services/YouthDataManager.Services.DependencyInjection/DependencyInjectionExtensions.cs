@@ -21,6 +21,8 @@ using YouthDataManager.Students.Service.Implementations.Commands;
 using YouthDataManager.Students.Service.Implementations.Queries;
 using YouthDataManager.Users.Service.Abstractions;
 using YouthDataManager.Users.Service.Implementations;
+using YouthDataManager.Notifications.Service.Abstractions;
+using YouthDataManager.Notifications.Service.Implementations;
 
 namespace YouthDataManager.Services.DependencyInjection;
 
@@ -132,6 +134,13 @@ public static class DependencyInjectionExtensions
     {
         services.Configure<PhotoUploadOptions>(configuration.GetSection(PhotoUploadOptions.SectionName));
         services.AddScoped<IPhotoUploadService, PhotoUploadService>();
+        return services;
+    }
+
+    public static IServiceCollection AddNotificationServices(this IServiceCollection services)
+    {
+        services.AddTransient<IFcmService, FcmService>();
+        services.AddScoped<INotificationService, NotificationService>();
         return services;
     }
 }

@@ -1,98 +1,98 @@
 import { Injectable } from '@angular/core';
-import { AuthService } from './auth.service';
+import { HttpClient } from '@angular/common/http';
+import { Observable, BehaviorSubject, tap, map, catchError, of } from 'rxjs';
+import { environment } from '../../environments/environment';
 
-const STORAGE_KEY = 'youth_servant_reminders';
+export interface ScheduleDto {
+  id: string;
+  daysOfWeek: string;
+  timeOfDay: string;
+  isActive: boolean;
+}
 
-export interface ReminderSlot {
-  time: string;
-  days: number[];
+export interface CreateScheduleRequest {
+  daysOfWeek: string;
+  timeOfDay: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReminderService {
-  private intervalId: ReturnType<typeof setInterval> | null = null;
-  private lastShownForDate: Map<string, string> = new Map();
+  private apiUrl = `${environment.apiUrl}/Notification`;
+  private _schedules$ = new BehaviorSubject<ScheduleDto[]>([]);
+  schedules$ = this._schedules$.asObservable();
 
-  constructor(private authService: AuthService) {}
+  constructor(private http: HttpClient) {}
 
-  getSlots(): ReminderSlot[] {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return [];
-      const parsed = JSON.parse(raw) as ReminderSlot[];
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
+  loadSchedules(): Observable<ScheduleDto[]> {
+    return this.http.get<ScheduleDto[]>(`${this.apiUrl}/schedules`).pipe(
+      tap(schedules => this._schedules$.next(schedules)),
+      catchError(() => {
+        this._schedules$.next([]);
+        return of([]);
+      })
+    );
   }
 
-  setSlots(slots: ReminderSlot[]): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(slots));
+  createSchedule(request: CreateScheduleRequest): Observable<ScheduleDto> {
+    return this.http.post<ScheduleDto>(`${this.apiUrl}/schedules`, request).pipe(
+      tap(() => this.loadSchedules().subscribe())
+    );
   }
 
-  addSlot(slot: ReminderSlot): void {
-    const slots = this.getSlots();
-    slots.push(slot);
-    this.setSlots(slots);
+  deleteSchedule(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/schedules/${id}`).pipe(
+      tap(() => this.loadSchedules().subscribe())
+    );
   }
 
-  removeSlot(index: number): void {
-    const slots = this.getSlots();
-    if (index < 0 || index >= slots.length) return;
-    slots.splice(index, 1);
-    this.setSlots(slots);
+  registerDeviceToken(token: string, deviceName?: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/device-token`, { token, deviceName });
+  }
+
+  unregisterDeviceToken(token: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/device-token`, { body: { token } });
   }
 
   async requestPermission(): Promise<NotificationPermission> {
-    if (typeof Notification === 'undefined') return 'denied';
-    return Notification.requestPermission();
+    await this.requestNotificationPermissionAndGetToken();
+    return this.permission;
+  }
+
+  async requestNotificationPermissionAndGetToken(): Promise<string | null> {
+    try {
+      if (typeof Notification === 'undefined') return null;
+
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') return null;
+
+      // Dynamically import firebase to keep bundle size small
+      const { initializeApp, getApps } = await import('firebase/app');
+      const { getMessaging, getToken } = await import('firebase/messaging');
+
+      if (getApps().length === 0) {
+        initializeApp(environment.firebase);
+      }
+
+      const messaging = getMessaging();
+      const token = await getToken(messaging, {
+        vapidKey: (environment.firebase as any).vapidKey,
+        serviceWorkerRegistration: await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js')
+          || await navigator.serviceWorker.register('/firebase-messaging-sw.js')
+      });
+
+      console.log('Firebase Cloud Messaging Token:', token);
+
+      return token || null;
+    } catch (err) {
+      console.error('Failed to get FCM token:', err);
+      return null;
+    }
   }
 
   get permission(): NotificationPermission {
     if (typeof Notification === 'undefined') return 'denied';
     return Notification.permission;
-  }
-
-  startChecking(): void {
-    if (this.intervalId != null) return;
-    this.intervalId = setInterval(() => this.check(), 60_000);
-    this.check();
-  }
-
-  private check(): void {
-    if (!this.authService.currentUser()) {
-      if (this.intervalId != null) {
-        clearInterval(this.intervalId);
-        this.intervalId = null;
-      }
-      return;
-    }
-    if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
-
-    const slots = this.getSlots();
-    if (slots.length === 0) return;
-
-    const now = new Date();
-    const today = now.toISOString().slice(0, 10);
-    const currentDay = now.getDay();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const nowTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-
-    for (let i = 0; i < slots.length; i++) {
-      const slot = slots[i];
-      const days = slot.days.length === 0 ? [0, 1, 2, 3, 4, 5, 6] : slot.days;
-      if (!days.includes(currentDay) || slot.time !== nowTime) continue;
-
-      const slotKey = `${i}-${slot.time}-${slot.days.join(',')}`;
-      if (this.lastShownForDate.get(slotKey) === today) continue;
-
-      try {
-        new Notification('تذكير متابعة', { body: 'وقت متابعة المخدومين' });
-        this.lastShownForDate.set(slotKey, today);
-      } catch (_) {}
-    }
   }
 }

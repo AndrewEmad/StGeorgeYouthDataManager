@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ReminderService, ReminderSlot } from '../../services/reminder.service';
+import { ReminderService, ScheduleDto } from '../../services/reminder.service';
 import { AuthService } from '../../services/auth.service';
 
 const DAY_NAMES = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
@@ -18,7 +18,9 @@ export class RemindersComponent implements OnInit {
   newDays: number[] = [];
   allDaysChecked = false;
   permissionMessage = '';
-  slots: ReminderSlot[] = [];
+  slots: ScheduleDto[] = [];
+  loading = false;
+  fcmRegistered = false;
 
   readonly dayNames = DAY_NAMES;
   readonly dayNumbers = [0, 1, 2, 3, 4, 5, 6];
@@ -34,10 +36,18 @@ export class RemindersComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSlots();
+    this.registerFcmToken();
   }
 
   loadSlots(): void {
-    this.slots = this.reminderService.getSlots();
+    this.loading = true;
+    this.reminderService.loadSchedules().subscribe({
+      next: schedules => {
+        this.slots = schedules;
+        this.loading = false;
+      },
+      error: () => this.loading = false
+    });
   }
 
   get permissionGranted(): boolean {
@@ -48,10 +58,10 @@ export class RemindersComponent implements OnInit {
     return this.reminderService.permission === 'denied';
   }
 
-  daysLabel(slot: ReminderSlot): string {
-    const days = slot.days.length === 0 ? [0, 1, 2, 3, 4, 5, 6] : slot.days;
-    if (days.length === 7) return 'كل الأيام';
-    return days.map(d => DAY_NAMES[d]).join('، ');
+  daysLabel(slot: ScheduleDto): string {
+    const dayIndices = slot.daysOfWeek.split(',').map((d: string) => parseInt(d.trim(), 10));
+    if (dayIndices.length === 7) return 'كل الأيام';
+    return dayIndices.map((d: number) => DAY_NAMES[d]).join('، ');
   }
 
   toggleAllDays(): void {
@@ -74,21 +84,30 @@ export class RemindersComponent implements OnInit {
   addSlot(): void {
     const days = this.allDaysChecked || this.newDays.length === 7 ? [0, 1, 2, 3, 4, 5, 6] : [...this.newDays];
     if (days.length === 0) return;
-    this.reminderService.addSlot({ time: this.newTime, days });
-    this.newDays = [];
-    this.allDaysChecked = false;
-    this.loadSlots();
+    this.reminderService.createSchedule({ timeOfDay: this.newTime, daysOfWeek: days.join(',') }).subscribe(() => {
+        this.newDays = [];
+        this.allDaysChecked = false;
+        this.loadSlots();
+    });
   }
 
-  removeSlot(index: number): void {
-    this.reminderService.removeSlot(index);
-    this.loadSlots();
+  removeSlot(id: string): void {
+    this.reminderService.deleteSchedule(id).subscribe(() => this.loadSlots());
   }
 
   async requestPermission(): Promise<void> {
     this.permissionMessage = '';
     const result = await this.reminderService.requestPermission();
     if (result === 'granted') this.permissionMessage = 'تم تفعيل التذكيرات';
-    else if (result === 'denied') this.permissionMessage = 'تم رفض الإشعارات. التذكيرات تعمل عند فتح التطبيق فقط عند السماح لاحقاً.';
+    else if (result === 'denied') this.permissionMessage = 'تم رفض الإشعارات.';
+  }
+
+  private async registerFcmToken(): Promise<void> {
+    if (this.reminderService.permission !== 'granted') return;
+    const token = await this.reminderService.requestNotificationPermissionAndGetToken();
+    if (token) {
+      this.reminderService.registerDeviceToken(token).subscribe();
+      this.fcmRegistered = true;
+    }
   }
 }

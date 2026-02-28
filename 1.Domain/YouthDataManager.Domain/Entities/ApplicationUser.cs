@@ -17,4 +17,6 @@ public class ApplicationUser : IdentityUser<Guid>
     public ICollection<CallLog> CallHistory { get; set; } = new List<CallLog>();
     public ICollection<HomeVisit> VisitHistory { get; set; } = new List<HomeVisit>();
     public ICollection<ServantAttendance> AttendanceRecords { get; set; } = new List<ServantAttendance>();
+    public ICollection<NotificationSchedule> NotificationSchedules { get; set; } = new List<NotificationSchedule>();
+    public ICollection<UserDeviceToken> DeviceTokens { get; set; } = new List<UserDeviceToken>();
 }

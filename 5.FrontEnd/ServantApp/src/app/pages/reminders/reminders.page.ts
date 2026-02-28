@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ReminderService, ReminderSlot } from '../../services/reminder.service';
+import { ReminderService, ScheduleDto } from '../../services/reminder.service';
 import { AuthService } from '../../services/auth.service';
 import { CardComponent } from '../../components/common/common';
 
@@ -19,7 +19,10 @@ export class RemindersPage implements OnInit {
   newDays: number[] = [];
   allDaysChecked = false;
   permissionMessage = '';
-  slots: ReminderSlot[] = [];
+  schedules: ScheduleDto[] = [];
+  loading = false;
+  saving = false;
+  fcmRegistered = false;
 
   readonly dayNames = DAY_NAMES;
   readonly dayNumbers = [0, 1, 2, 3, 4, 5, 6];
@@ -30,11 +33,21 @@ export class RemindersPage implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadSlots();
+    this.loadSchedules();
+    this.registerFcmToken();
   }
 
-  loadSlots(): void {
-    this.slots = this.reminderService.getSlots();
+  loadSchedules(): void {
+    this.loading = true;
+    this.reminderService.loadSchedules().subscribe({
+      next: schedules => {
+        this.schedules = schedules;
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
   }
 
   get permissionGranted(): boolean {
@@ -45,10 +58,10 @@ export class RemindersPage implements OnInit {
     return this.reminderService.permission === 'denied';
   }
 
-  daysLabel(slot: ReminderSlot): string {
-    const days = slot.days.length === 0 ? [0, 1, 2, 3, 4, 5, 6] : slot.days;
-    if (days.length === 7) return 'كل الأيام';
-    return days.map(d => DAY_NAMES[d]).join('، ');
+  daysLabel(schedule: ScheduleDto): string {
+    const dayIndices = schedule.daysOfWeek.split(',').map((d: string) => parseInt(d.trim(), 10));
+    if (dayIndices.length === 7) return 'كل الأيام';
+    return dayIndices.map((d: number) => DAY_NAMES[d]).join('، ');
   }
 
   toggleAllDays(): void {
@@ -68,24 +81,53 @@ export class RemindersPage implements OnInit {
     return this.newDays.includes(day);
   }
 
-  addSlot(): void {
-    const days = this.allDaysChecked || this.newDays.length === 7 ? [0, 1, 2, 3, 4, 5, 6] : [...this.newDays];
+  addSchedule(): void {
+    const days = this.allDaysChecked || this.newDays.length === 7
+      ? [0, 1, 2, 3, 4, 5, 6]
+      : [...this.newDays];
     if (days.length === 0) return;
-    this.reminderService.addSlot({ time: this.newTime, days });
-    this.newDays = [];
-    this.allDaysChecked = false;
-    this.loadSlots();
+
+    this.saving = true;
+    this.reminderService.createSchedule({
+      daysOfWeek: days.join(','),
+      timeOfDay: this.newTime
+    }).subscribe({
+      next: () => {
+        this.newDays = [];
+        this.allDaysChecked = false;
+        this.saving = false;
+        this.loadSchedules();
+      },
+      error: () => {
+        this.saving = false;
+      }
+    });
   }
 
-  removeSlot(index: number): void {
-    this.reminderService.removeSlot(index);
-    this.loadSlots();
+  removeSchedule(id: string): void {
+    this.reminderService.deleteSchedule(id).subscribe({
+      next: () => this.loadSchedules()
+    });
   }
 
   async requestPermission(): Promise<void> {
     this.permissionMessage = '';
-    const result = await this.reminderService.requestPermission();
-    if (result === 'granted') this.permissionMessage = 'تم تفعيل التذكيرات';
-    else if (result === 'denied') this.permissionMessage = 'تم رفض الإشعارات. التذكيرات تعمل عند فتح التطبيق فقط عند السماح لاحقاً.';
+    const token = await this.reminderService.requestNotificationPermissionAndGetToken();
+    if (token) {
+      this.permissionMessage = 'تم تفعيل التذكيرات';
+      this.reminderService.registerDeviceToken(token).subscribe();
+      this.fcmRegistered = true;
+    } else if (this.permissionDenied) {
+      this.permissionMessage = 'تم رفض الإشعارات. يمكنك تفعيلها من إعدادات المتصفح.';
+    }
+  }
+
+  private async registerFcmToken(): Promise<void> {
+    if (this.reminderService.permission !== 'granted') return;
+    const token = await this.reminderService.requestNotificationPermissionAndGetToken();
+    if (token) {
+      this.reminderService.registerDeviceToken(token).subscribe();
+      this.fcmRegistered = true;
+    }
   }
 }

@@ -9,6 +9,12 @@
   margin-bottom: 60px;
 }
 
+.stat-card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
 :host ::ng-deep .stat-card.glass-card {
   padding: 25px;
   display: flex;

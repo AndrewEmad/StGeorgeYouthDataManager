@@ -5,6 +5,12 @@
   padding: 20px;
 }
 
+a.stat-item-link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
 .glass-card {
   height: 100%;
 }

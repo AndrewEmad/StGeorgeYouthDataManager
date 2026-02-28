@@ -27,12 +27,14 @@
       [value]="stats?.totalStudents || 0"
       label="إجمالي المخدومين"
       variant="indigo"
+      [routerLink]="['/dashboard/students']"
     />
     <app-stat-item
       icon="badge"
       [value]="stats?.totalServants || 0"
       label="إجمالي الخدام"
       variant="purple"
+      [routerLink]="['/dashboard/servants']"
     />
     <app-stat-item
       icon="call"

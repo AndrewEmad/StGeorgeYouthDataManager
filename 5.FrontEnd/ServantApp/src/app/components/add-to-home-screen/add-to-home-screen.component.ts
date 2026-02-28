@@ -29,6 +29,7 @@ export class AddToHomeScreenComponent implements OnInit, OnDestroy {
   ngOnInit() {
     if (!isPlatformBrowser(this.platformId)) return;
     if (this.isStandalone()) return;
+    this.show = true;
     window.addEventListener('beforeinstallprompt', this.boundHandler);
   }
 

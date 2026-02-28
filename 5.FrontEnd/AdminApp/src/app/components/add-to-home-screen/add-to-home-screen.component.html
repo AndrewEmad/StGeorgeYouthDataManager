@@ -6,3 +6,11 @@
     </button>
   </div>
 }
+@if (showInstructions) {
+  <div class="install-instructions-overlay" (click)="showInstructions = false">
+    <div class="install-instructions" (click)="$event.stopPropagation()">
+      <p>{{ getInstallInstructions() }}</p>
+      <button type="button" class="install-instructions-btn" (click)="showInstructions = false">حسناً</button>
+    </div>
+  </div>
+}

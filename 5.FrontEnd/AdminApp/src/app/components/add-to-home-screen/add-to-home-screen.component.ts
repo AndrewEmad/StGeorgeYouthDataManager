@@ -21,6 +21,7 @@ interface BeforeInstallPromptEvent extends Event {
 })
 export class AddToHomeScreenComponent implements OnInit, OnDestroy {
   show = false;
+  showInstructions = false;
   private deferredPrompt: BeforeInstallPromptEvent | null = null;
   private boundHandler = (e: BeforeInstallPromptEvent) => this.handleInstallPrompt(e);
 
@@ -55,10 +56,25 @@ export class AddToHomeScreenComponent implements OnInit, OnDestroy {
   }
 
   async install() {
-    if (!this.deferredPrompt) return;
+    if (!this.deferredPrompt) {
+      this.showInstructions = true;
+      return;
+    }
     this.deferredPrompt.prompt();
     const { outcome } = await this.deferredPrompt.userChoice;
     this.deferredPrompt = null;
     if (outcome === 'accepted') this.show = false;
+  }
+
+  getInstallInstructions(): string {
+    if (typeof navigator === 'undefined') return '';
+    const ua = navigator.userAgent;
+    if (/iPad|iPhone|iPod/.test(ua)) {
+      return 'لإضافة التطبيق: اضغط زر المشاركة ثم اختر «إضافة إلى الشاشة الرئيسية».';
+    }
+    if (/Android/.test(ua)) {
+      return 'لإضافة التطبيق: افتح قائمة المتصفح (⋮) واختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».';
+    }
+    return 'لإضافة التطبيق للشاشة الرئيسية، استخدم خيار الإضافة من قائمة المتصفح.';
   }
 }

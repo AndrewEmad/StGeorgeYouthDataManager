@@ -79,7 +79,7 @@ export class ReminderService {
       const token = await getToken(messaging, {
         vapidKey: (environment.firebase as any).vapidKey,
         serviceWorkerRegistration: await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js')
-          || await navigator.serviceWorker.register('/firebase-messaging-sw.js')
+          || await navigator.serviceWorker.register('/StGeorgeYouthDataManager/servant/firebase-messaging-sw.js')
       });
 
       console.log('Firebase Cloud Messaging Token:', token);

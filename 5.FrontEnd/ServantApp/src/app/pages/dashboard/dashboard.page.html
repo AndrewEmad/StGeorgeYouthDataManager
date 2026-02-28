@@ -29,15 +29,7 @@
             <p>زيارات هذا الأسبوع</p>
           </div>
         </app-card>
-        <a routerLink="/reminders" class="stat-card-link">
-          <app-card [class]="'stat-card animate-fade'" style="animation-delay: 0.4s">
-            <span class="material-icons icon-box amber">event_note</span>
-            <div class="stat-info">
-              <h3>{{ stats?.studentsNeedingFollowUp || 0 }}</h3>
-              <p>متابعات مطلوبة</p>
-            </div>
-          </app-card>
-        </a>
+
       </div>
 
       <section class="actions-section animate-fade" style="animation-delay: 0.5s">

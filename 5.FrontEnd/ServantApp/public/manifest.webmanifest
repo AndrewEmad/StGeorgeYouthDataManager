@@ -12,9 +12,9 @@
   "dir": "rtl",
   "icons": [
     {
-      "src": "app.ico",
-      "sizes": "128x128",
-      "type": "image/x-icon",
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]

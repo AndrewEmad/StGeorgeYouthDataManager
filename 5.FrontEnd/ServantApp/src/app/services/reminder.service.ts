@@ -82,8 +82,6 @@ export class ReminderService {
           || await navigator.serviceWorker.register('/StGeorgeYouthDataManager/servant/firebase-messaging-sw.js')
       });
 
-      console.log('Firebase Cloud Messaging Token:', token);
-
       return token || null;
     } catch (err) {
       console.error('Failed to get FCM token:', err);

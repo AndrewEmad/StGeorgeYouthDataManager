@@ -1,22 +1,11 @@
 <div class="container student-list animate-fade">
-  <header class="list-header">
-    <div class="search-box">
-      <div class="search-input-wrap">
-        <span class="material-icons search-icon">search</span>
-        <input
-          type="text"
-          [(ngModel)]="searchTerm"
-          (keyup.enter)="onSearch()"
-          class="form-input"
-          placeholder="ابحث بالاسم أو المنطقة...">
-      </div>
-      <button type="button" class="btn-primary sm search-btn" (click)="onSearch()">بحث</button>
-    </div>
-  </header>
-
   <section class="filters-section">
     <h3 class="filters-title">بحث متقدم</h3>
     <div class="filters-row">
+      <label class="filter-label">
+        <span>الاسم</span>
+        <input type="text" [(ngModel)]="searchTerm" class="form-input filter-select filter-input-name" placeholder="ابحث بالاسم" (keyup.enter)="onApplyFilters()" />
+      </label>
       <label class="filter-label">
         <span>المنطقة</span>
         <select class="form-input filter-select" [(ngModel)]="filterArea">

@@ -32,7 +32,6 @@ export class StudentListComponent implements OnInit {
   academicYears: string[] = [];
   loading = true;
   requestingId: string | null = null;
-
   readonly genderOptions: { value: number; label: string }[] = [
     { value: 0, label: 'ذكر' },
     { value: 1, label: 'أنثى' }
@@ -90,17 +89,13 @@ export class StudentListComponent implements OnInit {
     });
   }
 
-  onSearch() {
-    this.page = 1;
-    this.loadPage();
-  }
-
   onApplyFilters() {
     this.page = 1;
     this.loadPage();
   }
 
   clearFilters() {
+    this.searchTerm = '';
     this.filterArea = '';
     this.filterAcademicYear = '';
     this.filterGender = null;
@@ -127,4 +122,5 @@ export class StudentListComponent implements OnInit {
       error: () => { this.requestingId = null; }
     });
   }
+
 }

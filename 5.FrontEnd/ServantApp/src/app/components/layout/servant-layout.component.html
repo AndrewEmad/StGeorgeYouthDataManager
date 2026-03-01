@@ -1,11 +1,11 @@
 <header class="layout-header glass-card">
   <div class="header-right">
-    <h1 class="page-title">{{ pageTitle }}</h1>
     @if (!isDashboard) {
       <a routerLink="/dashboard" class="layout-nav-btn btn-back" aria-label="رجوع">
         <span class="material-icons">arrow_forward</span>
       </a>
     }
+    <h1 class="page-title">{{ pageTitle }}</h1>
   </div>
   <div class="header-left">
     <a routerLink="/profile" class="profile-link" aria-label="الملف الشخصي">

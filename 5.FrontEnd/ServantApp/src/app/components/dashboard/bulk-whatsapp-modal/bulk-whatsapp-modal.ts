@@ -52,6 +52,6 @@ export class BulkWhatsAppModalComponent {
     const digits = (phone || '').replace(/\D/g, '');
     if (!digits) return '#';
     const q = text?.trim() ? `?text=${encodeURIComponent(text.trim())}` : '';
-    return `https://wa.me/${digits}${q}`;
+    return `https://wa.me/2${digits}${q}`;
   }
 }

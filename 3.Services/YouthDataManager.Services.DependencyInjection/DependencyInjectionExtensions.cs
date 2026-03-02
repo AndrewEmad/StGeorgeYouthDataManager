@@ -148,6 +148,11 @@ public static class DependencyInjectionExtensions
         services.AddScoped<IDomainEventHandler<StudentAdditionRequestCreatedEvent>, StudentAdditionRequestCreatedEventHandler>();
         services.AddScoped<IDomainEventHandler<StudentAssignmentRequestCreatedEvent>, StudentAssignmentRequestCreatedEventHandler>();
 
+        services.AddScoped<IDomainEventHandler<StudentAdditionRequestApprovedEvent>, StudentAdditionRequestApprovedEventHandler>();
+        services.AddScoped<IDomainEventHandler<StudentAdditionRequestRejectedEvent>, StudentAdditionRequestRejectedEventHandler>();
+        services.AddScoped<IDomainEventHandler<StudentAssignmentRequestApprovedEvent>, StudentAssignmentRequestApprovedEventHandler>();
+        services.AddScoped<IDomainEventHandler<StudentAssignmentRequestRejectedEvent>, StudentAssignmentRequestRejectedEventHandler>();
+
         return services;
     }
 }

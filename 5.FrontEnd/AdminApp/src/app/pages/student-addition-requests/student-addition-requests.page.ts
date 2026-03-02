@@ -37,10 +37,10 @@ export class StudentAdditionRequestsPage implements OnInit {
     });
   }
 
-  approve(id: string) {
+  approve(id: string, assign: boolean = true) {
     this.processingId = id;
     this.error = '';
-    this.additionRequestService.approve(id).subscribe({
+    this.additionRequestService.approve(id, assign).subscribe({
       next: () => {
         this.requests = this.requests.filter(r => r.id !== id);
         this.processingId = null;

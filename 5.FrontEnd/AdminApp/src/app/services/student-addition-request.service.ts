@@ -31,8 +31,8 @@ export class StudentAdditionRequestService {
     return this.http.get<StudentAdditionRequestDto[]>(`${this.apiUrl}/pending`);
   }
 
-  approve(id: string): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/${id}/approve`, {});
+  approve(id: string, assignToRequestor: boolean = true): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/${id}/approve?assignToRequestor=${assignToRequestor}`, {});
   }
 
   reject(id: string): Observable<void> {

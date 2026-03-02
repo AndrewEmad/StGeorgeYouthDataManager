@@ -172,7 +172,7 @@ export class StudentListAdminComponent implements OnInit {
       next: (years) => { this.academicYearOptions = years || []; }
     });
     this.usersService.getAll().subscribe(data => {
-      this.servants = data.filter(u => u.role !== 'Priest' && (String(u.role) === 'Servant' || (u as any).role === 0 || u.role === 'Manager'));
+      this.servants = data.filter(u => u.role !== 'Priest' && String(u.role) !== 'Admin');
     });
   }
 

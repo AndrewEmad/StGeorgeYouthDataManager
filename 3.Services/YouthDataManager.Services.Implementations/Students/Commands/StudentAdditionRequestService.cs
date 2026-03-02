@@ -109,7 +109,7 @@ public class StudentAdditionRequestService : IStudentAdditionRequestService
         }
     }
 
-    public async Task<ServiceResult> Approve(Guid requestId, Guid adminUserId)
+    public async Task<ServiceResult> Approve(Guid requestId, Guid adminUserId, bool assignToRequestor)
     {
         try
         {
@@ -130,7 +130,7 @@ public class StudentAdditionRequestService : IStudentAdditionRequestService
                 request.ConfessionFather ?? string.Empty,
                 request.Notes ?? string.Empty,
                 request.Gender,
-                request.RequestedByUserId,
+                assignToRequestor ? request.RequestedByUserId : null,
                 request.BirthDate
             );
 
@@ -144,6 +144,9 @@ public class StudentAdditionRequestService : IStudentAdditionRequestService
             _repo.Update(request);
             await _unitOfWork.SaveChangesAsync();
             await _activityLogger.LogAsync("موافقة على طلب إضافة مخدوم", $"تمت الموافقة على إضافة مخدوم: {request.FullName}");
+
+            await _dispatcher.Dispatch(new StudentAdditionRequestApprovedEvent(request, adminUserId, assignToRequestor));
+
             return ServiceResult.Success();
         }
         catch (Exception ex)
@@ -168,6 +171,9 @@ public class StudentAdditionRequestService : IStudentAdditionRequestService
             request.ProcessedByUserId = adminUserId;
             _repo.Update(request);
             await _unitOfWork.SaveChangesAsync();
+
+            await _dispatcher.Dispatch(new StudentAdditionRequestRejectedEvent(request, adminUserId));
+
             return ServiceResult.Success();
         }
         catch (Exception ex)

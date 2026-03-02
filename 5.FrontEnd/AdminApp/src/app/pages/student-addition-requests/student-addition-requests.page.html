@@ -22,8 +22,11 @@
     >
       <div actions>
         <button type="button" class="btn-outline danger" (click)="reject(r.id)" [disabled]="processingId === r.id">رفض</button>
-        <button type="button" class="btn-primary" (click)="approve(r.id)" [disabled]="processingId === r.id">
-          {{ processingId === r.id ? 'جاري...' : 'موافقة (إضافة وتخصيص للخادم)' }}
+        <button type="button" class="btn-outline secondary" (click)="approve(r.id, false)" [disabled]="processingId === r.id">
+          {{ processingId === r.id ? 'جاري...' : 'موافق (إضافة فقط)' }}
+        </button>
+        <button type="button" class="btn-primary" (click)="approve(r.id, true)" [disabled]="processingId === r.id">
+          {{ processingId === r.id ? 'جاري...' : 'موافق (إضافة وتخصيص)' }}
         </button>
       </div>
     </app-request-card>

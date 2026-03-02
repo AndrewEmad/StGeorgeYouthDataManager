@@ -60,13 +60,13 @@ public class StudentAdditionRequestsController : ControllerBase
 
     [HttpPost("{id}/approve")]
     [Authorize(Roles = RolePolicies.AdminManagerPriestRoles)]
-    public async Task<IActionResult> Approve(Guid id)
+    public async Task<IActionResult> Approve(Guid id, [FromQuery] bool assignToRequestor = true)
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var adminUserId))
             return Unauthorized();
 
-        var result = await _service.Approve(id, adminUserId);
+        var result = await _service.Approve(id, adminUserId, assignToRequestor);
         if (result.Status != ServiceResultStatus.Success)
             return BadRequest(result);
         return Ok();

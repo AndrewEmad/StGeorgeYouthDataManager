@@ -143,6 +143,9 @@ public class StudentAssignmentRequestService : IStudentAssignmentRequestService
 
             await _unitOfWork.SaveChangesAsync();
             await _activityLogger.LogAsync("موافقة على طلب تخصيص مخدوم", $"تمت الموافقة على طلب تخصيص: {request.Student?.FullName}");
+
+            await _dispatcher.Dispatch(new StudentAssignmentRequestApprovedEvent(request, adminUserId));
+
             return ServiceResult.Success();
         }
         catch (Exception ex)
@@ -167,6 +170,9 @@ public class StudentAssignmentRequestService : IStudentAssignmentRequestService
             request.ProcessedByUserId = adminUserId;
             _requestRepository.Update(request);
             await _unitOfWork.SaveChangesAsync();
+
+            await _dispatcher.Dispatch(new StudentAssignmentRequestRejectedEvent(request, adminUserId));
+
             return ServiceResult.Success();
         }
         catch (Exception ex)

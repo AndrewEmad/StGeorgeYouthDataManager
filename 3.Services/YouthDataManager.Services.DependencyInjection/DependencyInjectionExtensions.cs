@@ -23,6 +23,8 @@ using YouthDataManager.Users.Service.Abstractions;
 using YouthDataManager.Users.Service.Implementations;
 using YouthDataManager.Notifications.Service.Abstractions;
 using YouthDataManager.Notifications.Service.Implementations;
+using YouthDataManager.Notifications.Service.Implementations.Handlers;
+using YouthDataManager.Domain.Events;
 
 namespace YouthDataManager.Services.DependencyInjection;
 
@@ -141,6 +143,11 @@ public static class DependencyInjectionExtensions
     {
         services.AddTransient<IFcmService, FcmService>();
         services.AddScoped<INotificationService, NotificationService>();
+
+        // Domain Event Handlers
+        services.AddScoped<IDomainEventHandler<StudentAdditionRequestCreatedEvent>, StudentAdditionRequestCreatedEventHandler>();
+        services.AddScoped<IDomainEventHandler<StudentAssignmentRequestCreatedEvent>, StudentAssignmentRequestCreatedEventHandler>();
+
         return services;
     }
 }

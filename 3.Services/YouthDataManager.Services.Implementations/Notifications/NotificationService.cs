@@ -83,6 +83,7 @@ public class NotificationService : INotificationService
             // Update: reassign to this user and refresh timestamp
             existing.UserId = userId;
             existing.DeviceName = request.DeviceName;
+            existing.AppType = request.AppType;
             existing.LastUsedAt = DateTime.UtcNow;
             _tokenRepo.Update(existing);
         }
@@ -92,7 +93,8 @@ public class NotificationService : INotificationService
             {
                 UserId = userId,
                 Token = request.Token,
-                DeviceName = request.DeviceName
+                DeviceName = request.DeviceName,
+                AppType = request.AppType
             };
             _tokenRepo.Add(token);
         }

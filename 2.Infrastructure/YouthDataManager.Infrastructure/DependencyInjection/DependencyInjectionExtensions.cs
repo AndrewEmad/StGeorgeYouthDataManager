@@ -10,6 +10,8 @@ using YouthDataManager.Infrastructure.Repositories.NoTracking;
 using YouthDataManager.Infrastructure.Repositories.Tracking;
 using YouthDataManager.Infrastructure.Reports;
 using YouthDataManager.Reports.Service.Abstractions.Data;
+using YouthDataManager.Domain.Events;
+using YouthDataManager.Infrastructure.Events;
 
 namespace YouthDataManager.Infrastructure.DependencyInjection;
 
@@ -59,6 +61,9 @@ public static class DependencyInjectionExtensions
 
             // Notification repositories
             .AddTransient<INotificationScheduleRepository, NotificationScheduleRepository>()
-            .AddTransient<IUserDeviceTokenRepository, UserDeviceTokenRepository>();
+            .AddTransient<IUserDeviceTokenRepository, UserDeviceTokenRepository>()
+
+            // Domain Events
+            .AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
     }
 }

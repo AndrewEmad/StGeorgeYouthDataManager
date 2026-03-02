@@ -8,6 +8,7 @@ using YouthDataManager.Domain.Repositories.Tracking;
 using YouthDataManager.Students.Service.Abstractions.Commands;
 using YouthDataManager.Students.Service.Abstractions.DTOs;
 using YouthDataManager.Shared.Service.Abstractions;
+using YouthDataManager.Domain.Events;
 
 namespace YouthDataManager.Students.Service.Implementations.Commands;
 
@@ -19,6 +20,7 @@ public class StudentAssignmentRequestService : IStudentAssignmentRequestService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IActivityLogger _activityLogger;
     private readonly ILogger<StudentAssignmentRequestService> _logger;
+    private readonly IDomainEventDispatcher _dispatcher;
 
     public StudentAssignmentRequestService(
         IStudentAssignmentRequestRepository requestRepository,
@@ -26,7 +28,8 @@ public class StudentAssignmentRequestService : IStudentAssignmentRequestService
         IStudentCommandsService studentCommandsService,
         IUnitOfWork unitOfWork,
         IActivityLogger activityLogger,
-        ILogger<StudentAssignmentRequestService> logger)
+        ILogger<StudentAssignmentRequestService> logger,
+        IDomainEventDispatcher dispatcher)
     {
         _requestRepository = requestRepository;
         _studentRepository = studentRepository;
@@ -34,6 +37,7 @@ public class StudentAssignmentRequestService : IStudentAssignmentRequestService
         _unitOfWork = unitOfWork;
         _activityLogger = activityLogger;
         _logger = logger;
+        _dispatcher = dispatcher;
     }
 
     public async Task<ServiceResult<Guid>> CreateRequest(Guid studentId, Guid requestedByUserId)
@@ -62,6 +66,9 @@ public class StudentAssignmentRequestService : IStudentAssignmentRequestService
             await _unitOfWork.SaveChangesAsync();
 
             await _activityLogger.LogAsync("طلب تخصيص مخدوم", $"طلب الخادم تخصيص المخدوم: {student.FullName}");
+
+            await _dispatcher.Dispatch(new StudentAssignmentRequestCreatedEvent(request, requestedByUserId));
+
             return ServiceResult<Guid>.Success(request.Id);
         }
         catch (Exception ex)

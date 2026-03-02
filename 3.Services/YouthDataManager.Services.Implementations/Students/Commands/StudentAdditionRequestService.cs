@@ -9,6 +9,7 @@ using YouthDataManager.Domain.Repositories.Tracking;
 using YouthDataManager.Students.Service.Abstractions.Commands;
 using YouthDataManager.Students.Service.Abstractions.DTOs;
 using YouthDataManager.Shared.Service.Abstractions;
+using YouthDataManager.Domain.Events;
 
 namespace YouthDataManager.Students.Service.Implementations.Commands;
 
@@ -19,19 +20,22 @@ public class StudentAdditionRequestService : IStudentAdditionRequestService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IActivityLogger _activityLogger;
     private readonly ILogger<StudentAdditionRequestService> _logger;
+    private readonly IDomainEventDispatcher _dispatcher;
 
     public StudentAdditionRequestService(
         IStudentAdditionRequestRepository repo,
         IStudentCommandsService studentCommandsService,
         IUnitOfWork unitOfWork,
         IActivityLogger activityLogger,
-        ILogger<StudentAdditionRequestService> logger)
+        ILogger<StudentAdditionRequestService> logger,
+        IDomainEventDispatcher dispatcher)
     {
         _repo = repo;
         _studentCommandsService = studentCommandsService;
         _unitOfWork = unitOfWork;
         _activityLogger = activityLogger;
         _logger = logger;
+        _dispatcher = dispatcher;
     }
 
     public async Task<ServiceResult<Guid>> Create(CreateStudentAdditionRequestDto dto, Guid requestedByUserId)
@@ -63,6 +67,9 @@ public class StudentAdditionRequestService : IStudentAdditionRequestService
             _repo.Add(request);
             await _unitOfWork.SaveChangesAsync();
             await _activityLogger.LogAsync("طلب إضافة مخدوم", $"طلب الخادم إضافة مخدوم جديد: {request.FullName}");
+
+            await _dispatcher.Dispatch(new StudentAdditionRequestCreatedEvent(request, requestedByUserId));
+
             return ServiceResult<Guid>.Success(request.Id);
         }
         catch (Exception ex)

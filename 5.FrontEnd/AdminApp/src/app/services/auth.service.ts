@@ -1,8 +1,9 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, from } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { FcmService } from './fcm.service';
 
 export interface LoginResponse {
   token: string;
@@ -23,6 +24,7 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private router: Router,
+    private fcmService: FcmService
   ) {
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
@@ -49,6 +51,16 @@ export class AuthService {
         localStorage.setItem('user', JSON.stringify(response));
         localStorage.setItem('token', response.token);
         this.currentUser.set(response);
+        
+        // Trigger FCM token registration
+        this.fcmService.requestNotificationPermissionAndGetToken().then(fcmToken => {
+          if (fcmToken) {
+            this.fcmService.registerDeviceToken(fcmToken).subscribe({
+              next: () => localStorage.setItem('fcm_token', fcmToken),
+              error: (err) => console.error('Error registering FCM token:', err)
+            });
+          }
+        });
       }),
     );
   }
@@ -71,6 +83,12 @@ export class AuthService {
   }
 
   logout() {
+    const fcmToken = localStorage.getItem('fcm_token');
+    if (fcmToken) {
+      this.fcmService.unregisterDeviceToken(fcmToken).subscribe();
+      localStorage.removeItem('fcm_token');
+    }
+
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     this.currentUser.set(null);

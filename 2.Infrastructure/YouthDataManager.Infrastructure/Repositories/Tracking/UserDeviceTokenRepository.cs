@@ -16,6 +16,11 @@ public class UserDeviceTokenRepository : IUserDeviceTokenRepository
             .Where(t => t.UserId == userId)
             .ToListAsync();
 
+    public async Task<List<UserDeviceToken>> GetByUserIdAndAppType(Guid userId, string appType) =>
+        await _context.UserDeviceTokens
+            .Where(t => t.UserId == userId && t.AppType == appType)
+            .ToListAsync();
+
     public async Task<UserDeviceToken?> GetByToken(string token) =>
         await _context.UserDeviceTokens
             .FirstOrDefaultAsync(t => t.Token == token);

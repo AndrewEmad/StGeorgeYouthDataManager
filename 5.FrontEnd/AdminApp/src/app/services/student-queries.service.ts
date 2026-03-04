@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { StudentEditLogDto } from '../shared/models';
 
 @Injectable({
   providedIn: 'root'
@@ -68,13 +69,4 @@ export class StudentQueriesService {
       catchError(() => of(null))
     );
   }
-}
-
-export interface StudentEditLogDto {
-  id: string;
-  studentId: string;
-  updatedAt: string;
-  updatedByUserId: string;
-  updatedByUserName: string;
-  details: string;
 }

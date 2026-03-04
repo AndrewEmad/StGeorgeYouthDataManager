@@ -6,72 +6,106 @@
 
   <app-card class="attendance-card">
     <div class="mode-tabs">
-      <button type="button" class="tab" [class.active]="mode === 'students'" (click)="setMode('students')">حضور المخدومين</button>
-      <button type="button" class="tab" [class.active]="mode === 'servants'" (click)="setMode('servants')">حضور الخدام</button>
+      <button type="button" class="tab" [class.active]="mode() === 'students'" (click)="setMode('students')">حضور المخدومين</button>
+      <button type="button" class="tab" [class.active]="mode() === 'servants'" (click)="setMode('servants')">حضور الخدام</button>
     </div>
 
     <div class="form-row">
       <div class="form-group">
         <label>التاريخ</label>
-        <span class="date-input-wrap" (click)="dateInput.showPicker()"><input #dateInput type="date" [(ngModel)]="attendanceDate" class="form-input" /></span>
+        <span class="date-input-wrap" (click)="dateInput.showPicker()"><input #dateInput type="date" [ngModel]="attendanceDate()" (ngModelChange)="attendanceDate.set($event)" class="form-input" /></span>
       </div>
       <div class="form-group flex-grow">
         <label>بحث بالاسم</label>
-        <input type="text" [(ngModel)]="nameFilter" (ngModelChange)="onFilterChange()" class="form-input" placeholder="اكتب الاسم للتصفية..." />
+        <input type="text" [ngModel]="nameFilter()" (ngModelChange)="nameFilter.set($event); onFilterChange()" class="form-input" placeholder="اكتب الاسم للتصفية..." />
       </div>
     </div>
 
-    <p class="error-msg" *ngIf="error">{{ error }}</p>
-    <p class="success-msg" *ngIf="success">{{ success }}</p>
+    @if (error()) {
+      <p class="error-msg">{{ error() }}</p>
+    }
+    @if (success()) {
+      <p class="success-msg">{{ success() }}</p>
+    }
 
     <div class="list-section">
       <div class="list-header">
         <label class="checkbox-label">
-          <input type="checkbox" [checked]="allOnPageSelected" (change)="mode === 'students' ? selectAllStudents() : selectAllServants()" />
+          <input type="checkbox" [checked]="allOnPageSelected()" (change)="mode() === 'students' ? selectAllStudents() : selectAllServants()" />
           تحديد الكل (الصفحة الحالية)
         </label>
-        <span class="count" *ngIf="mode === 'students'">{{ selectedStudentIds.size }} محدد من {{ totalCount }}</span>
-        <span class="count" *ngIf="mode === 'servants'">{{ selectedServantIds.size }} محدد من {{ totalCount }}</span>
+        @if (mode() === 'students') {
+          <span class="count">{{ selectedStudentIds().size }} محدد من {{ totalCount() }}</span>
+        }
+        @if (mode() === 'servants') {
+          <span class="count">{{ selectedServantIds().size }} محدد من {{ totalCount() }}</span>
+        }
       </div>
-      <div class="list-body" *ngIf="mode === 'students'">
-        <app-loader *ngIf="loading" />
-        <div *ngIf="!loading && studentList.length === 0" class="empty">لا يوجد مخدومين أو لا توجد نتائج للبحث</div>
-        <label *ngFor="let s of studentList" class="list-item">
-          <input type="checkbox" [checked]="selectedStudentIds.has(s.id)" (change)="toggleStudent(s.id, s.fullName)" />
-          <span>{{ s.fullName }}</span>
-        </label>
-      </div>
-      <div class="list-body" *ngIf="mode === 'servants'">
-        <app-loader *ngIf="loading" />
-        <div *ngIf="!loading && servantList.length === 0" class="empty">لا يوجد خدام أو لا توجد نتائج للبحث</div>
-        <label *ngFor="let u of servantList" class="list-item">
-          <input type="checkbox" [checked]="selectedServantIds.has(u.id)" (change)="toggleServant(u.id, u.fullName)" />
-          <span>{{ u.fullName }}</span>
-        </label>
-      </div>
-      <div class="pagination-bar" *ngIf="!loading && totalPages > 1">
-        <button type="button" class="btn-outline sm" [disabled]="page <= 1" (click)="goPrev()">السابق</button>
-        <span class="page-info">صفحة {{ page }} من {{ totalPages }}</span>
-        <button type="button" class="btn-outline sm" [disabled]="page >= totalPages" (click)="goNext()">التالي</button>
-      </div>
+      @if (mode() === 'students') {
+        <div class="list-body">
+          @if (loading()) {
+            <app-loader />
+          }
+          @if (!loading() && studentList().length === 0) {
+            <div class="empty">لا يوجد مخدومين أو لا توجد نتائج للبحث</div>
+          }
+          @for (s of studentList(); track s.id) {
+            <label class="list-item">
+              <input type="checkbox" [checked]="selectedStudentIds().has(s.id)" (change)="toggleStudent(s.id, s.fullName)" />
+              <span>{{ s.fullName }}</span>
+            </label>
+          }
+        </div>
+      }
+      @if (mode() === 'servants') {
+        <div class="list-body">
+          @if (loading()) {
+            <app-loader />
+          }
+          @if (!loading() && servantList().length === 0) {
+            <div class="empty">لا يوجد خدام أو لا توجد نتائج للبحث</div>
+          }
+          @for (u of servantList(); track u.id) {
+            <label class="list-item">
+              <input type="checkbox" [checked]="selectedServantIds().has(u.id ?? '')" (change)="toggleServant(u.id ?? '', u.fullName)" />
+              <span>{{ u.fullName }}</span>
+            </label>
+          }
+        </div>
+      }
+      @if (!loading() && totalPages() > 1) {
+        <div class="pagination-bar">
+          <button type="button" class="btn-outline sm" [disabled]="page() <= 1" (click)="goPrev()">السابق</button>
+          <span class="page-info">صفحة {{ page() }} من {{ totalPages() }}</span>
+          <button type="button" class="btn-outline sm" [disabled]="page() >= totalPages()" (click)="goNext()">التالي</button>
+        </div>
+      }
     </div>
 
-    <div class="selected-names" *ngIf="mode === 'students' && selectedStudentIds.size > 0">
-      <h3 class="selected-names-title">المحددون للحضور</h3>
-      <ul class="selected-names-list">
-        <li *ngFor="let e of selectedStudentEntries; let i = index">{{ i + 1 }}. {{ e.fullName || '—' }}</li>
-      </ul>
-    </div>
-    <div class="selected-names" *ngIf="mode === 'servants' && selectedServantIds.size > 0">
-      <h3 class="selected-names-title">الخدام المحددون للحضور</h3>
-      <ul class="selected-names-list">
-        <li *ngFor="let e of selectedServantEntries; let i = index">{{ i + 1 }}. {{ e.fullName || '—' }}</li>
-      </ul>
-    </div>
+    @if (mode() === 'students' && selectedStudentIds().size > 0) {
+      <div class="selected-names">
+        <h3 class="selected-names-title">المحددون للحضور</h3>
+        <ul class="selected-names-list">
+          @for (e of selectedStudentEntries(); track e.id; let i = $index) {
+            <li>{{ i + 1 }}. {{ e.fullName || '—' }}</li>
+          }
+        </ul>
+      </div>
+    }
+    @if (mode() === 'servants' && selectedServantIds().size > 0) {
+      <div class="selected-names">
+        <h3 class="selected-names-title">الخدام المحددون للحضور</h3>
+        <ul class="selected-names-list">
+          @for (e of selectedServantEntries(); track e.id; let i = $index) {
+            <li>{{ i + 1 }}. {{ e.fullName || '—' }}</li>
+          }
+        </ul>
+      </div>
+    }
 
     <div class="form-actions">
-      <button type="button" class="btn-primary" (click)="submit()" [disabled]="saving">
-        {{ saving ? 'جاري الحفظ...' : 'تسجيل الحضور' }}
+      <button type="button" class="btn-primary" (click)="submit()" [disabled]="saving()">
+        {{ saving() ? 'جاري الحفظ...' : 'تسجيل الحضور' }}
       </button>
     </div>
   </app-card>

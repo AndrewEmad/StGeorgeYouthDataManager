@@ -1,50 +1,54 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 import { CardComponent, FormFieldComponent } from '../../components/common/common';
 
 @Component({
   selector: 'app-change-password-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, CardComponent, FormFieldComponent],
+  imports: [FormsModule, CardComponent, FormFieldComponent],
   templateUrl: './change-password.page.html',
-  styleUrls: ['./change-password.page.css']
+  styleUrls: ['./change-password.page.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChangePasswordPage {
-  currentPassword = '';
-  newPassword = '';
-  confirmPassword = '';
-  error = '';
-  loading = false;
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  constructor(private authService: AuthService, private router: Router) {}
+  currentPassword = signal('');
+  newPassword = signal('');
+  confirmPassword = signal('');
+  error = signal('');
+  loading = signal(false);
 
-  onSubmit() {
-    this.error = '';
-    if (!this.currentPassword || !this.newPassword || !this.confirmPassword) {
-      this.error = 'يرجى تعبئة جميع الحقول';
+  onSubmit(): void {
+    this.error.set('');
+    const current = this.currentPassword();
+    const newP = this.newPassword();
+    const confirm = this.confirmPassword();
+    if (!current || !newP || !confirm) {
+      this.error.set('يرجى تعبئة جميع الحقول');
       return;
     }
-    if (this.newPassword !== this.confirmPassword) {
-      this.error = 'كلمة المرور الجديدة وتأكيدها غير متطابقين';
+    if (newP !== confirm) {
+      this.error.set('كلمة المرور الجديدة وتأكيدها غير متطابقين');
       return;
     }
-    if (this.newPassword.length < 6) {
-      this.error = 'كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل';
+    if (newP.length < 6) {
+      this.error.set('كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل');
       return;
     }
-    this.loading = true;
-    this.authService.changePassword(this.currentPassword, this.newPassword).subscribe({
+    this.loading.set(true);
+    this.authService.changePassword(current, newP).subscribe({
       next: (res) => {
         this.authService.setUserAfterPasswordChange(res);
         this.router.navigate(res.requiresProfileCompletion ? ['/complete-profile'] : ['/dashboard']);
       },
-      error: (err) => {
-        this.error = err.error?.message || 'فشل تغيير كلمة المرور. تحقق من كلمة المرور الحالية.';
-        this.loading = false;
-      }
+      error: (err: { error?: { message?: string } }) => {
+        this.error.set(err.error?.message || 'فشل تغيير كلمة المرور. تحقق من كلمة المرور الحالية.');
+        this.loading.set(false);
+      },
     });
   }
 }

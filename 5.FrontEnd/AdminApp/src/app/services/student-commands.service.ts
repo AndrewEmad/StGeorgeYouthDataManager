@@ -2,33 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-
-export interface CreateStudentRequest {
-  fullName: string;
-  phone: string;
-  address?: string | null;
-  area?: string | null;
-  college?: string | null;
-  academicYear?: string | null;
-  confessionFather?: string | null;
-  gender: number; // 0 Male, 1 Female
-  servantId?: string | null;
-  birthDate?: string | null; // ISO date string for API
-}
-
-export interface UpdateStudentRequest {
-  id: string;
-  fullName: string;
-  phone: string;
-  address?: string | null;
-  area?: string | null;
-  college?: string | null;
-  academicYear?: string | null;
-  confessionFather?: string | null;
-  gender: number;
-  servantId?: string | null;
-  birthDate?: string | null;
-}
+import { CreateStudentRequest, UpdateStudentRequest, BulkImportResult } from '../shared/models';
 
 @Injectable({
   providedIn: 'root'
@@ -100,7 +74,6 @@ export class StudentCommandsService {
 
   /** Parse CSV text (Arabic or English headers) into array of CreateStudentRequest. */
   parseCsvToStudents(csvText: string): CreateStudentRequest[] {
-    debugger
     const lines = csvText.split(/\r?\n/).filter(l => l.length > 0);
     if (lines.length < 2) return [];
     const header = this.parseCsvLine(lines[0]);
@@ -168,9 +141,4 @@ export class StudentCommandsService {
     }));
     return this.http.post<BulkImportResult>(`${this.apiUrl}/bulk-import`, body);
   }
-}
-
-export interface BulkImportResult {
-  created: number;
-  errors: { row: number; message: string }[];
 }

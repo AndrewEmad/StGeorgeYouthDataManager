@@ -1,17 +1,16 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { ReportsService } from '../../../services/reports.service';
 import { ContentHeaderComponent, CardComponent } from '../../common/common';
 
 @Component({
   selector: 'app-backups',
   standalone: true,
-  imports: [CommonModule, ContentHeaderComponent, CardComponent],
+  imports: [ContentHeaderComponent, CardComponent],
   templateUrl: './backups.html',
   styleUrls: ['./backups.css']
 })
 export class BackupsComponent {
-  constructor(private reportsService: ReportsService) {}
+  private reportsService = inject(ReportsService);
 
   exportStudents() {
     this.reportsService.exportStudents({}).subscribe((blob: Blob) => {

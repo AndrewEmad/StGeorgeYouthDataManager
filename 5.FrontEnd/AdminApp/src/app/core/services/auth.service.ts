@@ -1,19 +1,10 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, from } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { FcmService } from './fcm.service';
-
-export interface LoginResponse {
-  token: string;
-  refreshToken: string;
-  fullName: string;
-  role: string;
-  userId: string;
-  requiresPasswordChange?: boolean;
-  requiresProfileCompletion?: boolean;
-}
+import { LoginResponse, ProfileDto } from '../../shared/models';
 
 @Injectable({
   providedIn: 'root',
@@ -52,13 +43,12 @@ export class AuthService {
         localStorage.setItem('user', JSON.stringify(response));
         localStorage.setItem('token', response.token);
         this.currentUser.set(response);
-        
-        // Trigger FCM token registration
-        this.fcmService.requestNotificationPermissionAndGetToken().then(fcmToken => {
+
+        this.fcmService.requestNotificationPermissionAndGetToken().then((fcmToken) => {
           if (fcmToken) {
             this.fcmService.registerDeviceToken(fcmToken).subscribe({
               next: () => localStorage.setItem('fcm_token', fcmToken),
-              error: (err) => console.error('Error registering FCM token:', err)
+              error: (err) => console.error('Error registering FCM token:', err),
             });
           }
         });
@@ -142,7 +132,12 @@ export class AuthService {
     return this.http.get<ProfileDto>(`${environment.apiUrl}/Profile`);
   }
 
-  updateProfile(dto: { fullName?: string; email?: string; phone?: string; address?: string }): Observable<{ token?: string }> {
+  updateProfile(dto: {
+    fullName?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+  }): Observable<{ token?: string }> {
     return this.http.put<{ token?: string }>(`${environment.apiUrl}/Profile`, dto);
   }
 
@@ -154,17 +149,4 @@ export class AuthService {
       this.currentUser.set(updated);
     }
   }
-}
-
-export interface ProfileDto {
-  id: string;
-  userName: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  address?: string;
-  role: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string | null;
 }

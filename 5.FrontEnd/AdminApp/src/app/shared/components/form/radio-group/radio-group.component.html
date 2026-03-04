@@ -1,0 +1,22 @@
+<div class="admin-radio-group" role="radiogroup" [attr.aria-label]="label()">
+  @if (label()) {
+    <span class="group-label">{{ label() }}</span>
+  }
+  <div class="options">
+    @for (opt of options(); track opt.value) {
+      <label class="radio-option" [class.disabled]="disabled() || isDisabled()">
+        <input
+          type="radio"
+          [name]="name()"
+          [value]="opt.value"
+          [checked]="value() === opt.value"
+          [disabled]="disabled() || isDisabled()"
+          (change)="onSelect(opt.value)"
+          (blur)="onBlur()"
+          class="radio-input"
+        />
+        <span class="radio-label">{{ opt.label }}</span>
+      </label>
+    }
+  </div>
+</div>

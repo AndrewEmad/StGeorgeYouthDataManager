@@ -1,0 +1,14 @@
+<div class="form-group">
+  @if (label()) {
+    <label [for]="id() || null" class="field-label">
+      {{ label() }}
+      @if (required()) {
+        <span class="required" aria-hidden="true">*</span>
+      }
+    </label>
+  }
+  <ng-content />
+  @if (error()) {
+    <span class="field-error" role="alert">{{ error() }}</span>
+  }
+</div>

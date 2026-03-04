@@ -1,0 +1,74 @@
+<app-filters-bar
+  [open]="open()"
+  (openChange)="toggleOpen()"
+  [toggleLabel]="toggleLabel()"
+>
+  <div class="filters-grid">
+    @for (field of config(); track trackByKey($index, field)) {
+      @switch (field.type) {
+        @case ('text') {
+          <div class="filter-field">
+            <label [for]="'filter-' + field.key" class="field-label">{{ field.label }}</label>
+            <input
+              type="text"
+              [id]="'filter-' + field.key"
+              class="form-input"
+              [value]="getValue(field.key) ?? ''"
+              [placeholder]="field.placeholder ?? ''"
+              (input)="setValue(field.key, ($any($event.target).value || null))"
+            />
+          </div>
+        }
+        @case ('select') {
+          <div class="filter-field">
+            <label [for]="'filter-' + field.key" class="field-label">{{ field.label }}</label>
+            <select
+              [id]="'filter-' + field.key"
+              class="form-select"
+              [value]="getValue(field.key) ?? ''"
+              (change)="setValue(field.key, ($any($event.target).value || null))"
+            >
+              <option value="">{{ field.placeholder ?? 'الكل' }}</option>
+              @for (opt of field.options; track opt.value) {
+                <option [value]="opt.value">{{ opt.label }}</option>
+              }
+            </select>
+          </div>
+        }
+        @case ('date') {
+          <div class="filter-field">
+            <label [for]="'filter-' + field.key" class="field-label">{{ field.label }}</label>
+            <input
+              type="date"
+              [id]="'filter-' + field.key"
+              class="form-input"
+              [value]="getValue(field.key) ?? ''"
+              (input)="setValue(field.key, ($any($event.target).value || null))"
+            />
+          </div>
+        }
+        @case ('date-range') {
+          <div class="filter-field date-range">
+            <span class="field-label">{{ field.label }}</span>
+            <input
+              type="date"
+              class="form-input"
+              [value]="getValue(field.key + '_from') ?? ''"
+              (input)="setValue(field.key + '_from', $any($event.target).value || null)"
+            />
+            <input
+              type="date"
+              class="form-input"
+              [value]="getValue(field.key + '_to') ?? ''"
+              (input)="setValue(field.key + '_to', $any($event.target).value || null)"
+            />
+          </div>
+        }
+      }
+    }
+  </div>
+  <div class="filter-actions">
+    <button type="button" class="btn-outline sm" (click)="apply()">تطبيق</button>
+    <button type="button" class="btn-outline sm" (click)="reset()">إعادة تعيين</button>
+  </div>
+</app-filters-bar>

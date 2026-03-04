@@ -1,0 +1,21 @@
+<div class="admin-textarea">
+  @if (label()) {
+    <label [for]="id()" class="field-label">
+      {{ label() }}
+      @if (required()) {
+        <span class="required" aria-hidden="true">*</span>
+      }
+    </label>
+  }
+  <textarea
+    [id]="id()"
+    [value]="value()"
+    [placeholder]="placeholder()"
+    [rows]="rows()"
+    [disabled]="disabled() || isDisabled()"
+    [attr.aria-required]="required()"
+    (input)="onInput($event)"
+    (blur)="onBlur()"
+    class="form-textarea"
+  ></textarea>
+</div>

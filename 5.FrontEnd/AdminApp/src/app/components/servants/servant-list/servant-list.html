@@ -34,29 +34,31 @@
   </app-filters-bar>
 
   <app-card class="table-container">
-    <table *ngIf="!loading">
+    @if (!loading) {
+    <table>
       <thead>
         <tr>
-          <th class="sortable" (click)="setSort('fullName')">الاسم <span class="sort-icon" *ngIf="sortBy === 'fullName'">{{ sortDesc ? '▼' : '▲' }}</span></th>
-          <th class="sortable" (click)="setSort('userName')">اسم المستخدم <span class="sort-icon" *ngIf="sortBy === 'userName'">{{ sortDesc ? '▼' : '▲' }}</span></th>
-          <th class="sortable" (click)="setSort('role')">الدور <span class="sort-icon" *ngIf="sortBy === 'role'">{{ sortDesc ? '▼' : '▲' }}</span></th>
-          <th class="sortable" (click)="setSort('assignedStudentsCount')">عدد المخدومين <span class="sort-icon" *ngIf="sortBy === 'assignedStudentsCount'">{{ sortDesc ? '▼' : '▲' }}</span></th>
-          <th class="sortable" (click)="setSort('lastCallDate')">آخر مكالمة <span class="sort-icon" *ngIf="sortBy === 'lastCallDate'">{{ sortDesc ? '▼' : '▲' }}</span></th>
-          <th class="sortable" (click)="setSort('lastVisitDate')">آخر زيارة <span class="sort-icon" *ngIf="sortBy === 'lastVisitDate'">{{ sortDesc ? '▼' : '▲' }}</span></th>
-          <th class="sortable" (click)="setSort('isActive')">الحالة <span class="sort-icon" *ngIf="sortBy === 'isActive'">{{ sortDesc ? '▼' : '▲' }}</span></th>
+          <th class="sortable" (click)="setSort('fullName')">الاسم @if (sortBy === 'fullName') { <span class="sort-icon">{{ sortDesc ? '▼' : '▲' }}</span> }</th>
+          <th class="sortable" (click)="setSort('userName')">اسم المستخدم @if (sortBy === 'userName') { <span class="sort-icon">{{ sortDesc ? '▼' : '▲' }}</span> }</th>
+          <th class="sortable" (click)="setSort('role')">الدور @if (sortBy === 'role') { <span class="sort-icon">{{ sortDesc ? '▼' : '▲' }}</span> }</th>
+          <th class="sortable" (click)="setSort('assignedStudentsCount')">عدد المخدومين @if (sortBy === 'assignedStudentsCount') { <span class="sort-icon">{{ sortDesc ? '▼' : '▲' }}</span> }</th>
+          <th class="sortable" (click)="setSort('lastCallDate')">آخر مكالمة @if (sortBy === 'lastCallDate') { <span class="sort-icon">{{ sortDesc ? '▼' : '▲' }}</span> }</th>
+          <th class="sortable" (click)="setSort('lastVisitDate')">آخر زيارة @if (sortBy === 'lastVisitDate') { <span class="sort-icon">{{ sortDesc ? '▼' : '▲' }}</span> }</th>
+          <th class="sortable" (click)="setSort('isActive')">الحالة @if (sortBy === 'isActive') { <span class="sort-icon">{{ sortDesc ? '▼' : '▲' }}</span> }</th>
           <th>الإجراءات</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let s of servants" class="row-clickable" (click)="viewServant(s)">
+        @for (s of servants; track s.id) {
+        <tr class="row-clickable" (click)="viewServant(s)">
           <td>{{ s.fullName }}</td>
           <td>{{ s.userName }}</td>
           <td>
             <span class="badge" [class.manager]="s.role === 'Manager'" [class.priest]="s.role === 'Priest'">{{ roleLabel(s.role) }}</span>
           </td>
           <td>{{ servantStatsMap[s.id]?.assignedStudentsCount ?? '—' }}</td>
-          <td>{{ servantStatsMap[s.id]?.lastCallDate ? (servantStatsMap[s.id].lastCallDate | date:'dd/MM/yyyy') : '—' }}</td>
-          <td>{{ servantStatsMap[s.id]?.lastVisitDate ? (servantStatsMap[s.id].lastVisitDate | date:'dd/MM/yyyy') : '—' }}</td>
+          <td>{{ servantStatsMap[s.id]?.lastCallDate ? (servantStatsMap[s.id].lastCallDate | dateFormat) : '—' }}</td>
+          <td>{{ servantStatsMap[s.id]?.lastVisitDate ? (servantStatsMap[s.id].lastVisitDate | dateFormat) : '—' }}</td>
           <td>
             <span class="status-dot" [class.active]="s.isActive"></span>
             {{ s.isActive ? 'نشط' : 'متوقف' }}
@@ -67,13 +69,17 @@
             <button class="btn-outline sm danger" (click)="deleteServant(s)">حذف</button>
           </td>
         </tr>
+        }
       </tbody>
     </table>
-    <app-loader *ngIf="loading" />
+    }
+    @if (loading) {
+      <app-loader />
+    }
   </app-card>
 
+  @if (totalCount > 0) {
   <app-pagination
-    *ngIf="totalCount > 0"
     [total]="totalCount"
     [page]="page"
     [pageSize]="pageSize"
@@ -82,6 +88,7 @@
     (pageChange)="goToPage($event)"
     (pageSizeChange)="setPageSize($event)"
   />
+  }
 </div>
 
 <app-modal title="إضافة خادم جديد" [visible]="showModal" (close)="showModal = false">
@@ -93,7 +100,7 @@
         [disabled]="creatingServant"
         (photoSelected)="onNewServantPhotoFile($event)"
       />
-      <p *ngIf="creatingServant" class="photo-saving-indicator"><span class="photo-spinner"></span> جاري الحفظ...</p>
+      @if (creatingServant) { <p class="photo-saving-indicator"><span class="photo-spinner"></span> جاري الحفظ...</p> }
     </app-form-field>
     <form (ngSubmit)="onCreateServant()" id="addServantForm">
     <div class="form-grid">
@@ -119,7 +126,7 @@
           <option value="Secretary">سكرتارية</option>
           <option value="Priest" [disabled]="priestAlreadyExists">الاب الكاهن المسئول (مستخدم واحد فقط)</option>
         </select>
-        <p class="muted sm" *ngIf="priestAlreadyExists">يوجد بالفعل مستخدم بدور الاب الكاهن المسئول.</p>
+        @if (priestAlreadyExists) { <p class="muted sm">يوجد بالفعل مستخدم بدور الاب الكاهن المسئول.</p> }
       </app-form-field>
     </div>
     </form>
@@ -139,7 +146,7 @@
         [disabled]="editSaving"
         (photoSelected)="onEditServantPhotoFile($event)"
       />
-      <p *ngIf="editSaving" class="photo-saving-indicator"><span class="photo-spinner"></span> جاري الحفظ...</p>
+      @if (editSaving) { <p class="photo-saving-indicator"><span class="photo-spinner"></span> جاري الحفظ...</p> }
     </app-form-field>
     <form (ngSubmit)="onUpdateServant()" id="editServantForm">
     <div class="form-grid">
@@ -162,10 +169,10 @@
           <option value="Secretary">سكرتارية</option>
           <option value="Priest" [disabled]="priestOptionDisabledInEdit">الاب الكاهن المسئول (مستخدم واحد فقط)</option>
         </select>
-        <p class="muted sm" *ngIf="priestOptionDisabledInEdit">يوجد بالفعل مستخدم بدور الاب الكاهن المسئول.</p>
+        @if (priestOptionDisabledInEdit) { <p class="muted sm">يوجد بالفعل مستخدم بدور الاب الكاهن المسئول.</p> }
       </app-form-field>
     </div>
-    <p class="muted" *ngIf="editingServant">اسم المستخدم: {{ editingServant.userName }}</p>
+    @if (editingServant) { <p class="muted">اسم المستخدم: {{ editingServant.userName }}</p> }
     </form>
   </div>
   <div actions>
@@ -174,9 +181,10 @@
   </div>
 </app-modal>
 
+@if (pendingCropFile) {
 <app-photo-crop-modal
-  *ngIf="pendingCropFile"
   [sourceFile]="pendingCropFile"
   (croppedFile)="onCropConfirm($event)"
   (cancel)="onCropCancel()"
 />
+}

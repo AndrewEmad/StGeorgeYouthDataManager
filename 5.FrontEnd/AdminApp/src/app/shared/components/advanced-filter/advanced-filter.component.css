@@ -1,0 +1,39 @@
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-field.date-range {
+  grid-column: span 2;
+}
+
+.filter-field .field-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass);
+  color: var(--text-main);
+  font-size: 0.95rem;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 8px;
+}

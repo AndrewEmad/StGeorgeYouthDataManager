@@ -1,0 +1,24 @@
+<div class="admin-number-input">
+  @if (label()) {
+    <label [for]="id()" class="field-label">
+      {{ label() }}
+      @if (required()) {
+        <span class="required" aria-hidden="true">*</span>
+      }
+    </label>
+  }
+  <input
+    [id]="id()"
+    type="number"
+    [value]="value() ?? ''"
+    [placeholder]="placeholder()"
+    [disabled]="disabled() || isDisabled()"
+    [min]="min() ?? undefined"
+    [max]="max() ?? undefined"
+    [step]="step() ?? undefined"
+    [attr.aria-required]="required()"
+    (input)="onInput($event)"
+    (blur)="onBlur()"
+    class="form-input"
+  />
+</div>

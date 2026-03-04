@@ -1,0 +1,73 @@
+@if (form(); as f) {
+  <form (ngSubmit)="onSubmit()" [formGroup]="f" class="admin-dynamic-form">
+    @for (field of visibleConfig(); track trackByKey($index, field)) {
+      @switch (field.type) {
+        @case ('text') {
+          <admin-text-input
+            [label]="field.label"
+            [placeholder]="field.placeholder ?? ''"
+            [required]="field.required ?? false"
+            [id]="field.key"
+            formControlName="{{ field.key }}"
+          />
+        }
+        @case ('number') {
+          <admin-number-input
+            [label]="field.label"
+            [placeholder]="field.placeholder ?? ''"
+            [required]="field.required ?? false"
+            [id]="field.key"
+            formControlName="{{ field.key }}"
+          />
+        }
+        @case ('select') {
+          <admin-select
+            [label]="field.label"
+            [placeholder]="field.placeholder ?? ''"
+            [options]="field.options ?? []"
+            [required]="field.required ?? false"
+            [id]="field.key"
+            formControlName="{{ field.key }}"
+          />
+        }
+        @case ('date') {
+          <admin-date-picker
+            [label]="field.label"
+            [required]="field.required ?? false"
+            [id]="field.key"
+            formControlName="{{ field.key }}"
+          />
+        }
+        @case ('textarea') {
+          <admin-textarea
+            [label]="field.label"
+            [placeholder]="field.placeholder ?? ''"
+            [required]="field.required ?? false"
+            [id]="field.key"
+            formControlName="{{ field.key }}"
+          />
+        }
+        @case ('checkbox') {
+          <admin-checkbox
+            [label]="field.label"
+            [id]="field.key"
+            formControlName="{{ field.key }}"
+          />
+        }
+        @case ('radio') {
+          <admin-radio-group
+            [label]="field.label"
+            [name]="field.key"
+            [options]="field.options ?? []"
+            formControlName="{{ field.key }}"
+          />
+        }
+      }
+    }
+    <div class="form-actions">
+      <button type="submit" class="btn-primary" [disabled]="f.invalid">
+        {{ submitLabel() }}
+      </button>
+    </div>
+  </form>
+}

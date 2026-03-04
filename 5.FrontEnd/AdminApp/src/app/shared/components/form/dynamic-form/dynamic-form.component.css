@@ -1,0 +1,14 @@
+.admin-dynamic-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-actions {
+  margin-top: 8px;
+}
+
+.form-actions .btn-primary {
+  min-height: var(--touch-min, 44px);
+  padding: 12px 24px;
+}

@@ -1,0 +1,17 @@
+.admin-report-viewer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.report-section {
+  flex: 1;
+}
+
+@media print {
+  .admin-report-viewer .admin-advanced-filter,
+  .admin-report-viewer app-content-header button,
+  .admin-report-viewer .table-actions {
+    display: none !important;
+  }
+}

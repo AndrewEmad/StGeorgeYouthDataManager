@@ -1,0 +1,37 @@
+<div class="admin-report-viewer">
+  @if (title() || backLink()) {
+    <app-content-header
+      [title]="title()"
+      [subtitle]="subtitle()"
+      [backLink]="backLink()"
+      [backLabel]="backLabel()"
+    />
+  }
+  @if (filterConfig().length > 0) {
+    <admin-advanced-filter
+      [config]="filterConfig()"
+      [initialModel]="initialFilterModel()"
+      (filterChange)="filterChange.emit($event)"
+    />
+  }
+  <section class="report-section">
+    <admin-data-table
+      [columns]="columns()"
+      [data]="data()"
+      [loading]="loading()"
+      [totalCount]="totalCount()"
+      [page]="page()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="pageSizeOptions()"
+      [sortBy]="sortBy()"
+      [sortDesc]="sortDesc()"
+      [emptyMessage]="emptyMessage()"
+      [rowClickable]="rowClickable()"
+      [actionsTemplate]="actionsTemplate()"
+      (pageChange)="pageChange.emit($event)"
+      (pageSizeChange)="pageSizeChange.emit($event)"
+      (sortChange)="sortChange.emit($event)"
+      (rowClick)="rowClick.emit($event)"
+    />
+  </section>
+</div>

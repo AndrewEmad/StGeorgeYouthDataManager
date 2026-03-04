@@ -1,0 +1,20 @@
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.required {
+  color: var(--error);
+}
+
+.field-error {
+  font-size: 0.85rem;
+  color: var(--error);
+}

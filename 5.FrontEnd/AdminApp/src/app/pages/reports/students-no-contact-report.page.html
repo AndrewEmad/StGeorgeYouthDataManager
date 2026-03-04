@@ -1,63 +1,31 @@
 <div class="animate-slide">
-  <app-content-header
+  @if (error()) {
+    <p class="error-msg">{{ error() }}</p>
+  }
+  <admin-report-viewer
     title="مخدومون بدون تواصل حديث"
     subtitle="تقرير منفصل"
     backLink="/dashboard/reports/servant-follow-up"
     backLabel="العودة لمتابعة الخدام"
+    [filterConfig]="filterConfig()"
+    [initialFilterModel]="{ days: 14 }"
+    [columns]="columns"
+    [data]="data()"
+    [loading]="loading()"
+    [totalCount]="totalCount()"
+    [page]="page()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="pageSizeOptions"
+    [sortBy]="sortBy()"
+    [sortDesc]="sortDesc()"
+    [emptyMessage]="'لا يوجد مخدومون بدون تواصل في الفترة المحددة'"
+    [actionsTemplate]="actionsTplRef() ?? null"
+    (filterChange)="onFilterChange($event)"
+    (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)"
+    (sortChange)="onSortChange($event)"
   />
-  <section class="report-section">
-    <app-card class="filters">
-      <label>
-        خلال (يوم)
-        <select [(ngModel)]="daysNoContact">
-          <option [value]="7">7</option>
-          <option [value]="14">14</option>
-          <option [value]="30">30</option>
-        </select>
-      </label>
-      <label>
-        الخادم
-        <select [(ngModel)]="servantIdFilter">
-          <option value="">الكل</option>
-          <option *ngFor="let s of servants" [value]="s.id">{{ s.fullName }}</option>
-        </select>
-      </label>
-      <button type="button" class="btn-outline" (click)="onApplyFilters()">تطبيق</button>
-    </app-card>
-    <app-loader *ngIf="loading" />
-    <p *ngIf="error" class="error-msg">{{ error }}</p>
-    <app-card *ngIf="!loading && !error" class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th class="sortable" (click)="setSort('fullName')">المخدوم <span class="sort-icon" *ngIf="sortBy === 'fullName'">{{ sortDesc ? '▼' : '▲' }}</span></th>
-            <th class="sortable" (click)="setSort('servantName')">الخادم <span class="sort-icon" *ngIf="sortBy === 'servantName'">{{ sortDesc ? '▼' : '▲' }}</span></th>
-            <th class="sortable" (click)="setSort('lastContactDate')">آخر تواصل <span class="sort-icon" *ngIf="sortBy === 'lastContactDate'">{{ sortDesc ? '▼' : '▲' }}</span></th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let row of list">
-            <td>{{ row.fullName }}</td>
-            <td>{{ row.servantName || '—' }}</td>
-            <td>{{ row.lastContactDate ? (row.lastContactDate | date:'dd/MM/yyyy') : 'لم يُتواصل معه' }}</td>
-            <td><a [routerLink]="['/dashboard/students', row.studentId]" class="btn-outline sm">تفاصيل</a></td>
-          </tr>
-          <tr *ngIf="list.length === 0">
-            <td colspan="4" class="text-muted">لا يوجد مخدومون بدون تواصل في الفترة المحددة</td>
-          </tr>
-        </tbody>
-      </table>
-    </app-card>
-    <app-pagination
-      *ngIf="totalCount > 0"
-      [total]="totalCount"
-      [page]="page"
-      [pageSize]="pageSize"
-      [pageSizeOptions]="pageSizeOptions"
-      [currentPageCount]="list.length"
-      (pageChange)="goToPage($event)"
-      (pageSizeChange)="setPageSize($event)"
-    />
-  </section>
+  <ng-template #rowActionsTpl let-row>
+    <a [routerLink]="['/dashboard/students', row.studentId]" class="btn-outline sm" (click)="$event.stopPropagation()">تفاصيل</a>
+  </ng-template>
 </div>

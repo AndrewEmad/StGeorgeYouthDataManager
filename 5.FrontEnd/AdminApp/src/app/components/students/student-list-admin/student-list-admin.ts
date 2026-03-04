@@ -1,15 +1,11 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { StudentQueriesService } from '../../../services/student-queries.service';
-import { UsersService, User } from '../../../services/users.service';
-import {
-  StudentCommandsService,
-  CreateStudentRequest,
-  UpdateStudentRequest,
-} from '../../../services/student-commands.service';
+import { UsersService } from '../../../services/users.service';
+import { StudentCommandsService } from '../../../services/student-commands.service';
+import { User, CreateStudentRequest, UpdateStudentRequest } from '../../../shared/models';
 import {
   ContentHeaderComponent,
   CardComponent,
@@ -20,12 +16,12 @@ import {
   PhotoCropModalComponent,
   ProfilePhotoInputComponent,
 } from '../../common/common';
+import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
 
 @Component({
   selector: 'app-student-list-admin',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ContentHeaderComponent,
     CardComponent,
@@ -35,6 +31,7 @@ import {
     PaginationComponent,
     PhotoCropModalComponent,
     ProfilePhotoInputComponent,
+    DateFormatPipe,
   ],
   templateUrl: './student-list-admin.html',
   styleUrls: ['./student-list-admin.css'],
@@ -47,7 +44,6 @@ export class StudentListAdminComponent implements OnInit {
   pageSizeOptions = [5, 10, 20, 50];
   servants: User[] = [];
   loading = true;
-  searchTerm = '';
   selectedStudent: any = null;
   showAssignModal = false;
   targetServantId = '';

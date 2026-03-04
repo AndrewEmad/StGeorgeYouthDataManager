@@ -1,75 +1,83 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal, inject, ChangeDetectionStrategy, TemplateRef, viewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { ReportsService, PagedReport, ServantPerformance } from '../../services/reports.service';
-import { ContentHeaderComponent, LoaderComponent, CardComponent, PaginationComponent } from '../../components/common/common';
+import { ReportsService } from '../../services/reports.service';
+import { ServantPerformance } from '../../shared/models/report.model';
+import { ReportViewerComponent } from '../../shared/components/report-viewer/report-viewer.component';
+import { DataTableColumn } from '../../shared/components/data-table/data-table-column';
 
 @Component({
   selector: 'app-servant-performance-report-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, ContentHeaderComponent, LoaderComponent, CardComponent, PaginationComponent],
+  imports: [RouterLink, ReportViewerComponent],
   templateUrl: './servant-performance-report.page.html',
-  styleUrls: ['./servant-follow-up.page.css']
+  styleUrls: ['./servant-follow-up.page.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ServantPerformanceReportPage implements OnInit {
-  perfResult: PagedReport<ServantPerformance> | null = null;
-  loading = false;
-  page = 1;
-  pageSize = 10;
+  private reportsService = inject(ReportsService);
+  private router = inject(Router);
+
+  actionsTplRef = viewChild<TemplateRef<{ $implicit: ServantPerformance }>>('rowActionsTpl');
+
+  readonly columns: DataTableColumn<ServantPerformance>[] = [
+    { key: 'fullName', header: 'الخادم', sortable: true },
+    { key: 'assignedStudentsCount', header: 'عدد المخدومين المخصصين', sortable: true },
+    { key: 'callsThisWeek', header: 'مكالمات هذا الأسبوع', sortable: true },
+    { key: 'visitsThisWeek', header: 'زيارات هذا الأسبوع', sortable: true },
+  ];
+
+  data = signal<ServantPerformance[]>([]);
+  loading = signal(false);
+  totalCount = signal(0);
+  page = signal(1);
+  pageSize = signal(10);
   pageSizeOptions = [5, 10, 20, 50];
-  sortBy: string | null = 'fullName';
-  sortDesc = false;
+  sortBy = signal<string | null>('fullName');
+  sortDesc = signal(false);
 
-  constructor(
-    private reportsService: ReportsService,
-    private router: Router
-  ) {}
-
-  get totalPages(): number {
-    if (!this.perfResult) return 1;
-    return Math.max(1, Math.ceil(this.perfResult.totalCount / this.pageSize));
-  }
-
-  viewServant(servantId: string) {
-    this.router.navigate(['/dashboard/servants', servantId]);
-  }
-
-  setSort(column: string) {
-    if (this.sortBy === column) this.sortDesc = !this.sortDesc;
-    else { this.sortBy = column; this.sortDesc = false; }
-    this.page = 1;
+  ngOnInit(): void {
     this.loadData();
   }
 
-  loadData() {
-    this.loading = true;
-    this.reportsService.getServantPerformancesPaged({
-      page: this.page,
-      pageSize: this.pageSize,
-      sortBy: this.sortBy ?? undefined,
-      sortDesc: this.sortDesc
-    }).subscribe({
-      next: (data) => {
-        this.perfResult = data;
-        this.page = data.page ?? this.page;
-        this.loading = false;
-      },
-      error: () => { this.loading = false; }
-    });
+  loadData(): void {
+    this.loading.set(true);
+    this.reportsService
+      .getServantPerformancesPaged({
+        page: this.page(),
+        pageSize: this.pageSize(),
+        sortBy: this.sortBy() ?? undefined,
+        sortDesc: this.sortDesc(),
+      })
+      .subscribe({
+        next: (res) => {
+          this.data.set(res.items ?? []);
+          this.totalCount.set(res.totalCount ?? 0);
+          this.page.set(res.page ?? this.page());
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
   }
 
-  goToPage(p: number) {
-    this.page = p;
+  onPageChange(p: number): void {
+    this.page.set(p);
     this.loadData();
   }
 
-  setPageSize(n: number) {
-    this.pageSize = Number(n);
-    this.page = 1;
+  onPageSizeChange(n: number): void {
+    this.pageSize.set(Number(n));
+    this.page.set(1);
     this.loadData();
   }
 
-  ngOnInit() {
+  onSortChange(event: { column: string; desc: boolean }): void {
+    this.sortBy.set(event.column);
+    this.sortDesc.set(event.desc);
+    this.page.set(1);
     this.loadData();
+  }
+
+  onRowClick(row: ServantPerformance): void {
+    this.router.navigate(['/dashboard/servants', row.servantId]);
   }
 }

@@ -1,0 +1,42 @@
+<div class="admin-image-upload">
+  @if (label()) {
+    <span class="field-label">{{ label() }}</span>
+  }
+  <div class="upload-area">
+    <input
+      #fileInput
+      type="file"
+      [accept]="accept()"
+      [disabled]="disabled()"
+      (change)="onFileChange($event)"
+      class="file-input"
+    />
+    @if (previewUrl() || currentImageUrl()) {
+      <div class="preview-wrap">
+        <img
+          [src]="previewUrl() || currentImageUrl()!"
+          alt="Preview"
+          class="preview-img"
+        />
+        @if (!disabled()) {
+          <button
+            type="button"
+            class="change-btn"
+            (click)="triggerSelect()"
+          >
+            تغيير
+          </button>
+        }
+      </div>
+    } @else {
+      <button
+        type="button"
+        class="upload-btn"
+        [disabled]="disabled()"
+        (click)="triggerSelect()"
+      >
+        اختر صورة
+      </button>
+    }
+  </div>
+</div>

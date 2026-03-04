@@ -1,0 +1,14 @@
+<label class="admin-checkbox" [class.disabled]="disabled() || isDisabled()">
+  <input
+    type="checkbox"
+    [id]="id()"
+    [checked]="value()"
+    [disabled]="disabled() || isDisabled()"
+    (change)="onChangeEvent($event)"
+    (blur)="onBlur()"
+    class="checkbox-input"
+  />
+  @if (label()) {
+    <span class="checkbox-label">{{ label() }}</span>
+  }
+</label>

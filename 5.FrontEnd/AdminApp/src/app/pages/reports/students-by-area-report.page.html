@@ -1,43 +1,27 @@
 <div class="animate-slide">
-  <app-content-header
+  @if (error()) {
+    <p class="error-msg">{{ error() }}</p>
+  }
+  <admin-report-viewer
     title="توزيع المخدومين حسب المنطقة"
     subtitle="تقرير منفصل"
     backLink="/dashboard/reports/student-distribution"
     backLabel="العودة لتوزيع المخدومين"
+    [columns]="columns"
+    [data]="data()"
+    [loading]="loading()"
+    [totalCount]="totalCount()"
+    [page]="page()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="pageSizeOptions"
+    [sortBy]="sortBy()"
+    [sortDesc]="sortDesc()"
+    [actionsTemplate]="actionsTplRef() ?? null"
+    (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)"
+    (sortChange)="onSortChange($event)"
   />
-  <section class="report-section">
-    <app-loader *ngIf="loading" />
-    <p *ngIf="error" class="error-msg">{{ error }}</p>
-    <app-card *ngIf="!loading && !error" class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th class="sortable" (click)="setSort('groupKey')">المنطقة <span class="sort-icon" *ngIf="sortBy === 'groupKey'">{{ sortDesc ? '▼' : '▲' }}</span></th>
-            <th class="sortable" (click)="setSort('count')">العدد <span class="sort-icon" *ngIf="sortBy === 'count'">{{ sortDesc ? '▼' : '▲' }}</span></th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let row of list">
-            <td>{{ row.groupKey || '—' }}</td>
-            <td>{{ row.count }}</td>
-            <td><a [routerLink]="['/dashboard/students']" [queryParams]="{ area: row.groupKey }" class="btn-outline sm">عرض المخدومين</a></td>
-          </tr>
-          <tr *ngIf="list.length === 0">
-            <td colspan="3" class="text-muted">لا توجد بيانات</td>
-          </tr>
-        </tbody>
-      </table>
-    </app-card>
-    <app-pagination
-      *ngIf="totalCount > 0"
-      [total]="totalCount"
-      [page]="page"
-      [pageSize]="pageSize"
-      [pageSizeOptions]="pageSizeOptions"
-      [currentPageCount]="list.length"
-      (pageChange)="goToPage($event)"
-      (pageSizeChange)="setPageSize($event)"
-    />
-  </section>
+  <ng-template #rowActionsTpl let-row>
+    <a [routerLink]="['/dashboard/students']" [queryParams]="{ area: row.groupKey }" class="btn-outline sm" (click)="$event.stopPropagation()">عرض المخدومين</a>
+  </ng-template>
 </div>

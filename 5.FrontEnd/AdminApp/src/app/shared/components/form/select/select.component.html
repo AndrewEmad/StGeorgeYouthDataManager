@@ -1,0 +1,26 @@
+<div class="admin-select">
+  @if (label()) {
+    <label [for]="id()" class="field-label">
+      {{ label() }}
+      @if (required()) {
+        <span class="required" aria-hidden="true">*</span>
+      }
+    </label>
+  }
+  <select
+    [id]="id()"
+    [value]="value()"
+    [disabled]="disabled() || isDisabled()"
+    [attr.aria-required]="required()"
+    (change)="onSelect($event)"
+    (blur)="onBlur()"
+    class="form-select"
+  >
+    @if (placeholder()) {
+      <option value="" disabled>{{ placeholder() }}</option>
+    }
+    @for (opt of options(); track opt.value) {
+      <option [value]="opt.value">{{ opt.label }}</option>
+    }
+  </select>
+</div>

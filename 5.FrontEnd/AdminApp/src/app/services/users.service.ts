@@ -3,18 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-
-export interface User {
-  id: string;
-  userName: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  role: string;
-  isActive: boolean;
-  createdAt: string;
-  photoPath?: string | null;
-}
+import { User } from '../shared/models';
 
 @Injectable({
   providedIn: 'root'

@@ -1,76 +1,78 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 import { CardComponent, FormFieldComponent } from '../../components/common/common';
 
 @Component({
   selector: 'app-complete-profile-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, CardComponent, FormFieldComponent],
+  imports: [FormsModule, CardComponent, FormFieldComponent],
   templateUrl: './complete-profile.page.html',
-  styleUrls: ['./complete-profile.page.css']
+  styleUrls: ['./complete-profile.page.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CompleteProfilePage implements OnInit {
-  fullName = '';
-  phone = '';
-  address = '';
-  error = '';
-  loading = false;
-  profileLoading = false;
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  constructor(private authService: AuthService, private router: Router) {}
+  fullName = signal('');
+  phone = signal('');
+  address = signal('');
+  error = signal('');
+  loading = signal(false);
+  profileLoading = signal(false);
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadProfile();
   }
 
-  loadProfile() {
-    this.profileLoading = true;
+  loadProfile(): void {
+    this.profileLoading.set(true);
     this.authService.getProfile().subscribe({
       next: (p) => {
-        this.fullName = p.fullName ?? '';
-        this.phone = p.phone ?? '';
-        this.address = p.address ?? '';
-        this.profileLoading = false;
+        this.fullName.set(p.fullName ?? '');
+        this.phone.set(p.phone ?? '');
+        this.address.set((p as { address?: string }).address ?? '');
+        this.profileLoading.set(false);
       },
       error: () => {
-        this.profileLoading = false;
-      }
+        this.profileLoading.set(false);
+      },
     });
   }
 
-  onSubmit() {
-    this.error = '';
-    if (!this.fullName?.trim()) {
-      this.error = 'يرجى إدخال الاسم الكامل';
+  onSubmit(): void {
+    this.error.set('');
+    const fullName = this.fullName().trim();
+    const phone = this.phone().trim();
+    const address = this.address().trim();
+    if (!fullName) {
+      this.error.set('يرجى إدخال الاسم الكامل');
       return;
     }
-    if (!this.phone?.trim()) {
-      this.error = 'يرجى إدخال رقم التليفون';
+    if (!phone) {
+      this.error.set('يرجى إدخال رقم التليفون');
       return;
     }
-    if (!this.address?.trim()) {
-      this.error = 'يرجى إدخال العنوان';
+    if (!address) {
+      this.error.set('يرجى إدخال العنوان');
       return;
     }
-    this.loading = true;
-    this.authService.updateProfile({ fullName: this.fullName.trim(), phone: this.phone.trim(), address: this.address.trim() }).subscribe({
-      next: (res) => {
-        this.loading = false;
+    this.loading.set(true);
+    this.authService.updateProfile({ fullName, phone, address }).subscribe({
+      next: (res: { token?: string }) => {
+        this.loading.set(false);
         if (res?.token) {
           this.authService.setUserAfterProfileCompletion(res.token);
-          this.authService.refreshCurrentUserFullName(this.fullName.trim());
-          this.router.navigate(['/dashboard']);
-        } else {
-          this.router.navigate(['/dashboard']);
+          this.authService.refreshCurrentUserFullName(fullName);
         }
+        this.router.navigate(['/dashboard']);
       },
-      error: (err) => {
-        this.error = err.error?.message || 'فشل حفظ البيانات';
-        this.loading = false;
-      }
+      error: (err: { error?: { message?: string } }) => {
+        this.error.set(err.error?.message || 'فشل حفظ البيانات');
+        this.loading.set(false);
+      },
     });
   }
 }

@@ -4,56 +4,67 @@
     backLabel="العودة لقائمة الخدام"
   />
 
-  <app-loader *ngIf="loading" />
+  @if (loading) {
+    <app-loader />
+  }
 
-  <div *ngIf="!loading && servant" class="detail-content">
+  @if (!loading && servant; as s) {
+  <div class="detail-content">
     <app-detail-section title="بيانات الخادم">
-      <div *ngIf="servantPhotoUrl" class="photo-wrap mb-2">
+      @if (servantPhotoUrl) {
+      <div class="photo-wrap mb-2">
         <img [src]="servantPhotoUrl" alt="صورة الخادم" class="servant-photo" />
       </div>
+      }
       <dl class="detail-grid">
         <dt>الاسم الكامل</dt>
-        <dd>{{ servant.fullName }}</dd>
+        <dd>{{ s.fullName }}</dd>
         <dt>اسم المستخدم</dt>
-        <dd>{{ servant.userName }}</dd>
+        <dd>{{ s.userName }}</dd>
         <dt>الهاتف</dt>
-        <dd>{{ servant.phone || '—' }}</dd>
+        <dd>{{ s.phone || '—' }}</dd>
         <dt>الدور</dt>
         <dd>{{
-          servant.role === 'Manager'
+          s.role === 'Manager'
             ? 'مسئول'
-            : servant.role === 'Priest'
+            : s.role === 'Priest'
               ? 'الاب الكاهن المسئول'
               : 'خادم'
         }}</dd>
         <dt>الحالة</dt>
         <dd>
-          <span class="status-dot" [class.active]="servant.isActive"></span>
-          {{ servant.isActive ? 'نشط' : 'متوقف' }}
+          <span class="status-dot" [class.active]="s.isActive"></span>
+          {{ s.isActive ? 'نشط' : 'متوقف' }}
         </dd>
         <dt>تاريخ الإنشاء</dt>
-        <dd>{{ servant.createdAt ? (servant.createdAt | date:'dd/MM/yyyy') : '—' }}</dd>
+        <dd>{{ s.createdAt | dateFormat }}</dd>
         <dt>آخر تحديث</dt>
-        <dd>{{ servant.updatedAt ? (servant.updatedAt | date:'dd/MM/yyyy') : '—' }}</dd>
+        <dd>{{ s.updatedAt | dateFormat }}</dd>
       </dl>
-      <p *ngIf="servant.role === 'Priest'" class="priest-notice muted small">لا يُخصص للاب الكاهن مخدومين ولا يسجل مكالمات أو زيارات — عرض البيانات والإدارة فقط.</p>
+      @if (s.role === 'Priest') {
+      <p class="priest-notice muted small">لا يُخصص للاب الكاهن مخدومين ولا يسجل مكالمات أو زيارات — عرض البيانات والإدارة فقط.</p>
+      }
       <button type="button" class="btn-secondary mt-2" (click)="openChangePassword()">
         <span class="material-icons">lock_reset</span>
         تغيير كلمة المرور
       </button>
     </app-detail-section>
 
-    <app-detail-section *ngIf="performance && servant.role !== 'Priest'" title="أداء المتابعة (هذا الأسبوع: جمعة–خميس)">
+    @if (performance && s.role !== 'Priest') {
+    <app-detail-section title="أداء المتابعة (هذا الأسبوع: جمعة–خميس)">
       <div class="perf-grid">
         <app-stat-item icon="people" [value]="performance.assignedStudentsCount" label="المخدومين المخصصين" variant="indigo" />
         <app-stat-item icon="call" [value]="performance.callsThisWeek" label="مكالمات هذا الأسبوع" variant="emerald" />
         <app-stat-item icon="home" [value]="performance.visitsThisWeek" label="زيارات هذا الأسبوع" variant="amber" />
       </div>
     </app-detail-section>
+    }
 
-    <app-detail-section *ngIf="servant.role !== 'Priest'" title="سجل المتابعة الهاتفية">
+    @if (s.role !== 'Priest') {
+    <app-detail-section title="سجل المتابعة الهاتفية">
       <div class="table-wrap">
-        <table *ngIf="calls.length">
+        @if (calls.length) {
+        <table>
           <thead>
             <tr>
               <th>المخدوم</th>
@@ -64,24 +75,29 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let c of calls">
+            @for (c of calls; track c.id) {
+            <tr>
               <td>
                 <a [routerLink]="['/dashboard/students', c.studentId]" class="student-link">{{ c.studentName || '—' }}</a>
               </td>
-              <td>{{ formatDate(c.callDate) }}</td>
-              <td>{{ callStatusLabel(c.callStatus) }}</td>
+              <td>{{ c.callDate | dateFormat }}</td>
+              <td>{{ c.callStatus | callStatus }}</td>
               <td>{{ c.notes || '—' }}</td>
-              <td>{{ formatDate(c.nextFollowUpDate) }}</td>
+              <td>{{ c.nextFollowUpDate | dateFormat }}</td>
             </tr>
+            }
           </tbody>
         </table>
-        <p *ngIf="!calls.length" class="muted">لا توجد مكالمات مسجلة</p>
+        } @else {
+        <p class="muted">لا توجد مكالمات مسجلة</p>
+        }
       </div>
     </app-detail-section>
 
-    <app-detail-section *ngIf="servant.role !== 'Priest'" title="سجل الزيارات المنزلية">
+    <app-detail-section title="سجل الزيارات المنزلية">
       <div class="table-wrap">
-        <table *ngIf="visits.length">
+        @if (visits.length) {
+        <table>
           <thead>
             <tr>
               <th>المخدوم</th>
@@ -93,24 +109,32 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let v of visits">
+            @for (v of visits; track v.id) {
+            <tr>
               <td>
                 <a [routerLink]="['/dashboard/students', v.studentId]" class="student-link">{{ v.studentName || '—' }}</a>
               </td>
-              <td>{{ formatDate(v.visitDate) }}</td>
-              <td>{{ visitOutcomeLabel(v.visitOutcome) }}</td>
+              <td>{{ v.visitDate | dateFormat }}</td>
+              <td>{{ v.visitOutcome | visitOutcome }}</td>
               <td>{{ formatParticipants(v.participants) }}</td>
               <td>{{ v.notes || '—' }}</td>
-              <td>{{ formatDate(v.nextVisitDate) }}</td>
+              <td>{{ v.nextVisitDate | dateFormat }}</td>
             </tr>
+            }
           </tbody>
         </table>
-        <p *ngIf="!visits.length" class="muted">لا توجد زيارات مسجلة</p>
+        } @else {
+        <p class="muted">لا توجد زيارات مسجلة</p>
+        }
       </div>
     </app-detail-section>
+    }
   </div>
+  }
 
-  <div *ngIf="!loading && !servant" class="p-4 text-center muted">الخادم غير موجود</div>
+  @if (!loading && !servant) {
+  <div class="p-4 text-center muted">الخادم غير موجود</div>
+  }
 </div>
 
 <app-modal
@@ -128,7 +152,9 @@
       <label>تأكيد كلمة المرور</label>
       <input type="password" [(ngModel)]="confirmPassword" class="form-input" placeholder="تأكيد كلمة المرور" />
     </div>
-    <p *ngIf="passwordError" class="error-msg">{{ passwordError }}</p>
+    @if (passwordError) {
+      <p class="error-msg">{{ passwordError }}</p>
+    }
   </div>
   <div actions>
     <button type="button" class="btn-secondary" (click)="closeChangePassword()">إلغاء</button>

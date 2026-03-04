@@ -1,42 +1,42 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 import { CardComponent, FormFieldComponent } from '../common/common';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, CardComponent, FormFieldComponent],
+  imports: [FormsModule, CardComponent, FormFieldComponent],
   templateUrl: './login.html',
   styleUrl: './login.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
-  username = '';
-  password = '';
-  error = '';
-  loading = false;
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-  ) {}
+  username = signal('');
+  password = signal('');
+  error = signal('');
+  loading = signal(false);
 
-  onSubmit() {
-    if (!this.username || !this.password) return;
+  onSubmit(): void {
+    const u = this.username();
+    const p = this.password();
+    if (!u || !p) return;
 
-    this.loading = true;
-    this.error = '';
+    this.loading.set(true);
+    this.error.set('');
 
-    this.authService.login({ username: this.username, password: this.password }).subscribe({
+    this.authService.login({ username: u, password: p }).subscribe({
       next: (res) => {
         const target = res.requiresPasswordChange ? '/change-password' : res.requiresProfileCompletion ? '/complete-profile' : '/dashboard';
         this.router.navigate([target]);
       },
-      error: (err) => {
-        this.error = 'اسم المستخدم أو كلمة المرور غير صحيحة';
-        this.loading = false;
+      error: () => {
+        this.error.set('اسم المستخدم أو كلمة المرور غير صحيحة');
+        this.loading.set(false);
       },
     });
   }

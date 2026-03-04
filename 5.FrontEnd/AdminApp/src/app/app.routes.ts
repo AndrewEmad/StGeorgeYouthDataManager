@@ -23,8 +23,8 @@ import { StudentsByBirthMonthReportPage } from './pages/reports/students-by-birt
 import { ServantPerformanceReportPage } from './pages/reports/servant-performance-report.page';
 import { AttendancePage } from './pages/attendance/attendance.page';
 import { ProfilePage } from './pages/profile/profile.page';
-import { authGuard } from './guards/auth.guard';
-import { redirectIfAuthGuard } from './guards/redirect-if-auth.guard';
+import { authGuard } from './core/guards/auth.guard';
+import { redirectIfAuthGuard } from './core/guards/redirect-if-auth.guard';
 
 export const routes: Routes = [
   { path: 'login', component: LoginPage, canActivate: [redirectIfAuthGuard] },

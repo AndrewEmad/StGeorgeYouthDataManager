@@ -4,32 +4,42 @@
     [subtitle]="'طلبات الخدام لإزالة مخدوم — بالموافقة يتم إما إلغاء التخصيص فقط أو إلغاء التخصيص وتفعيل الحذف حسب نوع الطلب'"
   />
 
-  <app-loader [fullScreen]="true" *ngIf="loading" />
+  @if (loading()) {
+    <app-loader [fullScreen]="true" />
+  }
 
-  <p class="error-msg" *ngIf="error">{{ error }}</p>
+  @if (error()) {
+    <p class="error-msg">{{ error() }}</p>
+  }
 
-  <app-empty-state
-    *ngIf="!loading && requests.length === 0"
-    message="لا توجد طلبات قيد المراجعة"
-  />
+  @if (!loading() && requests().length === 0) {
+    <app-empty-state message="لا توجد طلبات قيد المراجعة" />
+  }
 
-  <div *ngIf="!loading && requests.length" class="requests-list">
-    <app-request-card
-      *ngFor="let r of requests"
-      [title]="r.studentName"
-      [subtitle]="'طلب من: ' + r.requestedByUserName"
-      [date]="r.requestedAt"
-    >
-      <span badges>
-        <p class="removal-type" *ngIf="r.removalType === 0"><span class="badge">من قائمته فقط</span></p>
-        <p class="removal-type" *ngIf="r.removalType !== 0"><span class="badge">من النظام</span></p>
-      </span>
-      <div actions>
-        <button type="button" class="btn-outline danger" (click)="reject(r.id)" [disabled]="processingId === r.id">رفض</button>
-        <button type="button" class="btn-primary" (click)="approve(r.id)" [disabled]="processingId === r.id">
-          {{ processingId === r.id ? 'جاري...' : (r.removalType === 0 ? 'موافقة (إزالة من القائمة فقط)' : 'موافقة (إزالة وتفعيل الحذف)') }}
-        </button>
-      </div>
-    </app-request-card>
-  </div>
+  @if (!loading() && requests().length) {
+    <div class="requests-list">
+      @for (r of requests(); track r.id) {
+        <app-request-card
+          [title]="r.studentName"
+          [subtitle]="'طلب من: ' + r.requestedByUserName"
+          [date]="r.requestedAt"
+        >
+          <span badges>
+            @if (r.removalType === 0) {
+              <p class="removal-type"><span class="badge">من قائمته فقط</span></p>
+            }
+            @if (r.removalType !== 0) {
+              <p class="removal-type"><span class="badge">من النظام</span></p>
+            }
+          </span>
+          <div actions>
+            <button type="button" class="btn-outline danger" (click)="reject(r.id)" [disabled]="processingId() === r.id">رفض</button>
+            <button type="button" class="btn-primary" (click)="approve(r.id)" [disabled]="processingId() === r.id">
+              {{ processingId() === r.id ? 'جاري...' : (r.removalType === 0 ? 'موافقة (إزالة من القائمة فقط)' : 'موافقة (إزالة وتفعيل الحذف)') }}
+            </button>
+          </div>
+        </app-request-card>
+      }
+    </div>
+  }
 </div>

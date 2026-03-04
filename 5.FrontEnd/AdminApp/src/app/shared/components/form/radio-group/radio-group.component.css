@@ -1,0 +1,37 @@
+.admin-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.group-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.radio-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.radio-option.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.radio-input {
+  accent-color: var(--primary);
+}
+
+.radio-label {
+  color: var(--text-main);
+}

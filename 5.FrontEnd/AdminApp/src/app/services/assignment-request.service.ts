@@ -2,18 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-
-export interface StudentAssignmentRequestDto {
-  id: string;
-  studentId: string;
-  studentName: string;
-  requestedByUserId: string;
-  requestedByUserName: string;
-  requestedAt: string;
-  status: string;
-  processedAt?: string;
-  processedByUserId?: string;
-}
+import { StudentAssignmentRequestDto } from '../shared/models';
 
 @Injectable({
   providedIn: 'root'

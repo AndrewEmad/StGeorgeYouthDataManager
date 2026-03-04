@@ -2,10 +2,10 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
-export const authGuard = (_: any, state: any) => {
+export const authGuard = (_: unknown, state: unknown) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  const url = state?.url ?? router.url;
+  const url = (state as { url?: string })?.url ?? router.url;
 
   if (!authService.isLoggedIn()) {
     router.navigate(['/login']);

@@ -4,39 +4,47 @@
     subtitle="تعديل البريد الإلكتروني ورقم التليفون وكلمة المرور"
   />
 
-  <app-loader *ngIf="profileLoading" />
+  @if (profileLoading()) {
+    <app-loader />
+  }
 
-  <div *ngIf="!profileLoading && profile" class="profile-sections">
-    <app-detail-section title="البيانات الشخصية">
-      <form (ngSubmit)="saveProfile()">
-        <app-form-field label="الاسم الكامل">
-          <input type="text" [(ngModel)]="fullName" name="fullName" class="form-input" />
-        </app-form-field>
-        <app-form-field label="البريد الإلكتروني">
-          <input type="email" [(ngModel)]="email" name="email" class="form-input" />
-        </app-form-field>
-        <app-form-field label="رقم التليفون">
-          <input type="tel" [(ngModel)]="phone" name="phone" class="form-input" />
-        </app-form-field>
-        <p *ngIf="profileError" class="error-msg">{{ profileError }}</p>
-        <button type="submit" class="btn-primary" [disabled]="profileSaving">{{ profileSaving ? 'جاري الحفظ...' : 'حفظ التعديلات' }}</button>
-      </form>
-    </app-detail-section>
+  @if (!profileLoading() && profile()) {
+    <div class="profile-sections">
+      <app-detail-section title="البيانات الشخصية">
+        <form (ngSubmit)="saveProfile()">
+          <app-form-field label="الاسم الكامل">
+            <input type="text" [ngModel]="fullName()" (ngModelChange)="fullName.set($event)" name="fullName" class="form-input" />
+          </app-form-field>
+          <app-form-field label="البريد الإلكتروني">
+            <input type="email" [ngModel]="email()" (ngModelChange)="email.set($event)" name="email" class="form-input" />
+          </app-form-field>
+          <app-form-field label="رقم التليفون">
+            <input type="tel" [ngModel]="phone()" (ngModelChange)="phone.set($event)" name="phone" class="form-input" />
+          </app-form-field>
+          @if (profileError()) {
+            <p class="error-msg">{{ profileError() }}</p>
+          }
+          <button type="submit" class="btn-primary" [disabled]="profileSaving()">{{ profileSaving() ? 'جاري الحفظ...' : 'حفظ التعديلات' }}</button>
+        </form>
+      </app-detail-section>
 
-    <app-detail-section title="تغيير كلمة المرور">
-      <form (ngSubmit)="changePassword()">
-        <app-form-field label="كلمة المرور الحالية">
-          <input type="password" [(ngModel)]="currentPassword" name="currentPassword" class="form-input" />
-        </app-form-field>
-        <app-form-field label="كلمة المرور الجديدة">
-          <input type="password" [(ngModel)]="newPassword" name="newPassword" class="form-input" placeholder="6 أحرف على الأقل" />
-        </app-form-field>
-        <app-form-field label="تأكيد كلمة المرور الجديدة">
-          <input type="password" [(ngModel)]="confirmPassword" name="confirmPassword" class="form-input" />
-        </app-form-field>
-        <p *ngIf="passwordError" class="error-msg">{{ passwordError }}</p>
-        <button type="submit" class="btn-outline" [disabled]="passwordSaving">{{ passwordSaving ? 'جاري التغيير...' : 'تغيير كلمة المرور' }}</button>
-      </form>
-    </app-detail-section>
-  </div>
+      <app-detail-section title="تغيير كلمة المرور">
+        <form (ngSubmit)="changePassword()">
+          <app-form-field label="كلمة المرور الحالية">
+            <input type="password" [ngModel]="currentPassword()" (ngModelChange)="currentPassword.set($event)" name="currentPassword" class="form-input" />
+          </app-form-field>
+          <app-form-field label="كلمة المرور الجديدة">
+            <input type="password" [ngModel]="newPassword()" (ngModelChange)="newPassword.set($event)" name="newPassword" class="form-input" placeholder="6 أحرف على الأقل" />
+          </app-form-field>
+          <app-form-field label="تأكيد كلمة المرور الجديدة">
+            <input type="password" [ngModel]="confirmPassword()" (ngModelChange)="confirmPassword.set($event)" name="confirmPassword" class="form-input" />
+          </app-form-field>
+          @if (passwordError()) {
+            <p class="error-msg">{{ passwordError() }}</p>
+          }
+          <button type="submit" class="btn-outline" [disabled]="passwordSaving()">{{ passwordSaving() ? 'جاري التغيير...' : 'تغيير كلمة المرور' }}</button>
+        </form>
+      </app-detail-section>
+    </div>
+  }
 </div>

@@ -1,16 +1,19 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { UsersService } from '../../services/users.service';
 import { ReportsService } from '../../services/reports.service';
-import { FollowUpService, CallLogDto, HomeVisitDto, HomeVisitParticipantDto } from '../../services/follow-up.service';
+import { FollowUpService } from '../../services/follow-up.service';
+import { CallLogDto, HomeVisitDto, HomeVisitParticipantDto } from '../../shared/models';
 import { ContentHeaderComponent, LoaderComponent, DetailSectionComponent, StatItemComponent, ModalComponent } from '../../components/common/common';
+import { DateFormatPipe } from '../../shared/pipes/date-format.pipe';
+import { CallStatusPipe } from '../../shared/pipes/call-status.pipe';
+import { VisitOutcomePipe } from '../../shared/pipes/visit-outcome.pipe';
 
 @Component({
   selector: 'app-servant-detail-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, ContentHeaderComponent, LoaderComponent, DetailSectionComponent, StatItemComponent, ModalComponent],
+  imports: [FormsModule, RouterLink, ContentHeaderComponent, LoaderComponent, DetailSectionComponent, StatItemComponent, ModalComponent, DateFormatPipe, CallStatusPipe, VisitOutcomePipe],
   templateUrl: './servant-detail.page.html',
   styleUrls: ['./servant-detail.page.css']
 })

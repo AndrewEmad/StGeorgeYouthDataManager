@@ -73,6 +73,10 @@ h3 {
   letter-spacing: -0.5px;
 }
 
+button {
+  margin: 0px 4px;
+}
+
 /* Buttons – touch-friendly min height */
 .btn-primary {
   background: linear-gradient(135deg, var(--primary), var(--secondary));

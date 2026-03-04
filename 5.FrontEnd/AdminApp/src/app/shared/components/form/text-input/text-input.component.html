@@ -1,0 +1,22 @@
+<div class="admin-text-input">
+  @if (label()) {
+    <label [for]="id()" class="field-label">
+      {{ label() }}
+      @if (required()) {
+        <span class="required" aria-hidden="true">*</span>
+      }
+    </label>
+  }
+  <input
+    [id]="id()"
+    type="{{ type() }}"
+    [value]="value()"
+    [placeholder]="placeholder()"
+    [disabled]="disabled() || isDisabled()"
+    [attr.aria-required]="required()"
+    [attr.aria-invalid]="null"
+    (input)="onInput($event)"
+    (blur)="onBlur()"
+    class="form-input"
+  />
+</div>

@@ -1,48 +1,26 @@
 <div class="animate-slide">
-  <app-content-header
+  <admin-report-viewer
     title="أداء الخدام ومتابعة المخدومين"
     subtitle="مكالمات وزيارات هذا الأسبوع"
     backLink="/dashboard/reports/servant-follow-up"
     backLabel="العودة للتقارير"
+    [columns]="columns"
+    [data]="data()"
+    [loading]="loading()"
+    [totalCount]="totalCount()"
+    [page]="page()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="pageSizeOptions"
+    [sortBy]="sortBy()"
+    [sortDesc]="sortDesc()"
+    [emptyMessage]="'لا يوجد خدام'"
+    (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)"
+    (sortChange)="onSortChange($event)"
+    (rowClick)="onRowClick($event)"
+    [actionsTemplate]="actionsTplRef() ?? null"
   />
-  <section class="report-section">
-    <app-loader *ngIf="loading" />
-    <app-card *ngIf="!loading && perfResult" class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th class="sortable" (click)="setSort('fullName')">الخادم <span class="sort-icon" *ngIf="sortBy === 'fullName'">{{ sortDesc ? '▼' : '▲' }}</span></th>
-            <th class="sortable" (click)="setSort('assignedStudentsCount')">عدد المخدومين المخصصين <span class="sort-icon" *ngIf="sortBy === 'assignedStudentsCount'">{{ sortDesc ? '▼' : '▲' }}</span></th>
-            <th class="sortable" (click)="setSort('callsThisWeek')">مكالمات هذا الأسبوع <span class="sort-icon" *ngIf="sortBy === 'callsThisWeek'">{{ sortDesc ? '▼' : '▲' }}</span></th>
-            <th class="sortable" (click)="setSort('visitsThisWeek')">زيارات هذا الأسبوع <span class="sort-icon" *ngIf="sortBy === 'visitsThisWeek'">{{ sortDesc ? '▼' : '▲' }}</span></th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let sp of perfResult.items" class="row-clickable" (click)="viewServant(sp.servantId)">
-            <td>{{ sp.fullName }}</td>
-            <td>{{ sp.assignedStudentsCount }}</td>
-            <td>{{ sp.callsThisWeek }}</td>
-            <td>{{ sp.visitsThisWeek }}</td>
-            <td (click)="$event.stopPropagation()">
-              <a [routerLink]="['/dashboard/servants', sp.servantId]" class="btn-outline sm">تفاصيل</a>
-            </td>
-          </tr>
-          <tr *ngIf="perfResult.items.length === 0">
-            <td colspan="5" class="text-muted">لا يوجد خدام</td>
-          </tr>
-        </tbody>
-      </table>
-    </app-card>
-    <app-pagination
-      *ngIf="!loading && perfResult && perfResult.totalCount > 0"
-      [total]="perfResult.totalCount"
-      [page]="page"
-      [pageSize]="pageSize"
-      [pageSizeOptions]="pageSizeOptions"
-      [currentPageCount]="perfResult.items.length"
-      (pageChange)="goToPage($event)"
-      (pageSizeChange)="setPageSize($event)"
-    />
-  </section>
+  <ng-template #rowActionsTpl let-row>
+    <a [routerLink]="['/dashboard/servants', row.servantId]" class="btn-outline sm" (click)="$event.stopPropagation()">تفاصيل</a>
+  </ng-template>
 </div>

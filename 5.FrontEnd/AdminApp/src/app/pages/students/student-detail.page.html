@@ -4,98 +4,127 @@
     backLabel="العودة لقائمة المخدومين"
   />
 
-  <app-loader *ngIf="loading" />
+  @if (loading()) {
+    <app-loader />
+  }
 
-  <div *ngIf="!loading && student" class="detail-content">
+  @if (!loading() && student(); as s) {
+  <div class="detail-content">
     <app-detail-section title="بيانات المخدوم">
-      <div *ngIf="studentPhotoUrl" class="photo-wrap mb-2">
-        <img [src]="studentPhotoUrl" alt="صورة المخدوم" class="student-photo" />
-      </div>
+      @if (studentPhotoUrl()) {
+        <div class="photo-wrap mb-2">
+          <img [src]="studentPhotoUrl()!" alt="صورة المخدوم" class="student-photo" />
+        </div>
+      }
       <dl class="detail-grid">
-        <dt>الاسم الكامل</dt><dd>{{ student.fullName }}</dd>
-        <dt>رقم التليفون</dt><dd>{{ student.phone }}</dd>
-        <dt>تاريخ الميلاد</dt><dd>{{ formatDate(student.birthDate) }}</dd>
-        <dt>المنطقة</dt><dd>{{ student.area || '—' }}</dd>
-        <dt>الكلية</dt><dd>{{ student.college || '—' }}</dd>
-        <dt>السنة الدراسية</dt><dd>{{ student.academicYear || '—' }}</dd>
-        <dt>أب الاعتراف</dt><dd>{{ student.confessionFather || '—' }}</dd>
-        <dt>الخادم</dt><dd><span *ngIf="student.servantName" class="badge">{{ student.servantName }}</span><span *ngIf="!student.servantName">—</span></dd>
-        <dt>تاريخ الإنشاء</dt><dd>{{ student.createdAt ? formatDate(student.createdAt) : '—' }}</dd>
-        <dt>آخر تحديث</dt><dd>{{ student.updatedAt ? formatDate(student.updatedAt) : '—' }}</dd>
+        <dt>الاسم الكامل</dt><dd>{{ s.fullName }}</dd>
+        <dt>رقم التليفون</dt><dd>{{ s.phone }}</dd>
+        <dt>تاريخ الميلاد</dt><dd>{{ s.birthDate | dateFormat }}</dd>
+        <dt>المنطقة</dt><dd>{{ s.area || '—' }}</dd>
+        <dt>الكلية</dt><dd>{{ s.college || '—' }}</dd>
+        <dt>السنة الدراسية</dt><dd>{{ s.academicYear || '—' }}</dd>
+        <dt>أب الاعتراف</dt><dd>{{ s.confessionFather || '—' }}</dd>
+        <dt>الخادم</dt>
+        <dd>
+          @if (s.servantName) {
+            <span class="badge">{{ s.servantName }}</span>
+          } @else {
+            —
+          }
+        </dd>
+        <dt>تاريخ الإنشاء</dt><dd>{{ s.createdAt | dateFormat }}</dd>
+        <dt>آخر تحديث</dt><dd>{{ s.updatedAt | dateFormat }}</dd>
       </dl>
     </app-detail-section>
 
-    <app-detail-section *ngIf="editHistory.length" title="سجل التعديلات">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>التاريخ</th>
-              <th>من قام بالتعديل</th>
-              <th>التفاصيل</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let e of editHistory">
-              <td>{{ formatDate(e.updatedAt) }}</td>
-              <td>{{ e.updatedByUserName }}</td>
-              <td>{{ e.details }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </app-detail-section>
+    @if (editHistory().length) {
+      <app-detail-section title="سجل التعديلات">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>من قام بالتعديل</th>
+                <th>التفاصيل</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of editHistory(); track e.id) {
+                <tr>
+                  <td>{{ e.updatedAt | dateFormat }}</td>
+                  <td>{{ e.updatedByUserName }}</td>
+                  <td>{{ e.details }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </app-detail-section>
+    }
 
     <app-detail-section title="سجل المتابعة الهاتفية">
       <div class="table-wrap">
-        <table *ngIf="calls.length">
-          <thead>
-            <tr>
-              <th>التاريخ</th>
-              <th>الحالة</th>
-              <th>ملاحظات</th>
-              <th>متابعة قادمة</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let c of calls">
-              <td>{{ formatDate(c.callDate) }}</td>
-              <td>{{ callStatusLabel(c.callStatus) }}</td>
-              <td>{{ c.notes || '—' }}</td>
-              <td>{{ formatDate(c.nextFollowUpDate) }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <p *ngIf="!calls.length" class="muted">لا توجد مكالمات مسجلة</p>
+        @if (calls().length) {
+          <table>
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>الحالة</th>
+                <th>ملاحظات</th>
+                <th>متابعة قادمة</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of calls(); track c.id) {
+                <tr>
+                  <td>{{ c.callDate | dateFormat }}</td>
+                  <td>{{ c.callStatus | callStatus }}</td>
+                  <td>{{ c.notes || '—' }}</td>
+                  <td>{{ c.nextFollowUpDate | dateFormat }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <p class="muted">لا توجد مكالمات مسجلة</p>
+        }
       </div>
     </app-detail-section>
 
     <app-detail-section title="سجل الزيارات المنزلية">
       <div class="table-wrap">
-        <table *ngIf="visits.length">
-          <thead>
-            <tr>
-              <th>التاريخ</th>
-              <th>النتيجة</th>
-              <th>المرافقين</th>
-              <th>ملاحظات</th>
-              <th>زيارة قادمة</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let v of visits">
-              <td>{{ formatDate(v.visitDate) }}</td>
-              <td>{{ visitOutcomeLabel(v.visitOutcome) }}</td>
-              <td>{{ formatParticipants(v.participants) }}</td>
-              <td>{{ v.notes || '—' }}</td>
-              <td>{{ formatDate(v.nextVisitDate) }}</td>
-            </tr>
-          </tbody>
-        </table>
-        <p *ngIf="!visits.length" class="muted">لا توجد زيارات مسجلة</p>
+        @if (visits().length) {
+          <table>
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>النتيجة</th>
+                <th>المرافقين</th>
+                <th>ملاحظات</th>
+                <th>زيارة قادمة</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (v of visits(); track v.id) {
+                <tr>
+                  <td>{{ v.visitDate | dateFormat }}</td>
+                  <td>{{ v.visitOutcome | visitOutcome }}</td>
+                  <td>{{ formatParticipants(v.participants) }}</td>
+                  <td>{{ v.notes || '—' }}</td>
+                  <td>{{ v.nextVisitDate | dateFormat }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <p class="muted">لا توجد زيارات مسجلة</p>
+        }
       </div>
     </app-detail-section>
   </div>
+  }
 
-  <div *ngIf="!loading && !student" class="p-4 text-center muted">المخدوم غير موجود</div>
+  @if (!loading() && !student()) {
+    <div class="p-4 text-center muted">المخدوم غير موجود</div>
+  }
 </div>

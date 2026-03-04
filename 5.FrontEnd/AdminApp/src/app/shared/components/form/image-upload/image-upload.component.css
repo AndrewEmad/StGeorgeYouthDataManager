@@ -1,0 +1,62 @@
+.admin-image-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.upload-area {
+  position: relative;
+}
+
+.file-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.upload-btn,
+.change-btn {
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 1px dashed var(--glass-border);
+  background: var(--glass);
+  color: var(--text-main);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.upload-btn:hover:not(:disabled),
+.change-btn:hover {
+  border-color: var(--primary);
+  background: rgba(129, 140, 248, 0.1);
+}
+
+.upload-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.preview-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.preview-img {
+  max-width: 120px;
+  max-height: 120px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.change-btn {
+  font-size: 0.9rem;
+}

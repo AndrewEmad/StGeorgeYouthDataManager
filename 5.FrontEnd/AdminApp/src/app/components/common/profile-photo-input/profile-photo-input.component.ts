@@ -1,10 +1,9 @@
 import { Component, input, output, viewChild, signal, computed, OnDestroy, effect, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-profile-photo-input',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './profile-photo-input.component.html',
   styleUrl: './profile-photo-input.component.scss',
 })

@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { UsersService, User } from '../../../services/users.service';
+import { UsersService } from '../../../services/users.service';
+import { User } from '../../../shared/models';
 import { ReportsService } from '../../../services/reports.service';
 import {
   ContentHeaderComponent,
@@ -20,7 +21,7 @@ import {
   selector: 'app-servant-list',
   standalone: true,
   imports: [
-    CommonModule,
+    DateFormatPipe,
     FormsModule,
     ContentHeaderComponent,
     FiltersBarComponent,

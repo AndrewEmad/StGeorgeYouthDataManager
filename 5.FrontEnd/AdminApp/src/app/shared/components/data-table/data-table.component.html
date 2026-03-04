@@ -1,0 +1,88 @@
+<div class="admin-data-table">
+  @if (loading()) {
+    <app-loader />
+  } @else {
+    @if (data().length === 0) {
+      <app-empty-state [message]="emptyMessage()" />
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              @for (col of columns(); track trackByKey($index, col)) {
+                @if (col.sortable) {
+                  <th
+                    class="sortable"
+                    (click)="onSort(col.key)"
+                  >
+                    {{ col.header }}
+                    @if (sortBy() === col.key) {
+                      <span class="sort-icon">{{ sortDesc() ? '▼' : '▲' }}</span>
+                    }
+                  </th>
+                } @else {
+                  <th>{{ col.header }}</th>
+                }
+              }
+              @if (actionsTemplate()) {
+                <th class="actions-col"></th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of data(); track trackByIndex($index)) {
+              <tr
+                class="data-row"
+                [class.clickable]="rowClickable()"
+                (click)="rowClickable() && rowClick.emit(row)"
+              >
+                @for (col of columns(); track trackByKey($index, col)) {
+                  <td (click)="$event.stopPropagation()">
+                    @if (col.template) {
+                      <ng-container
+                        [ngTemplateOutlet]="col.template"
+                        [ngTemplateOutletContext]="{ $implicit: row, value: getValue(row, col.key) }"
+                      />
+                    } @else if (col.format === 'date') {
+                      {{ getValue(row, col.key) | dateFormat }}
+                    } @else if (col.format === 'month') {
+                      {{ getValue(row, col.key) | monthName }}
+                    } @else {
+                      {{ getValue(row, col.key) }}
+                    }
+                  </td>
+                }
+                @if (actionsTemplate(); as tpl) {
+                  <td class="actions-col" (click)="$event.stopPropagation()">
+                    <ng-container
+                      [ngTemplateOutlet]="tpl"
+                      [ngTemplateOutletContext]="{ $implicit: row }"
+                    />
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (totalCount() > 0) {
+        <app-pagination
+          [total]="totalCount()"
+          [page]="page()"
+          [pageSize]="pageSize()"
+          [pageSizeOptions]="pageSizeOptions()"
+          [currentPageCount]="data().length"
+          (pageChange)="pageChange.emit($event)"
+          (pageSizeChange)="pageSizeChange.emit($event)"
+        />
+      }
+    }
+  }
+  @if (!loading() && data().length > 0 && totalCount() > 0) {
+    <div class="table-actions">
+      <button type="button" class="btn-outline sm" (click)="exportCsv()">
+        تصدير CSV
+      </button>
+    </div>
+  }
+</div>

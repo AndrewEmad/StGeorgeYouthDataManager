@@ -2,21 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-
-export const RemovalType = { UnassignOnly: 0, DeleteFromSystem: 1 } as const;
-
-export interface StudentRemovalRequestDto {
-  id: string;
-  studentId: string;
-  studentName: string;
-  requestedByUserId: string;
-  requestedByUserName: string;
-  requestedAt: string;
-  status: string;
-  removalType: number;
-  processedAt?: string;
-  processedByUserId?: string;
-}
+import { StudentRemovalRequestDto, RemovalType } from '../shared/models';
 
 @Injectable({
   providedIn: 'root'

@@ -1,5 +1,4 @@
 import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { isPlatformBrowser } from '@angular/common';
 
 declare global {
@@ -15,7 +14,7 @@ interface BeforeInstallPromptEvent extends Event {
 @Component({
   selector: 'app-add-to-home-screen',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './add-to-home-screen.component.html',
   styleUrls: ['./add-to-home-screen.component.css']
 })

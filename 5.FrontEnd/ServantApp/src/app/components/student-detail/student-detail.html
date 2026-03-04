@@ -294,13 +294,25 @@
       <label>موعد الزيارة القادمة (اختياري)</label>
       <span class="date-input-wrap" (click)="visitNextDateInput.showPicker()"><input #visitNextDateInput type="datetime-local" [(ngModel)]="visitNextDate" class="form-input" /></span>
     </div>
-    <div class="form-group" *ngIf="servantList.length">
+    <div class="form-group participant-picker-wrap" *ngIf="servantList.length">
       <label>الخدام المرافقين في الزيارة</label>
-      <div class="participant-checkboxes">
-        <label *ngFor="let s of servantList" class="participant-check">
-          <input type="checkbox" [checked]="isParticipantSelected(s.id)" (change)="toggleVisitParticipant(s.id)" />
-          <span>{{ s.fullName }}</span>
-        </label>
+      <div class="participant-search-wrap">
+        <input
+          type="text"
+          class="form-input participant-search-input"
+          [(ngModel)]="participantSearchQuery"
+          placeholder="بحث بالاسم..."
+          autocomplete="off"
+        />
+      </div>
+      <div class="participant-list-scroll">
+        <div class="participant-checkboxes">
+          <label *ngFor="let s of filteredServantList" class="participant-check">
+            <input type="checkbox" [checked]="isParticipantSelected(s.id)" (change)="toggleVisitParticipant(s.id)" class="participant-checkbox" />
+            <span class="participant-name">{{ s.fullName }}</span>
+          </label>
+        </div>
+        <p *ngIf="filteredServantList.length === 0" class="participant-no-results">لا توجد نتائج</p>
       </div>
     </div>
     <p class="error-msg" *ngIf="visitError">{{ visitError }}</p>

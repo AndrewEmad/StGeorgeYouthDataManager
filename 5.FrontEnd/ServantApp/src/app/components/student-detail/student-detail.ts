@@ -62,6 +62,7 @@ export class StudentDetailComponent implements OnInit, OnDestroy {
   visitError = '';
   servantList: { id: string; fullName: string }[] = [];
   selectedParticipantIds: string[] = [];
+  participantSearchQuery = '';
 
   saveEditLoading = false;
   editError = '';
@@ -223,7 +224,14 @@ export class StudentDetailComponent implements OnInit, OnDestroy {
     this.visitNextDate = '';
     this.visitError = '';
     this.selectedParticipantIds = [];
+    this.participantSearchQuery = '';
     this.showAddVisit = true;
+  }
+
+  get filteredServantList(): { id: string; fullName: string }[] {
+    const q = (this.participantSearchQuery || '').trim().toLowerCase();
+    if (!q) return this.servantList;
+    return this.servantList.filter(s => (s.fullName || '').toLowerCase().includes(q));
   }
 
   closeAddVisit() {

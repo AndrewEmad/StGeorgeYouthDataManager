@@ -87,6 +87,7 @@
               <th>المخدوم</th>
               <th>التاريخ</th>
               <th>النتيجة</th>
+              <th>المرافقين</th>
               <th>ملاحظات</th>
               <th>زيارة قادمة</th>
             </tr>
@@ -98,6 +99,7 @@
               </td>
               <td>{{ formatDate(v.visitDate) }}</td>
               <td>{{ visitOutcomeLabel(v.visitOutcome) }}</td>
+              <td>{{ formatParticipants(v.participants) }}</td>
               <td>{{ v.notes || '—' }}</td>
               <td>{{ formatDate(v.nextVisitDate) }}</td>
             </tr>

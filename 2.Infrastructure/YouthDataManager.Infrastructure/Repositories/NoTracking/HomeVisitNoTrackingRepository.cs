@@ -20,6 +20,7 @@ public class HomeVisitNoTrackingRepository : IHomeVisitNoTrackingRepository
     {
         return await _context.HomeVisits
             .AsNoTracking()
+            .Include(e => e.Participants).ThenInclude(p => p.Servant)
             .Where(e => e.StudentId == studentId)
             .OrderByDescending(e => e.VisitDate)
             .Select(selector)
@@ -30,7 +31,8 @@ public class HomeVisitNoTrackingRepository : IHomeVisitNoTrackingRepository
     {
         return await _context.HomeVisits
             .AsNoTracking()
-            .Where(e => e.ServantId == servantId)
+            .Include(e => e.Participants).ThenInclude(p => p.Servant)
+            .Where(e => e.ServantId == servantId || e.Participants.Any(p => p.ServantId == servantId))
             .OrderByDescending(e => e.VisitDate)
             .Select(selector)
             .ToListAsync();
@@ -44,11 +46,13 @@ public class HomeVisitNoTrackingRepository : IHomeVisitNoTrackingRepository
         string? college, 
         Expression<Func<HomeVisit, T>> selector)
     {
-        var query = _context.HomeVisits.AsNoTracking();
+        IQueryable<HomeVisit> query = _context.HomeVisits
+            .AsNoTracking()
+            .Include(e => e.Participants).ThenInclude(p => p.Servant);
 
         if (from.HasValue) query = query.Where(e => e.VisitDate >= from.Value);
         if (to.HasValue) query = query.Where(e => e.VisitDate <= to.Value);
-        if (servantId.HasValue) query = query.Where(e => e.ServantId == servantId.Value);
+        if (servantId.HasValue) query = query.Where(e => e.ServantId == servantId.Value || e.Participants.Any(p => p.ServantId == servantId.Value));
         if (!string.IsNullOrEmpty(area)) query = query.Where(e => e.Student.Area == area);
         if (!string.IsNullOrEmpty(college)) query = query.Where(e => e.Student.College == college);
 
@@ -59,6 +63,7 @@ public class HomeVisitNoTrackingRepository : IHomeVisitNoTrackingRepository
     {
         return await _context.HomeVisits
             .AsNoTracking()
+            .Include(e => e.Participants).ThenInclude(p => p.Servant)
             .OrderByDescending(e => e.VisitDate)
             .Select(selector)
             .ToListAsync();

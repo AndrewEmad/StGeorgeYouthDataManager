@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { StudentQueriesService, StudentEditLogDto } from '../../services/student-queries.service';
-import { FollowUpService, CallLogDto, HomeVisitDto } from '../../services/follow-up.service';
+import { FollowUpService, CallLogDto, HomeVisitDto, HomeVisitParticipantDto } from '../../services/follow-up.service';
 import { ContentHeaderComponent, LoaderComponent, DetailSectionComponent } from '../../components/common/common';
 
 @Component({
@@ -63,5 +63,10 @@ export class StudentDetailPage implements OnInit, OnDestroy {
   visitOutcomeLabel(n: number): string {
     const map: Record<number, string> = { 0: 'تمت الزيارة', 1: 'غير موجود', 2: 'رفض الاستقبال', 3: 'مؤجلة' };
     return map[n] ?? String(n);
+  }
+
+  formatParticipants(participants: HomeVisitParticipantDto[] | undefined): string {
+    if (!participants?.length) return '—';
+    return participants.map(p => p.servantName).filter(Boolean).join('، ') || '—';
   }
 }

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { UsersService } from '../../services/users.service';
 import { ReportsService } from '../../services/reports.service';
-import { FollowUpService, CallLogDto, HomeVisitDto } from '../../services/follow-up.service';
+import { FollowUpService, CallLogDto, HomeVisitDto, HomeVisitParticipantDto } from '../../services/follow-up.service';
 import { ContentHeaderComponent, LoaderComponent, DetailSectionComponent, StatItemComponent, ModalComponent } from '../../components/common/common';
 
 @Component({
@@ -71,6 +71,11 @@ export class ServantDetailPage implements OnInit, OnDestroy {
   visitOutcomeLabel(n: number): string {
     const map: Record<number, string> = { 0: 'تمت الزيارة', 1: 'غير موجود', 2: 'رفض الاستقبال', 3: 'مؤجلة' };
     return map[n] ?? String(n);
+  }
+
+  formatParticipants(participants: HomeVisitParticipantDto[] | undefined): string {
+    if (!participants?.length) return '—';
+    return participants.map(p => p.servantName).filter(Boolean).join('، ') || '—';
   }
 
   openChangePassword() {

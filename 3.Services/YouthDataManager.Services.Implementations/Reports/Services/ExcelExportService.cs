@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using ClosedXML.Excel;
 using YouthDataManager.Domain.Entities;
 
@@ -79,7 +80,7 @@ public class ExcelExportService
         var worksheet = workbook.Worksheets.Add("الزيارات");
         worksheet.RightToLeft = true;
 
-        var headers = new[] { "التاريخ", "المخدوم", "الخادم", "المناسبة", "الملاحظات" };
+        var headers = new[] { "التاريخ", "المخدوم", "الخادم", "المناسبة", "الملاحظات", "المرافقين" };
         for (int i = 0; i < headers.Length; i++)
         {
             worksheet.Cell(1, i + 1).Value = headers[i];
@@ -94,6 +95,10 @@ public class ExcelExportService
             worksheet.Cell(row, 3).Value = visit.Servant?.FullName ?? "غير محدد";
             worksheet.Cell(row, 4).Value = visit.VisitOutcome.ToString();
             worksheet.Cell(row, 5).Value = visit.Notes;
+            var participantNames = visit.Participants?
+                .Select(p => p.Servant?.FullName ?? "")
+                .Where(n => !string.IsNullOrEmpty(n)) ?? Enumerable.Empty<string>();
+            worksheet.Cell(row, 6).Value = string.Join("، ", participantNames);
             row++;
         }
 

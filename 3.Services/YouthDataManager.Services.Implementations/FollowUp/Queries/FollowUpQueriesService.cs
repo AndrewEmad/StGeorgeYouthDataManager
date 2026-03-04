@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using YouthDataManager.Domain.Repositories.NoTracking;
@@ -59,7 +60,8 @@ public class FollowUpQueriesService : IFollowUpQueriesService
                 v.VisitDate,
                 v.VisitOutcome,
                 v.Notes,
-                v.NextVisitDate
+                v.NextVisitDate,
+                v.Participants.Select(p => new HomeVisitParticipantDto(p.ServantId, p.Servant.FullName ?? "")).ToList()
             ));
 
             return ServiceResult<IEnumerable<HomeVisitDto>>.Success(result);
@@ -105,7 +107,8 @@ public class FollowUpQueriesService : IFollowUpQueriesService
                 v.VisitDate,
                 v.VisitOutcome,
                 v.Notes,
-                v.NextVisitDate
+                v.NextVisitDate,
+                v.Participants.Select(p => new HomeVisitParticipantDto(p.ServantId, p.Servant.FullName ?? "")).ToList()
             ));
 
             return ServiceResult<IEnumerable<HomeVisitDto>>.Success(result);

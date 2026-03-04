@@ -1,8 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using YouthDataManager.Domain.Entities;
 using YouthDataManager.FollowUp.Service.Abstractions.Commands;
 using YouthDataManager.FollowUp.Service.Abstractions.DTOs;
 using YouthDataManager.FollowUp.Service.Abstractions.Queries;
@@ -17,11 +21,16 @@ public class FollowUpController : ControllerBase
 {
     private readonly IFollowUpCommandsService _commands;
     private readonly IFollowUpQueriesService _queries;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public FollowUpController(IFollowUpCommandsService commands, IFollowUpQueriesService queries)
+    public FollowUpController(
+        IFollowUpCommandsService commands,
+        IFollowUpQueriesService queries,
+        UserManager<ApplicationUser> userManager)
     {
         _commands = commands;
         _queries = queries;
+        _userManager = userManager;
     }
 
     [HttpPost("call")]
@@ -74,5 +83,24 @@ public class FollowUpController : ControllerBase
     {
         var result = await _queries.GetServantVisitHistory(servantId);
         return Ok(result.Data);
+    }
+
+    /// <summary>
+    /// Returns active servants (id, fullName) for the visit participant picker, excluding the current user.
+    /// </summary>
+    [HttpGet("servants")]
+    public async Task<IActionResult> GetServantsForVisitPicker()
+    {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var servants = await _userManager.GetUsersInRoleAsync("Servant");
+        var managers = await _userManager.GetUsersInRoleAsync("Manager");
+        var secretaries = await _userManager.GetUsersInRoleAsync("Secretary");
+        var all = servants.Concat(managers).Concat(secretaries)
+            .GroupBy(u => u.Id).Select(g => g.First())
+            .Where(u => u.IsActive && u.Id.ToString() != currentUserId)
+            .OrderBy(u => u.FullName ?? u.UserName ?? "")
+            .Select(u => new { id = u.Id, fullName = u.FullName ?? u.UserName ?? "" })
+            .ToList();
+        return Ok(all);
     }
 }

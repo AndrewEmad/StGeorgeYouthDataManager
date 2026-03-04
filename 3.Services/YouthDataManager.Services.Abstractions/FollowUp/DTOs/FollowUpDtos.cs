@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 
 namespace YouthDataManager.FollowUp.Service.Abstractions.DTOs;
+
+public record HomeVisitParticipantDto(Guid ServantId, string ServantName);
 
 public record CallLogDto(
     Guid Id,
@@ -27,7 +30,8 @@ public record HomeVisitDto(
     DateTime VisitDate,
     YouthDataManager.Domain.Enums.VisitOutcome VisitOutcome,
     string Notes,
-    DateTime? NextVisitDate
+    DateTime? NextVisitDate,
+    IReadOnlyList<HomeVisitParticipantDto> Participants
 );
 
 public record CreateHomeVisitRequest(
@@ -35,5 +39,6 @@ public record CreateHomeVisitRequest(
     DateTime VisitDate,
     YouthDataManager.Domain.Enums.VisitOutcome VisitOutcome,
     string Notes,
-    DateTime? NextVisitDate
+    DateTime? NextVisitDate,
+    List<Guid>? ParticipantServantIds
 );

@@ -294,6 +294,15 @@
       <label>موعد الزيارة القادمة (اختياري)</label>
       <span class="date-input-wrap" (click)="visitNextDateInput.showPicker()"><input #visitNextDateInput type="datetime-local" [(ngModel)]="visitNextDate" class="form-input" /></span>
     </div>
+    <div class="form-group" *ngIf="servantList.length">
+      <label>الخدام المرافقين في الزيارة</label>
+      <div class="participant-checkboxes">
+        <label *ngFor="let s of servantList" class="participant-check">
+          <input type="checkbox" [checked]="isParticipantSelected(s.id)" (change)="toggleVisitParticipant(s.id)" />
+          <span>{{ s.fullName }}</span>
+        </label>
+      </div>
+    </div>
     <p class="error-msg" *ngIf="visitError">{{ visitError }}</p>
     <div class="modal-actions">
       <button type="button" class="btn-outline" (click)="closeAddVisit()">إلغاء</button>

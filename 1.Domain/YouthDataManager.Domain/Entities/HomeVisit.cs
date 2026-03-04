@@ -14,4 +14,6 @@ public class HomeVisit
     public string Notes { get; set; } = string.Empty;
     public DateTime? NextVisitDate { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public ICollection<HomeVisitParticipant> Participants { get; set; } = new List<HomeVisitParticipant>();
 }

@@ -13,6 +13,11 @@ export interface CallLogDto {
   nextFollowUpDate: string | null;
 }
 
+export interface HomeVisitParticipantDto {
+  servantId: string;
+  servantName: string;
+}
+
 export interface HomeVisitDto {
   id: string;
   studentId: string;
@@ -21,6 +26,7 @@ export interface HomeVisitDto {
   visitOutcome: number;
   notes: string;
   nextVisitDate: string | null;
+  participants?: HomeVisitParticipantDto[];
 }
 
 @Injectable({ providedIn: 'root' })

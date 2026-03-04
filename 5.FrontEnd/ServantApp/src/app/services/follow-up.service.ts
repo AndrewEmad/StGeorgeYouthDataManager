@@ -26,4 +26,8 @@ export class FollowUpService {
   getVisitHistory(studentId: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/history/visits/${studentId}`);
   }
+
+  getServants(): Observable<{ id: string; fullName: string }[]> {
+    return this.http.get<{ id: string; fullName: string }[]>(`${this.apiUrl}/servants`);
+  }
 }

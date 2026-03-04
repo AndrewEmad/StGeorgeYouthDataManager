@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using YouthDataManager.Domain.Entities;
@@ -60,9 +61,10 @@ public class FollowUpCommandsService : IFollowUpCommandsService
     {
         try
         {
+            var visitId = Guid.NewGuid();
             var visit = new HomeVisit
             {
-                Id = Guid.NewGuid(),
+                Id = visitId,
                 StudentId = request.StudentId,
                 ServantId = currentUserId,
                 VisitDate = request.VisitDate,
@@ -71,6 +73,22 @@ public class FollowUpCommandsService : IFollowUpCommandsService
                 NextVisitDate = request.NextVisitDate,
                 CreatedAt = DateTime.UtcNow
             };
+
+            var participantIds = new HashSet<Guid> { currentUserId };
+            if (request.ParticipantServantIds != null)
+            {
+                foreach (var id in request.ParticipantServantIds)
+                    participantIds.Add(id);
+            }
+
+            foreach (var servantId in participantIds)
+            {
+                visit.Participants.Add(new HomeVisitParticipant
+                {
+                    HomeVisitId = visitId,
+                    ServantId = servantId
+                });
+            }
 
             _visitRepository.Add(visit);
             await _unitOfWork.SaveChangesAsync();

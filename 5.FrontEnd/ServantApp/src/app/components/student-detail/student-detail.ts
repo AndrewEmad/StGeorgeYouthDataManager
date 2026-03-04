@@ -60,6 +60,8 @@ export class StudentDetailComponent implements OnInit, OnDestroy {
   visitNextDate = '';
   visitSaving = false;
   visitError = '';
+  servantList: { id: string; fullName: string }[] = [];
+  selectedParticipantIds: string[] = [];
 
   saveEditLoading = false;
   editError = '';
@@ -83,6 +85,10 @@ export class StudentDetailComponent implements OnInit, OnDestroy {
     if (id) {
       this.loadStudent(id);
     }
+    this.followUpService.getServants().subscribe({
+      next: (list) => (this.servantList = list ?? []),
+      error: () => (this.servantList = [])
+    });
   }
 
   ngOnDestroy() {
@@ -216,11 +222,22 @@ export class StudentDetailComponent implements OnInit, OnDestroy {
     this.visitNotes = '';
     this.visitNextDate = '';
     this.visitError = '';
+    this.selectedParticipantIds = [];
     this.showAddVisit = true;
   }
 
   closeAddVisit() {
     this.showAddVisit = false;
+  }
+
+  toggleVisitParticipant(servantId: string) {
+    const idx = this.selectedParticipantIds.indexOf(servantId);
+    if (idx === -1) this.selectedParticipantIds.push(servantId);
+    else this.selectedParticipantIds.splice(idx, 1);
+  }
+
+  isParticipantSelected(servantId: string): boolean {
+    return this.selectedParticipantIds.includes(servantId);
   }
 
   submitVisit() {
@@ -232,7 +249,8 @@ export class StudentDetailComponent implements OnInit, OnDestroy {
       visitDate: new Date(this.visitDate).toISOString(),
       visitOutcome: Number(this.visitOutcome),
       notes: this.visitNotes || '',
-      nextVisitDate: this.visitNextDate ? new Date(this.visitNextDate).toISOString() : null
+      nextVisitDate: this.visitNextDate ? new Date(this.visitNextDate).toISOString() : null,
+      participantServantIds: this.selectedParticipantIds.length ? this.selectedParticipantIds : null
     };
     this.followUpService.registerVisit(payload).subscribe({
       next: () => {

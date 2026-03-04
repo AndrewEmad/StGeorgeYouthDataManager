@@ -27,6 +27,7 @@ export interface HomeVisitDto {
   notes: string;
   nextVisitDate: string | null;
   participants?: HomeVisitParticipantDto[];
+  recordedByServantId?: string;
 }
 
 @Injectable({ providedIn: 'root' })

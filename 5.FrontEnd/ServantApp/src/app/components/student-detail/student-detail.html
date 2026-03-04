@@ -225,7 +225,12 @@
               <span class="material-icons">home</span>
             </div>
             <div class="timeline-content">
-              <h4>{{ visit.visitDate | date:'short' }}</h4>
+              <div class="timeline-content-header">
+                <h4>{{ visit.visitDate | date:'short' }}</h4>
+                <button *ngIf="canEditVisit(visit)" type="button" class="btn-icon-edit" (click)="openEditVisit(visit)" title="تعديل الزيارة">
+                  <span class="material-icons">edit</span>
+                </button>
+              </div>
               <p class="meta"><span class="label">النتيجة:</span> {{ getVisitOutcomeLabel(visit.visitOutcome) }}</p>
               <p *ngIf="visit.notes" class="notes">{{ visit.notes }}</p>
               <p *ngIf="visit.nextVisitDate" class="next-date"><span class="label">موعد الزيارة القادمة:</span> {{ visit.nextVisitDate | date:'short' }}</p>
@@ -319,6 +324,57 @@
     <div class="modal-actions">
       <button type="button" class="btn-outline" (click)="closeAddVisit()">إلغاء</button>
       <button type="button" class="btn-primary" (click)="submitVisit()" [disabled]="visitSaving">{{ visitSaving ? 'جاري الحفظ...' : 'حفظ' }}</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Visit Modal -->
+<div class="modal-overlay" *ngIf="showEditVisit" (click)="closeEditVisit()">
+  <div class="modal glass-card" (click)="$event.stopPropagation()">
+    <h3>تعديل الزيارة</h3>
+    <div class="form-group">
+      <label>التاريخ والوقت</label>
+      <span class="date-input-wrap" (click)="editVisitDateInput.showPicker()"><input #editVisitDateInput type="datetime-local" [(ngModel)]="visitDate" class="form-input" /></span>
+    </div>
+    <div class="form-group">
+      <label>النتيجة</label>
+      <select [(ngModel)]="visitOutcome" class="form-input">
+        <option *ngFor="let o of visitOutcomeOptions" [value]="o.value">{{ o.label }}</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>ملاحظات</label>
+      <textarea [(ngModel)]="visitNotes" class="form-input" rows="3"></textarea>
+    </div>
+    <div class="form-group">
+      <label>موعد الزيارة القادمة (اختياري)</label>
+      <span class="date-input-wrap" (click)="editVisitNextDateInput.showPicker()"><input #editVisitNextDateInput type="datetime-local" [(ngModel)]="visitNextDate" class="form-input" /></span>
+    </div>
+    <div class="form-group participant-picker-wrap" *ngIf="servantList.length">
+      <label>الخدام المرافقين في الزيارة</label>
+      <div class="participant-search-wrap">
+        <input
+          type="text"
+          class="form-input participant-search-input"
+          [(ngModel)]="participantSearchQuery"
+          placeholder="بحث بالاسم..."
+          autocomplete="off"
+        />
+      </div>
+      <div class="participant-list-scroll">
+        <div class="participant-checkboxes">
+          <label *ngFor="let s of filteredServantList" class="participant-check">
+            <input type="checkbox" [checked]="isParticipantSelected(s.id)" (change)="toggleVisitParticipant(s.id)" class="participant-checkbox" />
+            <span class="participant-name">{{ s.fullName }}</span>
+          </label>
+        </div>
+        <p *ngIf="filteredServantList.length === 0" class="participant-no-results">لا توجد نتائج</p>
+      </div>
+    </div>
+    <p class="error-msg" *ngIf="visitError">{{ visitError }}</p>
+    <div class="modal-actions">
+      <button type="button" class="btn-outline" (click)="closeEditVisit()">إلغاء</button>
+      <button type="button" class="btn-primary" (click)="submitEditVisit()" [disabled]="visitSaving">{{ visitSaving ? 'جاري الحفظ...' : 'حفظ التعديلات' }}</button>
     </div>
   </div>
 </div>

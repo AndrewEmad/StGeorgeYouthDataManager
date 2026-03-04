@@ -14,6 +14,9 @@ public class HomeVisitRepository : IHomeVisitRepository
     public async Task<HomeVisit?> GetById(Guid id) =>
         await _context.HomeVisits.FindAsync(id);
 
+    public async Task<HomeVisit?> GetByIdWithParticipants(Guid id) =>
+        await _context.HomeVisits.Include(v => v.Participants).FirstOrDefaultAsync(v => v.Id == id);
+
     public void Add(HomeVisit homeVisit) => _context.HomeVisits.Add(homeVisit);
 
     public void Update(HomeVisit homeVisit) => _context.HomeVisits.Update(homeVisit);

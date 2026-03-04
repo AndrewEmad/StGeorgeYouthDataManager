@@ -30,4 +30,20 @@ export class FollowUpService {
   getServants(): Observable<{ id: string; fullName: string }[]> {
     return this.http.get<{ id: string; fullName: string }[]>(`${this.apiUrl}/servants`);
   }
+
+  updateVisit(visitId: string, data: {
+    visitDate: string;
+    visitOutcome: number;
+    notes: string;
+    nextVisitDate: string | null;
+    participantServantIds: string[] | null;
+  }): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/visit/${visitId}`, {
+      visitDate: data.visitDate,
+      visitOutcome: data.visitOutcome,
+      notes: data.notes || '',
+      nextVisitDate: data.nextVisitDate,
+      participantServantIds: data.participantServantIds?.length ? data.participantServantIds : null
+    });
+  }
 }

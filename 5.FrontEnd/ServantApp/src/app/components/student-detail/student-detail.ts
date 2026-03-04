@@ -44,6 +44,8 @@ export class StudentDetailComponent implements OnInit, OnDestroy {
   editForm: any = {};
   showAddCall = false;
   showAddVisit = false;
+  showEditVisit = false;
+  visitToEdit: any = null;
   showRemovalChoiceModal = false;
   removalRequest: any = null;
 
@@ -236,6 +238,56 @@ export class StudentDetailComponent implements OnInit, OnDestroy {
 
   closeAddVisit() {
     this.showAddVisit = false;
+  }
+
+  canEditVisit(visit: any): boolean {
+    const uid = this.authService.currentUser()?.userId;
+    return !!uid && visit?.recordedByServantId === uid;
+  }
+
+  openEditVisit(visit: any) {
+    if (!visit?.id) return;
+    this.visitToEdit = visit;
+    this.visitDate = visit.visitDate ? new Date(visit.visitDate).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16);
+    this.visitOutcome = Number(visit.visitOutcome) ?? 0;
+    this.visitNotes = visit.notes || '';
+    this.visitNextDate = visit.nextVisitDate ? new Date(visit.nextVisitDate).toISOString().slice(0, 16) : '';
+    const uid = this.authService.currentUser()?.userId;
+    this.selectedParticipantIds = (visit.participants || [])
+      .filter((p: any) => p.servantId !== uid)
+      .map((p: any) => p.servantId);
+    this.participantSearchQuery = '';
+    this.visitError = '';
+    this.showEditVisit = true;
+  }
+
+  closeEditVisit() {
+    this.showEditVisit = false;
+    this.visitToEdit = null;
+  }
+
+  submitEditVisit() {
+    if (!this.visitToEdit?.id) return;
+    this.visitSaving = true;
+    this.visitError = '';
+    const payload = {
+      visitDate: new Date(this.visitDate).toISOString(),
+      visitOutcome: Number(this.visitOutcome),
+      notes: this.visitNotes || '',
+      nextVisitDate: this.visitNextDate ? new Date(this.visitNextDate).toISOString() : null,
+      participantServantIds: this.selectedParticipantIds.length ? this.selectedParticipantIds : null
+    };
+    this.followUpService.updateVisit(this.visitToEdit.id, payload).subscribe({
+      next: () => {
+        this.closeEditVisit();
+        this.reloadHistory();
+        this.visitSaving = false;
+      },
+      error: (err) => {
+        this.visitError = err.error?.message || 'فشل تحديث الزيارة';
+        this.visitSaving = false;
+      }
+    });
   }
 
   toggleVisitParticipant(servantId: string) {

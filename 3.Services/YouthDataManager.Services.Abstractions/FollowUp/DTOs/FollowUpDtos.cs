@@ -31,7 +31,16 @@ public record HomeVisitDto(
     YouthDataManager.Domain.Enums.VisitOutcome VisitOutcome,
     string Notes,
     DateTime? NextVisitDate,
-    IReadOnlyList<HomeVisitParticipantDto> Participants
+    IReadOnlyList<HomeVisitParticipantDto> Participants,
+    Guid RecordedByServantId
+);
+
+public record UpdateHomeVisitRequest(
+    DateTime VisitDate,
+    YouthDataManager.Domain.Enums.VisitOutcome VisitOutcome,
+    string Notes,
+    DateTime? NextVisitDate,
+    List<Guid>? ParticipantServantIds
 );
 
 public record CreateHomeVisitRequest(

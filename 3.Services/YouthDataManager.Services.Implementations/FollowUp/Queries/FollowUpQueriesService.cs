@@ -61,7 +61,8 @@ public class FollowUpQueriesService : IFollowUpQueriesService
                 v.VisitOutcome,
                 v.Notes,
                 v.NextVisitDate,
-                v.Participants.Select(p => new HomeVisitParticipantDto(p.ServantId, p.Servant.FullName ?? "")).ToList()
+                v.Participants.Select(p => new HomeVisitParticipantDto(p.ServantId, p.Servant.FullName ?? "")).ToList(),
+                v.ServantId
             ));
 
             return ServiceResult<IEnumerable<HomeVisitDto>>.Success(result);
@@ -108,7 +109,8 @@ public class FollowUpQueriesService : IFollowUpQueriesService
                 v.VisitOutcome,
                 v.Notes,
                 v.NextVisitDate,
-                v.Participants.Select(p => new HomeVisitParticipantDto(p.ServantId, p.Servant.FullName ?? "")).ToList()
+                v.Participants.Select(p => new HomeVisitParticipantDto(p.ServantId, p.Servant.FullName ?? "")).ToList(),
+                v.ServantId
             ));
 
             return ServiceResult<IEnumerable<HomeVisitDto>>.Success(result);

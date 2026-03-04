@@ -101,4 +101,49 @@ public class FollowUpCommandsService : IFollowUpCommandsService
             return ServiceResult<Guid>.Failure("An error occurred while registering the visit.");
         }
     }
+
+    public async Task<ServiceResult> UpdateVisit(Guid visitId, UpdateHomeVisitRequest request, Guid currentUserId)
+    {
+        try
+        {
+            var visit = await _visitRepository.GetByIdWithParticipants(visitId);
+            if (visit == null)
+                return ServiceResult.Failure("Visit not found.");
+
+            if (visit.ServantId != currentUserId)
+                return ServiceResult.Failure("Only the person who recorded the visit can edit it.");
+
+            visit.VisitDate = request.VisitDate;
+            visit.VisitOutcome = request.VisitOutcome;
+            visit.Notes = request.Notes ?? string.Empty;
+            visit.NextVisitDate = request.NextVisitDate;
+
+            var participantIds = new HashSet<Guid> { currentUserId };
+            if (request.ParticipantServantIds != null)
+            {
+                foreach (var id in request.ParticipantServantIds)
+                    participantIds.Add(id);
+            }
+
+            visit.Participants.Clear();
+            foreach (var servantId in participantIds)
+            {
+                visit.Participants.Add(new HomeVisitParticipant
+                {
+                    HomeVisitId = visit.Id,
+                    ServantId = servantId
+                });
+            }
+
+            _visitRepository.Update(visit);
+            await _unitOfWork.SaveChangesAsync();
+
+            return ServiceResult.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating visit {VisitId}", visitId);
+            return ServiceResult.Failure("An error occurred while updating the visit.");
+        }
+    }
 }

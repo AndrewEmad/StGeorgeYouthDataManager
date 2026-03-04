@@ -9,4 +9,5 @@ public interface IFollowUpCommandsService
 {
     Task<ServiceResult<Guid>> RegisterCall(CreateCallLogRequest request, Guid currentUserId);
     Task<ServiceResult<Guid>> RegisterVisit(CreateHomeVisitRequest request, Guid currentUserId);
+    Task<ServiceResult> UpdateVisit(Guid visitId, UpdateHomeVisitRequest request, Guid currentUserId);
 }

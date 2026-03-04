@@ -57,6 +57,18 @@ public class FollowUpController : ControllerBase
         return Ok(result.Data);
     }
 
+    [HttpPut("visit/{id:guid}")]
+    public async Task<IActionResult> UpdateVisit(Guid id, [FromBody] UpdateHomeVisitRequest request)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var result = await _commands.UpdateVisit(id, request, userId);
+
+        if (result.Status != ServiceResultStatus.Success)
+            return BadRequest(result);
+
+        return Ok();
+    }
+
     [HttpGet("history/calls/{studentId}")]
     public async Task<IActionResult> GetCallHistory(Guid studentId)
     {

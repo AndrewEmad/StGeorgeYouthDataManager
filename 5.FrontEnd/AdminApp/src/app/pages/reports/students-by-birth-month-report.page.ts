@@ -22,8 +22,17 @@ export class StudentsByBirthMonthReportPage implements OnInit {
   pageSize = 10;
   totalCount = 0;
   pageSizeOptions = [5, 10, 20, 50];
+  sortBy: string | null = 'groupKey';
+  sortDesc = false;
 
   constructor(private reportsService: ReportsService) {}
+
+  setSort(column: string) {
+    if (this.sortBy === column) this.sortDesc = !this.sortDesc;
+    else { this.sortBy = column; this.sortDesc = false; }
+    this.page = 1;
+    this.loadData();
+  }
 
   get totalPages(): number { return Math.max(1, Math.ceil(this.totalCount / this.pageSize)); }
 
@@ -44,7 +53,7 @@ export class StudentsByBirthMonthReportPage implements OnInit {
   loadData() {
     this.loading = true;
     this.error = '';
-    this.reportsService.getStudentsByBirthMonth({ page: this.page, pageSize: this.pageSize }).subscribe({
+    this.reportsService.getStudentsByBirthMonth({ page: this.page, pageSize: this.pageSize, sortBy: this.sortBy ?? undefined, sortDesc: this.sortDesc }).subscribe({
       next: (data) => {
         this.list = data.items ?? [];
         this.totalCount = data.totalCount ?? 0;

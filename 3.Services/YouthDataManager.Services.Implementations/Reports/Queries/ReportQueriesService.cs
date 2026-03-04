@@ -91,14 +91,24 @@ public class ReportQueriesService : IReportQueriesService
         return (weekStart, weekEnd);
     }
 
+    /// <summary>
+    /// Returns all users considered "servants" (Servant, Manager, Secretary roles — excludes Admin and Priest).
+    /// </summary>
+    private async Task<IList<ApplicationUser>> GetAllServantsAsync()
+    {
+        var servants = await _userManager.GetUsersInRoleAsync("Servant");
+        var managers = await _userManager.GetUsersInRoleAsync("Manager");
+        var secretaries = await _userManager.GetUsersInRoleAsync("Secretary");
+        return servants.Concat(managers).Concat(secretaries)
+            .GroupBy(u => u.Id).Select(g => g.First()).ToList();
+    }
+
     public async Task<ServiceResult<ManagerDashboardDto>> GetManagerDashboard()
     {
         try
         {
             var students = await _studentRepository.GetAll(s => s);
-            var servants = await _userManager.GetUsersInRoleAsync("Servant");
-            var managerCount = (await _userManager.GetUsersInRoleAsync("Manager")).Count;
-            var secretaryCount = (await _userManager.GetUsersInRoleAsync("Secretary")).Count;
+            var allServants = await GetAllServantsAsync();
             var totalCalls = (await _callRepository.GetAll(c => c.Id)).Count();
             var totalVisits = (await _visitRepository.GetAll(v => v.Id)).Count();
 
@@ -113,7 +123,7 @@ public class ReportQueriesService : IReportQueriesService
 
             var dto = new ManagerDashboardDto(
                 students.Count(),
-                servants.Count + managerCount + secretaryCount,
+                allServants.Count,
                 totalCalls,
                 totalVisits,
                 callsThisWeek,
@@ -176,23 +186,32 @@ public class ReportQueriesService : IReportQueriesService
         }
     }
 
-    public async Task<ServiceResult<PagedReportResult<ServantPerformanceDto>>> GetServantPerformancesPaged(int page, int pageSize)
+    public async Task<ServiceResult<PagedReportResult<ServantPerformanceDto>>> GetServantPerformancesPaged(int page, int pageSize, string? sortBy = null, bool? sortDesc = null)
     {
         try
         {
-            var servants = await _userManager.GetUsersInRoleAsync("Servant");
+            var servants = await GetAllServantsAsync();
             var totalCount = servants.Count;
             var (weekStart, weekEnd) = GetCurrentWeekRange();
-            var pagedServants = servants.Skip((page - 1) * pageSize).Take(pageSize);
             var result = new List<ServantPerformanceDto>();
-            foreach (var servant in pagedServants)
+            foreach (var servant in servants)
             {
                 var assignedCount = (await _studentRepository.GetByServantId(servant.Id, s => s.Id)).Count();
                 var callsWeek = (await _callRepository.GetByFilter(weekStart, weekEnd, servant.Id, null, null, c => c.Id)).Count();
                 var visitsWeek = (await _visitRepository.GetByFilter(weekStart, weekEnd, servant.Id, null, null, v => v.Id)).Count();
                 result.Add(new ServantPerformanceDto(servant.Id, servant.FullName ?? servant.UserName ?? "", assignedCount, callsWeek, visitsWeek));
             }
-            var paged = new PagedReportResult<ServantPerformanceDto>(result, totalCount, page, pageSize);
+            var sortKey = (sortBy ?? "fullname").Trim().ToLowerInvariant();
+            var desc = sortDesc ?? false;
+            var ordered = sortKey == "assignedstudentscount"
+                ? (desc ? result.OrderByDescending(x => x.AssignedStudentsCount).ThenBy(x => x.FullName) : result.OrderBy(x => x.AssignedStudentsCount).ThenBy(x => x.FullName))
+                : sortKey == "callsthisweek"
+                ? (desc ? result.OrderByDescending(x => x.CallsThisWeek).ThenBy(x => x.FullName) : result.OrderBy(x => x.CallsThisWeek).ThenBy(x => x.FullName))
+                : sortKey == "visitsthisweek"
+                ? (desc ? result.OrderByDescending(x => x.VisitsThisWeek).ThenBy(x => x.FullName) : result.OrderBy(x => x.VisitsThisWeek).ThenBy(x => x.FullName))
+                : (desc ? result.OrderByDescending(x => x.FullName) : result.OrderBy(x => x.FullName));
+            var pagedItems = ordered.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var paged = new PagedReportResult<ServantPerformanceDto>(pagedItems, totalCount, page, pageSize);
             return ServiceResult<PagedReportResult<ServantPerformanceDto>>.Success(paged);
         }
         catch (Exception ex)
@@ -250,26 +269,35 @@ public class ReportQueriesService : IReportQueriesService
         }
     }
 
-    public async Task<ServiceResult<PagedReportResult<ServantActivitySummaryDto>>> GetServantActivitySummary(DateTime? dateFrom, DateTime? dateTo, Guid? servantId, int page, int pageSize)
+    public async Task<ServiceResult<PagedReportResult<ServantActivitySummaryDto>>> GetServantActivitySummary(DateTime? dateFrom, DateTime? dateTo, Guid? servantId, int page, int pageSize, string? sortBy = null, bool? sortDesc = null)
     {
         try
         {
             var servants = servantId.HasValue
                 ? (await _userManager.FindByIdAsync(servantId.Value.ToString()) is { } u ? new[] { u } : Array.Empty<ApplicationUser>())
-                : (await _userManager.GetUsersInRoleAsync("Servant"));
+                : (await GetAllServantsAsync());
             var totalCount = servants.Count;
             var dateStart = dateFrom ?? DateTime.UtcNow.Date.AddMonths(-1);
             var dateEnd = dateTo ?? DateTime.UtcNow;
-            var pagedServants = servants.Skip((page - 1) * pageSize).Take(pageSize);
             var result = new List<ServantActivitySummaryDto>();
-            foreach (var servant in pagedServants)
+            foreach (var servant in servants)
             {
                 var assignedCount = (await _studentRepository.GetByServantId(servant.Id, s => s.Id)).Count();
                 var callsInPeriod = (await _callRepository.GetByFilter(dateStart, dateEnd, servant.Id, null, null, c => c.Id)).Count();
                 var visitsInPeriod = (await _visitRepository.GetByFilter(dateStart, dateEnd, servant.Id, null, null, v => v.Id)).Count();
                 result.Add(new ServantActivitySummaryDto(servant.Id, servant.FullName ?? servant.UserName ?? "", assignedCount, callsInPeriod, visitsInPeriod));
             }
-            var paged = new PagedReportResult<ServantActivitySummaryDto>(result, totalCount, page, pageSize);
+            var sortKey = (sortBy ?? "fullname").Trim().ToLowerInvariant();
+            var desc = sortDesc ?? false;
+            var ordered = sortKey == "assignedcount"
+                ? (desc ? result.OrderByDescending(x => x.AssignedCount).ThenBy(x => x.FullName) : result.OrderBy(x => x.AssignedCount).ThenBy(x => x.FullName))
+                : sortKey == "callsinperiod"
+                ? (desc ? result.OrderByDescending(x => x.CallsInPeriod).ThenBy(x => x.FullName) : result.OrderBy(x => x.CallsInPeriod).ThenBy(x => x.FullName))
+                : sortKey == "visitsinperiod"
+                ? (desc ? result.OrderByDescending(x => x.VisitsInPeriod).ThenBy(x => x.FullName) : result.OrderBy(x => x.VisitsInPeriod).ThenBy(x => x.FullName))
+                : (desc ? result.OrderByDescending(x => x.FullName) : result.OrderBy(x => x.FullName));
+            var pagedItems = ordered.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var paged = new PagedReportResult<ServantActivitySummaryDto>(pagedItems, totalCount, page, pageSize);
             return ServiceResult<PagedReportResult<ServantActivitySummaryDto>>.Success(paged);
         }
         catch (Exception ex)
@@ -279,11 +307,11 @@ public class ReportQueriesService : IReportQueriesService
         }
     }
 
-    public async Task<ServiceResult<PagedReportResult<StudentNoContactDto>>> GetStudentsWithNoRecentContact(int days, Guid? servantId, int page, int pageSize)
+    public async Task<ServiceResult<PagedReportResult<StudentNoContactDto>>> GetStudentsWithNoRecentContact(int days, Guid? servantId, int page, int pageSize, string? sortBy = null, bool? sortDesc = null)
     {
         try
         {
-            var (items, totalCount) = await _reportDataProvider.GetStudentsWithNoRecentContactPagedAsync(days, servantId, page, pageSize);
+            var (items, totalCount) = await _reportDataProvider.GetStudentsWithNoRecentContactPagedAsync(days, servantId, page, pageSize, sortBy, sortDesc ?? false);
             var paged = new PagedReportResult<StudentNoContactDto>(items, totalCount, page, pageSize);
             return ServiceResult<PagedReportResult<StudentNoContactDto>>.Success(paged);
         }
@@ -294,11 +322,11 @@ public class ReportQueriesService : IReportQueriesService
         }
     }
 
-    public async Task<ServiceResult<PagedReportResult<StudentsByGroupDto>>> GetStudentsByArea(int page, int pageSize)
+    public async Task<ServiceResult<PagedReportResult<StudentsByGroupDto>>> GetStudentsByArea(int page, int pageSize, string? sortBy = null, bool? sortDesc = null)
     {
         try
         {
-            var (items, totalCount) = await _reportDataProvider.GetStudentsByAreaPagedAsync(page, pageSize);
+            var (items, totalCount) = await _reportDataProvider.GetStudentsByAreaPagedAsync(page, pageSize, sortBy, sortDesc ?? false);
             var paged = new PagedReportResult<StudentsByGroupDto>(items, totalCount, page, pageSize);
             return ServiceResult<PagedReportResult<StudentsByGroupDto>>.Success(paged);
         }
@@ -309,11 +337,11 @@ public class ReportQueriesService : IReportQueriesService
         }
     }
 
-    public async Task<ServiceResult<PagedReportResult<StudentsByGroupDto>>> GetStudentsByAcademicYear(int page, int pageSize)
+    public async Task<ServiceResult<PagedReportResult<StudentsByGroupDto>>> GetStudentsByAcademicYear(int page, int pageSize, string? sortBy = null, bool? sortDesc = null)
     {
         try
         {
-            var (items, totalCount) = await _reportDataProvider.GetStudentsByAcademicYearPagedAsync(page, pageSize);
+            var (items, totalCount) = await _reportDataProvider.GetStudentsByAcademicYearPagedAsync(page, pageSize, sortBy, sortDesc ?? false);
             var paged = new PagedReportResult<StudentsByGroupDto>(items, totalCount, page, pageSize);
             return ServiceResult<PagedReportResult<StudentsByGroupDto>>.Success(paged);
         }
@@ -324,11 +352,11 @@ public class ReportQueriesService : IReportQueriesService
         }
     }
 
-    public async Task<ServiceResult<PagedReportResult<StudentsByGroupDto>>> GetStudentsByBirthMonth(int page, int pageSize)
+    public async Task<ServiceResult<PagedReportResult<StudentsByGroupDto>>> GetStudentsByBirthMonth(int page, int pageSize, string? sortBy = null, bool? sortDesc = null)
     {
         try
         {
-            var (items, totalCount) = await _reportDataProvider.GetStudentsByBirthMonthPagedAsync(page, pageSize);
+            var (items, totalCount) = await _reportDataProvider.GetStudentsByBirthMonthPagedAsync(page, pageSize, sortBy, sortDesc ?? false);
             var paged = new PagedReportResult<StudentsByGroupDto>(items, totalCount, page, pageSize);
             return ServiceResult<PagedReportResult<StudentsByGroupDto>>.Success(paged);
         }

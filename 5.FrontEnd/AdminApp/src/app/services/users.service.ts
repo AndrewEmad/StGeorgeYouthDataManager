@@ -28,12 +28,14 @@ export class UsersService {
     return this.http.get<User[]>(this.apiUrl);
   }
 
-  getPaged(params: { page: number; pageSize: number; search?: string; role?: string; isActive?: boolean | null }): Observable<{ items: User[]; totalCount: number; page: number; pageSize: number }> {
+  getPaged(params: { page: number; pageSize: number; search?: string; role?: string; isActive?: boolean | null; sortBy?: string; sortDesc?: boolean }): Observable<{ items: User[]; totalCount: number; page: number; pageSize: number }> {
     let url = `${this.apiUrl}/paged?page=${params.page}&pageSize=${params.pageSize}`;
     if (params.search) url += `&search=${encodeURIComponent(params.search)}`;
     if (params.role) url += `&role=${encodeURIComponent(params.role)}`;
     if (params.isActive === true) url += `&isActive=true`;
     if (params.isActive === false) url += `&isActive=false`;
+    if (params.sortBy) url += `&sortBy=${encodeURIComponent(params.sortBy)}`;
+    if (params.sortDesc != null) url += `&sortDesc=${params.sortDesc}`;
     return this.http.get<{ items: User[]; totalCount: number; page: number; pageSize: number }>(url);
   }
 

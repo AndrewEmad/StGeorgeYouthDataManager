@@ -40,10 +40,10 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("paged")]
-    public async Task<IActionResult> GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 50, [FromQuery] string? search = null, [FromQuery] string? role = null, [FromQuery] bool? isActive = null)
+    public async Task<IActionResult> GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 50, [FromQuery] string? search = null, [FromQuery] string? role = null, [FromQuery] bool? isActive = null, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
     {
         if (pageSize > 50) pageSize = 50;
-        var result = await _userService.GetPagedAsync(page, pageSize, search, role, isActive);
+        var result = await _userService.GetPagedAsync(page, pageSize, search, role, isActive, sortBy, sortDesc);
         if (result.Status != ServiceResultStatus.Success) return BadRequest(result.Message);
         return Ok(result.Data);
     }

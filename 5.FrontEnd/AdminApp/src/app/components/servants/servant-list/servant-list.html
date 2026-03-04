@@ -37,13 +37,13 @@
     <table *ngIf="!loading">
       <thead>
         <tr>
-          <th>الاسم</th>
-          <th>اسم المستخدم</th>
-          <th>الدور</th>
-          <th>عدد المخدومين</th>
-          <th>آخر مكالمة</th>
-          <th>آخر زيارة</th>
-          <th>الحالة</th>
+          <th class="sortable" (click)="setSort('fullName')">الاسم <span class="sort-icon" *ngIf="sortBy === 'fullName'">{{ sortDesc ? '▼' : '▲' }}</span></th>
+          <th class="sortable" (click)="setSort('userName')">اسم المستخدم <span class="sort-icon" *ngIf="sortBy === 'userName'">{{ sortDesc ? '▼' : '▲' }}</span></th>
+          <th class="sortable" (click)="setSort('role')">الدور <span class="sort-icon" *ngIf="sortBy === 'role'">{{ sortDesc ? '▼' : '▲' }}</span></th>
+          <th class="sortable" (click)="setSort('assignedStudentsCount')">عدد المخدومين <span class="sort-icon" *ngIf="sortBy === 'assignedStudentsCount'">{{ sortDesc ? '▼' : '▲' }}</span></th>
+          <th class="sortable" (click)="setSort('lastCallDate')">آخر مكالمة <span class="sort-icon" *ngIf="sortBy === 'lastCallDate'">{{ sortDesc ? '▼' : '▲' }}</span></th>
+          <th class="sortable" (click)="setSort('lastVisitDate')">آخر زيارة <span class="sort-icon" *ngIf="sortBy === 'lastVisitDate'">{{ sortDesc ? '▼' : '▲' }}</span></th>
+          <th class="sortable" (click)="setSort('isActive')">الحالة <span class="sort-icon" *ngIf="sortBy === 'isActive'">{{ sortDesc ? '▼' : '▲' }}</span></th>
           <th>الإجراءات</th>
         </tr>
       </thead>

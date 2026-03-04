@@ -17,6 +17,8 @@ export class ServantPerformanceReportPage implements OnInit {
   page = 1;
   pageSize = 10;
   pageSizeOptions = [5, 10, 20, 50];
+  sortBy: string | null = 'fullName';
+  sortDesc = false;
 
   constructor(
     private reportsService: ReportsService,
@@ -32,9 +34,21 @@ export class ServantPerformanceReportPage implements OnInit {
     this.router.navigate(['/dashboard/servants', servantId]);
   }
 
+  setSort(column: string) {
+    if (this.sortBy === column) this.sortDesc = !this.sortDesc;
+    else { this.sortBy = column; this.sortDesc = false; }
+    this.page = 1;
+    this.loadData();
+  }
+
   loadData() {
     this.loading = true;
-    this.reportsService.getServantPerformancesPaged({ page: this.page, pageSize: this.pageSize }).subscribe({
+    this.reportsService.getServantPerformancesPaged({
+      page: this.page,
+      pageSize: this.pageSize,
+      sortBy: this.sortBy ?? undefined,
+      sortDesc: this.sortDesc
+    }).subscribe({
       next: (data) => {
         this.perfResult = data;
         this.page = data.page ?? this.page;

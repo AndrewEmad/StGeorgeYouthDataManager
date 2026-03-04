@@ -5,7 +5,11 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { StudentQueriesService } from '../../../services/student-queries.service';
 import { UsersService, User } from '../../../services/users.service';
-import { StudentCommandsService, CreateStudentRequest, UpdateStudentRequest } from '../../../services/student-commands.service';
+import {
+  StudentCommandsService,
+  CreateStudentRequest,
+  UpdateStudentRequest,
+} from '../../../services/student-commands.service';
 import {
   ContentHeaderComponent,
   CardComponent,
@@ -14,7 +18,7 @@ import {
   LoaderComponent,
   PaginationComponent,
   PhotoCropModalComponent,
-  ProfilePhotoInputComponent
+  ProfilePhotoInputComponent,
 } from '../../common/common';
 
 @Component({
@@ -30,10 +34,10 @@ import {
     LoaderComponent,
     PaginationComponent,
     PhotoCropModalComponent,
-    ProfilePhotoInputComponent
+    ProfilePhotoInputComponent,
   ],
   templateUrl: './student-list-admin.html',
-  styleUrls: ['./student-list-admin.css']
+  styleUrls: ['./student-list-admin.css'],
 })
 export class StudentListAdminComponent implements OnInit {
   students: any[] = [];
@@ -76,7 +80,7 @@ export class StudentListAdminComponent implements OnInit {
     confessionFather: null,
     gender: 0,
     servantId: null,
-    birthDate: null
+    birthDate: null,
   };
   editStudentPhoto: File | null = null;
   editStudentPhotoPreviewUrl: string | null = null;
@@ -93,7 +97,7 @@ export class StudentListAdminComponent implements OnInit {
     gender: '' as '' | '0' | '1',
     servantId: '',
     hasServant: '' as '' | 'yes' | 'no',
-    birthMonth: '' as '' | string
+    birthMonth: '' as '' | string,
   };
   regionOptions: string[] = [];
   academicYearOptions: string[] = [];
@@ -109,7 +113,7 @@ export class StudentListAdminComponent implements OnInit {
     confessionFather: null,
     gender: 0,
     servantId: null,
-    birthDate: null
+    birthDate: null,
   };
   newStudentPhoto: File | null = null;
   newStudentPhotoPreviewUrl: string | null = null;
@@ -121,7 +125,7 @@ export class StudentListAdminComponent implements OnInit {
     private studentCommands: StudentCommandsService,
     private usersService: UsersService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit() {
@@ -129,7 +133,8 @@ export class StudentListAdminComponent implements OnInit {
       this.filters.area = params['area'] ?? '';
       this.filters.academicYear = params['academicYear'] ?? '';
       this.filters.birthMonth = params['birthMonth'] ?? '';
-      if (this.filters.area || this.filters.academicYear || this.filters.birthMonth) this.showFilters = true;
+      if (this.filters.area || this.filters.academicYear || this.filters.birthMonth)
+        this.showFilters = true;
       this.page = 1;
       this.loadData();
     });
@@ -138,41 +143,59 @@ export class StudentListAdminComponent implements OnInit {
 
   loadData() {
     const genderNum = this.filters.gender === '' ? null : Number(this.filters.gender);
-    const hasServant = this.filters.hasServant === 'yes' ? true : this.filters.hasServant === 'no' ? false : null;
-    const servantId = this.filters.servantId === '_none' || !this.filters.servantId ? null : this.filters.servantId;
-    const birthMonthNum = this.filters.birthMonth === '' ? null : (() => { const n = +this.filters.birthMonth; return n >= 1 && n <= 12 ? n : null; })();
-    this.studentQueries.getPaged({
-      page: this.page,
-      pageSize: this.pageSize,
-      search: this.filters.search.trim() || undefined,
-      area: this.filters.area || undefined,
-      academicYear: this.filters.academicYear || undefined,
-      gender: genderNum ?? undefined,
-      servantId: servantId || undefined,
-      hasServant: hasServant ?? undefined,
-      sortBy: this.sortBy || 'fullName',
-      sortDesc: this.sortDesc,
-      birthMonth: birthMonthNum ?? undefined
-    }).subscribe({
-      next: (res) => {
-        this.students = res.items;
-        this.totalCount = res.totalCount;
-        this.page = res.page;
-        this.loading = false;
-      },
-      error: () => this.loading = false
-    });
+    const hasServant =
+      this.filters.hasServant === 'yes'
+        ? true
+        : this.filters.hasServant === 'no' || this.filters.servantId === '_none'
+          ? false
+          : null;
+    const servantId =
+      this.filters.servantId === '_none' || !this.filters.servantId ? null : this.filters.servantId;
+    const birthMonthNum =
+      this.filters.birthMonth === ''
+        ? null
+        : (() => {
+            const n = +this.filters.birthMonth;
+            return n >= 1 && n <= 12 ? n : null;
+          })();
+    this.studentQueries
+      .getPaged({
+        page: this.page,
+        pageSize: this.pageSize,
+        search: this.filters.search.trim() || undefined,
+        area: this.filters.area || undefined,
+        academicYear: this.filters.academicYear || undefined,
+        gender: genderNum ?? undefined,
+        servantId: servantId || undefined,
+        hasServant: hasServant ?? undefined,
+        sortBy: this.sortBy || 'fullName',
+        sortDesc: this.sortDesc,
+        birthMonth: birthMonthNum ?? undefined,
+      })
+      .subscribe({
+        next: (res) => {
+          this.students = res.items;
+          this.totalCount = res.totalCount;
+          this.page = res.page;
+          this.loading = false;
+        },
+        error: () => (this.loading = false),
+      });
   }
 
   loadOptionsAndServants() {
     this.studentQueries.getDistinctAreas().subscribe({
-      next: (areas) => { this.regionOptions = areas || []; }
+      next: (areas) => {
+        this.regionOptions = areas || [];
+      },
     });
     this.studentQueries.getDistinctAcademicYears().subscribe({
-      next: (years) => { this.academicYearOptions = years || []; }
+      next: (years) => {
+        this.academicYearOptions = years || [];
+      },
     });
-    this.usersService.getAll().subscribe(data => {
-      this.servants = data.filter(u => u.role !== 'Priest' && String(u.role) !== 'Admin');
+    this.usersService.getAll().subscribe((data) => {
+      this.servants = data.filter((u) => u.role !== 'Priest' && String(u.role) !== 'Admin');
     });
   }
 
@@ -182,7 +205,15 @@ export class StudentListAdminComponent implements OnInit {
   }
 
   clearFilters() {
-    this.filters = { search: '', area: '', academicYear: '', gender: '', servantId: '', hasServant: '', birthMonth: '' };
+    this.filters = {
+      search: '',
+      area: '',
+      academicYear: '',
+      gender: '',
+      servantId: '',
+      hasServant: '',
+      birthMonth: '',
+    };
     this.page = 1;
     this.loadData();
   }
@@ -209,7 +240,10 @@ export class StudentListAdminComponent implements OnInit {
 
   setSort(column: string) {
     if (this.sortBy === column) this.sortDesc = !this.sortDesc;
-    else { this.sortBy = column; this.sortDesc = false; }
+    else {
+      this.sortBy = column;
+      this.sortDesc = false;
+    }
     this.page = 1;
     this.loadData();
   }
@@ -250,7 +284,12 @@ export class StudentListAdminComponent implements OnInit {
       const items = this.studentCommands.parseCsvToStudents(text);
       if (items.length === 0) {
         this.uploadingCsv = false;
-        this.uploadResult = { created: 0, errors: [{ row: 0, message: 'لم يتم العثور على صفوف صالحة (الاسم ورقم التليفون مطلوبان)' }] };
+        this.uploadResult = {
+          created: 0,
+          errors: [
+            { row: 0, message: 'لم يتم العثور على صفوف صالحة (الاسم ورقم التليفون مطلوبان)' },
+          ],
+        };
         return;
       }
       this.studentCommands.bulkImport(items).subscribe({
@@ -261,8 +300,11 @@ export class StudentListAdminComponent implements OnInit {
         },
         error: (err) => {
           this.uploadingCsv = false;
-          this.uploadResult = { created: 0, errors: [{ row: 0, message: err.error?.message || err.message || 'خطأ في الاستيراد' }] };
-        }
+          this.uploadResult = {
+            created: 0,
+            errors: [{ row: 0, message: err.error?.message || err.message || 'خطأ في الاستيراد' }],
+          };
+        },
       });
     };
     reader.readAsText(file, 'UTF-8');
@@ -279,7 +321,7 @@ export class StudentListAdminComponent implements OnInit {
       confessionFather: null,
       gender: 0,
       servantId: null,
-      birthDate: null
+      birthDate: null,
     };
     if (this.newStudentPhotoPreviewUrl) {
       URL.revokeObjectURL(this.newStudentPhotoPreviewUrl);
@@ -331,14 +373,14 @@ export class StudentListAdminComponent implements OnInit {
     const req: CreateStudentRequest = {
       ...this.newStudent,
       servantId: this.newStudent.servantId || null,
-      birthDate: this.newStudent.birthDate || null
+      birthDate: this.newStudent.birthDate || null,
     };
     this.studentCommands.create(req).subscribe({
       next: (id) => {
         if (this.newStudentPhoto) {
           this.studentCommands.uploadPhoto(id, this.newStudentPhoto).subscribe({
             next: () => this.finishCreateStudent(),
-            error: () => this.finishCreateStudent()
+            error: () => this.finishCreateStudent(),
           });
         } else {
           this.finishCreateStudent();
@@ -347,7 +389,7 @@ export class StudentListAdminComponent implements OnInit {
       error: () => {
         this.addSaving = false;
         alert('خطأ في إضافة المخدوم');
-      }
+      },
     });
   }
 
@@ -386,7 +428,9 @@ export class StudentListAdminComponent implements OnInit {
   }
 
   get allFilteredSelected(): boolean {
-    return this.students.length > 0 && this.students.every((s: any) => this.selectedStudentIds.has(s.id));
+    return (
+      this.students.length > 0 && this.students.every((s: any) => this.selectedStudentIds.has(s.id))
+    );
   }
 
   openBulkAssignModal() {
@@ -399,7 +443,9 @@ export class StudentListAdminComponent implements OnInit {
     if (!this.bulkTargetServantId || this.selectedStudentIds.size === 0) return;
     this.bulkAssignSaving = true;
     const ids = Array.from(this.selectedStudentIds);
-    const requests = ids.map(id => this.studentCommands.assignToServant(id, this.bulkTargetServantId));
+    const requests = ids.map((id) =>
+      this.studentCommands.assignToServant(id, this.bulkTargetServantId),
+    );
     forkJoin(requests).subscribe({
       next: () => {
         this.bulkAssignSaving = false;
@@ -411,7 +457,7 @@ export class StudentListAdminComponent implements OnInit {
       error: () => {
         this.bulkAssignSaving = false;
         alert('حدث خطأ في تخصيص بعض المخدومين');
-      }
+      },
     });
   }
 
@@ -429,7 +475,7 @@ export class StudentListAdminComponent implements OnInit {
           confessionFather: st.confessionFather ?? null,
           gender: st.gender ?? 0,
           servantId: st.servantId ?? null,
-          birthDate: st.birthDate || null
+          birthDate: st.birthDate || null,
         };
         this.editStudentPhoto = null;
         if (this.editStudentPhotoPreviewUrl) {
@@ -442,13 +488,15 @@ export class StudentListAdminComponent implements OnInit {
         }
         if (st.photoPath) {
           this.studentQueries.getPhotoBlobUrl(s.id).subscribe({
-            next: (url) => { this.editStudentExistingPhotoUrl = url ?? null; },
-            error: () => {}
+            next: (url) => {
+              this.editStudentExistingPhotoUrl = url ?? null;
+            },
+            error: () => {},
           });
         }
         this.showEditModal = true;
       },
-      error: () => alert('فشل تحميل بيانات المخدوم')
+      error: () => alert('فشل تحميل بيانات المخدوم'),
     });
   }
 
@@ -480,24 +528,26 @@ export class StudentListAdminComponent implements OnInit {
       confessionFather: this.editForm.confessionFather ?? null,
       gender: this.editForm.gender ?? 0,
       servantId: this.editForm.servantId ?? null,
-      birthDate: this.editForm.birthDate || null
+      birthDate: this.editForm.birthDate || null,
     };
     this.studentCommands.update(req).subscribe({
       next: () => {
         if (this.editStudentPhoto) {
-          this.studentCommands.uploadPhoto(this.editingStudent.id, this.editStudentPhoto).subscribe({
-            next: (res) => {
-              this.editingStudent.photoPath = res.photoPath;
-              this.editSaving = false;
-              this.closeEdit();
-              this.loadData();
-            },
-            error: () => {
-              this.editSaving = false;
-              this.closeEdit();
-              this.loadData();
-            }
-          });
+          this.studentCommands
+            .uploadPhoto(this.editingStudent.id, this.editStudentPhoto)
+            .subscribe({
+              next: (res) => {
+                this.editingStudent.photoPath = res.photoPath;
+                this.editSaving = false;
+                this.closeEdit();
+                this.loadData();
+              },
+              error: () => {
+                this.editSaving = false;
+                this.closeEdit();
+                this.loadData();
+              },
+            });
         } else {
           this.editSaving = false;
           this.closeEdit();
@@ -507,7 +557,7 @@ export class StudentListAdminComponent implements OnInit {
       error: (err: any) => {
         this.editSaving = false;
         alert('خطأ في التحديث: ' + (err.error?.message || err.message));
-      }
+      },
     });
   }
 
@@ -517,7 +567,7 @@ export class StudentListAdminComponent implements OnInit {
       next: () => {
         this.loadData();
       },
-      error: (err: any) => alert('خطأ في الحذف: ' + (err.error?.message || err.message))
+      error: (err: any) => alert('خطأ في الحذف: ' + (err.error?.message || err.message)),
     });
   }
 
@@ -536,14 +586,14 @@ export class StudentListAdminComponent implements OnInit {
         confessionFather: this.selectedStudent.confessionFather ?? null,
         gender: this.selectedStudent.gender ?? 0,
         servantId: null,
-        birthDate: this.selectedStudent.birthDate || null
+        birthDate: this.selectedStudent.birthDate || null,
       };
       this.studentCommands.update(req).subscribe({
         next: () => {
           this.showAssignModal = false;
           this.loadData();
         },
-        error: (err) => alert('خطأ: ' + (err.error?.message || 'فشل إلغاء التخصيص'))
+        error: (err) => alert('خطأ: ' + (err.error?.message || 'فشل إلغاء التخصيص')),
       });
       return;
     }
@@ -553,7 +603,7 @@ export class StudentListAdminComponent implements OnInit {
         this.showAssignModal = false;
         this.loadData();
       },
-      error: (err) => alert('خطأ في التخصيص')
+      error: (err) => alert('خطأ في التخصيص'),
     });
   }
 }

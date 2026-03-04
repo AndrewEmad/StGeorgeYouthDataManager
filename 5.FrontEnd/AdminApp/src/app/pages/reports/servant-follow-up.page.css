@@ -117,6 +117,22 @@
   font-size: 0.9rem;
 }
 
+.table-container th.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.table-container th.sortable:hover {
+  color: var(--text-primary, #e2e8f0);
+}
+
+.table-container .sort-icon {
+  margin-inline-start: 4px;
+  font-size: 0.75rem;
+  opacity: 0.9;
+}
+
 .table-container tr.row-clickable {
   cursor: pointer;
 }

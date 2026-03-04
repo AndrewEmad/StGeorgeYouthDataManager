@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using YouthDataManager.Domain.Entities;
 using YouthDataManager.Domain.Enums;
 using YouthDataManager.Domain.Repositories.NoTracking;
+using YouthDataManager.Domain.Utilities;
 using YouthDataManager.Infrastructure.Data;
 
 namespace YouthDataManager.Infrastructure.Repositories.NoTracking;
@@ -50,12 +51,12 @@ public class StudentNoTrackingRepository : IStudentNoTrackingRepository
         var searchTrim = search?.Trim();
         if (!string.IsNullOrEmpty(searchTrim))
         {
-            var lower = searchTrim.ToLower();
+            var normalized = ArabicNormalizer.Normalize(searchTrim);
             query = query.Where(s =>
-                (s.FullName != null && s.FullName.ToLower().Contains(lower)) ||
-                (s.Phone != null && s.Phone.ToLower().Contains(lower)) ||
-                (s.Area != null && s.Area.ToLower().Contains(lower)) ||
-                (s.College != null && s.College.ToLower().Contains(lower)));
+                (s.NormalizedFullName != null && s.NormalizedFullName.Contains(normalized)) ||
+                (s.Phone != null && s.Phone.Contains(searchTrim)) ||
+                (s.Area != null && s.Area.Contains(searchTrim)) ||
+                (s.College != null && s.College.Contains(searchTrim)));
         }
         if (!string.IsNullOrEmpty(area)) query = query.Where(s => s.Area == area);
         if (!string.IsNullOrEmpty(academicYear)) query = query.Where(s => s.AcademicYear == academicYear);
@@ -99,18 +100,19 @@ public class StudentNoTrackingRepository : IStudentNoTrackingRepository
 
     public async Task<(IReadOnlyList<(Guid Id, int Segment)>, int TotalCount)> GetPagedForServantCombinedAsync(Guid servantId, string? search, string? area, string? academicYear, int? gender, int page, int pageSize)
     {
-        var searchLower = search?.Trim().ToLower();
+        var searchTrim = search?.Trim();
+        var normalized = string.IsNullOrEmpty(searchTrim) ? null : ArabicNormalizer.Normalize(searchTrim);
         var assigned = _context.Students.AsNoTracking().Where(s => s.ServantId == servantId);
         var requested = _context.Students.AsNoTracking().Where(s => s.ServantId == null
             && _context.StudentAssignmentRequests.Any(r => r.StudentId == s.Id && r.RequestedByUserId == servantId && r.Status == AssignmentRequestStatus.Pending));
         var unassigned = _context.Students.AsNoTracking().Where(s => s.ServantId == null
             && !_context.StudentAssignmentRequests.Any(r => r.StudentId == s.Id && r.Status == AssignmentRequestStatus.Pending));
 
-        if (!string.IsNullOrEmpty(searchLower))
+        if (!string.IsNullOrEmpty(normalized))
         {
-            assigned = assigned.Where(s => (s.FullName != null && s.FullName.ToLower().Contains(searchLower)) || (s.Phone != null && s.Phone.ToLower().Contains(searchLower)) || (s.Area != null && s.Area.ToLower().Contains(searchLower)) || (s.College != null && s.College.ToLower().Contains(searchLower)));
-            requested = requested.Where(s => (s.FullName != null && s.FullName.ToLower().Contains(searchLower)) || (s.Phone != null && s.Phone.ToLower().Contains(searchLower)) || (s.Area != null && s.Area.ToLower().Contains(searchLower)) || (s.College != null && s.College.ToLower().Contains(searchLower)));
-            unassigned = unassigned.Where(s => (s.FullName != null && s.FullName.ToLower().Contains(searchLower)) || (s.Phone != null && s.Phone.ToLower().Contains(searchLower)) || (s.Area != null && s.Area.ToLower().Contains(searchLower)) || (s.College != null && s.College.ToLower().Contains(searchLower)));
+            assigned = assigned.Where(s => (s.NormalizedFullName != null && s.NormalizedFullName.Contains(normalized)) || (s.Phone != null && s.Phone.Contains(searchTrim!)) || (s.Area != null && s.Area.Contains(searchTrim!)) || (s.College != null && s.College.Contains(searchTrim!)));
+            requested = requested.Where(s => (s.NormalizedFullName != null && s.NormalizedFullName.Contains(normalized)) || (s.Phone != null && s.Phone.Contains(searchTrim!)) || (s.Area != null && s.Area.Contains(searchTrim!)) || (s.College != null && s.College.Contains(searchTrim!)));
+            unassigned = unassigned.Where(s => (s.NormalizedFullName != null && s.NormalizedFullName.Contains(normalized)) || (s.Phone != null && s.Phone.Contains(searchTrim!)) || (s.Area != null && s.Area.Contains(searchTrim!)) || (s.College != null && s.College.Contains(searchTrim!)));
         }
         if (!string.IsNullOrWhiteSpace(area))
         {

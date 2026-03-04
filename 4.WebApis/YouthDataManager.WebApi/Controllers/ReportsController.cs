@@ -38,9 +38,9 @@ public class ReportsController : ControllerBase
     }
 
     [HttpGet("servant-performances-paged")]
-    public async Task<IActionResult> GetServantPerformancesPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetServantPerformancesPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
     {
-        var result = await _service.GetServantPerformancesPaged(page, pageSize);
+        var result = await _service.GetServantPerformancesPaged(page, pageSize, sortBy, sortDesc);
         if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
         return Ok(result.Data);
     }
@@ -90,41 +90,41 @@ public class ReportsController : ControllerBase
     }
 
     [HttpGet("servant-activity")]
-    public async Task<IActionResult> GetServantActivitySummary([FromQuery] DateTime? dateFrom, [FromQuery] DateTime? dateTo, [FromQuery] Guid? servantId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetServantActivitySummary([FromQuery] DateTime? dateFrom, [FromQuery] DateTime? dateTo, [FromQuery] Guid? servantId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
     {
-        var result = await _service.GetServantActivitySummary(dateFrom, dateTo, servantId, page, pageSize);
+        var result = await _service.GetServantActivitySummary(dateFrom, dateTo, servantId, page, pageSize, sortBy, sortDesc);
         if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
         return Ok(result.Data);
     }
 
     [HttpGet("students-no-contact")]
-    public async Task<IActionResult> GetStudentsWithNoRecentContact([FromQuery] int days = 14, [FromQuery] Guid? servantId = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetStudentsWithNoRecentContact([FromQuery] int days = 14, [FromQuery] Guid? servantId = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
     {
-        var result = await _service.GetStudentsWithNoRecentContact(days, servantId, page, pageSize);
+        var result = await _service.GetStudentsWithNoRecentContact(days, servantId, page, pageSize, sortBy, sortDesc);
         if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
         return Ok(result.Data);
     }
 
     [HttpGet("students-by-area")]
-    public async Task<IActionResult> GetStudentsByArea([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetStudentsByArea([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
     {
-        var result = await _service.GetStudentsByArea(page, pageSize);
+        var result = await _service.GetStudentsByArea(page, pageSize, sortBy, sortDesc);
         if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
         return Ok(result.Data);
     }
 
     [HttpGet("students-by-academic-year")]
-    public async Task<IActionResult> GetStudentsByAcademicYear([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetStudentsByAcademicYear([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
     {
-        var result = await _service.GetStudentsByAcademicYear(page, pageSize);
+        var result = await _service.GetStudentsByAcademicYear(page, pageSize, sortBy, sortDesc);
         if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
         return Ok(result.Data);
     }
 
     [HttpGet("students-by-birth-month")]
-    public async Task<IActionResult> GetStudentsByBirthMonth([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetStudentsByBirthMonth([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
     {
-        var result = await _service.GetStudentsByBirthMonth(page, pageSize);
+        var result = await _service.GetStudentsByBirthMonth(page, pageSize, sortBy, sortDesc);
         if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
         return Ok(result.Data);
     }

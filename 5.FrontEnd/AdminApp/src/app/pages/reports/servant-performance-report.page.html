@@ -11,10 +11,10 @@
       <table>
         <thead>
           <tr>
-            <th>الخادم</th>
-            <th>عدد المخدومين المخصصين</th>
-            <th>مكالمات هذا الأسبوع</th>
-            <th>زيارات هذا الأسبوع</th>
+            <th class="sortable" (click)="setSort('fullName')">الخادم <span class="sort-icon" *ngIf="sortBy === 'fullName'">{{ sortDesc ? '▼' : '▲' }}</span></th>
+            <th class="sortable" (click)="setSort('assignedStudentsCount')">عدد المخدومين المخصصين <span class="sort-icon" *ngIf="sortBy === 'assignedStudentsCount'">{{ sortDesc ? '▼' : '▲' }}</span></th>
+            <th class="sortable" (click)="setSort('callsThisWeek')">مكالمات هذا الأسبوع <span class="sort-icon" *ngIf="sortBy === 'callsThisWeek'">{{ sortDesc ? '▼' : '▲' }}</span></th>
+            <th class="sortable" (click)="setSort('visitsThisWeek')">زيارات هذا الأسبوع <span class="sort-icon" *ngIf="sortBy === 'visitsThisWeek'">{{ sortDesc ? '▼' : '▲' }}</span></th>
             <th></th>
           </tr>
         </thead>

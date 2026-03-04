@@ -10,7 +10,7 @@ public interface IReportQueriesService
 {
     Task<ServiceResult<ServantDashboardDto>> GetServantDashboard(Guid servantId);
     Task<ServiceResult<ManagerDashboardDto>> GetManagerDashboard();
-    Task<ServiceResult<PagedReportResult<ServantPerformanceDto>>> GetServantPerformancesPaged(int page, int pageSize);
+    Task<ServiceResult<PagedReportResult<ServantPerformanceDto>>> GetServantPerformancesPaged(int page, int pageSize, string? sortBy = null, bool? sortDesc = null);
     Task<ServiceResult<ServantPerformanceDto>> GetServantPerformance(Guid servantId);
     Task<ServiceResult<IEnumerable<ServantStatsDto>>> GetServantStats(IEnumerable<Guid> servantIds);
     
@@ -18,9 +18,9 @@ public interface IReportQueriesService
     Task<ServiceResult<byte[]>> ExportCallsExcel(ReportRequestDto filter);
     Task<ServiceResult<byte[]>> ExportVisitsExcel(ReportRequestDto filter);
 
-    Task<ServiceResult<PagedReportResult<ServantActivitySummaryDto>>> GetServantActivitySummary(DateTime? dateFrom, DateTime? dateTo, Guid? servantId, int page, int pageSize);
-    Task<ServiceResult<PagedReportResult<StudentNoContactDto>>> GetStudentsWithNoRecentContact(int days, Guid? servantId, int page, int pageSize);
-    Task<ServiceResult<PagedReportResult<StudentsByGroupDto>>> GetStudentsByArea(int page, int pageSize);
-    Task<ServiceResult<PagedReportResult<StudentsByGroupDto>>> GetStudentsByAcademicYear(int page, int pageSize);
-    Task<ServiceResult<PagedReportResult<StudentsByGroupDto>>> GetStudentsByBirthMonth(int page, int pageSize);
+    Task<ServiceResult<PagedReportResult<ServantActivitySummaryDto>>> GetServantActivitySummary(DateTime? dateFrom, DateTime? dateTo, Guid? servantId, int page, int pageSize, string? sortBy = null, bool? sortDesc = null);
+    Task<ServiceResult<PagedReportResult<StudentNoContactDto>>> GetStudentsWithNoRecentContact(int days, Guid? servantId, int page, int pageSize, string? sortBy = null, bool? sortDesc = null);
+    Task<ServiceResult<PagedReportResult<StudentsByGroupDto>>> GetStudentsByArea(int page, int pageSize, string? sortBy = null, bool? sortDesc = null);
+    Task<ServiceResult<PagedReportResult<StudentsByGroupDto>>> GetStudentsByAcademicYear(int page, int pageSize, string? sortBy = null, bool? sortDesc = null);
+    Task<ServiceResult<PagedReportResult<StudentsByGroupDto>>> GetStudentsByBirthMonth(int page, int pageSize, string? sortBy = null, bool? sortDesc = null);
 }

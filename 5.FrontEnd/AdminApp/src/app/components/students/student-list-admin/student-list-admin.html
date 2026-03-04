@@ -53,17 +53,17 @@
       <app-form-field label="الخادم">
         <select [(ngModel)]="filters.servantId" (ngModelChange)="applyFilters()" class="form-input">
           <option value="">— الكل —</option>
-          <!-- <option value="_none">غير مخصص</option> -->
+          <option value="_none">غير مخصص</option>
           <option *ngFor="let serv of servants" [value]="serv.id">{{ serv.fullName }}</option>
         </select>
       </app-form-field>
-      <app-form-field label="التخصيص">
+      <!-- <app-form-field label="التخصيص">
         <select [(ngModel)]="filters.hasServant" (ngModelChange)="applyFilters()" class="form-input">
           <option value="">— الكل —</option>
           <option value="yes">مخصص لخادم</option>
           <option value="no">غير مخصص</option>
         </select>
-      </app-form-field>
+      </app-form-field> -->
     </div>
     <div class="filters-actions">
       <button type="button" class="btn-outline sm" (click)="clearFilters()">مسح خيارات البحث</button>

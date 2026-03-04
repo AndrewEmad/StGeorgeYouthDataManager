@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using YouthDataManager.Domain.Entities;
+using YouthDataManager.Domain.Utilities;
 using YouthDataManager.Shared.Service.Abstractions;
 using YouthDataManager.Users.Service.Abstractions;
 using YouthDataManager.Users.Service.Abstractions.DTOs;
@@ -52,7 +53,7 @@ public class UserService : IUserService
         return ServiceResult<IEnumerable<UserDto>>.Success(dtos);
     }
 
-    public async Task<ServiceResult<PagedResult<UserDto>>> GetPagedAsync(int page, int pageSize, string? search = null, string? role = null, bool? isActive = null)
+    public async Task<ServiceResult<PagedResult<UserDto>>> GetPagedAsync(int page, int pageSize, string? search = null, string? role = null, bool? isActive = null, string? sortBy = null, bool? sortDesc = null)
     {
         if (page < 1) page = 1;
         if (pageSize > 50) pageSize = 50;
@@ -78,17 +79,23 @@ public class UserService : IUserService
         var searchTrim = search?.Trim();
         if (!string.IsNullOrEmpty(searchTrim))
         {
-            var lower = searchTrim.ToLower();
+            var normalized = ArabicNormalizer.Normalize(searchTrim);
             query = query.Where(u =>
-                (u.FullName != null && u.FullName.ToLower().Contains(lower)) ||
-                (u.UserName != null && u.UserName.ToLower().Contains(lower)) ||
-                (u.Phone != null && u.Phone.ToLower().Contains(lower)));
+                (u.NormalizedFullName != null && u.NormalizedFullName.Contains(normalized)) ||
+                (u.UserName != null && u.UserName.Contains(searchTrim)) ||
+                (u.Phone != null && u.Phone.Contains(searchTrim)));
         }
         if (isActive.HasValue)
             query = query.Where(u => u.IsActive == isActive.Value);
 
         var totalCount = await query.CountAsync();
-        var users = await query.OrderBy(u => u.FullName).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+        var sortKey = (sortBy ?? "fullname").Trim().ToLowerInvariant();
+        var desc = sortDesc ?? false;
+        var users = sortKey == "username"
+            ? await (desc ? query.OrderByDescending(u => u.UserName).ThenBy(u => u.FullName) : query.OrderBy(u => u.UserName).ThenBy(u => u.FullName)).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync()
+            : sortKey == "isactive"
+            ? await (desc ? query.OrderByDescending(u => u.IsActive).ThenBy(u => u.FullName) : query.OrderBy(u => u.IsActive).ThenBy(u => u.FullName)).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync()
+            : await (desc ? query.OrderByDescending(u => u.FullName) : query.OrderBy(u => u.FullName)).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
         var dtos = new List<UserDto>();
         foreach (var user in users)
         {
@@ -128,6 +135,7 @@ public class UserService : IUserService
             UserName = dto.UserName,
             Email = dto.Email,
             FullName = dto.FullName,
+            NormalizedFullName = ArabicNormalizer.Normalize(dto.FullName),
             Phone = dto.Phone,
             IsActive = true,
             MustChangePassword = true,
@@ -170,6 +178,7 @@ public class UserService : IUserService
         if (user == null) return ServiceResult.Failure("User not found");
 
         user.FullName = dto.FullName;
+        user.NormalizedFullName = ArabicNormalizer.Normalize(dto.FullName);
         user.Phone = dto.Phone;
         user.IsActive = dto.IsActive;
         user.UpdatedAt = DateTime.UtcNow;
@@ -214,7 +223,11 @@ public class UserService : IUserService
         if (user == null) return ServiceResult.Failure("User not found");
 
         var roles = await _userManager.GetRolesAsync(user);
-        if (roles.Contains("Admin") && dto.FullName != null) user.FullName = dto.FullName;
+        if (roles.Contains("Admin") && dto.FullName != null)
+        {
+            user.FullName = dto.FullName;
+            user.NormalizedFullName = ArabicNormalizer.Normalize(dto.FullName);
+        }
         if (dto.Email != null) user.Email = dto.Email;
         if (dto.Phone != null) user.Phone = dto.Phone;
         user.UpdatedAt = DateTime.UtcNow;

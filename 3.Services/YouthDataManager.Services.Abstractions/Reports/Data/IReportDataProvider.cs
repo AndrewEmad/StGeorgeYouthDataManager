@@ -7,8 +7,8 @@ namespace YouthDataManager.Reports.Service.Abstractions.Data;
 
 public interface IReportDataProvider
 {
-    Task<(IReadOnlyList<StudentNoContactDto> Items, int TotalCount)> GetStudentsWithNoRecentContactPagedAsync(int days, Guid? servantId, int page, int pageSize);
-    Task<(IReadOnlyList<StudentsByGroupDto> Items, int TotalCount)> GetStudentsByAreaPagedAsync(int page, int pageSize);
-    Task<(IReadOnlyList<StudentsByGroupDto> Items, int TotalCount)> GetStudentsByAcademicYearPagedAsync(int page, int pageSize);
-    Task<(IReadOnlyList<StudentsByGroupDto> Items, int TotalCount)> GetStudentsByBirthMonthPagedAsync(int page, int pageSize);
+    Task<(IReadOnlyList<StudentNoContactDto> Items, int TotalCount)> GetStudentsWithNoRecentContactPagedAsync(int days, Guid? servantId, int page, int pageSize, string? sortBy = null, bool sortDesc = false);
+    Task<(IReadOnlyList<StudentsByGroupDto> Items, int TotalCount)> GetStudentsByAreaPagedAsync(int page, int pageSize, string? sortBy = null, bool sortDesc = false);
+    Task<(IReadOnlyList<StudentsByGroupDto> Items, int TotalCount)> GetStudentsByAcademicYearPagedAsync(int page, int pageSize, string? sortBy = null, bool sortDesc = false);
+    Task<(IReadOnlyList<StudentsByGroupDto> Items, int TotalCount)> GetStudentsByBirthMonthPagedAsync(int page, int pageSize, string? sortBy = null, bool sortDesc = false);
 }

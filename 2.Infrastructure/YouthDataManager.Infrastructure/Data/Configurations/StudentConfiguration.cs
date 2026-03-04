@@ -10,6 +10,7 @@ public class StudentConfiguration : IEntityTypeConfiguration<Student>
     {
         builder.HasKey(e => e.Id);
         builder.Property(e => e.FullName).IsRequired().HasMaxLength(200);
+        builder.Property(e => e.NormalizedFullName).IsRequired().HasMaxLength(200);
         builder.Property(e => e.Phone).IsRequired().HasMaxLength(20);
         builder.Property(e => e.Area).HasMaxLength(100);
         builder.Property(e => e.College).HasMaxLength(100);
@@ -18,6 +19,7 @@ public class StudentConfiguration : IEntityTypeConfiguration<Student>
         builder.HasIndex(e => e.Phone);
         builder.HasIndex(e => e.Area);
         builder.HasIndex(e => e.FullName);
+        builder.HasIndex(e => e.NormalizedFullName);
 
         builder.HasOne(e => e.Servant)
             .WithMany(u => u.Students)

@@ -9,7 +9,7 @@ namespace YouthDataManager.Users.Service.Abstractions;
 public interface IUserService
 {
     Task<ServiceResult<IEnumerable<UserDto>>> GetAllAsync();
-    Task<ServiceResult<PagedResult<UserDto>>> GetPagedAsync(int page, int pageSize, string? search = null, string? role = null, bool? isActive = null);
+    Task<ServiceResult<PagedResult<UserDto>>> GetPagedAsync(int page, int pageSize, string? search = null, string? role = null, bool? isActive = null, string? sortBy = null, bool? sortDesc = null);
     Task<ServiceResult<UserDto>> GetByIdAsync(Guid id);
     Task<ServiceResult<Guid>> CreateAsync(CreateUserDto dto);
     Task<ServiceResult> UpdateAsync(Guid id, UpdateUserDto dto);

@@ -12,8 +12,8 @@
       <table>
         <thead>
           <tr>
-            <th>المنطقة</th>
-            <th>العدد</th>
+            <th class="sortable" (click)="setSort('groupKey')">المنطقة <span class="sort-icon" *ngIf="sortBy === 'groupKey'">{{ sortDesc ? '▼' : '▲' }}</span></th>
+            <th class="sortable" (click)="setSort('count')">العدد <span class="sort-icon" *ngIf="sortBy === 'count'">{{ sortDesc ? '▼' : '▲' }}</span></th>
             <th></th>
           </tr>
         </thead>

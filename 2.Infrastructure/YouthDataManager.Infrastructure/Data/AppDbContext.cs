@@ -33,6 +33,12 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
         builder.HasDefaultSchema("dbo");
         
         builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
+        builder.Entity<ApplicationUser>(b =>
+        {
+            b.Property(e => e.NormalizedFullName).HasMaxLength(256);
+            b.HasIndex(e => e.NormalizedFullName);
+        });
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

@@ -24,6 +24,8 @@ export class StudentsNoContactReportPage implements OnInit {
   pageSize = 10;
   totalCount = 0;
   pageSizeOptions = [5, 10, 20, 50];
+  sortBy: string | null = 'fullName';
+  sortDesc = false;
 
   constructor(
     private reportsService: ReportsService,
@@ -37,10 +39,17 @@ export class StudentsNoContactReportPage implements OnInit {
     this.loadData();
   }
 
+  setSort(column: string) {
+    if (this.sortBy === column) this.sortDesc = !this.sortDesc;
+    else { this.sortBy = column; this.sortDesc = false; }
+    this.page = 1;
+    this.loadData();
+  }
+
   loadData() {
     this.loading = true;
     this.error = '';
-    const params: { days?: number; servantId?: string; page: number; pageSize: number } = { days: this.daysNoContact, page: this.page, pageSize: this.pageSize };
+    const params: { days?: number; servantId?: string; page: number; pageSize: number; sortBy?: string; sortDesc?: boolean } = { days: this.daysNoContact, page: this.page, pageSize: this.pageSize, sortBy: this.sortBy ?? undefined, sortDesc: this.sortDesc };
     if (this.servantIdFilter) params.servantId = this.servantIdFilter;
     this.reportsService.getStudentsWithNoRecentContact(params).subscribe({
       next: (data) => {

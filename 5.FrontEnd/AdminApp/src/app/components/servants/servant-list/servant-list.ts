@@ -54,6 +54,8 @@ export class ServantListComponent implements OnInit {
     string,
     { assignedStudentsCount: number; lastCallDate: string | null; lastVisitDate: string | null }
   > = {};
+  sortBy: string | null = 'fullName';
+  sortDesc = false;
   priestAlreadyExists = false;
   priestOptionDisabledInEdit = false;
 
@@ -92,6 +94,17 @@ export class ServantListComponent implements OnInit {
     this.loadServants();
   }
 
+  private isServerSortColumn(column: string): boolean {
+    return column === 'fullName' || column === 'userName' || column === 'isActive';
+  }
+
+  setSort(column: string) {
+    if (this.sortBy === column) this.sortDesc = !this.sortDesc;
+    else { this.sortBy = column; this.sortDesc = false; }
+    this.page = 1;
+    this.loadServants();
+  }
+
   loadServants() {
     const isActive =
       this.filters.status === 'active'
@@ -99,6 +112,8 @@ export class ServantListComponent implements OnInit {
         : this.filters.status === 'inactive'
           ? false
           : undefined;
+    const apiSortBy = this.isServerSortColumn(this.sortBy ?? '') ? this.sortBy ?? undefined : undefined;
+    const apiSortDesc = apiSortBy != null ? this.sortDesc : undefined;
     this.usersService
       .getPaged({
         page: this.page,
@@ -106,6 +121,8 @@ export class ServantListComponent implements OnInit {
         search: this.filters.search.trim() || undefined,
         role: this.filters.role || undefined,
         isActive: isActive as boolean | undefined,
+        sortBy: apiSortBy,
+        sortDesc: apiSortDesc,
       })
       .subscribe({
         next: (res) => {
@@ -124,17 +141,45 @@ export class ServantListComponent implements OnInit {
                     lastVisitDate: st.lastVisitDate ?? null,
                   };
                 });
+                this.applyClientSideSort();
                 this.loading = false;
               },
               error: () => (this.loading = false),
             });
           } else {
             this.servantStatsMap = {};
+            this.applyClientSideSort();
             this.loading = false;
           }
         },
         error: () => (this.loading = false),
       });
+  }
+
+  private applyClientSideSort() {
+    if (this.isServerSortColumn(this.sortBy ?? '')) return;
+    const col = (this.sortBy ?? '').toLowerCase();
+    const desc = this.sortDesc;
+    const map = this.servantStatsMap;
+    this.servants = [...this.servants].sort((a, b) => {
+      let cmp = 0;
+      if (col === 'assignedstudentscount') {
+        const va = map[a.id]?.assignedStudentsCount ?? -1;
+        const vb = map[b.id]?.assignedStudentsCount ?? -1;
+        cmp = va - vb;
+      } else if (col === 'lastcalldate') {
+        const va = map[a.id]?.lastCallDate ?? '';
+        const vb = map[b.id]?.lastCallDate ?? '';
+        cmp = (va || '').localeCompare(vb || '');
+      } else if (col === 'lastvisitdate') {
+        const va = map[a.id]?.lastVisitDate ?? '';
+        const vb = map[b.id]?.lastVisitDate ?? '';
+        cmp = (va || '').localeCompare(vb || '');
+      } else if (col === 'role') {
+        cmp = (a.role || '').localeCompare(b.role || '');
+      } else return 0;
+      return desc ? -cmp : cmp;
+    });
   }
 
   roleLabel(role: string): string {

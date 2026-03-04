@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using YouthDataManager.Domain.Entities;
 using YouthDataManager.Domain.Repositories.Tracking;
+using YouthDataManager.Domain.Utilities;
 using YouthDataManager.Shared.Service.Abstractions;
 using YouthDataManager.Students.Service.Abstractions.Commands;
 using YouthDataManager.Students.Service.Abstractions.DTOs;
@@ -45,6 +46,7 @@ public class StudentCommandsService : IStudentCommandsService
             {
                 Id = Guid.NewGuid(),
                 FullName = request.FullName,
+                NormalizedFullName = ArabicNormalizer.Normalize(request.FullName),
                 Phone = request.Phone,
                 SecondaryPhone = request.SecondaryPhone,
                 Address = request.Address ?? string.Empty,
@@ -88,6 +90,7 @@ public class StudentCommandsService : IStudentCommandsService
             }
 
             student.FullName = request.FullName;
+            student.NormalizedFullName = ArabicNormalizer.Normalize(request.FullName);
             student.Phone = request.Phone;
             student.Address = request.Address ?? string.Empty;
             student.Area = request.Area ?? string.Empty;

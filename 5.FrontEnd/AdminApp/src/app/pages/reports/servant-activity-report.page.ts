@@ -24,6 +24,8 @@ export class ServantActivityReportPage implements OnInit {
   pageSize = 10;
   totalCount = 0;
   pageSizeOptions = [5, 10, 20, 50];
+  sortBy: string | null = 'fullName';
+  sortDesc = false;
 
   constructor(
     private reportsService: ReportsService,
@@ -37,10 +39,17 @@ export class ServantActivityReportPage implements OnInit {
     this.loadData();
   }
 
+  setSort(column: string) {
+    if (this.sortBy === column) this.sortDesc = !this.sortDesc;
+    else { this.sortBy = column; this.sortDesc = false; }
+    this.page = 1;
+    this.loadData();
+  }
+
   loadData() {
     this.loading = true;
     this.error = '';
-    const params: { dateFrom?: string; dateTo?: string; servantId?: string; page: number; pageSize: number } = { page: this.page, pageSize: this.pageSize };
+    const params: { dateFrom?: string; dateTo?: string; servantId?: string; page: number; pageSize: number; sortBy?: string; sortDesc?: boolean } = { page: this.page, pageSize: this.pageSize, sortBy: this.sortBy ?? undefined, sortDesc: this.sortDesc };
     if (this.dateFrom) params.dateFrom = this.dateFrom;
     if (this.dateTo) params.dateTo = this.dateTo;
     if (this.servantIdFilter) params.servantId = this.servantIdFilter;

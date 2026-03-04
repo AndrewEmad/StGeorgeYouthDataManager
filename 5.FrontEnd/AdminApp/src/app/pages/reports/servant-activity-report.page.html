@@ -24,10 +24,10 @@
       <table>
         <thead>
           <tr>
-            <th>الخادم</th>
-            <th>عدد المخدومين المخصصين</th>
-            <th>مكالمات في الفترة</th>
-            <th>زيارات في الفترة</th>
+            <th class="sortable" (click)="setSort('fullName')">الخادم <span class="sort-icon" *ngIf="sortBy === 'fullName'">{{ sortDesc ? '▼' : '▲' }}</span></th>
+            <th class="sortable" (click)="setSort('assignedCount')">عدد المخدومين المخصصين <span class="sort-icon" *ngIf="sortBy === 'assignedCount'">{{ sortDesc ? '▼' : '▲' }}</span></th>
+            <th class="sortable" (click)="setSort('callsInPeriod')">مكالمات في الفترة <span class="sort-icon" *ngIf="sortBy === 'callsInPeriod'">{{ sortDesc ? '▼' : '▲' }}</span></th>
+            <th class="sortable" (click)="setSort('visitsInPeriod')">زيارات في الفترة <span class="sort-icon" *ngIf="sortBy === 'visitsInPeriod'">{{ sortDesc ? '▼' : '▲' }}</span></th>
           </tr>
         </thead>
         <tbody>

@@ -85,6 +85,9 @@ public class StudentNoTrackingRepository : IStudentNoTrackingRepository
             case "lastfollowupdate":
                 ordered = sortDesc ? query.OrderByDescending(s => s.CallLogs.Select(c => (DateTime?)c.CallDate).Concat(s.HomeVisits.Select(v => (DateTime?)v.VisitDate)).Max()).ThenBy(s => s.Id) : query.OrderBy(s => s.CallLogs.Select(c => (DateTime?)c.CallDate).Concat(s.HomeVisits.Select(v => (DateTime?)v.VisitDate)).Max()).ThenBy(s => s.Id);
                 break;
+            case "lastattendancedate":
+                ordered = sortDesc ? query.OrderByDescending(s => s.LastAttendanceDate).ThenBy(s => s.Id) : query.OrderBy(s => s.LastAttendanceDate).ThenBy(s => s.Id);
+                break;
             default:
                 ordered = sortDesc ? query.OrderByDescending(s => s.FullName).ThenBy(s => s.Id) : query.OrderBy(s => s.FullName).ThenBy(s => s.Id);
                 break;

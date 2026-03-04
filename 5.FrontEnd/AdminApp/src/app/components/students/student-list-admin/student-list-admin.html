@@ -90,7 +90,7 @@
           <th class="sortable" (click)="setSort('academicYear')">السنة الدراسية <span class="sort-icon" *ngIf="sortBy === 'academicYear'">{{ sortDesc ? '▼' : '▲' }}</span></th>
           <th class="sortable" (click)="setSort('servantName')">الخادم الحالي <span class="sort-icon" *ngIf="sortBy === 'servantName'">{{ sortDesc ? '▼' : '▲' }}</span></th>
           <th class="sortable" (click)="setSort('lastFollowUpDate')">آخر متابعة <span class="sort-icon" *ngIf="sortBy === 'lastFollowUpDate'">{{ sortDesc ? '▼' : '▲' }}</span></th>
-          <th>آخر حضور</th>
+          <th class="sortable" (click)="setSort('lastAttendanceDate')">آخر حضور <span class="sort-icon" *ngIf="sortBy === 'lastAttendanceDate'">{{ sortDesc ? '▼' : '▲' }}</span></th>
           <th>آخر ملاحظة</th>
           <th>الإجراءات</th>
         </tr>

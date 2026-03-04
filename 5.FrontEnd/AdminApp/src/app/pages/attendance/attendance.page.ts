@@ -92,7 +92,7 @@ export class AttendancePage implements OnInit {
         });
     } else {
       this.usersService
-        .getPaged({ page: this.page, pageSize: this.pageSize, search: this.nameFilter.trim() || undefined })
+        .getPaged({ page: this.page, pageSize: this.pageSize, search: this.nameFilter.trim() || undefined, sortBy: 'fullName', sortDesc: false })
         .subscribe({
           next: (res) => {
             this.servantList = (res.items ?? []).slice().sort((a, b) => (a.fullName || '').localeCompare(b.fullName || '', 'ar'));

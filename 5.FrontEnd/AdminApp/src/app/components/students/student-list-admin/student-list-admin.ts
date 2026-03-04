@@ -195,7 +195,9 @@ export class StudentListAdminComponent implements OnInit {
       },
     });
     this.usersService.getAll().subscribe((data) => {
-      this.servants = data.filter((u) => u.role !== 'Priest' && String(u.role) !== 'Admin');
+      this.servants = data
+        .filter((u) => u.role !== 'Priest' && String(u.role) !== 'Admin')
+        .sort((a, b) => (a.fullName || '').localeCompare(b.fullName || '', 'ar'));
     });
   }
 

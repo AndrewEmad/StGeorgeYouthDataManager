@@ -35,7 +35,11 @@ export class ServantActivityReportPage implements OnInit {
   get totalPages(): number { return Math.max(1, Math.ceil(this.totalCount / this.pageSize)); }
 
   ngOnInit() {
-    this.usersService.getPaged({ page: 1, pageSize: 500 }).subscribe({ next: (res) => { this.servants = res.items ?? []; } });
+    this.usersService.getPaged({ page: 1, pageSize: 500, sortBy: 'fullName', sortDesc: false }).subscribe({
+      next: (res) => {
+        this.servants = (res.items ?? []).slice().sort((a, b) => (a.fullName || '').localeCompare(b.fullName || '', 'ar'));
+      }
+    });
     this.loadData();
   }
 

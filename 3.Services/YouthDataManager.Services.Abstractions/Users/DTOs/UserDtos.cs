@@ -16,7 +16,8 @@ public record UserDto(
     bool IsActive,
     DateTime CreatedAt,
     DateTime? UpdatedAt,
-    string? PhotoPath = null
+    string? PhotoPath = null,
+    string? Address = null
 );
 
 public record CreateUserDto(
@@ -32,9 +33,10 @@ public record UpdateUserDto(
     [property: JsonPropertyName("fullName")] string FullName,
     [property: JsonPropertyName("phone")] string Phone,
     [property: JsonPropertyName("isActive")] bool IsActive,
-    [property: JsonPropertyName("role")] string? Role
+    [property: JsonPropertyName("role")] string? Role,
+    [property: JsonPropertyName("address")] string? Address = null
 );
 
 public record SetPasswordDto(string NewPassword);
 
-public record UpdateMyProfileDto(string? FullName, string? Email, string? Phone);
+public record UpdateMyProfileDto(string? FullName, string? Email, string? Phone, string? Address = null);

@@ -5,6 +5,6 @@ namespace YouthDataManager.Auth.Service.Abstractions;
 
 public interface IJwtTokenService
 {
-    string GenerateToken(ApplicationUser user, IEnumerable<string> roles, bool mustChangePassword = false);
+    string GenerateToken(ApplicationUser user, IEnumerable<string> roles, bool mustChangePassword = false, bool profileIncomplete = false);
     string GenerateRefreshToken();
 }

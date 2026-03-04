@@ -39,7 +39,7 @@ export class ChangePasswordPage {
     this.authService.changePassword(this.currentPassword, this.newPassword).subscribe({
       next: (res) => {
         this.authService.setUserAfterPasswordChange(res);
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(res.requiresProfileCompletion ? ['/complete-profile'] : ['/dashboard']);
       },
       error: (err) => {
         this.error = err.error?.message || 'فشل تغيير كلمة المرور. تحقق من كلمة المرور الحالية.';

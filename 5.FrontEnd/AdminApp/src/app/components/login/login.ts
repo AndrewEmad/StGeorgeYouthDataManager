@@ -31,7 +31,8 @@ export class LoginComponent {
 
     this.authService.login({ username: this.username, password: this.password }).subscribe({
       next: (res) => {
-        this.router.navigate(res.requiresPasswordChange ? ['/change-password'] : ['/dashboard']);
+        const target = res.requiresPasswordChange ? '/change-password' : res.requiresProfileCompletion ? '/complete-profile' : '/dashboard';
+        this.router.navigate([target]);
       },
       error: (err) => {
         this.error = 'اسم المستخدم أو كلمة المرور غير صحيحة';

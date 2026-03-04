@@ -12,6 +12,7 @@ export interface LoginResponse {
   role: string;
   userId: string;
   requiresPasswordChange?: boolean;
+  requiresProfileCompletion?: boolean;
 }
 
 @Injectable({
@@ -75,6 +76,20 @@ export class AuthService {
     return !!this.currentUser()?.requiresPasswordChange;
   }
 
+  requiresProfileCompletion(): boolean {
+    return !!this.currentUser()?.requiresProfileCompletion;
+  }
+
+  setUserAfterProfileCompletion(token: string): void {
+    const u = this.currentUser();
+    if (u) {
+      const updated: LoginResponse = { ...u, token, requiresProfileCompletion: false };
+      localStorage.setItem('user', JSON.stringify(updated));
+      localStorage.setItem('token', token);
+      this.currentUser.set(updated);
+    }
+  }
+
   changePassword(currentPassword: string, newPassword: string): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/change-password`, {
       currentPassword,
@@ -127,8 +142,8 @@ export class AuthService {
     return this.http.get<ProfileDto>(`${environment.apiUrl}/Profile`);
   }
 
-  updateProfile(dto: { fullName?: string; email?: string; phone?: string }): Observable<void> {
-    return this.http.put<void>(`${environment.apiUrl}/Profile`, dto);
+  updateProfile(dto: { fullName?: string; email?: string; phone?: string; address?: string }): Observable<{ token?: string }> {
+    return this.http.put<{ token?: string }>(`${environment.apiUrl}/Profile`, dto);
   }
 
   refreshCurrentUserFullName(fullName: string): void {
@@ -147,6 +162,7 @@ export interface ProfileDto {
   fullName: string;
   email: string;
   phone: string;
+  address?: string;
   role: string;
   isActive: boolean;
   createdAt: string;

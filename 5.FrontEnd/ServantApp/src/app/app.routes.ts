@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { ServantLayoutComponent } from './components/layout/servant-layout.component';
 import { LoginPage } from './pages/login/login.page';
 import { ChangePasswordPage } from './pages/change-password/change-password.page';
+import { CompleteProfilePage } from './pages/complete-profile/complete-profile.page';
 import { DashboardPage } from './pages/dashboard/dashboard.page';
 import { ProfilePage } from './pages/profile/profile.page';
 import { StudentsPage } from './pages/students/students.page';
@@ -16,6 +17,7 @@ import { secretaryGuard } from './guards/secretary.guard';
 export const routes: Routes = [
   { path: 'login', component: LoginPage, canActivate: [redirectIfAuthGuard] },
   { path: 'change-password', component: ChangePasswordPage, canActivate: [authGuard] },
+  { path: 'complete-profile', component: CompleteProfilePage, canActivate: [authGuard] },
   {
     path: '',
     component: ServantLayoutComponent,

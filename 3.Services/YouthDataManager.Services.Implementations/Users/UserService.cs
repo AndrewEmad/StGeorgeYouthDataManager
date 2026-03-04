@@ -46,7 +46,8 @@ public class UserService : IUserService
                 user.IsActive,
                 user.CreatedAt,
                 user.UpdatedAt,
-                user.PhotoPath
+                user.PhotoPath,
+                user.Address
             ));
         }
 
@@ -100,7 +101,7 @@ public class UserService : IUserService
         foreach (var user in users)
         {
             var roles = await _userManager.GetRolesAsync(user);
-            dtos.Add(new UserDto(user.Id, user.UserName!, user.FullName, user.Email!, user.Phone, roles.FirstOrDefault() ?? "Unknown", user.IsActive, user.CreatedAt, user.UpdatedAt, user.PhotoPath));
+            dtos.Add(new UserDto(user.Id, user.UserName!, user.FullName, user.Email!, user.Phone, roles.FirstOrDefault() ?? "Unknown", user.IsActive, user.CreatedAt, user.UpdatedAt, user.PhotoPath, user.Address));
         }
         return ServiceResult<PagedResult<UserDto>>.Success(new PagedResult<UserDto>(dtos, totalCount, page, pageSize));
     }
@@ -121,7 +122,8 @@ public class UserService : IUserService
             user.IsActive,
             user.CreatedAt,
             user.UpdatedAt,
-            user.PhotoPath
+            user.PhotoPath,
+            user.Address
         );
 
         return ServiceResult<UserDto>.Success(dto);
@@ -181,6 +183,7 @@ public class UserService : IUserService
         user.NormalizedFullName = ArabicNormalizer.Normalize(dto.FullName);
         user.Phone = dto.Phone;
         user.IsActive = dto.IsActive;
+        if (dto.Address != null) user.Address = dto.Address;
         user.UpdatedAt = DateTime.UtcNow;
 
         if (!string.IsNullOrWhiteSpace(dto.Role))
@@ -230,6 +233,7 @@ public class UserService : IUserService
         }
         if (dto.Email != null) user.Email = dto.Email;
         if (dto.Phone != null) user.Phone = dto.Phone;
+        if (dto.Address != null) user.Address = dto.Address;
         user.UpdatedAt = DateTime.UtcNow;
 
         var result = await _userManager.UpdateAsync(user);

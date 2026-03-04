@@ -10,6 +10,9 @@ export const redirectIfAuthGuard = () => {
     if (authService.requiresPasswordChange()) {
       return router.parseUrl('/change-password');
     }
+    if (authService.requiresProfileCompletion()) {
+      return router.parseUrl('/complete-profile');
+    }
     return router.parseUrl('/dashboard');
   }
   return true;

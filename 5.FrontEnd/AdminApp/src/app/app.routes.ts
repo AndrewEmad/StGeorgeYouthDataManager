@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { LoginPage } from './pages/login/login.page';
 import { ChangePasswordPage } from './pages/change-password/change-password.page';
+import { CompleteProfilePage } from './pages/complete-profile/complete-profile.page';
 import { DashboardPage } from './pages/dashboard/dashboard.page';
 import { StatsPage } from './pages/stats/stats.page';
 import { ServantsPage } from './pages/servants/servants.page';
@@ -28,6 +29,7 @@ import { redirectIfAuthGuard } from './guards/redirect-if-auth.guard';
 export const routes: Routes = [
   { path: 'login', component: LoginPage, canActivate: [redirectIfAuthGuard] },
   { path: 'change-password', component: ChangePasswordPage, canActivate: [authGuard] },
+  { path: 'complete-profile', component: CompleteProfilePage, canActivate: [authGuard] },
   {
     path: 'dashboard',
     component: DashboardPage,

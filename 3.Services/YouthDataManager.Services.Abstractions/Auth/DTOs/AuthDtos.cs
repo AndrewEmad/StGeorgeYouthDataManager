@@ -11,7 +11,8 @@ public record LoginResponse(
     string FullName,
     string Role,
     Guid UserId,
-    bool RequiresPasswordChange = false
+    bool RequiresPasswordChange = false,
+    bool RequiresProfileCompletion = false
 );
 
 public record ChangePasswordRequest(string CurrentPassword, string NewPassword);
@@ -23,5 +24,6 @@ public record UserProfileDto(
     string FullName,
     string UserName,
     string Role,
-    bool IsActive
+    bool IsActive,
+    string? Address = null
 );

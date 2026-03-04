@@ -45,7 +45,12 @@ public class AuthCommandsService : IAuthCommandsService
 
             var roles = await _userManager.GetRolesAsync(user);
             var mustChange = user.MustChangePassword;
-            var token = _jwtService.GenerateToken(user, roles, mustChange);
+            var isExempt = roles.Contains("Admin") || roles.Contains("Priest");
+            var profileIncomplete = !isExempt && (
+                string.IsNullOrWhiteSpace(user.FullName) ||
+                string.IsNullOrWhiteSpace(user.Phone) ||
+                string.IsNullOrWhiteSpace(user.Address));
+            var token = _jwtService.GenerateToken(user, roles, mustChange, profileIncomplete);
             var refreshToken = _jwtService.GenerateRefreshToken();
 
             return ServiceResult<LoginResponse>.Success(new LoginResponse(
@@ -54,7 +59,8 @@ public class AuthCommandsService : IAuthCommandsService
                 user.FullName,
                 roles.FirstOrDefault() ?? "Servant",
                 user.Id,
-                RequiresPasswordChange: mustChange
+                RequiresPasswordChange: mustChange,
+                RequiresProfileCompletion: profileIncomplete
             ));
         }
         catch (Exception ex)
@@ -87,9 +93,14 @@ public class AuthCommandsService : IAuthCommandsService
             user.UpdatedAt = DateTime.UtcNow;
             await _userManager.UpdateAsync(user);
             var roles = await _userManager.GetRolesAsync(user);
-            var jwt = _jwtService.GenerateToken(user, roles, false);
+            var isExempt = roles.Contains("Admin") || roles.Contains("Priest");
+            var profileIncomplete = !isExempt && (
+                string.IsNullOrWhiteSpace(user.FullName) ||
+                string.IsNullOrWhiteSpace(user.Phone) ||
+                string.IsNullOrWhiteSpace(user.Address));
+            var jwt = _jwtService.GenerateToken(user, roles, false, profileIncomplete);
             var refreshToken = _jwtService.GenerateRefreshToken();
-            return ServiceResult<LoginResponse>.Success(new LoginResponse(jwt, refreshToken, user.FullName, roles.FirstOrDefault() ?? "Servant", user.Id, RequiresPasswordChange: false));
+            return ServiceResult<LoginResponse>.Success(new LoginResponse(jwt, refreshToken, user.FullName, roles.FirstOrDefault() ?? "Servant", user.Id, RequiresPasswordChange: false, RequiresProfileCompletion: profileIncomplete));
         }
         catch (Exception ex)
         {

@@ -21,7 +21,7 @@ public class JwtTokenService : IJwtTokenService
         _config = config.Value;
     }
 
-    public string GenerateToken(ApplicationUser user, IEnumerable<string> roles, bool mustChangePassword = false)
+    public string GenerateToken(ApplicationUser user, IEnumerable<string> roles, bool mustChangePassword = false, bool profileIncomplete = false)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.Secret));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -35,6 +35,8 @@ public class JwtTokenService : IJwtTokenService
         };
         if (mustChangePassword)
             claims.Add(new Claim("must_change_password", "true"));
+        if (profileIncomplete)
+            claims.Add(new Claim("profile_incomplete", "true"));
 
         claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 

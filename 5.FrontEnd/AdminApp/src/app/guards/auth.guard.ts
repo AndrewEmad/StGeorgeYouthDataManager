@@ -19,5 +19,13 @@ export const authGuard = (_: any, state: any) => {
     router.navigate(['/dashboard']);
     return false;
   }
+  if (authService.requiresProfileCompletion() && !url.includes('complete-profile')) {
+    router.navigate(['/complete-profile']);
+    return false;
+  }
+  if (!authService.requiresProfileCompletion() && url.includes('complete-profile')) {
+    router.navigate(['/dashboard']);
+    return false;
+  }
   return true;
 };

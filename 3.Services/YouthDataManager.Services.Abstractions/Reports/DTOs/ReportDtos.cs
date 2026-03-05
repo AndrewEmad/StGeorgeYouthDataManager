@@ -73,3 +73,21 @@ public record StudentsByGroupDto(
 );
 
 public record PagedReportResult<T>(IReadOnlyList<T> Items, int TotalCount, int Page, int PageSize);
+
+/// <summary>Servant (user) with stats for admin list; supports full-data sort then page.</summary>
+public record ServantWithStatsDto(
+    Guid Id,
+    string UserName,
+    string FullName,
+    string Email,
+    string? Phone,
+    string Role,
+    bool IsActive,
+    DateTime CreatedAt,
+    DateTime? UpdatedAt,
+    string? PhotoPath,
+    string? Address,
+    int AssignedStudentsCount,
+    DateTime? LastCallDate,
+    DateTime? LastVisitDate
+);

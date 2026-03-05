@@ -1,3 +1,27 @@
+<ng-template #selectAllHeader>
+  <input type="checkbox" [checked]="allFilteredSelected" (change)="selectAllFiltered()" title="تحديد الكل" class="col-checkbox-input" />
+</ng-template>
+<ng-template #rowCheckbox let-row>
+  <span (click)="$event.stopPropagation()">
+    <input type="checkbox" [checked]="isSelected(row)" (change)="toggleSelection(row)" class="col-checkbox-input" />
+  </span>
+</ng-template>
+<ng-template #servantNameCell let-row>
+  @if (row.servantName) {
+    <span class="badge">{{ row.servantName }}</span>
+  } @else {
+    <span class="text-error">غير مخصص</span>
+  }
+</ng-template>
+<ng-template #lastNoteCell let-row>
+  <span [title]="row.lastFollowUpNote || ''">{{ (row.lastFollowUpNote ? row.lastFollowUpNote.substring(0, 40) : '') || '—' }}{{ row.lastFollowUpNote && row.lastFollowUpNote.length > 40 ? '…' : '' }}</span>
+</ng-template>
+<ng-template #rowActionsTemplate let-row>
+  <button type="button" class="btn-outline sm" (click)="openEdit(row)">تعديل</button>
+  <button type="button" class="btn-outline sm" (click)="openAssignModal(row)">تخصيص</button>
+  <button type="button" class="btn-outline sm danger" (click)="deleteStudent(row)">حذف</button>
+</ng-template>
+
 <div class="animate-slide">
   <app-content-header title="إدارة المخدومين" subtitle="عرض وتوزيع المخدومين على الخدام">
     <div actions class="header-actions">
@@ -94,66 +118,29 @@
   }
 
   <app-card class="table-container">
-    @if (!loading) {
-    <table>
-      <thead>
-        <tr>
-          <th class="col-checkbox">
-            <input type="checkbox" [checked]="allFilteredSelected" (change)="selectAllFiltered()" title="تحديد الكل" />
-          </th>
-          <th class="sortable" (click)="setSort('fullName')">اسم المخدوم @if (sortBy === 'fullName') { <span class="sort-icon">{{ sortDesc ? '▼' : '▲' }}</span> }</th>
-          <th class="sortable" (click)="setSort('academicYear')">السنة الدراسية @if (sortBy === 'academicYear') { <span class="sort-icon">{{ sortDesc ? '▼' : '▲' }}</span> }</th>
-          <th class="sortable" (click)="setSort('servantName')">الخادم الحالي @if (sortBy === 'servantName') { <span class="sort-icon">{{ sortDesc ? '▼' : '▲' }}</span> }</th>
-          <th class="sortable" (click)="setSort('lastFollowUpDate')">آخر متابعة @if (sortBy === 'lastFollowUpDate') { <span class="sort-icon">{{ sortDesc ? '▼' : '▲' }}</span> }</th>
-          <th class="sortable" (click)="setSort('lastAttendanceDate')">آخر حضور @if (sortBy === 'lastAttendanceDate') { <span class="sort-icon">{{ sortDesc ? '▼' : '▲' }}</span> }</th>
-          <th>آخر ملاحظة</th>
-          <th>الإجراءات</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (s of students; track s.id) {
-        <tr class="row-clickable" (click)="viewStudent(s)">
-          <td class="col-checkbox" (click)="$event.stopPropagation()">
-            <input type="checkbox" [checked]="isSelected(s)" (change)="toggleSelection(s)" />
-          </td>
-          <td>{{ s.fullName }}</td>
-          <td>{{ s.academicYear || '—' }}</td>
-          <td>
-            @if (s.servantName) {
-              <span class="badge">{{ s.servantName }}</span>
-            } @else {
-              <span class="text-error">غير مخصص</span>
-            }
-          </td>
-          <td>{{ s.lastFollowUpDate ? (s.lastFollowUpDate | dateFormat) : '—' }}</td>
-          <td>{{ s.lastAttendanceDate ? (s.lastAttendanceDate | dateFormat) : '—' }}</td>
-          <td class="col-note" [title]="s.lastFollowUpNote || ''">{{ (s.lastFollowUpNote ? s.lastFollowUpNote.substring(0, 40) : '') || '—' }}{{ s.lastFollowUpNote && s.lastFollowUpNote.length > 40 ? '…' : '' }}</td>
-          <td class="col-actions" (click)="$event.stopPropagation()">
-            <button class="btn-outline sm" (click)="openEdit(s)">تعديل</button>
-            <button class="btn-outline sm" (click)="openAssignModal(s)">تخصيص</button>
-            <button class="btn-outline sm danger" (click)="deleteStudent(s)">حذف</button>
-          </td>
-        </tr>
-        }
-      </tbody>
-    </table>
-    }
-    @if (loading) {
+    @if (studentColumns().length > 0) {
+      <admin-data-table
+        [columns]="studentColumns()"
+        [data]="students"
+        [loading]="loading"
+        [totalCount]="totalCount"
+        [page]="page"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="pageSizeOptions"
+        [sortBy]="sortBy"
+        [sortDesc]="sortDesc"
+        [rowClickable]="true"
+        [actionsTemplate]="rowActionsTpl() ?? null"
+        [emptyMessage]="'لا يوجد مخدومين'"
+        (pageChange)="goToPage($event)"
+        (pageSizeChange)="setPageSize($event)"
+        (sortChange)="onSortChange($event)"
+        (rowClick)="viewStudent($event)"
+      />
+    } @else {
       <app-loader />
     }
   </app-card>
-
-  @if (totalCount > 0) {
-  <app-pagination
-    [total]="totalCount"
-    [page]="page"
-    [pageSize]="pageSize"
-    [pageSizeOptions]="pageSizeOptions"
-    [currentPageCount]="students.length"
-    (pageChange)="goToPage($event)"
-    (pageSizeChange)="setPageSize($event)"
-  />
-  }
 </div>
 
 <input #csvFileInput type="file" accept=".csv" (change)="onCsvFileSelected($event)" class="hidden-file-input" />

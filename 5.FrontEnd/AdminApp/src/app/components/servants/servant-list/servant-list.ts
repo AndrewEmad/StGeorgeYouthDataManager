@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UsersService } from '../../../services/users.service';
 import { User } from '../../../shared/models';
+import { ServantWithStats } from '../../../shared/models/report.model';
 import { ReportsService } from '../../../services/reports.service';
 import {
   ContentHeaderComponent,
@@ -37,7 +38,7 @@ import {
   styleUrls: ['./servant-list.css'],
 })
 export class ServantListComponent implements OnInit {
-  servants: User[] = [];
+  servants: ServantWithStats[] = [];
   totalCount = 0;
   page = 1;
   pageSize = 10;
@@ -51,16 +52,12 @@ export class ServantListComponent implements OnInit {
     role: '' as '' | 'Servant' | 'Manager' | 'Priest' | 'Admin',
     status: '' as '' | 'active' | 'inactive',
   };
-  servantStatsMap: Record<
-    string,
-    { assignedStudentsCount: number; lastCallDate: string | null; lastVisitDate: string | null }
-  > = {};
   sortBy: string | null = 'fullName';
   sortDesc = false;
   priestAlreadyExists = false;
   priestOptionDisabledInEdit = false;
 
-  editingServant: User | null = null;
+  editingServant: ServantWithStats | null = null;
   editForm = { fullName: '', phone: '', isActive: true, role: 'Servant' as string };
 
   newServant = {
@@ -87,16 +84,12 @@ export class ServantListComponent implements OnInit {
     private reportsService: ReportsService,
   ) {}
 
-  viewServant(s: User) {
+  viewServant(s: ServantWithStats) {
     this.router.navigate(['/dashboard/servants', s.id]);
   }
 
   ngOnInit() {
     this.loadServants();
-  }
-
-  private isServerSortColumn(column: string): boolean {
-    return column === 'fullName' || column === 'userName' || column === 'isActive';
   }
 
   setSort(column: string) {
@@ -113,74 +106,26 @@ export class ServantListComponent implements OnInit {
         : this.filters.status === 'inactive'
           ? false
           : undefined;
-    const apiSortBy = this.isServerSortColumn(this.sortBy ?? '') ? this.sortBy ?? undefined : undefined;
-    const apiSortDesc = apiSortBy != null ? this.sortDesc : undefined;
-    this.usersService
-      .getPaged({
+    this.loading = true;
+    this.reportsService
+      .getServantsPagedWithStats({
         page: this.page,
         pageSize: this.pageSize,
         search: this.filters.search.trim() || undefined,
         role: this.filters.role || undefined,
         isActive: isActive as boolean | undefined,
-        sortBy: apiSortBy,
-        sortDesc: apiSortDesc,
+        sortBy: this.sortBy ?? undefined,
+        sortDesc: this.sortDesc,
       })
       .subscribe({
         next: (res) => {
           this.servants = res.items;
           this.totalCount = res.totalCount;
           this.page = res.page;
-          const ids = res.items.map((u: User) => u.id);
-          if (ids.length) {
-            this.reportsService.getServantStats(ids).subscribe({
-              next: (stats) => {
-                this.servantStatsMap = {};
-                stats.forEach((st: any) => {
-                  this.servantStatsMap[st.servantId] = {
-                    assignedStudentsCount: st.assignedStudentsCount,
-                    lastCallDate: st.lastCallDate ?? null,
-                    lastVisitDate: st.lastVisitDate ?? null,
-                  };
-                });
-                this.applyClientSideSort();
-                this.loading = false;
-              },
-              error: () => (this.loading = false),
-            });
-          } else {
-            this.servantStatsMap = {};
-            this.applyClientSideSort();
-            this.loading = false;
-          }
+          this.loading = false;
         },
         error: () => (this.loading = false),
       });
-  }
-
-  private applyClientSideSort() {
-    if (this.isServerSortColumn(this.sortBy ?? '')) return;
-    const col = (this.sortBy ?? '').toLowerCase();
-    const desc = this.sortDesc;
-    const map = this.servantStatsMap;
-    this.servants = [...this.servants].sort((a, b) => {
-      let cmp = 0;
-      if (col === 'assignedstudentscount') {
-        const va = map[a.id]?.assignedStudentsCount ?? -1;
-        const vb = map[b.id]?.assignedStudentsCount ?? -1;
-        cmp = va - vb;
-      } else if (col === 'lastcalldate') {
-        const va = map[a.id]?.lastCallDate ?? '';
-        const vb = map[b.id]?.lastCallDate ?? '';
-        cmp = (va || '').localeCompare(vb || '');
-      } else if (col === 'lastvisitdate') {
-        const va = map[a.id]?.lastVisitDate ?? '';
-        const vb = map[b.id]?.lastVisitDate ?? '';
-        cmp = (va || '').localeCompare(vb || '');
-      } else if (col === 'role') {
-        cmp = (a.role || '').localeCompare(b.role || '');
-      } else return 0;
-      return desc ? -cmp : cmp;
-    });
   }
 
   roleLabel(role: string): string {
@@ -233,7 +178,7 @@ export class ServantListComponent implements OnInit {
     this.onPageSizeChange();
   }
 
-  toggleServantStatus(servant: User) {
+  toggleServantStatus(servant: ServantWithStats) {
     this.usersService.toggleStatus(servant.id).subscribe(() => {
       servant.isActive = !servant.isActive;
     });
@@ -318,7 +263,7 @@ export class ServantListComponent implements OnInit {
     this.newServantPhoto = null;
   }
 
-  openEdit(s: User) {
+  openEdit(s: ServantWithStats) {
     this.editingServant = s;
     this.editForm = { fullName: s.fullName || '', phone: s.phone || '', isActive: s.isActive, role: s.role ?? 'Servant' };
     this.editServantPhoto = null;
@@ -338,7 +283,7 @@ export class ServantListComponent implements OnInit {
     }
     this.usersService.getPaged({ page: 1, pageSize: 10, role: 'Priest' }).subscribe({
       next: (r) => {
-        this.priestOptionDisabledInEdit = r.items.some((u: User) => u.id !== s.id);
+        this.priestOptionDisabledInEdit = r.items.some((u: { id: string }) => u.id !== s.id);
       },
     });
     this.showEditModal = true;
@@ -384,7 +329,7 @@ export class ServantListComponent implements OnInit {
     });
   }
 
-  deleteServant(s: User) {
+  deleteServant(s: ServantWithStats) {
     if (!confirm(`حذف الخادم «${s.fullName}»؟ لا يمكن التراجع.`)) return;
     this.usersService.delete(s.id).subscribe({
       next: () => this.loadServants(),

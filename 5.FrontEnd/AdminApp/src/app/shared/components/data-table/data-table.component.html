@@ -10,7 +10,11 @@
           <thead>
             <tr>
               @for (col of columns(); track trackByKey($index, col)) {
-                @if (col.sortable) {
+                @if (col.headerTemplate) {
+                  <th class="header-custom">
+                    <ng-container [ngTemplateOutlet]="col.headerTemplate" />
+                  </th>
+                } @else if (col.sortable) {
                   <th
                     class="sortable"
                     (click)="onSort(col.key)"
@@ -37,7 +41,7 @@
                 (click)="rowClickable() && rowClick.emit(row)"
               >
                 @for (col of columns(); track trackByKey($index, col)) {
-                  <td (click)="$event.stopPropagation()">
+                  <td>
                     @if (col.template) {
                       <ng-container
                         [ngTemplateOutlet]="col.template"

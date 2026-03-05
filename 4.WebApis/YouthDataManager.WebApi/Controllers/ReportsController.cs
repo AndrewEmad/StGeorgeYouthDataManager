@@ -62,6 +62,15 @@ public class ReportsController : ControllerBase
         return Ok(result.Data);
     }
 
+    [HttpGet("servants-paged-with-stats")]
+    public async Task<IActionResult> GetServantsPagedWithStats([FromQuery] int page = 1, [FromQuery] int pageSize = 50, [FromQuery] string? search = null, [FromQuery] string? role = null, [FromQuery] bool? isActive = null, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
+    {
+        if (pageSize > 50) pageSize = 50;
+        var result = await _service.GetServantsPagedWithStats(page, pageSize, search, role, isActive, sortBy, sortDesc);
+        if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
+        return Ok(result.Data);
+    }
+
     [HttpGet("export/students")]
     public async Task<IActionResult> ExportStudents([FromQuery] ReportRequestDto filter)
     {

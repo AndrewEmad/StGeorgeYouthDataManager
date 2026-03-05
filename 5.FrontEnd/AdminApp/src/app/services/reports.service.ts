@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { PagedResult } from '../shared/models';
-import { ServantPerformance, ServantActivitySummary, StudentNoContact, StudentsByGroup } from '../shared/models/report.model';
+import { ServantPerformance, ServantActivitySummary, StudentNoContact, StudentsByGroup, ServantWithStats } from '../shared/models/report.model';
 
 @Injectable({
   providedIn: 'root',
@@ -40,6 +40,26 @@ export class ReportsService {
     if (!servantIds.length) return this.http.get<any[]>(`${this.apiUrl}/servant-stats`);
     const params = servantIds.map((id) => `ids=${encodeURIComponent(id)}`).join('&');
     return this.http.get<any[]>(`${this.apiUrl}/servant-stats?${params}`);
+  }
+
+  getServantsPagedWithStats(params: {
+    page: number;
+    pageSize: number;
+    search?: string;
+    role?: string;
+    isActive?: boolean | null;
+    sortBy?: string | null;
+    sortDesc?: boolean;
+  }): Observable<PagedResult<ServantWithStats>> {
+    const q = new URLSearchParams();
+    q.set('page', String(params.page));
+    q.set('pageSize', String(params.pageSize));
+    if (params.search) q.set('search', params.search);
+    if (params.role) q.set('role', params.role);
+    if (params.isActive !== undefined && params.isActive !== null) q.set('isActive', String(params.isActive));
+    if (params.sortBy) q.set('sortBy', params.sortBy);
+    if (params.sortDesc != null) q.set('sortDesc', String(params.sortDesc));
+    return this.http.get<PagedResult<ServantWithStats>>(`${this.apiUrl}/servants-paged-with-stats?${q.toString()}`);
   }
 
   exportStudents(filter: any): Observable<Blob> {

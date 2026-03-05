@@ -6,6 +6,8 @@ export interface DataTableColumn<T = unknown> {
   sortable?: boolean;
   /** Optional: 'date' uses DateFormatPipe, 'month' uses MonthNamePipe for display */
   format?: 'date' | 'month';
+  /** Optional template for header content (e.g. checkbox for select all). Rendered in parent context. */
+  headerTemplate?: TemplateRef<unknown>;
   /** Optional template for cell content. Receives row and value. */
   template?: TemplateRef<{ $implicit: T; value: unknown }>;
 }

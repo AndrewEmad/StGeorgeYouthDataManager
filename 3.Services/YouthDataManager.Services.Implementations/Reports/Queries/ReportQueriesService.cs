@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using YouthDataManager.Domain.Entities;
 using YouthDataManager.Domain.Repositories.NoTracking;
+using YouthDataManager.Domain.Utilities;
 using YouthDataManager.Reports.Service.Abstractions.Data;
 using YouthDataManager.Reports.Service.Abstractions.DTOs;
 using YouthDataManager.Reports.Service.Abstractions.Queries;
@@ -183,6 +185,104 @@ public class ReportQueriesService : IReportQueriesService
         {
             _logger.LogError(ex, "Error getting servant stats");
             return ServiceResult<IEnumerable<ServantStatsDto>>.Failure("An error occurred while loading servant stats.");
+        }
+    }
+
+    public async Task<ServiceResult<PagedReportResult<ServantWithStatsDto>>> GetServantsPagedWithStats(int page, int pageSize, string? search = null, string? role = null, bool? isActive = null, string? sortBy = null, bool? sortDesc = null)
+    {
+        try
+        {
+            if (page < 1) page = 1;
+            if (pageSize > 50) pageSize = 50;
+            if (pageSize < 1) pageSize = 10;
+
+            var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
+            var adminIds = adminUsers.Select(u => u.Id).ToList();
+            var query = _userManager.Users.AsQueryable().Where(u => !adminIds.Contains(u.Id));
+
+            if (role != "Priest")
+            {
+                var priestUsers = await _userManager.GetUsersInRoleAsync("Priest");
+                var priestIds = priestUsers.Select(u => u.Id).ToList();
+                query = query.Where(u => !priestIds.Contains(u.Id));
+            }
+
+            if (!string.IsNullOrWhiteSpace(role))
+            {
+                var roleUsers = await _userManager.GetUsersInRoleAsync(role);
+                var roleIds = roleUsers.Select(u => u.Id).ToList();
+                query = query.Where(u => roleIds.Contains(u.Id));
+            }
+
+            var searchTrim = search?.Trim();
+            if (!string.IsNullOrEmpty(searchTrim))
+            {
+                var normalized = ArabicNormalizer.Normalize(searchTrim);
+                query = query.Where(u =>
+                    (u.NormalizedFullName != null && u.NormalizedFullName.Contains(normalized)) ||
+                    (u.UserName != null && u.UserName.Contains(searchTrim)) ||
+                    (u.Phone != null && u.Phone.Contains(searchTrim)));
+            }
+
+            if (isActive.HasValue)
+                query = query.Where(u => u.IsActive == isActive.Value);
+
+            var users = await query.ToListAsync();
+            var totalCount = users.Count;
+
+            var ids = users.Select(u => u.Id).ToList();
+            var statsResult = await GetServantStats(ids);
+            var statsList = statsResult.Data?.ToList() ?? new List<ServantStatsDto>();
+            var statsMap = statsList.ToDictionary(s => s.ServantId, s => s);
+
+            var combined = new List<ServantWithStatsDto>();
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                var userRole = roles.FirstOrDefault() ?? "Unknown";
+                var st = statsMap.GetValueOrDefault(user.Id);
+                combined.Add(new ServantWithStatsDto(
+                    user.Id,
+                    user.UserName ?? "",
+                    user.FullName ?? "",
+                    user.Email ?? "",
+                    user.Phone,
+                    userRole,
+                    user.IsActive,
+                    user.CreatedAt,
+                    user.UpdatedAt,
+                    user.PhotoPath,
+                    user.Address,
+                    st?.AssignedStudentsCount ?? 0,
+                    st?.LastCallDate,
+                    st?.LastVisitDate
+                ));
+            }
+
+            var sortKey = (sortBy ?? "fullname").Trim().ToLowerInvariant();
+            var desc = sortDesc ?? false;
+            var ordered = sortKey == "username"
+                ? (desc ? combined.OrderByDescending(x => x.UserName).ThenBy(x => x.FullName) : combined.OrderBy(x => x.UserName).ThenBy(x => x.FullName))
+                : sortKey == "role"
+                ? (desc ? combined.OrderByDescending(x => x.Role).ThenBy(x => x.FullName) : combined.OrderBy(x => x.Role).ThenBy(x => x.FullName))
+                : sortKey == "isactive"
+                ? (desc ? combined.OrderByDescending(x => x.IsActive).ThenBy(x => x.FullName) : combined.OrderBy(x => x.IsActive).ThenBy(x => x.FullName))
+                : sortKey == "assignedstudentscount"
+                ? (desc ? combined.OrderByDescending(x => x.AssignedStudentsCount).ThenBy(x => x.FullName) : combined.OrderBy(x => x.AssignedStudentsCount).ThenBy(x => x.FullName))
+                : sortKey == "lastcalldate"
+                ? (desc ? combined.OrderByDescending(x => x.LastCallDate ?? DateTime.MinValue).ThenBy(x => x.FullName) : combined.OrderBy(x => x.LastCallDate ?? DateTime.MinValue).ThenBy(x => x.FullName))
+                : sortKey == "lastvisitdate"
+                ? (desc ? combined.OrderByDescending(x => x.LastVisitDate ?? DateTime.MinValue).ThenBy(x => x.FullName) : combined.OrderBy(x => x.LastVisitDate ?? DateTime.MinValue).ThenBy(x => x.FullName))
+                : (desc ? combined.OrderByDescending(x => x.FullName) : combined.OrderBy(x => x.FullName));
+
+            var pagedItems = ordered.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            var paged = new PagedReportResult<ServantWithStatsDto>(pagedItems, totalCount, page, pageSize);
+            return ServiceResult<PagedReportResult<ServantWithStatsDto>>.Success(paged);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting servants paged with stats");
+            return ServiceResult<PagedReportResult<ServantWithStatsDto>>.Failure("An error occurred while loading servants list.");
         }
     }
 

@@ -1,3 +1,7 @@
+<ng-template #callStatusCell let-value="value">{{ value | callStatus }}</ng-template>
+<ng-template #visitOutcomeCell let-value="value">{{ value | visitOutcome }}</ng-template>
+<ng-template #participantsCell let-value="value">{{ formatParticipants(value) }}</ng-template>
+
 <div class="animate-slide student-detail">
   <app-content-header
     backLink="/dashboard/students"
@@ -39,87 +43,37 @@
 
     @if (editHistory().length) {
       <app-detail-section title="سجل التعديلات">
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>التاريخ</th>
-                <th>من قام بالتعديل</th>
-                <th>التفاصيل</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (e of editHistory(); track e.id) {
-                <tr>
-                  <td>{{ e.updatedAt | dateFormat }}</td>
-                  <td>{{ e.updatedByUserName }}</td>
-                  <td>{{ e.details }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+        <admin-data-table
+          [columns]="editHistoryColumns"
+          [data]="editHistory()"
+          [loading]="false"
+          [totalCount]="0"
+          [rowClickable]="false"
+          emptyMessage="لا سجل تعديلات"
+        />
       </app-detail-section>
     }
 
     <app-detail-section title="سجل المتابعة الهاتفية">
-      <div class="table-wrap">
-        @if (calls().length) {
-          <table>
-            <thead>
-              <tr>
-                <th>التاريخ</th>
-                <th>الحالة</th>
-                <th>ملاحظات</th>
-                <th>متابعة قادمة</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (c of calls(); track c.id) {
-                <tr>
-                  <td>{{ c.callDate | dateFormat }}</td>
-                  <td>{{ c.callStatus | callStatus }}</td>
-                  <td>{{ c.notes || '—' }}</td>
-                  <td>{{ c.nextFollowUpDate | dateFormat }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        } @else {
-          <p class="muted">لا توجد مكالمات مسجلة</p>
-        }
-      </div>
+      <admin-data-table
+        [columns]="callsColumns()"
+        [data]="calls()"
+        [loading]="false"
+        [totalCount]="0"
+        [rowClickable]="false"
+        emptyMessage="لا توجد مكالمات مسجلة"
+      />
     </app-detail-section>
 
     <app-detail-section title="سجل الزيارات المنزلية">
-      <div class="table-wrap">
-        @if (visits().length) {
-          <table>
-            <thead>
-              <tr>
-                <th>التاريخ</th>
-                <th>النتيجة</th>
-                <th>المرافقين</th>
-                <th>ملاحظات</th>
-                <th>زيارة قادمة</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (v of visits(); track v.id) {
-                <tr>
-                  <td>{{ v.visitDate | dateFormat }}</td>
-                  <td>{{ v.visitOutcome | visitOutcome }}</td>
-                  <td>{{ formatParticipants(v.participants) }}</td>
-                  <td>{{ v.notes || '—' }}</td>
-                  <td>{{ v.nextVisitDate | dateFormat }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        } @else {
-          <p class="muted">لا توجد زيارات مسجلة</p>
-        }
-      </div>
+      <admin-data-table
+        [columns]="visitsColumns()"
+        [data]="visits()"
+        [loading]="false"
+        [totalCount]="0"
+        [rowClickable]="false"
+        emptyMessage="لا توجد زيارات مسجلة"
+      />
     </app-detail-section>
   </div>
   }

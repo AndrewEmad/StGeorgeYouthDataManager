@@ -67,7 +67,7 @@
           }
           @for (u of servantList(); track u.id) {
             <label class="list-item">
-              <input type="checkbox" [checked]="selectedServantIds().has(u.id ?? '')" (change)="toggleServant(u.id ?? '', u.fullName)" />
+              <input type="checkbox" [checked]="selectedServantIds().has(u?.id ?? '')" (change)="toggleServant(u?.id ?? '', u?.fullName ?? '')" />
               <span>{{ u.fullName }}</span>
             </label>
           }

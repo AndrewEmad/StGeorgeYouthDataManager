@@ -96,11 +96,14 @@
   gap: 8px;
 }
 
-.col-checkbox {
+.col-checkbox,
+.table-container .header-custom,
+.table-container .data-table td:first-child {
   width: 44px;
   text-align: center;
 }
-.col-checkbox input[type='checkbox'] {
+.col-checkbox input[type='checkbox'],
+.col-checkbox-input {
   cursor: pointer;
 }
 

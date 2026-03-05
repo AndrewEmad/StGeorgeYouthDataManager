@@ -56,9 +56,9 @@
           <td>
             <span class="badge" [class.manager]="s.role === 'Manager'" [class.priest]="s.role === 'Priest'">{{ roleLabel(s.role) }}</span>
           </td>
-          <td>{{ servantStatsMap[s.id]?.assignedStudentsCount ?? '—' }}</td>
-          <td>{{ servantStatsMap[s.id]?.lastCallDate ? (servantStatsMap[s.id].lastCallDate | dateFormat) : '—' }}</td>
-          <td>{{ servantStatsMap[s.id]?.lastVisitDate ? (servantStatsMap[s.id].lastVisitDate | dateFormat) : '—' }}</td>
+          <td>{{ s.assignedStudentsCount }}</td>
+          <td>{{ s.lastCallDate ? (s.lastCallDate | dateFormat) : '—' }}</td>
+          <td>{{ s.lastVisitDate ? (s.lastVisitDate | dateFormat) : '—' }}</td>
           <td>
             <span class="status-dot" [class.active]="s.isActive"></span>
             {{ s.isActive ? 'نشط' : 'متوقف' }}

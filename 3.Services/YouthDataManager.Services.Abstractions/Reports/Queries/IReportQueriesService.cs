@@ -13,7 +13,8 @@ public interface IReportQueriesService
     Task<ServiceResult<PagedReportResult<ServantPerformanceDto>>> GetServantPerformancesPaged(int page, int pageSize, string? sortBy = null, bool? sortDesc = null);
     Task<ServiceResult<ServantPerformanceDto>> GetServantPerformance(Guid servantId);
     Task<ServiceResult<IEnumerable<ServantStatsDto>>> GetServantStats(IEnumerable<Guid> servantIds);
-    
+    Task<ServiceResult<PagedReportResult<ServantWithStatsDto>>> GetServantsPagedWithStats(int page, int pageSize, string? search = null, string? role = null, bool? isActive = null, string? sortBy = null, bool? sortDesc = null);
+
     Task<ServiceResult<byte[]>> ExportStudentsExcel(ReportRequestDto filter);
     Task<ServiceResult<byte[]>> ExportCallsExcel(ReportRequestDto filter);
     Task<ServiceResult<byte[]>> ExportVisitsExcel(ReportRequestDto filter);

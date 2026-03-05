@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, viewChild, TemplateRef, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -12,11 +12,23 @@ import {
   FiltersBarComponent,
   FormFieldComponent,
   LoaderComponent,
-  PaginationComponent,
   PhotoCropModalComponent,
   ProfilePhotoInputComponent,
 } from '../../common/common';
-import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
+import { DataTableComponent } from '../../../shared/components/data-table/data-table.component';
+import type { DataTableColumn } from '../../../shared/components/data-table/data-table-column';
+
+/** Shape of a student row in the list (from getPaged) */
+interface StudentListItem {
+  id: string;
+  fullName: string;
+  academicYear?: string | null;
+  servantName?: string | null;
+  servantId?: string | null;
+  lastFollowUpDate?: string | null;
+  lastAttendanceDate?: string | null;
+  lastFollowUpNote?: string | null;
+}
 
 @Component({
   selector: 'app-student-list-admin',
@@ -28,16 +40,15 @@ import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
     FiltersBarComponent,
     FormFieldComponent,
     LoaderComponent,
-    PaginationComponent,
     PhotoCropModalComponent,
     ProfilePhotoInputComponent,
-    DateFormatPipe,
+    DataTableComponent,
   ],
   templateUrl: './student-list-admin.html',
   styleUrls: ['./student-list-admin.css'],
 })
-export class StudentListAdminComponent implements OnInit {
-  students: any[] = [];
+export class StudentListAdminComponent implements OnInit, AfterViewInit {
+  students: StudentListItem[] = [];
   totalCount = 0;
   page = 1;
   pageSize = 10;
@@ -116,6 +127,13 @@ export class StudentListAdminComponent implements OnInit {
   pendingCropFile: File | null = null;
   cropTarget: 'new' | 'editStudent' | null = null;
 
+  studentColumns = signal<DataTableColumn<StudentListItem>[]>([]);
+  private selectAllHeaderTpl = viewChild<TemplateRef<unknown>>('selectAllHeader');
+  private rowCheckboxTpl = viewChild<TemplateRef<{ $implicit: StudentListItem; value: unknown }>>('rowCheckbox');
+  private servantNameCellTpl = viewChild<TemplateRef<{ $implicit: StudentListItem; value: unknown }>>('servantNameCell');
+  private lastNoteCellTpl = viewChild<TemplateRef<{ $implicit: StudentListItem; value: unknown }>>('lastNoteCell');
+  rowActionsTpl = viewChild<TemplateRef<{ $implicit: StudentListItem }>>('rowActionsTemplate');
+
   constructor(
     private studentQueries: StudentQueriesService,
     private studentCommands: StudentCommandsService,
@@ -123,6 +141,42 @@ export class StudentListAdminComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
   ) {}
+
+  ngAfterViewInit(): void {
+    const selectAll = this.selectAllHeaderTpl();
+    const rowCb = this.rowCheckboxTpl();
+    const servantTpl = this.servantNameCellTpl();
+    const noteTpl = this.lastNoteCellTpl();
+    const actionsTpl = this.rowActionsTpl();
+    const cols: DataTableColumn<StudentListItem>[] = [];
+    if (selectAll && rowCb) {
+      cols.push({
+        key: 'id',
+        header: '',
+        headerTemplate: selectAll,
+        template: rowCb,
+      });
+    }
+    cols.push(
+      { key: 'fullName', header: 'اسم المخدوم', sortable: true },
+      { key: 'academicYear', header: 'السنة الدراسية', sortable: true },
+    );
+    if (servantTpl) {
+      cols.push({ key: 'servantName', header: 'الخادم الحالي', sortable: true, template: servantTpl });
+    } else {
+      cols.push({ key: 'servantName', header: 'الخادم الحالي', sortable: true });
+    }
+    cols.push(
+      { key: 'lastFollowUpDate', header: 'آخر متابعة', sortable: true, format: 'date' },
+      { key: 'lastAttendanceDate', header: 'آخر حضور', sortable: true, format: 'date' },
+    );
+    if (noteTpl) {
+      cols.push({ key: 'lastFollowUpNote', header: 'آخر ملاحظة', template: noteTpl });
+    } else {
+      cols.push({ key: 'lastFollowUpNote', header: 'آخر ملاحظة' });
+    }
+    this.studentColumns.set(cols);
+  }
 
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
@@ -242,6 +296,13 @@ export class StudentListAdminComponent implements OnInit {
       this.sortBy = column;
       this.sortDesc = false;
     }
+    this.page = 1;
+    this.loadData();
+  }
+
+  onSortChange(event: { column: string; desc: boolean }) {
+    this.sortBy = event.column;
+    this.sortDesc = event.desc;
     this.page = 1;
     this.loadData();
   }

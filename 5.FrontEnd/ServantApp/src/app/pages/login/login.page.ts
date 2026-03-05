@@ -1,42 +1,44 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { ReminderService } from '../../services/reminder.service';
-import { CardComponent } from '../../components/common/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AuthService } from '../../core/services/auth.service';
+import { CardComponent } from '../../shared/components';
 
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, CardComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CardComponent],
   templateUrl: './login.page.html',
-  styleUrls: ['./login.page.css']
+  styleUrls: ['./login.page.css'],
 })
 export class LoginPage {
-  username = '';
-  password = '';
-  error = '';
-  loading = false;
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    private reminderService: ReminderService
-  ) {}
+  readonly username = signal('');
+  readonly password = signal('');
+  readonly error = signal('');
+  readonly loading = signal(false);
 
-  onSubmit() {
-    if (!this.username || !this.password) return;
-    this.loading = true;
-    this.error = '';
-    this.authService.login({ username: this.username, password: this.password }).subscribe({
-      next: (res) => {
-        this.router.navigate(res.requiresPasswordChange ? ['/change-password'] : ['/dashboard']);
-      },
-      error: () => {
-        this.error = 'اسم المستخدم أو كلمة المرور غير صحيحة';
-        this.loading = false;
-      }
-    });
+  onSubmit(): void {
+    const u = this.username().trim();
+    const p = this.password();
+    if (!u || !p) return;
+    this.loading.set(true);
+    this.error.set('');
+    this.authService
+      .login({ username: u, password: p })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.router.navigate(res.requiresPasswordChange ? ['/change-password'] : ['/dashboard']);
+        },
+        error: () => {
+          this.error.set('اسم المستخدم أو كلمة المرور غير صحيحة');
+          this.loading.set(false);
+        },
+      });
   }
 }

@@ -1,0 +1,24 @@
+<servant-form-field-wrapper
+  [label]="label()"
+  [controlId]="id()"
+  [required]="required()"
+  [error]="error()"
+  [hint]="hint()"
+  [invalid]="!!error()">
+  <div class="file-upload-wrap">
+    <input
+      type="file"
+      [id]="id()"
+      [accept]="accept()"
+      [disabled]="disabled()"
+      [multiple]="multiple()"
+      [attr.aria-invalid]="error() ? 'true' : null"
+      [attr.aria-describedby]="error() ? id() + '-error' : (hint() ? id() + '-hint' : null)"
+      (input)="onInput($event)"
+      (blur)="onBlur()"
+      class="file-input" />
+    @if (fileNames()) {
+      <span class="file-names">{{ fileNames() }}</span>
+    }
+  </div>
+</servant-form-field-wrapper>

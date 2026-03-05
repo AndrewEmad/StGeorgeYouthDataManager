@@ -1,0 +1,88 @@
+<div class="filter-section" [class.collapsed]="collapsed()">
+  <button type="button" class="filter-header" (click)="toggle()" [attr.aria-expanded]="!collapsed()">
+    <h3 class="filter-title">{{ filterTitle() }}</h3>
+    <span class="material-icons filter-toggle-icon">{{ collapsed() ? 'expand_more' : 'expand_less' }}</span>
+  </button>
+  @if (!collapsed() && form(); as f) {
+    <div class="filter-body">
+      <div class="filter-fields" [formGroup]="f">
+        @for (field of fields(); track field.key) {
+          @switch (field.type) {
+            @case ('text') {
+              <div class="filter-field">
+                <servant-text-input
+                  [formControlName]="field.key"
+                  [label]="field.label"
+                  [controlId]="field.key"
+                  [placeholder]="field.placeholder ?? ''" />
+              </div>
+            }
+            @case ('select') {
+              <div class="filter-field">
+                @if (field.options?.length) {
+                  <servant-select
+                    [formControlName]="field.key"
+                    [label]="field.label"
+                    [controlId]="field.key"
+                    [options]="field.options ?? []"
+                    [placeholder]="field.placeholder ?? 'الكل'" />
+                }
+              </div>
+            }
+            @case ('date') {
+              <div class="filter-field">
+                <servant-date-picker
+                  [formControlName]="field.key"
+                  [label]="field.label"
+                  [controlId]="field.key"
+                  mode="date"
+                  [required]="false" />
+              </div>
+            }
+            @case ('date-range') {
+              <div class="filter-field filter-field-date-range">
+                <label class="filter-label">{{ field.label }}</label>
+                <div class="date-range-inputs">
+                  <servant-date-picker
+                    [formControlName]="field.key + '_from'"
+                    label="من"
+                    [controlId]="field.key + '_from'"
+                    mode="date" />
+                  <servant-date-picker
+                    [formControlName]="field.key + '_to'"
+                    label="إلى"
+                    [controlId]="field.key + '_to'"
+                    mode="date" />
+                </div>
+              </div>
+            }
+            @case ('multi-select') {
+              <div class="filter-field">
+                @if (field.options?.length) {
+                  <label class="filter-label">{{ field.label }}</label>
+                  <div class="multi-select-options">
+                    @for (opt of field.options; track opt.value) {
+                      <label class="multi-select-option">
+                        <input
+                          type="checkbox"
+                          [checked]="isMultiSelected(field.key, opt.value)"
+                          (change)="toggleMultiSelect(field.key, opt.value)"
+                          class="multi-select-checkbox" />
+                        <span>{{ opt.label }}</span>
+                      </label>
+                    }
+                  </div>
+                }
+              </div>
+            }
+            @default {}
+          }
+        }
+      </div>
+      <div class="filter-actions">
+        <button type="button" class="btn-primary sm" (click)="apply()">تطبيق</button>
+        <button type="button" class="btn-outline sm" (click)="reset()">مسح الفلاتر</button>
+      </div>
+    </div>
+  }
+</div>

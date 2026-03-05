@@ -1,126 +1,130 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { StudentQueriesService } from '../../services/student-queries.service';
 import { AssignmentRequestService } from '../../services/assignment-request.service';
-import { AuthService } from '../../services/auth.service';
-import { RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { LoaderComponent, EmptyStateComponent } from '../common/common';
-
-export interface ServantStudentItem {
-  student: any;
-  segment: string;
-}
+import { AuthService } from '../../core/services/auth.service';
+import { LoaderComponent, EmptyStateComponent } from '../../shared/components';
+import type { ServantStudentItem } from '../../shared/models/student.model';
+import { GENDER_OPTIONS } from '../../shared/models/student.model';
 
 @Component({
   selector: 'app-student-list',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, LoaderComponent, EmptyStateComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [DatePipe, RouterLink, LoaderComponent, EmptyStateComponent],
   templateUrl: './student-list.html',
-  styleUrls: ['./student-list.css']
+  styleUrls: ['./student-list.css'],
 })
-export class StudentListComponent implements OnInit {
-  items: ServantStudentItem[] = [];
-  totalCount = 0;
-  page = 1;
-  pageSize = 20;
-  searchTerm = '';
-  filterArea = '';
-  filterAcademicYear = '';
-  filterGender: number | null = null;
-  areas: string[] = [];
-  academicYears: string[] = [];
-  loading = true;
-  requestingId: string | null = null;
-  readonly genderOptions: { value: number; label: string }[] = [
-    { value: 0, label: 'ذكر' },
-    { value: 1, label: 'أنثى' }
-  ];
+export class StudentListComponent {
+  private readonly studentQueriesService = inject(StudentQueriesService);
+  private readonly assignmentRequestService = inject(AssignmentRequestService);
+  private readonly authService = inject(AuthService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  constructor(
-    private studentQueriesService: StudentQueriesService,
-    private assignmentRequestService: AssignmentRequestService,
-    private authService: AuthService
-  ) {}
+  readonly items = signal<ServantStudentItem[]>([]);
+  readonly totalCount = signal(0);
+  readonly page = signal(1);
+  readonly pageSize = signal(20);
+  readonly searchTerm = signal('');
+  readonly filterArea = signal('');
+  readonly filterAcademicYear = signal('');
+  readonly filterGender = signal<number | null>(null);
+  readonly areas = signal<string[]>([]);
+  readonly academicYears = signal<string[]>([]);
+  readonly loading = signal(true);
+  readonly requestingId = signal<string | null>(null);
 
-  get currentUserId(): string | null {
-    return this.authService.currentUser()?.userId ?? null;
-  }
+  readonly genderOptions = GENDER_OPTIONS;
+  readonly currentUserId = computed(() => this.authService.currentUser()?.userId ?? null);
+  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalCount() / this.pageSize())));
 
-  get totalPages(): number {
-    return Math.max(1, Math.ceil(this.totalCount / this.pageSize));
-  }
-
-  ngOnInit() {
-    this.studentQueriesService.getDistinctAreas().subscribe({ next: (r) => { this.areas = Array.isArray(r) ? r : []; } });
-    this.studentQueriesService.getDistinctAcademicYears().subscribe({ next: (r) => { this.academicYears = Array.isArray(r) ? r : []; } });
+  constructor() {
+    this.studentQueriesService
+      .getDistinctAreas()
+      .pipe(takeUntilDestroyed())
+      .subscribe({ next: (r) => this.areas.set(Array.isArray(r) ? r : []) });
+    this.studentQueriesService
+      .getDistinctAcademicYears()
+      .pipe(takeUntilDestroyed())
+      .subscribe({ next: (r) => this.academicYears.set(Array.isArray(r) ? r : []) });
     this.loadPage();
   }
 
-  loadPage() {
-    const userId = this.currentUserId;
+  loadPage(): void {
+    const userId = this.currentUserId();
     if (!userId) {
-      this.items = [];
-      this.totalCount = 0;
-      this.loading = false;
+      this.items.set([]);
+      this.totalCount.set(0);
+      this.loading.set(false);
       return;
     }
-    this.loading = true;
-    this.studentQueriesService.getPagedForServant({
-      page: this.page,
-      pageSize: this.pageSize,
-      search: this.searchTerm.trim() || undefined,
-      area: this.filterArea.trim() || undefined,
-      academicYear: this.filterAcademicYear.trim() || undefined,
-      gender: this.filterGender ?? undefined
-    }).subscribe({
-      next: (res) => {
-        this.items = res.items ?? [];
-        this.totalCount = res.totalCount ?? 0;
-        this.page = res.page ?? this.page;
-        this.pageSize = res.pageSize ?? this.pageSize;
-        this.loading = false;
-      },
-      error: () => {
-        this.items = [];
-        this.totalCount = 0;
-        this.loading = false;
-      }
-    });
+    this.loading.set(true);
+    this.studentQueriesService
+      .getPagedForServant({
+        page: this.page(),
+        pageSize: this.pageSize(),
+        search: this.searchTerm().trim() || undefined,
+        area: this.filterArea().trim() || undefined,
+        academicYear: this.filterAcademicYear().trim() || undefined,
+        gender: this.filterGender() ?? undefined,
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.items.set(res.items ?? []);
+          this.totalCount.set(res.totalCount ?? 0);
+          this.page.set(res.page ?? this.page());
+          this.pageSize.set(res.pageSize ?? this.pageSize());
+          this.loading.set(false);
+        },
+        error: () => {
+          this.items.set([]);
+          this.totalCount.set(0);
+          this.loading.set(false);
+        },
+      });
   }
 
-  onApplyFilters() {
-    this.page = 1;
+  onApplyFilters(): void {
+    this.page.set(1);
     this.loadPage();
   }
 
-  clearFilters() {
-    this.searchTerm = '';
-    this.filterArea = '';
-    this.filterAcademicYear = '';
-    this.filterGender = null;
-    this.page = 1;
+  clearFilters(): void {
+    this.searchTerm.set('');
+    this.filterArea.set('');
+    this.filterAcademicYear.set('');
+    this.filterGender.set(null);
+    this.page.set(1);
     this.loadPage();
   }
 
-  goToPage(p: number) {
-    if (p < 1 || p > this.totalPages) return;
-    this.page = p;
+  goToPage(p: number): void {
+    if (p < 1 || p > this.totalPages()) return;
+    this.page.set(p);
     this.loadPage();
   }
 
-  requestAssignToMe(item: ServantStudentItem) {
+  requestAssignToMe(item: ServantStudentItem): void {
     const student = item.student;
-    if (!student?.id || this.requestingId || item.segment !== 'Unassigned') return;
-    this.requestingId = student.id;
-    this.assignmentRequestService.create(student.id).subscribe({
-      next: () => {
-        const idx = this.items.findIndex(i => i.student?.id === student.id);
-        if (idx !== -1) this.items = this.items.slice(0, idx).concat([{ student, segment: 'Requested' }], this.items.slice(idx + 1));
-        this.requestingId = null;
-      },
-      error: () => { this.requestingId = null; }
-    });
+    if (!student?.id || this.requestingId() || item.segment !== 'Unassigned') return;
+    this.requestingId.set(student.id);
+    this.assignmentRequestService
+      .create(student.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          const idx = this.items().findIndex((i) => i.student?.id === student.id);
+          if (idx !== -1)
+            this.items.update((list) =>
+              list.slice(0, idx).concat([{ student, segment: 'Requested' }], list.slice(idx + 1))
+            );
+          this.requestingId.set(null);
+        },
+        error: () => this.requestingId.set(null),
+      });
   }
 
   getWaMeUrl(phone: string): string {
@@ -128,5 +132,4 @@ export class StudentListComponent implements OnInit {
     if (!digits) return '#';
     return `https://wa.me/2${digits}`;
   }
-
 }

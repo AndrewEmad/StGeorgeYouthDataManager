@@ -1,0 +1,20 @@
+<servant-form-field-wrapper
+  [label]="label()"
+  [controlId]="id()"
+  [required]="required()"
+  [error]="error()"
+  [hint]="hint()"
+  [invalid]="!!error()">
+  <textarea
+    [id]="id()"
+    [value]="value()"
+    [placeholder]="placeholder()"
+    [disabled]="disabled()"
+    [rows]="rows()"
+    [attr.maxlength]="maxLength() ?? undefined"
+    [attr.aria-invalid]="error() ? 'true' : null"
+    [attr.aria-describedby]="error() ? id() + '-error' : (hint() ? id() + '-hint' : null)"
+    (input)="onInput($event)"
+    (blur)="onBlur()"
+    class="form-input textarea-input"></textarea>
+</servant-form-field-wrapper>

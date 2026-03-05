@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { StudentAdditionRequestService, CreateStudentAdditionRequestDto } from '../../services/student-addition-request.service';
-import { CardComponent } from '../../components/common/common';
+import { CardComponent } from '../../shared/components';
 
 @Component({
   selector: 'app-request-add-student-page',

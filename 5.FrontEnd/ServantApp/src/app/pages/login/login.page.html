@@ -1,5 +1,5 @@
 <div class="login-container">
-  <app-card class="login-card" [class]="'login-card animate-fade'">
+  <app-card class="login-card animate-fade">
     <div class="login-header">
       <div class="logo">
         <span class="material-icons logo-icon">group</span>
@@ -8,24 +8,24 @@
       <p class="text-muted">نظام إدارة بيانات وخدمة الشباب</p>
     </div>
 
-    <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+    <form (submit)="onSubmit(); $event.preventDefault()">
       <div class="form-group">
         <label>اسم المستخدم</label>
-        <input type="text" [(ngModel)]="username" name="username" class="form-input" placeholder="أدخل اسم المستخدم" required />
+        <input type="text" [value]="username()" (input)="username.set($any($event.target).value)" name="username" class="form-input" placeholder="أدخل اسم المستخدم" required />
       </div>
       <div class="form-group">
         <label>كلمة المرور</label>
-        <input type="password" [(ngModel)]="password" name="password" class="form-input" placeholder="أدخل كلمة المرور" required />
+        <input type="password" [value]="password()" (input)="password.set($any($event.target).value)" name="password" class="form-input" placeholder="أدخل كلمة المرور" required />
       </div>
-      @if (error) {
+      @if (error()) {
         <div class="error-msg animate-fade">
           <span class="material-icons">error_outline</span>
-          {{ error }}
+          {{ error() }}
         </div>
       }
-      <button type="submit" class="btn-primary" [disabled]="loading">
-        @if (!loading) { تسجيل الدخول }
-        @if (loading) { <span class="spinner"></span> }
+      <button type="submit" class="btn-primary" [disabled]="loading()">
+        @if (!loading()) { تسجيل الدخول }
+        @if (loading()) { <span class="spinner"></span> }
       </button>
     </form>
   </app-card>

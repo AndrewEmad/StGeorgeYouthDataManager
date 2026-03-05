@@ -2,15 +2,16 @@
   <main class="container">
     <p class="text-muted animate-fade">نظرة عامة على المخدومين ومتابعة الأسبوع</p>
 
-    @if (loading) {
+    @if (loading()) {
       <app-loader />
     } @else {
+      @let s = stats();
       <div class="stats-grid">
         <a routerLink="/students" class="stat-card-link">
           <app-card [class]="'stat-card animate-fade'" style="animation-delay: 0.1s">
             <span class="material-icons icon-box indigo">people</span>
             <div class="stat-info">
-              <h3>{{ stats?.totalStudents || 0 }}</h3>
+              <h3>{{ s ? s.totalStudents : 0 }}</h3>
               <p>إجمالي المخدومين</p>
             </div>
           </app-card>
@@ -18,14 +19,14 @@
         <app-card [class]="'stat-card animate-fade'" style="animation-delay: 0.2s">
           <span class="material-icons icon-box cyan">phone</span>
           <div class="stat-info">
-            <h3>{{ stats?.callsThisWeek ?? 0 }}</h3>
+            <h3>{{ s ? s.callsThisWeek : 0 }}</h3>
             <p>مكالمات هذا الأسبوع</p>
           </div>
         </app-card>
         <app-card [class]="'stat-card animate-fade'" style="animation-delay: 0.3s">
           <span class="material-icons icon-box emerald">home</span>
           <div class="stat-info">
-            <h3>{{ stats?.visitsThisWeek ?? 0 }}</h3>
+            <h3>{{ s ? s.visitsThisWeek : 0 }}</h3>
             <p>زيارات هذا الأسبوع</p>
           </div>
         </app-card>
@@ -39,7 +40,7 @@
             <span class="material-icons">list_alt</span>
             <span>قائمة المخدومين</span>
           </a>
-          @if ((stats?.totalStudents ?? 0) > 0) {
+          @if (s && s.totalStudents > 0) {
             <button type="button" class="glass-card action-item action-item-btn" (click)="openBulkWhatsAppModal()">
               <span class="material-icons">chat</span>
               <span>إرسال واتساب جماعي</span>
@@ -65,11 +66,11 @@
   </main>
 </div>
 
-@if (showBulkWhatsAppModal) {
-  <app-bulk-whatsapp-modal [userId]="currentUserId" (close)="closeBulkWhatsAppModal()" />
+@if (showBulkWhatsAppModal()) {
+  <app-bulk-whatsapp-modal [userId]="currentUserId() ?? undefined" (close)="closeBulkWhatsAppModal()" />
 }
 
-@if (showBulkSmsModal) {
-  <app-bulk-sms-modal [userId]="currentUserId" (close)="closeBulkSmsModal()" />
+@if (showBulkSmsModal()) {
+  <app-bulk-sms-modal [userId]="currentUserId() ?? undefined" (close)="closeBulkSmsModal()" />
 }
 

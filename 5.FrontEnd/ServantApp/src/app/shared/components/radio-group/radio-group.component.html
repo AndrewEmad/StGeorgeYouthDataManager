@@ -1,0 +1,24 @@
+<servant-form-field-wrapper
+  [label]="label()"
+  [controlId]="id()"
+  [required]="required()"
+  [error]="error()"
+  [hint]="hint()"
+  [invalid]="!!error()">
+  <div class="radio-group" [class.vertical]="layout() === 'vertical'" [class.horizontal]="layout() === 'horizontal'" role="radiogroup" [attr.aria-label]="label()" [attr.aria-invalid]="error() ? 'true' : null" [attr.aria-describedby]="error() ? id() + '-error' : (hint() ? id() + '-hint' : null)">
+    @for (opt of options(); track opt.value) {
+      <label class="radio-option">
+        <input
+          type="radio"
+          [name]="id()"
+          [value]="opt.value"
+          [checked]="value() === opt.value"
+          [disabled]="disabled()"
+          (change)="select(opt)"
+          (blur)="onBlur()"
+          class="radio-input" />
+        <span class="radio-label">{{ opt.label }}</span>
+      </label>
+    }
+  </div>
+</servant-form-field-wrapper>

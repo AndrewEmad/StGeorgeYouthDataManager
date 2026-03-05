@@ -1,0 +1,29 @@
+:host {
+  display: block;
+}
+
+.file-upload-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.file-input {
+  color: var(--text-main, #f8fafc);
+  cursor: pointer;
+}
+
+.file-input::file-selector-button {
+  background: var(--glass, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+  color: var(--text-main, #f8fafc);
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-inline-end: 12px;
+  cursor: pointer;
+}
+
+.file-names {
+  font-size: 0.9rem;
+  color: var(--text-muted, #94a3b8);
+}

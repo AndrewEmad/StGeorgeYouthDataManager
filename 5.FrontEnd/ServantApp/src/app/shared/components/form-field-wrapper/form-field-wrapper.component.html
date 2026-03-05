@@ -1,0 +1,16 @@
+<div class="form-group" [class.required]="required()">
+  <label [for]="controlId() ?? undefined" class="label">
+    {{ label() }}
+  </label>
+  <ng-content />
+  @if (allErrors().length) {
+    <div [id]="errorId()" class="error-msg" role="alert">
+      @for (msg of allErrors(); track msg) {
+        <span>{{ msg }}</span>
+      }
+    </div>
+  }
+  @if (hint() && !allErrors().length) {
+    <p [id]="hintId()" class="hint">{{ hint() }}</p>
+  }
+</div>

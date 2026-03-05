@@ -1,0 +1,13 @@
+:host {
+  display: block;
+}
+
+.dynamic-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.form-actions {
+  margin-top: 24px;
+}

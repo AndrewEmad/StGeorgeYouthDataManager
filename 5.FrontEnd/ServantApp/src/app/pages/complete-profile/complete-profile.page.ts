@@ -1,71 +1,77 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { CardComponent } from '../../components/common/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AuthService } from '../../core/services/auth.service';
+import { CardComponent } from '../../shared/components';
 
 @Component({
   selector: 'app-complete-profile-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, CardComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CardComponent],
   templateUrl: './complete-profile.page.html',
-  styleUrls: ['./complete-profile.page.css']
+  styleUrls: ['./complete-profile.page.css'],
 })
-export class CompleteProfilePage implements OnInit {
-  fullName = '';
-  phone = '';
-  address = '';
-  error = '';
-  loading = false;
-  profileLoading = false;
+export class CompleteProfilePage {
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
-  constructor(private authService: AuthService, private router: Router) {}
+  readonly fullName = signal('');
+  readonly phone = signal('');
+  readonly address = signal('');
+  readonly error = signal('');
+  readonly loading = signal(false);
+  readonly profileLoading = signal(false);
 
-  ngOnInit() {
+  constructor() {
     this.loadProfile();
   }
 
-  loadProfile() {
-    this.profileLoading = true;
-    this.authService.getProfile().subscribe({
-      next: (p) => {
-        this.fullName = p.fullName ?? '';
-        this.phone = p.phone ?? '';
-        this.address = p.address ?? '';
-        this.profileLoading = false;
-      },
-      error: () => {
-        this.profileLoading = false;
-      }
-    });
+  loadProfile(): void {
+    this.profileLoading.set(true);
+    this.authService
+      .getProfile()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (p) => {
+          this.fullName.set(p.fullName ?? '');
+          this.phone.set(p.phone ?? '');
+          this.address.set(p.address ?? '');
+          this.profileLoading.set(false);
+        },
+        error: () => this.profileLoading.set(false),
+      });
   }
 
-  onSubmit() {
-    this.error = '';
-    if (!this.phone?.trim()) {
-      this.error = 'يرجى إدخال رقم التليفون';
+  onSubmit(): void {
+    this.error.set('');
+    const phoneVal = this.phone().trim();
+    const addressVal = this.address().trim();
+    if (!phoneVal) {
+      this.error.set('يرجى إدخال رقم التليفون');
       return;
     }
-    if (!this.address?.trim()) {
-      this.error = 'يرجى إدخال العنوان';
+    if (!addressVal) {
+      this.error.set('يرجى إدخال العنوان');
       return;
     }
-    this.loading = true;
-    this.authService.updateProfile({ phone: this.phone.trim(), address: this.address.trim() }).subscribe({
-      next: (res) => {
-        this.loading = false;
-        if (res?.token) {
-          this.authService.setUserAfterProfileCompletion(res.token);
+    this.loading.set(true);
+    this.authService
+      .updateProfile({ phone: phoneVal, address: addressVal })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.loading.set(false);
+          if (res?.token) {
+            this.authService.setUserAfterProfileCompletion(res.token);
+          }
           this.router.navigate(['/dashboard']);
-        } else {
-          this.router.navigate(['/dashboard']);
-        }
-      },
-      error: (err) => {
-        this.error = err.error?.message || 'فشل حفظ البيانات';
-        this.loading = false;
-      }
-    });
+        },
+        error: (err) => {
+          this.error.set(err.error?.message || 'فشل حفظ البيانات');
+          this.loading.set(false);
+        },
+      });
   }
 }

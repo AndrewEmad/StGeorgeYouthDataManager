@@ -1,0 +1,35 @@
+:host {
+  display: block;
+}
+
+.radio-group {
+  display: flex;
+  gap: 16px;
+}
+
+.radio-group.vertical {
+  flex-direction: column;
+}
+
+.radio-group.horizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.radio-input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary, #6366f1);
+  cursor: pointer;
+}
+
+.radio-label {
+  font-weight: normal;
+}

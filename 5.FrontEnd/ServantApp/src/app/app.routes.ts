@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { ServantLayoutComponent } from './components/layout/servant-layout.component';
+import { ServantLayoutComponent } from './layout/servant-layout/servant-layout.component';
 import { LoginPage } from './pages/login/login.page';
 import { ChangePasswordPage } from './pages/change-password/change-password.page';
 import { CompleteProfilePage } from './pages/complete-profile/complete-profile.page';
@@ -10,9 +10,9 @@ import { StudentDetailPage } from './pages/students/student-detail/student-detai
 import { RequestAddStudentPage } from './pages/request-add-student/request-add-student.page';
 import { RemindersPage } from './pages/reminders/reminders.page';
 import { AttendancePage } from './pages/attendance/attendance.page';
-import { authGuard } from './guards/auth.guard';
-import { redirectIfAuthGuard } from './guards/redirect-if-auth.guard';
-import { secretaryGuard } from './guards/secretary.guard';
+import { authGuard } from './core/guards/auth.guard';
+import { redirectIfAuthGuard } from './core/guards/redirect-if-auth.guard';
+import { secretaryGuard } from './core/guards/secretary.guard';
 
 export const routes: Routes = [
   { path: 'login', component: LoginPage, canActivate: [redirectIfAuthGuard] },

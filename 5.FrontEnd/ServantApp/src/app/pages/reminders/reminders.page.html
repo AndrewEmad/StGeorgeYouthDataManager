@@ -4,18 +4,18 @@
 
     <app-card [class]="'reminders-section'">
       <h2>الإشعارات</h2>
-      @if (!permissionGranted && !permissionDenied) {
+      @if (!permissionGranted() && !permissionDenied()) {
         <p class="section-msg">للحصول على تذكيرات، يرجى السماح بالإشعارات.</p>
         <button type="button" class="btn-primary" (click)="requestPermission()">تفعيل التذكيرات</button>
       }
-      @if (permissionGranted && fcmRegistered) {
+      @if (permissionGranted() && fcmRegistered()) {
         <p class="section-msg success-msg">✅ الإشعارات مفعّلة</p>
       }
-      @if (permissionDenied) {
+      @if (permissionDenied()) {
         <p class="section-msg">الإشعارات مُرفوضة. يمكنك تفعيلها من إعدادات المتصفح.</p>
       }
-      @if (permissionMessage) {
-        <p class="section-msg" [class.error-msg]="permissionDenied">{{ permissionMessage }}</p>
+      @if (permissionMessage()) {
+        <p class="section-msg" [class.error-msg]="permissionDenied()">{{ permissionMessage() }}</p>
       }
     </app-card>
 
@@ -24,13 +24,13 @@
       <div class="add-form">
         <div class="form-group">
           <label>الوقت</label>
-          <input type="time" [(ngModel)]="newTime" name="newTime" class="form-input" />
+          <input type="time" [value]="newTime()" (input)="newTime.set($any($event.target).value)" name="newTime" class="form-input" />
         </div>
         <div class="form-group">
           <label>الأيام</label>
           <div class="days-row">
             <label class="day-check">
-              <input type="checkbox" [checked]="allDaysChecked" (change)="toggleAllDays()" /> كل الأيام
+              <input type="checkbox" [checked]="allDaysChecked()" (change)="toggleAllDays()" /> كل الأيام
             </label>
             @for (i of dayNumbers; track i) {
               <label class="day-check">
@@ -41,8 +41,8 @@
           </div>
         </div>
         <button type="button" class="btn-primary" (click)="addSchedule()"
-          [disabled]="saving || (allDaysChecked ? 7 : newDays.length) === 0">
-          @if (saving) {
+          [disabled]="saving() || (allDaysChecked() ? 7 : newDays().length) === 0">
+          @if (saving()) {
             <span class="spinner-inline"></span> جاري الحفظ...
           } @else {
             إضافة
@@ -53,13 +53,13 @@
 
     <app-card [class]="'reminders-section'">
       <h2>التذكيرات الحالية</h2>
-      @if (loading) {
+      @if (loading()) {
         <p class="section-msg text-muted">جاري التحميل...</p>
-      } @else if (schedules.length === 0) {
+      } @else if (schedules().length === 0) {
         <p class="section-msg text-muted">لا توجد تذكيرات. أضف تذكيراً أعلاه.</p>
       } @else {
         <ul class="slots-list">
-          @for (schedule of schedules; track schedule.id) {
+          @for (schedule of schedules(); track schedule.id) {
             <li class="slot-item">
               <span class="slot-time">{{ schedule.timeOfDay }}</span>
               <span class="slot-days">{{ daysLabel(schedule) }}</span>

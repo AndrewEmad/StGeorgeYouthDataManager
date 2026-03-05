@@ -4,27 +4,40 @@
     <div class="filters-row">
       <label class="filter-label">
         <span>الاسم</span>
-        <input type="text" [(ngModel)]="searchTerm" class="form-input filter-select filter-input-name" placeholder="ابحث بالاسم" (keyup.enter)="onApplyFilters()" />
+        <input
+          type="text"
+          [value]="searchTerm()"
+          (input)="searchTerm.set($any($event.target).value)"
+          class="form-input filter-select filter-input-name"
+          placeholder="ابحث بالاسم"
+          (keyup.enter)="onApplyFilters()"
+        />
       </label>
       <label class="filter-label">
         <span>المنطقة</span>
-        <select class="form-input filter-select" [(ngModel)]="filterArea">
+        <select class="form-input filter-select" [value]="filterArea()" (change)="filterArea.set($any($event.target).value)">
           <option value="">الكل</option>
-          <option *ngFor="let a of areas" [value]="a">{{ a }}</option>
+          @for (a of areas(); track a) {
+            <option [value]="a">{{ a }}</option>
+          }
         </select>
       </label>
       <label class="filter-label">
         <span>السنة الدراسية</span>
-        <select class="form-input filter-select" [(ngModel)]="filterAcademicYear">
+        <select class="form-input filter-select" [value]="filterAcademicYear()" (change)="filterAcademicYear.set($any($event.target).value)">
           <option value="">الكل</option>
-          <option *ngFor="let y of academicYears" [value]="y">{{ y }}</option>
+          @for (y of academicYears(); track y) {
+            <option [value]="y">{{ y }}</option>
+          }
         </select>
       </label>
       <label class="filter-label">
         <span>النوع</span>
-        <select class="form-input filter-select" [(ngModel)]="filterGender">
-          <option [ngValue]="null">الكل</option>
-          <option *ngFor="let g of genderOptions" [ngValue]="g.value">{{ g.label }}</option>
+        <select class="form-input filter-select" [value]="filterGender() ?? ''" (change)="filterGender.set(($any($event.target).value === '' ? null : +$any($event.target).value))">
+          <option value="">الكل</option>
+          @for (g of genderOptions; track g.value) {
+            <option [value]="g.value">{{ g.label }}</option>
+          }
         </select>
       </label>
       <button type="button" class="btn-primary sm" (click)="onApplyFilters()">تطبيق</button>
@@ -32,58 +45,78 @@
     </div>
   </section>
 
-  @if (loading) {
+  @if (loading()) {
     <app-loader [fullScreen]="false" />
   }
 
-  <ng-container *ngIf="!loading">
-    <section *ngIf="items.length > 0" class="list-section">
-      <p class="section-title">المجموع: {{ totalCount }}</p>
-      <div class="students-grid">
-        <div *ngFor="let item of items" class="glass-card student-card" [class.unassigned]="item.segment === 'Unassigned'" [class.requested]="item.segment === 'Requested'">
-          <div class="student-info">
-            <span class="badge" [ngClass]="{
-              'assigned-badge': item.segment === 'Assigned',
-              'requested-badge': item.segment === 'Requested',
-              'unassigned-badge': item.segment === 'Unassigned'
-            }">
-              {{ item.segment === 'Assigned' ? 'مخصص' : item.segment === 'Requested' ? 'طلب تخصيص قيد المراجعة' : 'غير مخصص' }}
-            </span>
-            <h3>{{ item.student.fullName }}</h3>
-            <p><span class="material-icons">place</span> {{ item.student.area || '—' }}</p>
-            <p><span class="material-icons">school</span> {{ item.student.college || '—' }}</p>
-            <p><span class="material-icons">calendar_today</span> {{ item.student.academicYear || '—' }}</p>
-            <p *ngIf="item.student.lastAttendanceDate" class="last-attendance"><span class="material-icons">event_available</span> آخر حضور: {{ item.student.lastAttendanceDate | date:'dd/MM/yyyy' }}</p>
-          </div>
-          <div class="student-actions">
-            <ng-container *ngIf="item.segment === 'Assigned'">
-              <div class="contact-actions">
-                <a [href]="'tel:' + item.student.phone" class="btn-icon call"><span class="material-icons">phone</span></a>
-                <a [href]="getWaMeUrl(item.student.phone)" target="_blank" rel="noopener noreferrer" class="btn-icon whatsapp"><span class="material-icons">chat</span></a>
+  @if (!loading()) {
+    @if (items().length > 0) {
+      <section class="list-section">
+        <p class="section-title">المجموع: {{ totalCount() }}</p>
+        <div class="students-grid">
+          @for (item of items(); track item.student.id) {
+            <div
+              class="glass-card student-card"
+              [class.unassigned]="item.segment === 'Unassigned'"
+              [class.requested]="item.segment === 'Requested'"
+            >
+              <div class="student-info">
+                <span
+                  class="badge"
+                  [class.assigned-badge]="item.segment === 'Assigned'"
+                  [class.requested-badge]="item.segment === 'Requested'"
+                  [class.unassigned-badge]="item.segment === 'Unassigned'"
+                >
+                  @switch (item.segment) {
+                    @case ('Assigned') { مخصص }
+                    @case ('Requested') { طلب تخصيص قيد المراجعة }
+                    @default { غير مخصص }
+                  }
+                </span>
+                <h3>{{ item.student.fullName }}</h3>
+                <p><span class="material-icons">place</span> {{ item.student.area || '—' }}</p>
+                <p><span class="material-icons">school</span> {{ item.student.college || '—' }}</p>
+                <p><span class="material-icons">calendar_today</span> {{ item.student.academicYear || '—' }}</p>
+                @if (item.student.lastAttendanceDate) {
+                  <p class="last-attendance">
+                    <span class="material-icons">event_available</span>
+                    آخر حضور: {{ item.student.lastAttendanceDate | date:'dd/MM/yyyy' }}
+                  </p>
+                }
               </div>
-              <a [routerLink]="['/students', item.student.id]" class="btn-outline sm">التفاصيل</a>
-            </ng-container>
-            <ng-container *ngIf="item.segment === 'Requested'">
-              <span class="text-muted small">بانتظار موافقة المدير</span>
-            </ng-container>
-            <ng-container *ngIf="item.segment === 'Unassigned'">
-              <button type="button" class="btn-primary sm" [disabled]="requestingId === item.student.id" (click)="requestAssignToMe(item)">
-                {{ requestingId === item.student.id ? 'جاري الإرسال...' : 'طلب تخصيص لي' }}
-              </button>
-            </ng-container>
-          </div>
+              <div class="student-actions">
+                @if (item.segment === 'Assigned') {
+                  <div class="contact-actions">
+                    <a [href]="'tel:' + item.student.phone" class="btn-icon call"><span class="material-icons">phone</span></a>
+                    <a [href]="getWaMeUrl(item.student.phone)" target="_blank" rel="noopener noreferrer" class="btn-icon whatsapp"><span class="material-icons">chat</span></a>
+                  </div>
+                  <a [routerLink]="['/students', item.student.id]" class="btn-outline sm">التفاصيل</a>
+                }
+                @if (item.segment === 'Requested') {
+                  <span class="text-muted small">بانتظار موافقة المدير</span>
+                }
+                @if (item.segment === 'Unassigned') {
+                  <button type="button" class="btn-primary sm" [disabled]="requestingId() === item.student.id" (click)="requestAssignToMe(item)">
+                    {{ requestingId() === item.student.id ? 'جاري الإرسال...' : 'طلب تخصيص لي' }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
         </div>
-      </div>
-    </section>
+      </section>
 
-    <div *ngIf="items.length > 0 && totalPages > 1" class="pagination">
-      <button type="button" class="btn-outline sm" [disabled]="page <= 1" (click)="goToPage(page - 1)">السابق</button>
-      <span class="page-info">{{ page }} / {{ totalPages }}</span>
-      <button type="button" class="btn-outline sm" [disabled]="page >= totalPages" (click)="goToPage(page + 1)">التالي</button>
-    </div>
-  </ng-container>
+      @if (items().length > 0 && totalPages() > 1) {
+        <div class="pagination">
+          <button type="button" class="btn-outline sm" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">السابق</button>
+          <span class="page-info">{{ page() }} / {{ totalPages() }}</span>
+          <button type="button" class="btn-outline sm" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">التالي</button>
+        </div>
+      }
+    }
 
-  @if (!loading && items.length === 0) {
-    <app-empty-state icon="search_off" message="لم يتم العثور على مخدومين" />
+    @if (items().length === 0) {
+      <app-empty-state icon="search_off" message="لم يتم العثور على مخدومين" />
+    }
   }
 </div>

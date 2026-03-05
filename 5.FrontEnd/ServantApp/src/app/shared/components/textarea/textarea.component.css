@@ -1,0 +1,8 @@
+:host {
+  display: block;
+}
+
+.textarea-input {
+  resize: vertical;
+  min-height: 80px;
+}

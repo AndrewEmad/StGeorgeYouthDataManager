@@ -1,0 +1,62 @@
+:host {
+  display: block;
+}
+
+.report-viewer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.report-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.report-toolbar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.report-content {
+  flex: 1;
+}
+
+.report-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  color: var(--text-main, #f8fafc);
+}
+
+/* Screen: hide print-only title (we show it only when printing) */
+.report-print-only {
+  display: none;
+}
+
+/* Print layout */
+@media print {
+  .report-screen-only {
+    display: none !important;
+  }
+
+  .report-print-only {
+    display: block !important;
+  }
+
+  .report-viewer {
+    gap: 0;
+  }
+
+  .report-title {
+    margin-bottom: 16px;
+    color: #000;
+    font-size: 1.25rem;
+  }
+
+  :host {
+    background: #fff;
+  }
+}

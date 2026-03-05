@@ -1,78 +1,78 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReportsService } from '../../services/reports.service';
-import { AuthService } from '../../services/auth.service';
-import { StudentQueriesService } from '../../services/student-queries.service';
-import { LoaderComponent, CardComponent } from '../../components/common/common';
+import { AuthService } from '../../core/services/auth.service';
+import { LoaderComponent, CardComponent } from '../../shared/components';
 import { BulkWhatsAppModalComponent } from '../../components/dashboard/bulk-whatsapp-modal/bulk-whatsapp-modal';
 import { BulkSmsModalComponent } from '../../components/dashboard/bulk-sms-modal/bulk-sms-modal';
+import type { ServantDashboardStats } from '../../shared/models/reports.model';
 
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule, RouterLink, FormsModule,
-    LoaderComponent, CardComponent,
-    BulkWhatsAppModalComponent, BulkSmsModalComponent
+    RouterLink,
+    LoaderComponent,
+    CardComponent,
+    BulkWhatsAppModalComponent,
+    BulkSmsModalComponent,
   ],
   templateUrl: './dashboard.page.html',
-  styleUrls: ['./dashboard.page.css']
+  styleUrls: ['./dashboard.page.css'],
 })
-export class DashboardPage implements OnInit {
-  stats: any = null;
-  loading = true;
+export class DashboardPage {
+  private readonly reportsService = inject(ReportsService);
+  readonly authService = inject(AuthService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  showBulkWhatsAppModal = false;
-  showBulkSmsModal = false;
+  readonly stats = signal<ServantDashboardStats | null>(null);
+  readonly loading = signal(true);
+  readonly showBulkWhatsAppModal = signal(false);
+  readonly showBulkSmsModal = signal(false);
 
-  constructor(
-    private reportsService: ReportsService,
-    public authService: AuthService
-  ) {}
+  readonly currentUserId = computed(() => this.authService.currentUser()?.userId ?? null);
 
-  ngOnInit() {
+  constructor() {
     this.loadStats();
   }
 
-  get currentUserId() {
-    return this.authService.currentUser()?.userId;
+  loadStats(): void {
+    this.reportsService
+      .getServantDashboard()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data: ServantDashboardStats) => {
+          this.stats.set(data);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.stats.set({
+            totalStudents: 0,
+            callsThisWeek: 0,
+            visitsThisWeek: 0,
+            studentsNeedingFollowUp: 0,
+            studentsNotContacted: 0,
+          });
+          this.loading.set(false);
+        },
+      });
   }
 
-  loadStats() {
-    this.reportsService.getServantDashboard().subscribe({
-      next: (data: any) => {
-        this.stats = data;
-        this.loading = false;
-      },
-      error: () => {
-        this.stats = {
-          totalStudents: 0,
-          callsThisWeek: 0,
-          visitsThisWeek: 0,
-          studentsNeedingFollowUp: 0,
-          studentsNotContacted: 0
-        };
-        this.loading = false;
-      }
-    });
+  openBulkWhatsAppModal(): void {
+    this.showBulkWhatsAppModal.set(true);
   }
 
-  openBulkWhatsAppModal() {
-    this.showBulkWhatsAppModal = true;
+  closeBulkWhatsAppModal(): void {
+    this.showBulkWhatsAppModal.set(false);
   }
 
-  closeBulkWhatsAppModal() {
-    this.showBulkWhatsAppModal = false;
+  openBulkSmsModal(): void {
+    this.showBulkSmsModal.set(true);
   }
 
-  openBulkSmsModal() {
-    this.showBulkSmsModal = true;
-  }
-
-  closeBulkSmsModal() {
-    this.showBulkSmsModal = false;
+  closeBulkSmsModal(): void {
+    this.showBulkSmsModal.set(false);
   }
 }
-

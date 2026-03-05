@@ -1,94 +1,111 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { AuthService, ProfileDto } from '../../services/auth.service';
-import { LoaderComponent, CardComponent } from '../../components/common/common';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AuthService } from '../../core/services/auth.service';
+import type { ProfileDto } from '../../shared/models/auth.model';
+import { LoaderComponent, CardComponent } from '../../shared/components';
 
 @Component({
   selector: 'app-profile-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, LoaderComponent, CardComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [LoaderComponent, CardComponent],
   templateUrl: './profile.page.html',
-  styleUrls: ['./profile.page.css']
+  styleUrls: ['./profile.page.css'],
 })
-export class ProfilePage implements OnInit {
-  profile: ProfileDto | null = null;
-  fullName = '';
-  email = '';
-  phone = '';
-  profileLoading = false;
-  profileSaving = false;
-  profileError = '';
+export class ProfilePage {
+  readonly authService = inject(AuthService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  currentPassword = '';
-  newPassword = '';
-  confirmPassword = '';
-  passwordError = '';
-  passwordSaving = false;
+  readonly profile = signal<ProfileDto | null>(null);
+  readonly fullName = signal('');
+  readonly email = signal('');
+  readonly phone = signal('');
+  readonly profileLoading = signal(false);
+  readonly profileSaving = signal(false);
+  readonly profileError = signal('');
 
-  constructor(public authService: AuthService) {}
+  readonly currentPassword = signal('');
+  readonly newPassword = signal('');
+  readonly confirmPassword = signal('');
+  readonly passwordError = signal('');
+  readonly passwordSaving = signal(false);
 
-  ngOnInit() {
+  constructor() {
     this.loadProfile();
   }
 
-  loadProfile() {
-    this.profileLoading = true;
-    this.profileError = '';
-    this.authService.getProfile().subscribe({
-      next: (p) => {
-        this.profile = p;
-        this.fullName = p.fullName ?? '';
-        this.email = p.email ?? '';
-        this.phone = p.phone ?? '';
-        this.profileLoading = false;
-      },
-      error: () => {
-        this.profileError = 'فشل تحميل الملف الشخصي';
-        this.profileLoading = false;
-      }
-    });
+  loadProfile(): void {
+    this.profileLoading.set(true);
+    this.profileError.set('');
+    this.authService
+      .getProfile()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (p) => {
+          this.profile.set(p);
+          this.fullName.set(p.fullName ?? '');
+          this.email.set(p.email ?? '');
+          this.phone.set(p.phone ?? '');
+          this.profileLoading.set(false);
+        },
+        error: () => {
+          this.profileError.set('فشل تحميل الملف الشخصي');
+          this.profileLoading.set(false);
+        },
+      });
   }
 
-  saveProfile() {
-    this.profileError = '';
-    this.profileSaving = true;
-    this.authService.updateProfile({ email: this.email.trim() || undefined, phone: this.phone.trim() || undefined }).subscribe({
-      next: () => { this.profileSaving = false; },
-      error: (err) => {
-        this.profileError = err.error?.message || 'فشل حفظ التعديلات';
-        this.profileSaving = false;
-      }
-    });
+  saveProfile(): void {
+    this.profileError.set('');
+    this.profileSaving.set(true);
+    this.authService
+      .updateProfile({
+        email: this.email().trim() || undefined,
+        phone: this.phone().trim() || undefined,
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.profileSaving.set(false),
+        error: (err) => {
+          this.profileError.set(err.error?.message || 'فشل حفظ التعديلات');
+          this.profileSaving.set(false);
+        },
+      });
   }
 
-  changePassword() {
-    this.passwordError = '';
-    if (!this.currentPassword || !this.newPassword || !this.confirmPassword) {
-      this.passwordError = 'يرجى تعبئة جميع الحقول';
+  changePassword(): void {
+    this.passwordError.set('');
+    const current = this.currentPassword();
+    const newP = this.newPassword();
+    const confirm = this.confirmPassword();
+    if (!current || !newP || !confirm) {
+      this.passwordError.set('يرجى تعبئة جميع الحقول');
       return;
     }
-    if (this.newPassword !== this.confirmPassword) {
-      this.passwordError = 'كلمة المرور الجديدة وتأكيدها غير متطابقين';
+    if (newP !== confirm) {
+      this.passwordError.set('كلمة المرور الجديدة وتأكيدها غير متطابقين');
       return;
     }
-    if (this.newPassword.length < 6) {
-      this.passwordError = 'كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل';
+    if (newP.length < 6) {
+      this.passwordError.set('كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل');
       return;
     }
-    this.passwordSaving = true;
-    this.authService.changePassword(this.currentPassword, this.newPassword).subscribe({
-      next: (res) => {
-        this.authService.setUserAfterPasswordChange(res);
-        this.currentPassword = '';
-        this.newPassword = '';
-        this.confirmPassword = '';
-        this.passwordSaving = false;
-      },
-      error: (err) => {
-        this.passwordError = err.error?.message || 'فشل تغيير كلمة المرور';
-        this.passwordSaving = false;
-      }
-    });
+    this.passwordSaving.set(true);
+    this.authService
+      .changePassword(current, newP)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.authService.setUserAfterPasswordChange(res);
+          this.currentPassword.set('');
+          this.newPassword.set('');
+          this.confirmPassword.set('');
+          this.passwordSaving.set(false);
+        },
+        error: (err) => {
+          this.passwordError.set(err.error?.message || 'فشل تغيير كلمة المرور');
+          this.passwordSaving.set(false);
+        },
+      });
   }
 }

@@ -1,0 +1,12 @@
+:host {
+  display: block;
+}
+
+.date-input-wrap {
+  display: block;
+  cursor: pointer;
+}
+
+.date-input-wrap input {
+  cursor: pointer;
+}

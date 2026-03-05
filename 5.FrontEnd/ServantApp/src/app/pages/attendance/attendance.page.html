@@ -8,52 +8,66 @@
     <div class="form-row">
       <div class="form-group">
         <label>التاريخ</label>
-        <span class="date-input-wrap" (click)="dateInput.showPicker()"><input #dateInput type="date" [(ngModel)]="attendanceDate" class="form-input" /></span>
+        <span class="date-input-wrap" (click)="dateInput.showPicker()"><input #dateInput type="date" [value]="attendanceDate()" (input)="attendanceDate.set($any($event.target).value)" class="form-input" /></span>
       </div>
       <div class="form-group flex-grow">
         <label>بحث بالاسم</label>
-        <input type="text" [(ngModel)]="nameFilter" (ngModelChange)="onFilterChange()" class="form-input" placeholder="اكتب الاسم للتصفية..." />
+        <input type="text" [value]="nameFilter()" (input)="nameFilter.set($any($event.target).value); onFilterChange()" class="form-input" placeholder="اكتب الاسم للتصفية..." />
       </div>
     </div>
 
-    <p class="error-msg" *ngIf="error">{{ error }}</p>
-    <p class="success-msg" *ngIf="success">{{ success }}</p>
+    @if (error()) {
+      <p class="error-msg">{{ error() }}</p>
+    }
+    @if (success()) {
+      <p class="success-msg">{{ success() }}</p>
+    }
 
     <div class="list-section">
       <div class="list-header">
         <label class="checkbox-label">
-          <input type="checkbox" [checked]="allOnPageSelected" (change)="selectAllStudents()" />
+          <input type="checkbox" [checked]="allOnPageSelected()" (change)="selectAllStudents()" />
           تحديد الكل (الصفحة الحالية)
         </label>
-        <span class="count">{{ selectedStudentIds.size }} محدد من {{ totalCount }}</span>
+        <span class="count">{{ selectedStudentIds().size }} محدد من {{ totalCount() }}</span>
       </div>
       <div class="list-body">
-        <app-loader *ngIf="loading" />
-        <div *ngIf="!loading && studentList.length === 0" class="empty">لا يوجد مخدومين أو لا توجد نتائج للبحث</div>
-        <label *ngFor="let s of studentList" class="list-item">
-          <input type="checkbox" [checked]="selectedStudentIds.has(s.id)" (change)="toggleStudent(s.id, s.fullName)" />
-          <span>{{ s.fullName }}</span>
-        </label>
+        @if (loading()) {
+          <app-loader />
+        }
+        @if (!loading() && studentList().length === 0) {
+          <div class="empty">لا يوجد مخدومين أو لا توجد نتائج للبحث</div>
+        }
+        @for (s of studentList(); track s.id) {
+          <label class="list-item">
+            <input type="checkbox" [checked]="selectedStudentIds().has(s.id)" (change)="toggleStudent(s.id, s.fullName)" />
+            <span>{{ s.fullName }}</span>
+          </label>
+        }
       </div>
-      @if (!loading && totalPages > 1) {
+      @if (!loading() && totalPages() > 1) {
         <div class="pagination-bar">
-          <button type="button" class="btn-outline sm" [disabled]="page <= 1" (click)="goPrev()">السابق</button>
-          <span class="page-info">صفحة {{ page }} من {{ totalPages }}</span>
-          <button type="button" class="btn-outline sm" [disabled]="page >= totalPages" (click)="goNext()">التالي</button>
+          <button type="button" class="btn-outline sm" [disabled]="page() <= 1" (click)="goPrev()">السابق</button>
+          <span class="page-info">صفحة {{ page() }} من {{ totalPages() }}</span>
+          <button type="button" class="btn-outline sm" [disabled]="page() >= totalPages()" (click)="goNext()">التالي</button>
         </div>
       }
     </div>
 
-    <div class="selected-names" *ngIf="selectedStudentIds.size > 0">
-      <h3 class="selected-names-title">المحددون للحضور</h3>
-      <ul class="selected-names-list">
-        <li *ngFor="let e of selectedStudentEntries; let i = index">{{ i + 1 }}. {{ e.fullName || '—' }}</li>
-      </ul>
-    </div>
+    @if (selectedStudentIds().size > 0) {
+      <div class="selected-names">
+        <h3 class="selected-names-title">المحددون للحضور</h3>
+        <ul class="selected-names-list">
+          @for (e of selectedStudentEntries(); track e.id; let i = $index) {
+            <li>{{ i + 1 }}. {{ e.fullName || '—' }}</li>
+          }
+        </ul>
+      </div>
+    }
 
     <div class="form-actions">
-      <button type="button" class="btn-primary" (click)="submit()" [disabled]="saving">
-        {{ saving ? 'جاري الحفظ...' : 'تسجيل الحضور' }}
+      <button type="button" class="btn-primary" (click)="submit()" [disabled]="saving()">
+        {{ saving() ? 'جاري الحفظ...' : 'تسجيل الحضور' }}
       </button>
     </div>
   </app-card>

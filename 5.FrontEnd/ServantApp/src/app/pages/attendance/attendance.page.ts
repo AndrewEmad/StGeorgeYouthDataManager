@@ -1,157 +1,171 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AttendanceService } from '../../services/attendance.service';
 import { StudentQueriesService } from '../../services/student-queries.service';
-import { AuthService } from '../../services/auth.service';
-import { LoaderComponent, CardComponent } from '../../components/common/common';
+import { AuthService } from '../../core/services/auth.service';
+import { LoaderComponent, CardComponent } from '../../shared/components';
+
+interface StudentEntry {
+  id: string;
+  fullName: string;
+}
 
 @Component({
   selector: 'app-attendance-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, LoaderComponent, CardComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [LoaderComponent, CardComponent],
   templateUrl: './attendance.page.html',
-  styleUrls: ['./attendance.page.css']
+  styleUrls: ['./attendance.page.css'],
 })
-export class AttendancePage implements OnInit {
-  attendanceDate = '';
-  nameFilter = '';
-  studentList: { id: string; fullName: string }[] = [];
-  selectedStudentIds = new Set<string>();
-  selectedStudentEntries: { id: string; fullName: string }[] = [];
-  totalCount = 0;
-  page = 1;
-  pageSize = 20;
-  loading = false;
-  saving = false;
-  error = '';
-  success = '';
+export class AttendancePage {
+  private readonly attendanceService = inject(AttendanceService);
+  private readonly studentQueries = inject(StudentQueriesService);
+  private readonly auth = inject(AuthService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  constructor(
-    private attendanceService: AttendanceService,
-    private studentQueries: StudentQueriesService,
-    private auth: AuthService
-  ) {}
+  readonly attendanceDate = signal('');
+  readonly nameFilter = signal('');
+  readonly studentList = signal<StudentEntry[]>([]);
+  readonly selectedStudentIds = signal<Set<string>>(new Set());
+  readonly selectedStudentEntries = signal<StudentEntry[]>([]);
+  readonly totalCount = signal(0);
+  readonly page = signal(1);
+  readonly pageSize = signal(20);
+  readonly loading = signal(false);
+  readonly saving = signal(false);
+  readonly error = signal('');
+  readonly success = signal('');
 
-  get totalPages(): number {
-    return Math.max(1, Math.ceil(this.totalCount / this.pageSize));
-  }
+  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalCount() / this.pageSize())));
+  readonly allOnPageSelected = computed(() => {
+    const list = this.studentList();
+    const ids = this.selectedStudentIds();
+    return list.length > 0 && list.every((s) => ids.has(s.id));
+  });
 
-  get allOnPageSelected(): boolean {
-    return this.studentList.length > 0 && this.studentList.every((s) => this.selectedStudentIds.has(s.id));
-  }
-
-  ngOnInit() {
+  constructor() {
     this.loadPage();
   }
 
-  loadPage() {
+  loadPage(): void {
     const userId = this.auth.currentUser()?.userId;
     if (!userId) {
-      this.studentList = [];
-      this.totalCount = 0;
-      this.loading = false;
+      this.studentList.set([]);
+      this.totalCount.set(0);
+      this.loading.set(false);
       return;
     }
-    this.loading = true;
-    this.error = '';
-    this.success = '';
+    this.loading.set(true);
+    this.error.set('');
+    this.success.set('');
     this.studentQueries
       .getPagedForServant({
-        page: this.page,
-        pageSize: this.pageSize,
-        search: this.nameFilter.trim() || undefined
+        page: this.page(),
+        pageSize: this.pageSize(),
+        search: this.nameFilter().trim() || undefined,
       })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          this.studentList = (res.items || []).map((it: any) => ({
+          const list = (res.items || []).map((it: { student?: { id?: string; studentId?: string; fullName?: string } }) => ({
             id: it.student?.id ?? it.student?.studentId ?? '',
-            fullName: it.student?.fullName ?? ''
+            fullName: it.student?.fullName ?? '',
           }));
-          this.studentList.sort((a, b) => (a.fullName || '').localeCompare(b.fullName || '', 'ar'));
-          this.totalCount = res.totalCount ?? 0;
-          this.page = res.page ?? this.page;
-          this.pageSize = res.pageSize ?? this.pageSize;
-          this.loading = false;
+          list.sort((a, b) => (a.fullName || '').localeCompare(b.fullName || '', 'ar'));
+          this.studentList.set(list);
+          this.totalCount.set(res.totalCount ?? 0);
+          this.page.set(res.page ?? this.page());
+          this.pageSize.set(res.pageSize ?? this.pageSize());
+          this.loading.set(false);
         },
         error: () => {
-          this.error = 'فشل تحميل قائمة المخدومين';
-          this.loading = false;
-        }
+          this.error.set('فشل تحميل قائمة المخدومين');
+          this.loading.set(false);
+        },
       });
   }
 
-  onFilterChange() {
-    this.page = 1;
+  onFilterChange(): void {
+    this.page.set(1);
     this.loadPage();
   }
 
-  goPrev() {
-    if (this.page > 1) {
-      this.page--;
+  goPrev(): void {
+    if (this.page() > 1) {
+      this.page.update((p) => p - 1);
       this.loadPage();
     }
   }
 
-  goNext() {
-    if (this.page < this.totalPages) {
-      this.page++;
+  goNext(): void {
+    if (this.page() < this.totalPages()) {
+      this.page.update((p) => p + 1);
       this.loadPage();
     }
   }
 
-  toggleStudent(id: string, fullName?: string) {
-    if (this.selectedStudentIds.has(id)) {
-      this.selectedStudentIds.delete(id);
-      this.selectedStudentEntries = this.selectedStudentEntries.filter((e) => e.id !== id);
+  toggleStudent(id: string, fullName?: string): void {
+    const ids = new Set(this.selectedStudentIds());
+    const entries = [...this.selectedStudentEntries()];
+    if (ids.has(id)) {
+      ids.delete(id);
+      this.selectedStudentEntries.set(entries.filter((e) => e.id !== id));
     } else {
-      this.selectedStudentIds.add(id);
-      this.selectedStudentEntries = [...this.selectedStudentEntries, { id, fullName: fullName ?? '' }];
+      ids.add(id);
+      this.selectedStudentEntries.set([...entries, { id, fullName: fullName ?? '' }]);
     }
-    this.selectedStudentIds = new Set(this.selectedStudentIds);
+    this.selectedStudentIds.set(ids);
   }
 
-  selectAllStudents() {
-    const allOnPageSelected = this.studentList.length > 0 && this.studentList.every((s) => this.selectedStudentIds.has(s.id));
-    if (allOnPageSelected) {
-      this.studentList.forEach((s) => {
-        this.selectedStudentIds.delete(s.id);
-        this.selectedStudentEntries = this.selectedStudentEntries.filter((e) => e.id !== s.id);
+  selectAllStudents(): void {
+    const list = this.studentList();
+    const allSelected = list.length > 0 && list.every((s) => this.selectedStudentIds().has(s.id));
+    const ids = new Set(this.selectedStudentIds());
+    let entries = [...this.selectedStudentEntries()];
+    if (allSelected) {
+      list.forEach((s) => {
+        ids.delete(s.id);
+        entries = entries.filter((e) => e.id !== s.id);
       });
     } else {
-      this.studentList.forEach((s) => {
-        if (!this.selectedStudentIds.has(s.id)) {
-          this.selectedStudentIds.add(s.id);
-          this.selectedStudentEntries = [...this.selectedStudentEntries, { id: s.id, fullName: s.fullName }];
+      list.forEach((s) => {
+        if (!ids.has(s.id)) {
+          ids.add(s.id);
+          entries = [...entries, { id: s.id, fullName: s.fullName }];
         }
       });
     }
-    this.selectedStudentIds = new Set(this.selectedStudentIds);
+    this.selectedStudentIds.set(ids);
+    this.selectedStudentEntries.set(entries);
   }
 
-  submit() {
-    if (!this.attendanceDate?.trim()) {
-      this.error = 'اختر التاريخ';
+  submit(): void {
+    const date = this.attendanceDate().trim();
+    if (!date) {
+      this.error.set('اختر التاريخ');
       return;
     }
-    if (this.selectedStudentIds.size === 0) {
-      this.error = 'اختر مخدوم واحد على الأقل';
+    const ids = this.selectedStudentIds();
+    if (ids.size === 0) {
+      this.error.set('اختر مخدوم واحد على الأقل');
       return;
     }
-    this.error = '';
-    this.success = '';
-    this.saving = true;
+    this.error.set('');
+    this.success.set('');
+    this.saving.set(true);
     this.attendanceService
-      .recordStudentAttendance(this.attendanceDate, Array.from(this.selectedStudentIds))
+      .recordStudentAttendance(date, Array.from(ids))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.success = 'تم تسجيل الحضور بنجاح';
-          this.saving = false;
+          this.success.set('تم تسجيل الحضور بنجاح');
+          this.saving.set(false);
         },
         error: (err) => {
-          this.error = err.error?.message || err.message || 'فشل تسجيل الحضور';
-          this.saving = false;
-        }
+          this.error.set(err.error?.message || err.message || 'فشل تسجيل الحضور');
+          this.saving.set(false);
+        },
       });
   }
 }

@@ -1,61 +1,55 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ReminderService, ScheduleDto } from '../../services/reminder.service';
-import { AuthService } from '../../services/auth.service';
-import { CardComponent } from '../../components/common/common';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ReminderService } from '../../services/reminder.service';
+import type { ScheduleDto } from '../../shared/models/reminder.model';
+import { CardComponent } from '../../shared/components';
 
 const DAY_NAMES = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
 @Component({
   selector: 'app-reminders-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, CardComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CardComponent],
   templateUrl: './reminders.page.html',
-  styleUrls: ['./reminders.page.css']
+  styleUrls: ['./reminders.page.css'],
 })
-export class RemindersPage implements OnInit {
-  newTime = '09:00';
-  newDays: number[] = [];
-  allDaysChecked = false;
-  permissionMessage = '';
-  schedules: ScheduleDto[] = [];
-  loading = false;
-  saving = false;
-  fcmRegistered = false;
+export class RemindersPage {
+  readonly reminderService = inject(ReminderService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  readonly newTime = signal('09:00');
+  readonly newDays = signal<number[]>([]);
+  readonly allDaysChecked = signal(false);
+  readonly permissionMessage = signal('');
+  readonly schedules = signal<ScheduleDto[]>([]);
+  readonly loading = signal(false);
+  readonly saving = signal(false);
+  readonly fcmRegistered = signal(false);
 
   readonly dayNames = DAY_NAMES;
   readonly dayNumbers = [0, 1, 2, 3, 4, 5, 6];
 
-  constructor(
-    public reminderService: ReminderService,
-    private authService: AuthService
-  ) {}
+  readonly permissionGranted = computed(() => this.reminderService.permission === 'granted');
+  readonly permissionDenied = computed(() => this.reminderService.permission === 'denied');
 
-  ngOnInit(): void {
+  constructor() {
     this.loadSchedules();
     this.registerFcmToken();
   }
 
   loadSchedules(): void {
-    this.loading = true;
-    this.reminderService.loadSchedules().subscribe({
-      next: schedules => {
-        this.schedules = schedules;
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-      }
-    });
-  }
-
-  get permissionGranted(): boolean {
-    return this.reminderService.permission === 'granted';
-  }
-
-  get permissionDenied(): boolean {
-    return this.reminderService.permission === 'denied';
+    this.loading.set(true);
+    this.reminderService
+      .loadSchedules()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (schedules) => {
+          this.schedules.set(schedules);
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
   }
 
   daysLabel(schedule: ScheduleDto): string {
@@ -65,60 +59,61 @@ export class RemindersPage implements OnInit {
   }
 
   toggleAllDays(): void {
-    this.allDaysChecked = !this.allDaysChecked;
-    this.newDays = this.allDaysChecked ? [0, 1, 2, 3, 4, 5, 6] : [];
+    const checked = !this.allDaysChecked();
+    this.allDaysChecked.set(checked);
+    this.newDays.set(checked ? [0, 1, 2, 3, 4, 5, 6] : []);
   }
 
   toggleDay(day: number): void {
-    const i = this.newDays.indexOf(day);
-    if (i === -1) this.newDays.push(day);
-    else this.newDays.splice(i, 1);
-    this.newDays.sort((a, b) => a - b);
-    this.allDaysChecked = this.newDays.length === 7;
+    const days = this.newDays();
+    const i = days.indexOf(day);
+    const next = i === -1 ? [...days, day].sort((a, b) => a - b) : days.filter((d) => d !== day);
+    this.newDays.set(next);
+    this.allDaysChecked.set(next.length === 7);
   }
 
   isDaySelected(day: number): boolean {
-    return this.newDays.includes(day);
+    return this.newDays().includes(day);
   }
 
   addSchedule(): void {
-    const days = this.allDaysChecked || this.newDays.length === 7
-      ? [0, 1, 2, 3, 4, 5, 6]
-      : [...this.newDays];
+    const days = this.allDaysChecked() || this.newDays().length === 7 ? [0, 1, 2, 3, 4, 5, 6] : [...this.newDays()];
     if (days.length === 0) return;
 
-    this.saving = true;
-    this.reminderService.createSchedule({
-      daysOfWeek: days.join(','),
-      timeOfDay: this.newTime
-    }).subscribe({
-      next: () => {
-        this.newDays = [];
-        this.allDaysChecked = false;
-        this.saving = false;
-        this.loadSchedules();
-      },
-      error: () => {
-        this.saving = false;
-      }
-    });
+    this.saving.set(true);
+    this.reminderService
+      .createSchedule({
+        daysOfWeek: days.join(','),
+        timeOfDay: this.newTime(),
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.newDays.set([]);
+          this.allDaysChecked.set(false);
+          this.saving.set(false);
+          this.loadSchedules();
+        },
+        error: () => this.saving.set(false),
+      });
   }
 
   removeSchedule(id: string): void {
-    this.reminderService.deleteSchedule(id).subscribe({
-      next: () => this.loadSchedules()
-    });
+    this.reminderService
+      .deleteSchedule(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: () => this.loadSchedules() });
   }
 
   async requestPermission(): Promise<void> {
-    this.permissionMessage = '';
+    this.permissionMessage.set('');
     const token = await this.reminderService.requestNotificationPermissionAndGetToken();
     if (token) {
-      this.permissionMessage = 'تم تفعيل التذكيرات';
-      this.reminderService.registerDeviceToken(token).subscribe();
-      this.fcmRegistered = true;
-    } else if (this.permissionDenied) {
-      this.permissionMessage = 'تم رفض الإشعارات. يمكنك تفعيلها من إعدادات المتصفح.';
+      this.permissionMessage.set('تم تفعيل التذكيرات');
+      this.reminderService.registerDeviceToken(token).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+      this.fcmRegistered.set(true);
+    } else if (this.permissionDenied()) {
+      this.permissionMessage.set('تم رفض الإشعارات. يمكنك تفعيلها من إعدادات المتصفح.');
     }
   }
 
@@ -126,8 +121,8 @@ export class RemindersPage implements OnInit {
     if (this.reminderService.permission !== 'granted') return;
     const token = await this.reminderService.requestNotificationPermissionAndGetToken();
     if (token) {
-      this.reminderService.registerDeviceToken(token).subscribe();
-      this.fcmRegistered = true;
+      this.reminderService.registerDeviceToken(token).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+      this.fcmRegistered.set(true);
     }
   }
 }

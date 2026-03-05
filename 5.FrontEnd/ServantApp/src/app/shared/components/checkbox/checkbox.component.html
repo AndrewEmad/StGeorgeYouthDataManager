@@ -1,0 +1,20 @@
+<servant-form-field-wrapper
+  [label]="label()"
+  [controlId]="id()"
+  [required]="false"
+  [error]="error()"
+  [hint]="hint()"
+  [invalid]="!!error()">
+  <div class="checkbox-wrap">
+    <input
+      type="checkbox"
+      [id]="id()"
+      [checked]="checked()"
+      [disabled]="disabled()"
+      [attr.aria-invalid]="error() ? 'true' : null"
+      [attr.aria-describedby]="error() ? id() + '-error' : (hint() ? id() + '-hint' : null)"
+      (change)="onChangeEvent($event)"
+      (blur)="onBlur()"
+      class="checkbox-input" />
+  </div>
+</servant-form-field-wrapper>

@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthService, ProfileDto } from '../../services/auth.service';
+import { AuthService } from '../../core/services/auth.service';
+import type { ProfileDto } from '../../shared/models/auth.model';
 
 @Component({
   selector: 'app-profile',

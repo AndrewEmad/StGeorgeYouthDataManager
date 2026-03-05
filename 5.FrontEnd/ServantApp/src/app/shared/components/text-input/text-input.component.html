@@ -1,0 +1,19 @@
+<servant-form-field-wrapper
+  [label]="label()"
+  [controlId]="id()"
+  [required]="required()"
+  [error]="error()"
+  [hint]="hint()"
+  [invalid]="!!error()">
+  <input
+    [type]="type()"
+    [id]="id()"
+    [value]="value()"
+    [placeholder]="placeholder()"
+    [disabled]="disabled()"
+    [attr.aria-invalid]="error() ? 'true' : null"
+    [attr.aria-describedby]="error() ? id() + '-error' : (hint() ? id() + '-hint' : null)"
+    (input)="onInput($event)"
+    (blur)="onBlur()"
+    class="form-input" />
+</servant-form-field-wrapper>

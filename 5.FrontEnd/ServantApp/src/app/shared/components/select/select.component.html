@@ -1,0 +1,24 @@
+<servant-form-field-wrapper
+  [label]="label()"
+  [controlId]="id()"
+  [required]="required()"
+  [error]="error()"
+  [hint]="hint()"
+  [invalid]="!!error()">
+  <select
+    [id]="id()"
+    [value]="value() != null ? stringVal(value()) : ''"
+    [disabled]="disabled()"
+    [attr.aria-invalid]="error() ? 'true' : null"
+    [attr.aria-describedby]="error() ? id() + '-error' : (hint() ? id() + '-hint' : null)"
+    (change)="onChangeEvent($event)"
+    (blur)="onBlur()"
+    class="form-input">
+    @if (placeholder()) {
+      <option value="" disabled>{{ placeholder() }}</option>
+    }
+    @for (opt of options(); track opt.value) {
+      <option [value]="stringVal(opt.value)">{{ opt.label }}</option>
+    }
+  </select>
+</servant-form-field-wrapper>

@@ -1,0 +1,63 @@
+@if (loading()) {
+  <div class="table-loading">
+    <div class="table-loading-spinner"></div>
+    <p class="table-loading-msg">جاري التحميل…</p>
+  </div>
+} @else {
+  <div class="table-wrap">
+    @if (showExportButton() && data().length > 0) {
+      <div class="table-toolbar">
+        <button type="button" class="btn-outline sm" (click)="exportToCsv()">تصدير CSV</button>
+      </div>
+    }
+    @if (slicedData().length > 0) {
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              @for (col of columns(); track col.key) {
+                <th [style.width]="col.width ?? null" [class.sortable]="col.sortable" (click)="col.sortable ? toggleSort(col) : null">
+                  <span>{{ col.label }}</span>
+                  @if (col.sortable && sortKey() === col.key) {
+                    <span class="sort-icon" [attr.aria-label]="sortDirection() === 'asc' ? 'تصاعدي' : 'تنازلي'">
+                      {{ sortDirection() === 'asc' ? '↑' : '↓' }}
+                    </span>
+                  }
+                </th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of slicedData(); track $index) {
+              <tr>
+                @for (col of columns(); track col.key) {
+                  <td [style.width]="col.width ?? null">
+                    @if (col.template; as templateName) {
+                      @if (getColumnTemplate(templateName); as tpl) {
+                        <ng-container [ngTemplateOutlet]="tpl" [ngTemplateOutletContext]="{ $implicit: row, row }" />
+                      }
+                    } @else {
+                      {{ getCellValue(row, col.key) }}
+                    }
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (totalPages() > 1) {
+        <div class="table-pagination">
+          <button type="button" class="btn-outline sm" [disabled]="page() <= 1" (click)="setPage(page() - 1)">السابق</button>
+          <span class="page-info">{{ page() }} / {{ totalPages() }}</span>
+          <button type="button" class="btn-outline sm" [disabled]="page() >= totalPages()" (click)="setPage(page() + 1)">التالي</button>
+        </div>
+      }
+    } @else {
+      <div class="table-empty">
+        <span class="material-icons table-empty-icon">inbox</span>
+        <p>{{ emptyMessage() }}</p>
+      </div>
+    }
+  </div>
+}

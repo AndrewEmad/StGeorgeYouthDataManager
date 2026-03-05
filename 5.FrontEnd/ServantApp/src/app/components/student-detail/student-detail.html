@@ -1,380 +1,477 @@
-<div class="container animate-fade" *ngIf="!loading && student">
-  <div class="actions-bar" *ngIf="!editing && student">
-    <a [href]="'tel:' + student.phone" class="btn-primary">
-      <span class="material-icons">phone</span>
-      اتصال الآن
-    </a>
-    <button type="button" class="btn-outline" (click)="openAddCall()">تسجيل مكالمة</button>
-    <button type="button" class="btn-outline" (click)="openAddVisit()">تسجيل زيارة</button>
-    <button type="button" class="btn-outline" (click)="startEdit()" *ngIf="canEdit()">تعديل البيانات</button>
-    <button type="button" class="btn-outline danger" (click)="requestRemoval()" *ngIf="canEdit() && !removalRequest" [disabled]="requestRemovalLoading">
-      {{ requestRemovalLoading ? 'جاري الإرسال...' : 'طلب إزالة' }}
-    </button>
-    <p class="text-muted small" *ngIf="canEdit() && removalRequest">طلب إزالة قيد المراجعة</p>
-    <p class="error-msg" *ngIf="removalError">{{ removalError }}</p>
+@if (loading()) {
+  <div class="loader-container">
+    <div class="spinner"></div>
   </div>
+}
 
-  <div class="modal-overlay" *ngIf="showRemovalChoiceModal" (click)="showRemovalChoiceModal = false">
-    <div class="glass-card modal-content removal-choice-modal" (click)="$event.stopPropagation()">
-      <h3>نوع الإزالة</h3>
-      <p class="text-muted small">اختر ماذا تريد طلبه من الإدارة:</p>
-      <div class="removal-options">
-        <button type="button" class="btn-outline" (click)="submitRemovalRequest(0)" [disabled]="requestRemovalLoading">
-          إزالة من قائمتي فقط
-        </button>
-        <button type="button" class="btn-outline danger" (click)="submitRemovalRequest(1)" [disabled]="requestRemovalLoading">
-          إزالة من النظام
-        </button>
-      </div>
-      <button type="button" class="btn-outline sm mt-2" (click)="showRemovalChoiceModal = false">إلغاء</button>
-    </div>
-  </div>
-
-  <div class="grid-layout">
-    <section class="glass-card profile-section">
-      <div class="profile-header">
-        <div class="photo-and-name">
-          <ng-container *ngIf="!editing">
-            <div class="photo-view-only">
-              <img *ngIf="studentPhotoUrl" [src]="studentPhotoUrl" alt="صورة المخدوم" class="photo-img" />
-              <div *ngIf="!studentPhotoUrl" class="avatar">{{ student.fullName?.[0] }}</div>
-            </div>
-          </ng-container>
-          <ng-container *ngIf="editing">
-            <app-profile-photo-input
-              [previewUrl]="studentPhotoUrl"
-              [disabled]="uploadingPhoto"
-              label="تغيير صورة المخدوم"
-              (photoSelected)="onStudentPhotoSelected($event)"
-            />
-            <p *ngIf="uploadingPhoto" class="photo-saving-indicator"><span class="photo-spinner"></span> جاري الرفع...</p>
-            <span *ngIf="photoError" class="error-msg">{{ photoError }}</span>
-          </ng-container>
-        </div>
-        <h2>{{ student.fullName }}</h2>
-        <!-- <span class="badge">{{ student.college }}</span> -->
-      </div>
-
-      <div class="info-list" *ngIf="!editing">
-        <div class="info-item">
-          <span class="material-icons">person</span>
-          <div class="info-content">
-            <label>الاسم الكامل</label>
-            <p>{{ student.fullName }}</p>
-          </div>
-        </div>
-        <div class="info-item">
+@if (!loading() && student(); as student) {
+  <div class="container animate-fade">
+    @if (!editing()) {
+      <div class="actions-bar">
+        <a [href]="'tel:' + student.phone" class="btn-primary">
           <span class="material-icons">phone</span>
-          <div class="info-content">
-            <label>رقم الهاتف</label>
-            <p>{{ student.phone }}</p>
+          اتصال الآن
+        </a>
+        <button type="button" class="btn-outline" (click)="openAddCall()">تسجيل مكالمة</button>
+        <button type="button" class="btn-outline" (click)="openAddVisit()">تسجيل زيارة</button>
+        @if (canEdit()) {
+          <button type="button" class="btn-outline" (click)="startEdit()">تعديل البيانات</button>
+          @if (!removalRequest()) {
+            <button type="button" class="btn-outline danger" (click)="requestRemoval()" [disabled]="requestRemovalLoading()">
+              {{ requestRemovalLoading() ? 'جاري الإرسال...' : 'طلب إزالة' }}
+            </button>
+          }
+          @if (removalRequest()) {
+            <p class="text-muted small">طلب إزالة قيد المراجعة</p>
+          }
+        }
+        @if (removalError()) {
+          <p class="error-msg">{{ removalError() }}</p>
+        }
+      </div>
+    }
+
+    @if (showRemovalChoiceModal()) {
+      <div class="modal-overlay" (click)="closeRemovalModal()">
+        <div class="glass-card modal-content removal-choice-modal" (click)="$event.stopPropagation()">
+          <h3>نوع الإزالة</h3>
+          <p class="text-muted small">اختر ماذا تريد طلبه من الإدارة:</p>
+          <div class="removal-options">
+            <button type="button" class="btn-outline" (click)="submitRemovalRequest(0)" [disabled]="requestRemovalLoading()">
+              إزالة من قائمتي فقط
+            </button>
+            <button type="button" class="btn-outline danger" (click)="submitRemovalRequest(1)" [disabled]="requestRemovalLoading()">
+              إزالة من النظام
+            </button>
           </div>
-        </div>
-        <div class="info-item" *ngIf="student.secondaryPhone">
-          <span class="material-icons">phone_android</span>
-          <div class="info-content">
-            <label>هاتف بديل</label>
-            <p>{{ student.secondaryPhone }}</p>
-          </div>
-        </div>
-        <div class="info-item" *ngIf="student.address || student.area">
-          <span class="material-icons">place</span>
-          <div class="info-content">
-            <label>العنوان / المنطقة</label>
-            <p>{{ student.address || student.area }}</p>
-          </div>
-        </div>
-        <div class="info-item" *ngIf="student.college">
-          <span class="material-icons">school</span>
-          <div class="info-content">
-            <label>الكلية</label>
-            <p>{{ student.college }}</p>
-          </div>
-        </div>
-        <div class="info-item" *ngIf="student.academicYear">
-          <span class="material-icons">calendar_today</span>
-          <div class="info-content">
-            <label>السنة الدراسية</label>
-            <p>{{ student.academicYear }}</p>
-          </div>
-        </div>
-        <div class="info-item" *ngIf="student.confessionFather">
-          <span class="material-icons">church</span>
-          <div class="info-content">
-            <label>أب الاعتراف</label>
-            <p>{{ student.confessionFather }}</p>
-          </div>
-        </div>
-        <div class="info-item">
-          <span class="material-icons">cake</span>
-          <div class="info-content">
-            <label>تاريخ الميلاد</label>
-            <p>{{ student.birthDate | date }}</p>
-          </div>
-        </div>
-        <div class="info-item">
-          <span class="material-icons">wc</span>
-          <div class="info-content">
-            <label>النوع</label>
-            <p>{{ student.gender === 1 ? 'أنثى' : 'ذكر' }}</p>
-          </div>
-        </div>
-        <div class="info-item">
-          <span class="material-icons">event_available</span>
-          <div class="info-content">
-            <label>آخر حضور</label>
-            <p>{{ student.lastAttendanceDate ? (student.lastAttendanceDate | date:'dd/MM/yyyy') : '—' }}</p>
-          </div>
-        </div>
-        <div class="info-item" *ngIf="student.createdAt">
-          <span class="material-icons">add_circle</span>
-          <div class="info-content">
-            <label>تاريخ الإنشاء</label>
-            <p>{{ student.createdAt | date:'dd/MM/yyyy' }}</p>
-          </div>
-        </div>
-        <div class="info-item" *ngIf="student.updatedAt">
-          <span class="material-icons">edit_calendar</span>
-          <div class="info-content">
-            <label>آخر تحديث</label>
-            <p>{{ student.updatedAt | date:'dd/MM/yyyy' }}</p>
-          </div>
-        </div>
-        <div class="info-item" *ngIf="student.notes">
-          <span class="material-icons">note</span>
-          <div class="info-content">
-            <label>ملاحظات</label>
-            <p>{{ student.notes }}</p>
-          </div>
+          <button type="button" class="btn-outline sm mt-2" (click)="closeRemovalModal()">إلغاء</button>
         </div>
       </div>
+    }
 
-      <div class="edit-form" *ngIf="editing">
-        <div class="form-group">
-          <label>الاسم الكامل</label>
-          <input type="text" [(ngModel)]="editForm.fullName" class="form-input" />
-        </div>
-        <div class="form-group">
-          <label>الهاتف</label>
-          <input type="text" [(ngModel)]="editForm.phone" class="form-input" />
-        </div>
-        <div class="form-group">
-          <label>العنوان</label>
-          <input type="text" [(ngModel)]="editForm.address" class="form-input" />
-        </div>
-        <div class="form-group">
-          <label>المنطقة</label>
-          <input type="text" [(ngModel)]="editForm.area" class="form-input" />
-        </div>
-        <div class="form-group">
-          <label>الكلية</label>
-          <input type="text" [(ngModel)]="editForm.college" class="form-input" />
-        </div>
-        <div class="form-group">
-          <label>السنة الدراسية</label>
-          <input type="text" [(ngModel)]="editForm.academicYear" class="form-input" />
-        </div>
-        <div class="form-group">
-          <label>أب الاعتراف</label>
-          <input type="text" [(ngModel)]="editForm.confessionFather" class="form-input" />
-        </div>
-        <div class="form-group">
-          <label>النوع</label>
-          <select [(ngModel)]="editForm.gender" class="form-input">
-            <option [value]="0">ذكر</option>
-            <option [value]="1">أنثى</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>تاريخ الميلاد</label>
-          <span class="date-input-wrap" (click)="birthDateInput.showPicker()"><input #birthDateInput type="date" [(ngModel)]="editForm.birthDate" class="form-input" /></span>
-        </div>
-        <p class="error-msg" *ngIf="editError">{{ editError }}</p>
-        <div class="form-actions">
-          <button type="button" class="btn-outline" (click)="cancelEdit()">إلغاء</button>
-          <button type="button" class="btn-primary" (click)="saveEdit()" [disabled]="saveEditLoading">
-            {{ saveEditLoading ? 'جاري الحفظ...' : 'حفظ' }}
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <div class="history-container">
-      <section class="glass-card history-section">
-        <h3>سجل المكالمات</h3>
-        <div class="timeline" *ngIf="callHistory?.length">
-          <div class="timeline-item" *ngFor="let call of callHistory">
-            <div class="timeline-icon">
-              <span class="material-icons">call</span>
-            </div>
-            <div class="timeline-content">
-              <h4>{{ call.callDate | date:'short' }}</h4>
-              <p class="meta"><span class="label">الحالة:</span> {{ getCallStatusLabel(call.callStatus) }}</p>
-              <p *ngIf="call.notes" class="notes">{{ call.notes }}</p>
-              <p *ngIf="call.nextFollowUpDate" class="next-date"><span class="label">موعد المتابعة القادمة:</span> {{ call.nextFollowUpDate | date:'short' }}</p>
-            </div>
-          </div>
-        </div>
-        <p *ngIf="!callHistory?.length" class="text-muted">لا يوجد سجل مكالمات بعد</p>
-      </section>
-      <section class="glass-card history-section">
-        <h3>سجل الزيارات</h3>
-        <div class="timeline" *ngIf="visitHistory?.length">
-          <div class="timeline-item" *ngFor="let visit of visitHistory">
-            <div class="timeline-icon visit">
-              <span class="material-icons">home</span>
-            </div>
-            <div class="timeline-content">
-              <div class="timeline-content-header">
-                <h4>{{ visit.visitDate | date:'short' }}</h4>
-                <button *ngIf="canEditVisit(visit)" type="button" class="btn-icon-edit" (click)="openEditVisit(visit)" title="تعديل الزيارة">
-                  <span class="material-icons">edit</span>
-                </button>
+    <div class="grid-layout">
+      <section class="glass-card profile-section">
+        <div class="profile-header">
+          <div class="photo-and-name">
+            @if (!editing()) {
+              <div class="photo-view-only">
+                @if (studentPhotoUrl()) {
+                  <img [src]="studentPhotoUrl()" alt="صورة المخدوم" class="photo-img" />
+                } @else {
+                  <div class="avatar">{{ student.fullName[0] }}</div>
+                }
               </div>
-              <p class="meta"><span class="label">النتيجة:</span> {{ getVisitOutcomeLabel(visit.visitOutcome) }}</p>
-              <p *ngIf="visit.notes" class="notes">{{ visit.notes }}</p>
-              <p *ngIf="visit.nextVisitDate" class="next-date"><span class="label">موعد الزيارة القادمة:</span> {{ visit.nextVisitDate | date:'short' }}</p>
+            }
+            @if (editing()) {
+              <app-profile-photo-input
+                [previewUrl]="studentPhotoUrl()"
+                [disabled]="uploadingPhoto()"
+                label="تغيير صورة المخدوم"
+                (photoSelected)="onStudentPhotoSelected($event)"
+              />
+              @if (uploadingPhoto()) {
+                <p class="photo-saving-indicator"><span class="photo-spinner"></span> جاري الرفع...</p>
+              }
+              @if (photoError()) {
+                <span class="error-msg">{{ photoError() }}</span>
+              }
+            }
+          </div>
+          <h2>{{ student.fullName }}</h2>
+        </div>
+
+        @if (!editing()) {
+          <div class="info-list">
+            <div class="info-item">
+              <span class="material-icons">person</span>
+              <div class="info-content">
+                <label>الاسم الكامل</label>
+                <p>{{ student.fullName }}</p>
+              </div>
+            </div>
+            <div class="info-item">
+              <span class="material-icons">phone</span>
+              <div class="info-content">
+                <label>رقم الهاتف</label>
+                <p>{{ student.phone }}</p>
+              </div>
+            </div>
+            @if (student.secondaryPhone) {
+              <div class="info-item">
+                <span class="material-icons">phone_android</span>
+                <div class="info-content">
+                  <label>هاتف بديل</label>
+                  <p>{{ student.secondaryPhone }}</p>
+                </div>
+              </div>
+            }
+            @if (student.address || student.area) {
+              <div class="info-item">
+                <span class="material-icons">place</span>
+                <div class="info-content">
+                  <label>العنوان / المنطقة</label>
+                  <p>{{ student.address || student.area }}</p>
+                </div>
+              </div>
+            }
+            @if (student.college) {
+              <div class="info-item">
+                <span class="material-icons">school</span>
+                <div class="info-content">
+                  <label>الكلية</label>
+                  <p>{{ student.college }}</p>
+                </div>
+              </div>
+            }
+            @if (student.academicYear) {
+              <div class="info-item">
+                <span class="material-icons">calendar_today</span>
+                <div class="info-content">
+                  <label>السنة الدراسية</label>
+                  <p>{{ student.academicYear }}</p>
+                </div>
+              </div>
+            }
+            @if (student.confessionFather) {
+              <div class="info-item">
+                <span class="material-icons">church</span>
+                <div class="info-content">
+                  <label>أب الاعتراف</label>
+                  <p>{{ student.confessionFather }}</p>
+                </div>
+              </div>
+            }
+            <div class="info-item">
+              <span class="material-icons">cake</span>
+              <div class="info-content">
+                <label>تاريخ الميلاد</label>
+                <p>{{ student.birthDate | date }}</p>
+              </div>
+            </div>
+            <div class="info-item">
+              <span class="material-icons">wc</span>
+              <div class="info-content">
+                <label>النوع</label>
+                <p>{{ student.gender === 1 ? 'أنثى' : 'ذكر' }}</p>
+              </div>
+            </div>
+            <div class="info-item">
+              <span class="material-icons">event_available</span>
+              <div class="info-content">
+                <label>آخر حضور</label>
+                <p>{{ student.lastAttendanceDate ? (student.lastAttendanceDate | date:'dd/MM/yyyy') : '—' }}</p>
+              </div>
+            </div>
+            @if (student.createdAt) {
+              <div class="info-item">
+                <span class="material-icons">add_circle</span>
+                <div class="info-content">
+                  <label>تاريخ الإنشاء</label>
+                  <p>{{ student.createdAt | date:'dd/MM/yyyy' }}</p>
+                </div>
+              </div>
+            }
+            @if (student.updatedAt) {
+              <div class="info-item">
+                <span class="material-icons">edit_calendar</span>
+                <div class="info-content">
+                  <label>آخر تحديث</label>
+                  <p>{{ student.updatedAt | date:'dd/MM/yyyy' }}</p>
+                </div>
+              </div>
+            }
+            @if (student.notes) {
+              <div class="info-item">
+                <span class="material-icons">note</span>
+                <div class="info-content">
+                  <label>ملاحظات</label>
+                  <p>{{ student.notes }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        @if (editing()) {
+          <div class="edit-form">
+            @let form = editForm();
+            <div class="form-group">
+              <label>الاسم الكامل</label>
+              <input type="text" [value]="form['fullName']" (input)="setEditFormKey('fullName', $any($event.target).value)" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label>الهاتف</label>
+              <input type="text" [value]="form['phone']" (input)="setEditFormKey('phone', $any($event.target).value)" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label>العنوان</label>
+              <input type="text" [value]="form['address']" (input)="setEditFormKey('address', $any($event.target).value)" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label>المنطقة</label>
+              <input type="text" [value]="form['area']" (input)="setEditFormKey('area', $any($event.target).value)" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label>الكلية</label>
+              <input type="text" [value]="form['college']" (input)="setEditFormKey('college', $any($event.target).value)" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label>السنة الدراسية</label>
+              <input type="text" [value]="form['academicYear']" (input)="setEditFormKey('academicYear', $any($event.target).value)" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label>أب الاعتراف</label>
+              <input type="text" [value]="form['confessionFather']" (input)="setEditFormKey('confessionFather', $any($event.target).value)" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label>النوع</label>
+              <select [value]="form['gender']" (change)="setEditFormKey('gender', +$any($event.target).value)" class="form-input">
+                <option [value]="0">ذكر</option>
+                <option [value]="1">أنثى</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>تاريخ الميلاد</label>
+              <span class="date-input-wrap" (click)="birthDateInput.showPicker()"><input #birthDateInput type="date" [value]="form['birthDate']" (input)="setEditFormKey('birthDate', $any($event.target).value)" class="form-input" /></span>
+            </div>
+            @if (editError()) {
+              <p class="error-msg">{{ editError() }}</p>
+            }
+            <div class="form-actions">
+              <button type="button" class="btn-outline" (click)="cancelEdit()">إلغاء</button>
+              <button type="button" class="btn-primary" (click)="saveEdit()" [disabled]="saveEditLoading()">
+                {{ saveEditLoading() ? 'جاري الحفظ...' : 'حفظ' }}
+              </button>
             </div>
           </div>
-        </div>
-        <p *ngIf="!visitHistory?.length" class="text-muted">لا يوجد سجل زيارات بعد</p>
+        }
       </section>
+
+      <div class="history-container">
+        <section class="glass-card history-section">
+          <h3>سجل المكالمات</h3>
+          @if (callHistory().length) {
+            <div class="timeline">
+              @for (call of callHistory(); track call.id) {
+                <div class="timeline-item">
+                  <div class="timeline-icon">
+                    <span class="material-icons">call</span>
+                  </div>
+                  <div class="timeline-content">
+                    <h4>{{ call.callDate | date:'short' }}</h4>
+                    <p class="meta"><span class="label">الحالة:</span> {{ call.callStatus | callStatusLabel }}</p>
+                    @if (call.notes) {
+                      <p class="notes">{{ call.notes }}</p>
+                    }
+                    @if (call.nextFollowUpDate) {
+                      <p class="next-date"><span class="label">موعد المتابعة القادمة:</span> {{ call.nextFollowUpDate | date:'short' }}</p>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="text-muted">لا يوجد سجل مكالمات بعد</p>
+          }
+        </section>
+        <section class="glass-card history-section">
+          <h3>سجل الزيارات</h3>
+          @if (visitHistory().length) {
+            <div class="timeline">
+              @for (visit of visitHistory(); track visit.id) {
+                <div class="timeline-item">
+                  <div class="timeline-icon visit">
+                    <span class="material-icons">home</span>
+                  </div>
+                  <div class="timeline-content">
+                    <div class="timeline-content-header">
+                      <h4>{{ visit.visitDate | date:'short' }}</h4>
+                      @if (canEditVisit(visit)) {
+                        <button type="button" class="btn-icon-edit" (click)="openEditVisit(visit)" title="تعديل الزيارة">
+                          <span class="material-icons">edit</span>
+                        </button>
+                      }
+                    </div>
+                    <p class="meta"><span class="label">النتيجة:</span> {{ visit.visitOutcome | visitOutcomeLabel }}</p>
+                    @if (visit.notes) {
+                      <p class="notes">{{ visit.notes }}</p>
+                    }
+                    @if (visit.nextVisitDate) {
+                      <p class="next-date"><span class="label">موعد الزيارة القادمة:</span> {{ visit.nextVisitDate | date:'short' }}</p>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="text-muted">لا يوجد سجل زيارات بعد</p>
+          }
+        </section>
+      </div>
     </div>
   </div>
-</div>
-
-<div class="loader-container" *ngIf="loading">
-  <div class="spinner"></div>
-</div>
+}
 
 <!-- Add Call Modal -->
-<div class="modal-overlay" *ngIf="showAddCall" (click)="closeAddCall()">
-  <div class="modal glass-card" (click)="$event.stopPropagation()">
-    <h3>تسجيل مكالمة</h3>
-    <div class="form-group">
-      <label>التاريخ والوقت</label>
-      <span class="date-input-wrap" (click)="callDateInput.showPicker()"><input #callDateInput type="datetime-local" [(ngModel)]="callDate" class="form-input" /></span>
-    </div>
-    <div class="form-group">
-      <label>الحالة</label>
-      <select [(ngModel)]="callStatus" class="form-input">
-        <option *ngFor="let o of callStatusOptions" [value]="o.value">{{ o.label }}</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>ملاحظات</label>
-      <textarea [(ngModel)]="callNotes" class="form-input" rows="3"></textarea>
-    </div>
-    <div class="form-group">
-      <label>موعد المتابعة القادمة (اختياري)</label>
-      <span class="date-input-wrap" (click)="callNextDateInput.showPicker()"><input #callNextDateInput type="datetime-local" [(ngModel)]="callNextDate" class="form-input" /></span>
-    </div>
-    <p class="error-msg" *ngIf="callError">{{ callError }}</p>
-    <div class="modal-actions">
-      <button type="button" class="btn-outline" (click)="closeAddCall()">إلغاء</button>
-      <button type="button" class="btn-primary" (click)="submitCall()" [disabled]="callSaving">{{ callSaving ? 'جاري الحفظ...' : 'حفظ' }}</button>
+@if (showAddCall()) {
+  <div class="modal-overlay" (click)="closeAddCall()">
+    <div class="modal glass-card" (click)="$event.stopPropagation()">
+      <h3>تسجيل مكالمة</h3>
+      <div class="form-group">
+        <label>التاريخ والوقت</label>
+        <span class="date-input-wrap" (click)="callDateInput.showPicker()"><input #callDateInput type="datetime-local" [value]="callDate()" (input)="callDate.set($any($event.target).value)" class="form-input" /></span>
+      </div>
+      <div class="form-group">
+        <label>الحالة</label>
+        <select [value]="callStatus()" (change)="callStatus.set(+$any($event.target).value)" class="form-input">
+          @for (o of callStatusOptions; track o.value) {
+            <option [value]="o.value">{{ o.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label>ملاحظات</label>
+        <textarea [value]="callNotes()" (input)="callNotes.set($any($event.target).value)" class="form-input" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label>موعد المتابعة القادمة (اختياري)</label>
+        <span class="date-input-wrap" (click)="callNextDateInput.showPicker()"><input #callNextDateInput type="datetime-local" [value]="callNextDate()" (input)="callNextDate.set($any($event.target).value)" class="form-input" /></span>
+      </div>
+      @if (callError()) {
+        <p class="error-msg">{{ callError() }}</p>
+      }
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" (click)="closeAddCall()">إلغاء</button>
+        <button type="button" class="btn-primary" (click)="submitCall()" [disabled]="callSaving()">{{ callSaving() ? 'جاري الحفظ...' : 'حفظ' }}</button>
+      </div>
     </div>
   </div>
-</div>
+}
 
 <!-- Add Visit Modal -->
-<div class="modal-overlay" *ngIf="showAddVisit" (click)="closeAddVisit()">
-  <div class="modal glass-card" (click)="$event.stopPropagation()">
-    <h3>تسجيل زيارة</h3>
-    <div class="form-group">
-      <label>التاريخ والوقت</label>
-      <span class="date-input-wrap" (click)="visitDateInput.showPicker()"><input #visitDateInput type="datetime-local" [(ngModel)]="visitDate" class="form-input" /></span>
-    </div>
-    <div class="form-group">
-      <label>النتيجة</label>
-      <select [(ngModel)]="visitOutcome" class="form-input">
-        <option *ngFor="let o of visitOutcomeOptions" [value]="o.value">{{ o.label }}</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>ملاحظات</label>
-      <textarea [(ngModel)]="visitNotes" class="form-input" rows="3"></textarea>
-    </div>
-    <div class="form-group">
-      <label>موعد الزيارة القادمة (اختياري)</label>
-      <span class="date-input-wrap" (click)="visitNextDateInput.showPicker()"><input #visitNextDateInput type="datetime-local" [(ngModel)]="visitNextDate" class="form-input" /></span>
-    </div>
-    <div class="form-group participant-picker-wrap" *ngIf="servantList.length">
-      <label>الخدام المرافقين في الزيارة</label>
-      <div class="participant-search-wrap">
-        <input
-          type="text"
-          class="form-input participant-search-input"
-          [(ngModel)]="participantSearchQuery"
-          placeholder="بحث بالاسم..."
-          autocomplete="off"
-        />
+@if (showAddVisit()) {
+  <div class="modal-overlay" (click)="closeAddVisit()">
+    <div class="modal glass-card" (click)="$event.stopPropagation()">
+      <h3>تسجيل زيارة</h3>
+      <div class="form-group">
+        <label>التاريخ والوقت</label>
+        <span class="date-input-wrap" (click)="visitDateInput.showPicker()"><input #visitDateInput type="datetime-local" [value]="visitDate()" (input)="visitDate.set($any($event.target).value)" class="form-input" /></span>
       </div>
-      <div class="participant-list-scroll">
-        <div class="participant-checkboxes">
-          <label *ngFor="let s of filteredServantList" class="participant-check">
-            <input type="checkbox" [checked]="isParticipantSelected(s.id)" (change)="toggleVisitParticipant(s.id)" class="participant-checkbox" />
-            <span class="participant-name">{{ s.fullName }}</span>
-          </label>
+      <div class="form-group">
+        <label>النتيجة</label>
+        <select [value]="visitOutcome()" (change)="visitOutcome.set(+$any($event.target).value)" class="form-input">
+          @for (o of visitOutcomeOptions; track o.value) {
+            <option [value]="o.value">{{ o.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label>ملاحظات</label>
+        <textarea [value]="visitNotes()" (input)="visitNotes.set($any($event.target).value)" class="form-input" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label>موعد الزيارة القادمة (اختياري)</label>
+        <span class="date-input-wrap" (click)="visitNextDateInput.showPicker()"><input #visitNextDateInput type="datetime-local" [value]="visitNextDate()" (input)="visitNextDate.set($any($event.target).value)" class="form-input" /></span>
+      </div>
+      @if (servantList().length) {
+        <div class="form-group participant-picker-wrap">
+          <label>الخدام المرافقين في الزيارة</label>
+          <div class="participant-search-wrap">
+            <input
+              type="text"
+              class="form-input participant-search-input"
+              [value]="participantSearchQuery()"
+              (input)="participantSearchQuery.set($any($event.target).value)"
+              placeholder="بحث بالاسم..."
+              autocomplete="off"
+            />
+          </div>
+          <div class="participant-list-scroll">
+            <div class="participant-checkboxes">
+              @for (s of filteredServantList(); track s.id) {
+                <label class="participant-check">
+                  <input type="checkbox" [checked]="isParticipantSelected(s.id)" (change)="toggleVisitParticipant(s.id)" class="participant-checkbox" />
+                  <span class="participant-name">{{ s.fullName }}</span>
+                </label>
+              }
+            </div>
+            @if (filteredServantList().length === 0) {
+              <p class="participant-no-results">لا توجد نتائج</p>
+            }
+          </div>
         </div>
-        <p *ngIf="filteredServantList.length === 0" class="participant-no-results">لا توجد نتائج</p>
+      }
+      @if (visitError()) {
+        <p class="error-msg">{{ visitError() }}</p>
+      }
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" (click)="closeAddVisit()">إلغاء</button>
+        <button type="button" class="btn-primary" (click)="submitVisit()" [disabled]="visitSaving()">{{ visitSaving() ? 'جاري الحفظ...' : 'حفظ' }}</button>
       </div>
-    </div>
-    <p class="error-msg" *ngIf="visitError">{{ visitError }}</p>
-    <div class="modal-actions">
-      <button type="button" class="btn-outline" (click)="closeAddVisit()">إلغاء</button>
-      <button type="button" class="btn-primary" (click)="submitVisit()" [disabled]="visitSaving">{{ visitSaving ? 'جاري الحفظ...' : 'حفظ' }}</button>
     </div>
   </div>
-</div>
+}
 
 <!-- Edit Visit Modal -->
-<div class="modal-overlay" *ngIf="showEditVisit" (click)="closeEditVisit()">
-  <div class="modal glass-card" (click)="$event.stopPropagation()">
-    <h3>تعديل الزيارة</h3>
-    <div class="form-group">
-      <label>التاريخ والوقت</label>
-      <span class="date-input-wrap" (click)="editVisitDateInput.showPicker()"><input #editVisitDateInput type="datetime-local" [(ngModel)]="visitDate" class="form-input" /></span>
-    </div>
-    <div class="form-group">
-      <label>النتيجة</label>
-      <select [(ngModel)]="visitOutcome" class="form-input">
-        <option *ngFor="let o of visitOutcomeOptions" [value]="o.value">{{ o.label }}</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>ملاحظات</label>
-      <textarea [(ngModel)]="visitNotes" class="form-input" rows="3"></textarea>
-    </div>
-    <div class="form-group">
-      <label>موعد الزيارة القادمة (اختياري)</label>
-      <span class="date-input-wrap" (click)="editVisitNextDateInput.showPicker()"><input #editVisitNextDateInput type="datetime-local" [(ngModel)]="visitNextDate" class="form-input" /></span>
-    </div>
-    <div class="form-group participant-picker-wrap" *ngIf="servantList.length">
-      <label>الخدام المرافقين في الزيارة</label>
-      <div class="participant-search-wrap">
-        <input
-          type="text"
-          class="form-input participant-search-input"
-          [(ngModel)]="participantSearchQuery"
-          placeholder="بحث بالاسم..."
-          autocomplete="off"
-        />
+@if (showEditVisit()) {
+  <div class="modal-overlay" (click)="closeEditVisit()">
+    <div class="modal glass-card" (click)="$event.stopPropagation()">
+      <h3>تعديل الزيارة</h3>
+      <div class="form-group">
+        <label>التاريخ والوقت</label>
+        <span class="date-input-wrap" (click)="editVisitDateInput.showPicker()"><input #editVisitDateInput type="datetime-local" [value]="visitDate()" (input)="visitDate.set($any($event.target).value)" class="form-input" /></span>
       </div>
-      <div class="participant-list-scroll">
-        <div class="participant-checkboxes">
-          <label *ngFor="let s of filteredServantList" class="participant-check">
-            <input type="checkbox" [checked]="isParticipantSelected(s.id)" (change)="toggleVisitParticipant(s.id)" class="participant-checkbox" />
-            <span class="participant-name">{{ s.fullName }}</span>
-          </label>
+      <div class="form-group">
+        <label>النتيجة</label>
+        <select [value]="visitOutcome()" (change)="visitOutcome.set(+$any($event.target).value)" class="form-input">
+          @for (o of visitOutcomeOptions; track o.value) {
+            <option [value]="o.value">{{ o.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label>ملاحظات</label>
+        <textarea [value]="visitNotes()" (input)="visitNotes.set($any($event.target).value)" class="form-input" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label>موعد الزيارة القادمة (اختياري)</label>
+        <span class="date-input-wrap" (click)="editVisitNextDateInput.showPicker()"><input #editVisitNextDateInput type="datetime-local" [value]="visitNextDate()" (input)="visitNextDate.set($any($event.target).value)" class="form-input" /></span>
+      </div>
+      @if (servantList().length) {
+        <div class="form-group participant-picker-wrap">
+          <label>الخدام المرافقين في الزيارة</label>
+          <div class="participant-search-wrap">
+            <input
+              type="text"
+              class="form-input participant-search-input"
+              [value]="participantSearchQuery()"
+              (input)="participantSearchQuery.set($any($event.target).value)"
+              placeholder="بحث بالاسم..."
+              autocomplete="off"
+            />
+          </div>
+          <div class="participant-list-scroll">
+            <div class="participant-checkboxes">
+              @for (s of filteredServantList(); track s.id) {
+                <label class="participant-check">
+                  <input type="checkbox" [checked]="isParticipantSelected(s.id)" (change)="toggleVisitParticipant(s.id)" class="participant-checkbox" />
+                  <span class="participant-name">{{ s.fullName }}</span>
+                </label>
+              }
+            </div>
+            @if (filteredServantList().length === 0) {
+              <p class="participant-no-results">لا توجد نتائج</p>
+            }
+          </div>
         </div>
-        <p *ngIf="filteredServantList.length === 0" class="participant-no-results">لا توجد نتائج</p>
+      }
+      @if (visitError()) {
+        <p class="error-msg">{{ visitError() }}</p>
+      }
+      <div class="modal-actions">
+        <button type="button" class="btn-outline" (click)="closeEditVisit()">إلغاء</button>
+        <button type="button" class="btn-primary" (click)="submitEditVisit()" [disabled]="visitSaving()">{{ visitSaving() ? 'جاري الحفظ...' : 'حفظ التعديلات' }}</button>
       </div>
-    </div>
-    <p class="error-msg" *ngIf="visitError">{{ visitError }}</p>
-    <div class="modal-actions">
-      <button type="button" class="btn-outline" (click)="closeEditVisit()">إلغاء</button>
-      <button type="button" class="btn-primary" (click)="submitEditVisit()" [disabled]="visitSaving">{{ visitSaving ? 'جاري الحفظ...' : 'حفظ التعديلات' }}</button>
     </div>
   </div>
-</div>
+}

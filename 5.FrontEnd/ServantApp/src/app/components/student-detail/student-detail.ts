@@ -1,397 +1,429 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin } from 'rxjs';
 import { StudentQueriesService } from '../../services/student-queries.service';
 import { FollowUpService } from '../../services/follow-up.service';
 import { StudentCommandsService } from '../../services/student-commands.service';
 import { RemovalRequestService } from '../../services/removal-request.service';
-import { AuthService } from '../../services/auth.service';
-import { ProfilePhotoInputComponent } from '../common/common';
-
-const CALL_STATUS_OPTIONS = [
-  { value: 0, label: 'لم يجب' },
-  { value: 1, label: 'أجاب' },
-  { value: 2, label: 'مشغول' },
-  { value: 3, label: 'مغلق' },
-  { value: 4, label: 'رقم خاطئ' }
-];
-
-const VISIT_OUTCOME_OPTIONS = [
-  { value: 0, label: 'ناجحة' },
-  { value: 1, label: 'غير موجود' },
-  { value: 2, label: 'رفض الزيارة' },
-  { value: 3, label: 'مؤجلة' }
-];
+import { AuthService } from '../../core/services/auth.service';
+import { DatePipe } from '@angular/common';
+import { ProfilePhotoInputComponent } from '../../shared/components';
+import { CallStatusLabelPipe, VisitOutcomeLabelPipe } from '../../shared/pipes';
+import type { Student } from '../../shared/models/student.model';
+import type { CallRecord, VisitRecord } from '../../shared/models/follow-up.model';
+import { CALL_STATUS_OPTIONS, VISIT_OUTCOME_OPTIONS } from '../../shared/models/follow-up.model';
+import { fromIsoToDateOnly } from '../../shared/utils/date.utils';
 
 @Component({
   selector: 'app-student-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, ProfilePhotoInputComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [DatePipe, ProfilePhotoInputComponent, CallStatusLabelPipe, VisitOutcomeLabelPipe],
   templateUrl: './student-detail.html',
-  styleUrls: ['./student-detail.css']
+  styleUrls: ['./student-detail.css'],
 })
-export class StudentDetailComponent implements OnInit, OnDestroy {
-  student: any = null;
-  studentPhotoUrl: string | null = null;
-  uploadingPhoto = false;
-  photoError = '';
-  callHistory: any[] = [];
-  visitHistory: any[] = [];
-  loading = true;
-  editing = false;
-  editForm: any = {};
-  showAddCall = false;
-  showAddVisit = false;
-  showEditVisit = false;
-  visitToEdit: any = null;
-  showRemovalChoiceModal = false;
-  removalRequest: any = null;
+export class StudentDetailComponent {
+  private readonly route = inject(ActivatedRoute);
+  private readonly studentQueriesService = inject(StudentQueriesService);
+  private readonly followUpService = inject(FollowUpService);
+  private readonly studentCommandsService = inject(StudentCommandsService);
+  private readonly removalRequestService = inject(RemovalRequestService);
+  private readonly authService = inject(AuthService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  callDate = '';
-  callStatus = 0;
-  callNotes = '';
-  callNextDate = '';
-  callSaving = false;
-  callError = '';
+  readonly student = signal<Student | null>(null);
+  readonly studentPhotoUrl = signal<string | null>(null);
+  readonly uploadingPhoto = signal(false);
+  readonly photoError = signal('');
+  readonly callHistory = signal<CallRecord[]>([]);
+  readonly visitHistory = signal<VisitRecord[]>([]);
+  readonly loading = signal(true);
+  readonly editing = signal(false);
+  readonly editForm = signal<Record<string, unknown>>({});
+  readonly showAddCall = signal(false);
+  readonly showAddVisit = signal(false);
+  readonly showEditVisit = signal(false);
+  readonly visitToEdit = signal<VisitRecord | null>(null);
+  readonly showRemovalChoiceModal = signal(false);
+  readonly removalRequest = signal<{ status: string } | null>(null);
 
-  visitDate = '';
-  visitOutcome = 0;
-  visitNotes = '';
-  visitNextDate = '';
-  visitSaving = false;
-  visitError = '';
-  servantList: { id: string; fullName: string }[] = [];
-  selectedParticipantIds: string[] = [];
-  participantSearchQuery = '';
+  readonly callDate = signal('');
+  readonly callStatus = signal(0);
+  readonly callNotes = signal('');
+  readonly callNextDate = signal('');
+  readonly callSaving = signal(false);
+  readonly callError = signal('');
 
-  saveEditLoading = false;
-  editError = '';
-  requestRemovalLoading = false;
-  removalError = '';
+  readonly visitDate = signal('');
+  readonly visitOutcome = signal(0);
+  readonly visitNotes = signal('');
+  readonly visitNextDate = signal('');
+  readonly visitSaving = signal(false);
+  readonly visitError = signal('');
+  readonly servantList = signal<{ id: string; fullName: string }[]>([]);
+  readonly selectedParticipantIds = signal<string[]>([]);
+  readonly participantSearchQuery = signal('');
+
+  readonly saveEditLoading = signal(false);
+  readonly editError = signal('');
+  readonly requestRemovalLoading = signal(false);
+  readonly removalError = signal('');
 
   readonly callStatusOptions = CALL_STATUS_OPTIONS;
   readonly visitOutcomeOptions = VISIT_OUTCOME_OPTIONS;
 
-  constructor(
-    private route: ActivatedRoute,
-    private studentQueriesService: StudentQueriesService,
-    private followUpService: FollowUpService,
-    private studentCommandsService: StudentCommandsService,
-    private removalRequestService: RemovalRequestService,
-    private authService: AuthService
-  ) {}
+  readonly filteredServantList = computed(() => {
+    const q = (this.participantSearchQuery() || '').trim().toLowerCase();
+    const list = this.servantList();
+    if (!q) return list;
+    return list.filter((s) => (s.fullName || '').toLowerCase().includes(q));
+  });
 
-  ngOnInit() {
+  readonly canEdit = computed(() => {
+    const uid = this.authService.currentUser()?.userId;
+    return !!uid && this.student()?.servantId === uid;
+  });
+
+  constructor() {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.loadStudent(id);
-    }
-    this.followUpService.getServants().subscribe({
-      next: (list) => (this.servantList = list ?? []),
-      error: () => (this.servantList = [])
-    });
+    if (id) this.loadStudent(id);
+    this.followUpService
+      .getServants()
+      .pipe(takeUntilDestroyed())
+      .subscribe({
+        next: (list) => this.servantList.set(list ?? []),
+        error: () => this.servantList.set([]),
+      });
   }
 
-  ngOnDestroy() {
-    if (this.studentPhotoUrl) URL.revokeObjectURL(this.studentPhotoUrl);
+  onStudentPhotoSelected(file: File): void {
+    const s = this.student();
+    if (!s?.id) return;
+    this.photoError.set('');
+    this.uploadingPhoto.set(true);
+    this.studentCommandsService
+      .uploadPhoto(s.id, file)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.student.update((prev) => (prev ? { ...prev, photoPath: res.photoPath } : null));
+          const url = this.studentPhotoUrl();
+          if (url) URL.revokeObjectURL(url);
+          this.studentQueriesService
+            .getPhotoBlobUrl(s.id)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((url) => this.studentPhotoUrl.set(url));
+          this.uploadingPhoto.set(false);
+        },
+        error: (err) => {
+          this.photoError.set(err.error?.message || 'فشل رفع الصورة');
+          this.uploadingPhoto.set(false);
+        },
+      });
   }
 
-  onStudentPhotoSelected(file: File) {
-    if (!this.student?.id) return;
-    this.photoError = '';
-    this.uploadingPhoto = true;
-    this.studentCommandsService.uploadPhoto(this.student.id, file).subscribe({
-      next: (res) => {
-        this.student.photoPath = res.photoPath;
-        if (this.studentPhotoUrl) URL.revokeObjectURL(this.studentPhotoUrl);
-        this.studentQueriesService.getPhotoBlobUrl(this.student.id).subscribe(url => this.studentPhotoUrl = url);
-        this.uploadingPhoto = false;
-      },
-      error: (err) => {
-        this.photoError = err.error?.message || 'فشل رفع الصورة';
-        this.uploadingPhoto = false;
-      }
-    });
+  loadStudent(id: string): void {
+    this.loading.set(true);
+    this.studentQueriesService
+      .getById(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data: Student) => {
+          this.student.set(data);
+          if (data.photoPath) {
+            this.studentQueriesService
+              .getPhotoBlobUrl(id)
+              .pipe(takeUntilDestroyed(this.destroyRef))
+              .subscribe((url) => this.studentPhotoUrl.set(url));
+          } else {
+            this.studentPhotoUrl.set(null);
+          }
+          this.editForm.set({
+            id: data.id,
+            fullName: data.fullName,
+            phone: data.phone,
+            address: data.address || '',
+            area: data.area || '',
+            college: data.college || '',
+            academicYear: data.academicYear || '',
+            confessionFather: data.confessionFather || '',
+            gender: data.gender ?? 0,
+            birthDate: data.birthDate ? fromIsoToDateOnly(data.birthDate) : '',
+          });
+          this.loadHistory(id);
+          this.removalRequestService
+            .getPendingForStudent(id)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({ next: (req) => this.removalRequest.set(req), error: () => {} });
+        },
+        error: () => this.loading.set(false),
+      });
   }
 
-  loadStudent(id: string) {
-    this.loading = true;
-    this.studentQueriesService.getById(id).subscribe({
-      next: (data: any) => {
-        this.student = data;
-        if (data.photoPath) {
-          this.studentQueriesService.getPhotoBlobUrl(id).subscribe(url => this.studentPhotoUrl = url);
-        } else {
-          this.studentPhotoUrl = null;
-        }
-        this.editForm = {
-          id: data.id,
-          fullName: data.fullName,
-          phone: data.phone,
-          address: data.address || '',
-          area: data.area || '',
-          college: data.college || '',
-          academicYear: data.academicYear || '',
-          confessionFather: data.confessionFather || '',
-          gender: data.gender ?? 0,
-          birthDate: data.birthDate ? data.birthDate.split('T')[0] : ''
-        };
-        this.loadHistory(id);
-        this.removalRequestService.getPendingForStudent(id).subscribe({
-          next: (req) => (this.removalRequest = req),
-          error: () => {}
-        });
-      },
-      error: () => {
-        this.loading = false;
-      }
-    });
-  }
-
-  loadHistory(studentId: string) {
+  loadHistory(studentId: string): void {
     forkJoin({
       calls: this.followUpService.getCallHistory(studentId),
-      visits: this.followUpService.getVisitHistory(studentId)
-    }).subscribe({
-      next: (r) => {
-        const calls = Array.isArray(r.calls) ? r.calls : [];
-        const visits = Array.isArray(r.visits) ? r.visits : [];
-        this.callHistory = [...calls].sort((a, b) => new Date((b as any).callDate).getTime() - new Date((a as any).callDate).getTime());
-        this.visitHistory = [...visits].sort((a, b) => new Date((b as any).visitDate).getTime() - new Date((a as any).visitDate).getTime());
-        this.loading = false;
-      },
-      error: () => {
-        this.callHistory = [];
-        this.visitHistory = [];
-        this.loading = false;
-      }
-    });
+      visits: this.followUpService.getVisitHistory(studentId),
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (r) => {
+          const calls = Array.isArray(r.calls) ? (r.calls as CallRecord[]) : [];
+          const visits = Array.isArray(r.visits) ? (r.visits as VisitRecord[]) : [];
+          this.callHistory.set(
+            [...calls].sort((a, b) => new Date(b.callDate).getTime() - new Date(a.callDate).getTime())
+          );
+          this.visitHistory.set(
+            [...visits].sort((a, b) => new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime())
+          );
+          this.loading.set(false);
+        },
+        error: () => {
+          this.callHistory.set([]);
+          this.visitHistory.set([]);
+          this.loading.set(false);
+        },
+      });
   }
 
-  getCallStatusLabel(status: number): string {
-    return this.callStatusOptions.find(o => o.value === status)?.label ?? String(status);
+  reloadHistory(): void {
+    const id = this.student()?.id;
+    if (id) this.loadHistory(id);
   }
 
-  getVisitOutcomeLabel(outcome: number): string {
-    return this.visitOutcomeOptions.find(o => o.value === outcome)?.label ?? String(outcome);
+  openAddCall(): void {
+    this.callDate.set(new Date().toISOString().slice(0, 16));
+    this.callStatus.set(0);
+    this.callNotes.set('');
+    this.callNextDate.set('');
+    this.callError.set('');
+    this.showAddCall.set(true);
   }
 
-  reloadHistory() {
-    if (this.student?.id) this.loadHistory(this.student.id);
+  closeAddCall(): void {
+    this.showAddCall.set(false);
   }
 
-  openAddCall() {
-    this.callDate = new Date().toISOString().slice(0, 16);
-    this.callStatus = 0;
-    this.callNotes = '';
-    this.callNextDate = '';
-    this.callError = '';
-    this.showAddCall = true;
-  }
-
-  closeAddCall() {
-    this.showAddCall = false;
-  }
-
-  submitCall() {
-    if (!this.student?.id) return;
-    this.callSaving = true;
-    this.callError = '';
+  submitCall(): void {
+    const s = this.student();
+    if (!s?.id) return;
+    this.callSaving.set(true);
+    this.callError.set('');
     const payload = {
-      studentId: this.student.id,
-      callDate: new Date(this.callDate).toISOString(),
-      callStatus: Number(this.callStatus),
-      notes: this.callNotes || '',
-      nextFollowUpDate: this.callNextDate ? new Date(this.callNextDate).toISOString() : null
+      studentId: s.id,
+      callDate: new Date(this.callDate()).toISOString(),
+      callStatus: Number(this.callStatus()),
+      notes: this.callNotes() || '',
+      nextFollowUpDate: this.callNextDate() ? new Date(this.callNextDate()).toISOString() : null,
     };
-    this.followUpService.registerCall(payload).subscribe({
-      next: () => {
-        this.closeAddCall();
-        this.reloadHistory();
-        this.callSaving = false;
-      },
-      error: (err) => {
-        this.callError = err.error?.message || 'فشل تسجيل المكالمة';
-        this.callSaving = false;
-      }
-    });
+    this.followUpService
+      .registerCall(payload)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.closeAddCall();
+          this.reloadHistory();
+          this.callSaving.set(false);
+        },
+        error: (err) => {
+          this.callError.set(err.error?.message || 'فشل تسجيل المكالمة');
+          this.callSaving.set(false);
+        },
+      });
   }
 
-  openAddVisit() {
-    this.visitDate = new Date().toISOString().slice(0, 16);
-    this.visitOutcome = 0;
-    this.visitNotes = '';
-    this.visitNextDate = '';
-    this.visitError = '';
-    this.selectedParticipantIds = [];
-    this.participantSearchQuery = '';
-    this.showAddVisit = true;
+  openAddVisit(): void {
+    this.visitDate.set(new Date().toISOString().slice(0, 16));
+    this.visitOutcome.set(0);
+    this.visitNotes.set('');
+    this.visitNextDate.set('');
+    this.visitError.set('');
+    this.selectedParticipantIds.set([]);
+    this.participantSearchQuery.set('');
+    this.showAddVisit.set(true);
   }
 
-  get filteredServantList(): { id: string; fullName: string }[] {
-    const q = (this.participantSearchQuery || '').trim().toLowerCase();
-    if (!q) return this.servantList;
-    return this.servantList.filter(s => (s.fullName || '').toLowerCase().includes(q));
+  closeAddVisit(): void {
+    this.showAddVisit.set(false);
   }
 
-  closeAddVisit() {
-    this.showAddVisit = false;
-  }
-
-  canEditVisit(visit: any): boolean {
+  canEditVisit(visit: VisitRecord): boolean {
     const uid = this.authService.currentUser()?.userId;
-    return !!uid && visit?.recordedByServantId === uid;
+    return !!uid && (visit as unknown as { recordedByServantId?: string })?.recordedByServantId === uid;
   }
 
-  openEditVisit(visit: any) {
+  openEditVisit(visit: VisitRecord): void {
     if (!visit?.id) return;
-    this.visitToEdit = visit;
-    this.visitDate = visit.visitDate ? new Date(visit.visitDate).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16);
-    this.visitOutcome = Number(visit.visitOutcome) ?? 0;
-    this.visitNotes = visit.notes || '';
-    this.visitNextDate = visit.nextVisitDate ? new Date(visit.nextVisitDate).toISOString().slice(0, 16) : '';
+    this.visitToEdit.set(visit);
+    const v = visit as unknown as { visitDate?: string; visitOutcome?: number; notes?: string; nextVisitDate?: string; participants?: { servantId: string }[] };
+    this.visitDate.set(v.visitDate ? new Date(v.visitDate).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16));
+    this.visitOutcome.set(Number(v.visitOutcome) ?? 0);
+    this.visitNotes.set(v.notes || '');
+    this.visitNextDate.set(v.nextVisitDate ? new Date(v.nextVisitDate).toISOString().slice(0, 16) : '');
     const uid = this.authService.currentUser()?.userId;
-    this.selectedParticipantIds = (visit.participants || [])
-      .filter((p: any) => p.servantId !== uid)
-      .map((p: any) => p.servantId);
-    this.participantSearchQuery = '';
-    this.visitError = '';
-    this.showEditVisit = true;
+    this.selectedParticipantIds.set(
+      (v.participants || []).filter((p: { servantId: string }) => p.servantId !== uid).map((p: { servantId: string }) => p.servantId)
+    );
+    this.participantSearchQuery.set('');
+    this.visitError.set('');
+    this.showEditVisit.set(true);
   }
 
-  closeEditVisit() {
-    this.showEditVisit = false;
-    this.visitToEdit = null;
+  closeEditVisit(): void {
+    this.showEditVisit.set(false);
+    this.visitToEdit.set(null);
   }
 
-  submitEditVisit() {
-    if (!this.visitToEdit?.id) return;
-    this.visitSaving = true;
-    this.visitError = '';
+  submitEditVisit(): void {
+    const visit = this.visitToEdit();
+    if (!visit?.id) return;
+    this.visitSaving.set(true);
+    this.visitError.set('');
     const payload = {
-      visitDate: new Date(this.visitDate).toISOString(),
-      visitOutcome: Number(this.visitOutcome),
-      notes: this.visitNotes || '',
-      nextVisitDate: this.visitNextDate ? new Date(this.visitNextDate).toISOString() : null,
-      participantServantIds: this.selectedParticipantIds.length ? this.selectedParticipantIds : null
+      visitDate: new Date(this.visitDate()).toISOString(),
+      visitOutcome: Number(this.visitOutcome()),
+      notes: this.visitNotes() || '',
+      nextVisitDate: this.visitNextDate() ? new Date(this.visitNextDate()).toISOString() : null,
+      participantServantIds: this.selectedParticipantIds().length ? this.selectedParticipantIds() : null,
     };
-    this.followUpService.updateVisit(this.visitToEdit.id, payload).subscribe({
-      next: () => {
-        this.closeEditVisit();
-        this.reloadHistory();
-        this.visitSaving = false;
-      },
-      error: (err) => {
-        this.visitError = err.error?.message || 'فشل تحديث الزيارة';
-        this.visitSaving = false;
-      }
-    });
+    this.followUpService
+      .updateVisit(visit.id, payload)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.closeEditVisit();
+          this.reloadHistory();
+          this.visitSaving.set(false);
+        },
+        error: (err) => {
+          this.visitError.set(err.error?.message || 'فشل تحديث الزيارة');
+          this.visitSaving.set(false);
+        },
+      });
   }
 
-  toggleVisitParticipant(servantId: string) {
-    const idx = this.selectedParticipantIds.indexOf(servantId);
-    if (idx === -1) this.selectedParticipantIds.push(servantId);
-    else this.selectedParticipantIds.splice(idx, 1);
+  toggleVisitParticipant(servantId: string): void {
+    this.selectedParticipantIds.update((ids) => {
+      const idx = ids.indexOf(servantId);
+      if (idx === -1) return [...ids, servantId];
+      const next = [...ids];
+      next.splice(idx, 1);
+      return next;
+    });
   }
 
   isParticipantSelected(servantId: string): boolean {
-    return this.selectedParticipantIds.includes(servantId);
+    return this.selectedParticipantIds().includes(servantId);
   }
 
-  submitVisit() {
-    if (!this.student?.id) return;
-    this.visitSaving = true;
-    this.visitError = '';
+  submitVisit(): void {
+    const s = this.student();
+    if (!s?.id) return;
+    this.visitSaving.set(true);
+    this.visitError.set('');
     const payload = {
-      studentId: this.student.id,
-      visitDate: new Date(this.visitDate).toISOString(),
-      visitOutcome: Number(this.visitOutcome),
-      notes: this.visitNotes || '',
-      nextVisitDate: this.visitNextDate ? new Date(this.visitNextDate).toISOString() : null,
-      participantServantIds: this.selectedParticipantIds.length ? this.selectedParticipantIds : null
+      studentId: s.id,
+      visitDate: new Date(this.visitDate()).toISOString(),
+      visitOutcome: Number(this.visitOutcome()),
+      notes: this.visitNotes() || '',
+      nextVisitDate: this.visitNextDate() ? new Date(this.visitNextDate()).toISOString() : null,
+      participantServantIds: this.selectedParticipantIds().length ? this.selectedParticipantIds() : null,
     };
-    this.followUpService.registerVisit(payload).subscribe({
-      next: () => {
-        this.closeAddVisit();
-        this.reloadHistory();
-        this.visitSaving = false;
-      },
-      error: (err) => {
-        this.visitError = err.error?.message || 'فشل تسجيل الزيارة';
-        this.visitSaving = false;
-      }
+    this.followUpService
+      .registerVisit(payload)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.closeAddVisit();
+          this.reloadHistory();
+          this.visitSaving.set(false);
+        },
+        error: (err) => {
+          this.visitError.set(err.error?.message || 'فشل تسجيل الزيارة');
+          this.visitSaving.set(false);
+        },
+      });
+  }
+
+  startEdit(): void {
+    const s = this.student();
+    if (!s) return;
+    this.editForm.set({
+      id: s.id,
+      fullName: s.fullName,
+      phone: s.phone,
+      address: s.address || '',
+      area: s.area || '',
+      college: s.college || '',
+      academicYear: s.academicYear || '',
+      confessionFather: s.confessionFather || '',
+      gender: s.gender ?? 0,
+      birthDate: s.birthDate ? String(s.birthDate).split('T')[0] : '',
+      servantId: s.servantId,
     });
+    this.editing.set(true);
+    this.editError.set('');
   }
 
-  startEdit() {
-    this.editForm = {
-      id: this.student.id,
-      fullName: this.student.fullName,
-      phone: this.student.phone,
-      address: this.student.address || '',
-      area: this.student.area || '',
-      college: this.student.college || '',
-      academicYear: this.student.academicYear || '',
-      confessionFather: this.student.confessionFather || '',
-      gender: this.student.gender ?? 0,
-      birthDate: this.student.birthDate ? String(this.student.birthDate).split('T')[0] : '',
-      servantId: this.student.servantId
-    };
-    this.editing = true;
-    this.editError = '';
+  cancelEdit(): void {
+    this.editing.set(false);
   }
 
-  cancelEdit() {
-    this.editing = false;
+  saveEdit(): void {
+    const s = this.student();
+    if (!s) return;
+    const form = this.editForm();
+    this.saveEditLoading.set(true);
+    this.editError.set('');
+    const req = { ...form, birthDate: (form['birthDate'] as string) || null };
+    this.studentCommandsService
+      .update(s.id, req)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.student.set({ ...s, ...form });
+          this.editing.set(false);
+          this.saveEditLoading.set(false);
+        },
+        error: (err) => {
+          this.editError.set(err.error?.message || 'فشل التحديث');
+          this.saveEditLoading.set(false);
+        },
+      });
   }
 
-  saveEdit() {
-    this.saveEditLoading = true;
-    this.editError = '';
-    const req = {
-      ...this.editForm,
-      birthDate: this.editForm.birthDate || null
-    };
-    this.studentCommandsService.update(this.student.id, req).subscribe({
-      next: () => {
-        this.student = { ...this.student, ...this.editForm };
-        this.editing = false;
-        this.saveEditLoading = false;
-      },
-      error: (err) => {
-        this.editError = err.error?.message || 'فشل التحديث';
-        this.saveEditLoading = false;
-      }
-    });
+  requestRemoval(): void {
+    if (!this.student()?.id || this.removalRequest()) return;
+    this.showRemovalChoiceModal.set(true);
+    this.removalError.set('');
   }
 
-  requestRemoval() {
-    if (!this.student?.id || this.removalRequest) return;
-    this.showRemovalChoiceModal = true;
-    this.removalError = '';
+  submitRemovalRequest(removalType: number): void {
+    if (!this.student()?.id || this.removalRequest()) return;
+    this.requestRemovalLoading.set(true);
+    this.removalError.set('');
+    this.removalRequestService
+      .create(this.student()!.id, removalType)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.removalRequest.set({ status: 'Pending' });
+          this.requestRemovalLoading.set(false);
+          this.showRemovalChoiceModal.set(false);
+        },
+        error: (err) => {
+          this.removalError.set(err.error?.message || 'فشل تقديم الطلب');
+          this.requestRemovalLoading.set(false);
+        },
+      });
   }
 
-  submitRemovalRequest(removalType: number) {
-    if (!this.student?.id || this.removalRequest) return;
-    this.requestRemovalLoading = true;
-    this.removalError = '';
-    this.removalRequestService.create(this.student.id, removalType).subscribe({
-      next: () => {
-        this.removalRequest = { status: 'Pending' };
-        this.requestRemovalLoading = false;
-        this.showRemovalChoiceModal = false;
-      },
-      error: (err) => {
-        this.removalError = err.error?.message || 'فشل تقديم الطلب';
-        this.requestRemovalLoading = false;
-      }
-    });
+  closeRemovalModal(): void {
+    this.showRemovalChoiceModal.set(false);
   }
 
-  canEdit(): boolean {
-    const uid = this.authService.currentUser()?.userId;
-    return !!uid && this.student?.servantId === uid;
+  setEditFormKey(key: string, value: unknown): void {
+    this.editForm.update((f) => ({ ...f, [key]: value }));
   }
 }

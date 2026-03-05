@@ -1,0 +1,23 @@
+<div class="report-viewer">
+  <div class="report-screen-only report-actions">
+    <servant-advanced-filter
+      [fields]="filterFields()"
+      [filterTitle]="filterTitle()"
+      [syncQueryParams]="syncQueryParams()"
+      (filterChange)="onFilterChange($event)" />
+    <div class="report-toolbar">
+      <button type="button" class="btn-outline sm" (click)="print()">طباعة</button>
+    </div>
+  </div>
+  <div class="report-content">
+    <h2 class="report-title report-print-only">{{ reportTitle() }}</h2>
+    <servant-data-table
+      [columns]="columns()"
+      [data]="data()"
+      [loading]="loading()"
+      mode="client"
+      [pageSize]="20"
+      [emptyMessage]="emptyMessage()"
+      [showExportButton]="true" />
+  </div>
+</div>

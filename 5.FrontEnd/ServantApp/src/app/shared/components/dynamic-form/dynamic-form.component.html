@@ -1,0 +1,100 @@
+@if (form(); as f) {
+  <form [formGroup]="f" (ngSubmit)="onSubmit()" class="dynamic-form">
+    @for (field of visibleFields(); track field.key) {
+      @switch (field.type) {
+        @case ('text') {
+          <servant-text-input
+            [formControlName]="field.key"
+            [label]="field.label"
+            [controlId]="field.key"
+            [placeholder]="field.placeholder ?? ''"
+            [type]="field.inputType ?? 'text'"
+            [required]="field.required ?? false"
+            [error]="errorFor(field.key)"
+            [hint]="field.hint ?? null" />
+        }
+        @case ('number') {
+          <servant-number-input
+            [formControlName]="field.key"
+            [label]="field.label"
+            [controlId]="field.key"
+            [placeholder]="field.placeholder ?? ''"
+            [required]="field.required ?? false"
+            [min]="field.min ?? null"
+            [max]="field.max ?? null"
+            [step]="field.step ?? 1"
+            [error]="errorFor(field.key)"
+            [hint]="field.hint ?? null" />
+        }
+        @case ('select') {
+          @if (field.options?.length) {
+            <servant-select
+              [formControlName]="field.key"
+              [label]="field.label"
+              [controlId]="field.key"
+              [options]="field.options ?? []"
+              [placeholder]="field.placeholder ?? ''"
+              [required]="field.required ?? false"
+              [error]="errorFor(field.key)"
+              [hint]="field.hint ?? null" />
+          }
+        }
+        @case ('date') {
+          <servant-date-picker
+            [formControlName]="field.key"
+            [label]="field.label"
+            [controlId]="field.key"
+            [mode]="field.dateMode ?? 'date'"
+            [required]="field.required ?? false"
+            [error]="errorFor(field.key)"
+            [hint]="field.hint ?? null" />
+        }
+        @case ('checkbox') {
+          <servant-checkbox
+            [formControlName]="field.key"
+            [label]="field.label"
+            [controlId]="field.key"
+            [error]="errorFor(field.key)"
+            [hint]="field.hint ?? null" />
+        }
+        @case ('radio') {
+          @if (field.options?.length) {
+            <servant-radio-group
+              [formControlName]="field.key"
+              [label]="field.label"
+              [controlId]="field.key"
+              [options]="field.options ?? []"
+              [required]="field.required ?? false"
+              [layout]="field.layout ?? 'vertical'"
+              [error]="errorFor(field.key)"
+              [hint]="field.hint ?? null" />
+          }
+        }
+        @case ('textarea') {
+          <servant-textarea
+            [formControlName]="field.key"
+            [label]="field.label"
+            [controlId]="field.key"
+            [placeholder]="field.placeholder ?? ''"
+            [required]="field.required ?? false"
+            [rows]="field.rows ?? 3"
+            [error]="errorFor(field.key)"
+            [hint]="field.hint ?? null" />
+        }
+        @case ('file') {
+          <servant-file-upload
+            [formControlName]="field.key"
+            [label]="field.label"
+            [controlId]="field.key"
+            [required]="field.required ?? false"
+            [error]="errorFor(field.key)"
+            [hint]="field.hint ?? null" />
+        }
+        @default {}
+      }
+    }
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">{{ submitLabel() }}</button>
+    </div>
+  </form>
+}

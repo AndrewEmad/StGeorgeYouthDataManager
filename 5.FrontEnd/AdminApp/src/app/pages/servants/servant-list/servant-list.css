@@ -147,19 +147,15 @@ tr.row-clickable { cursor: pointer; }
 }
 
 /* Keep role (badge) and actions columns on one line */
-.table-container th:nth-child(3),
-.table-container td:nth-child(3) {
+.table-container .data-table th:nth-child(3),
+.table-container .data-table td:nth-child(3) {
   min-width: 90px;
   white-space: nowrap;
 }
 
-.table-container th:nth-child(8),
-.table-container td:nth-child(8) {
+.table-container .data-table .actions-col {
   min-width: 240px;
   white-space: nowrap;
-}
-
-.table-container td:nth-child(8) {
   display: flex;
   flex-wrap: nowrap;
   gap: 8px;

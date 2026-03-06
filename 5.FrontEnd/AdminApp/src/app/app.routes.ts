@@ -1,13 +1,13 @@
 import { Routes } from '@angular/router';
-import { LoginPage } from './pages/login/login.page';
+import { LoginComponent } from './pages/login/login';
 import { ChangePasswordPage } from './pages/change-password/change-password.page';
 import { CompleteProfilePage } from './pages/complete-profile/complete-profile.page';
 import { DashboardPage } from './pages/dashboard/dashboard.page';
 import { StatsPage } from './pages/stats/stats.page';
-import { ServantsPage } from './pages/servants/servants.page';
-import { ServantDetailPage } from './pages/servants/servant-detail.page';
-import { StudentsPage } from './pages/students/students.page';
-import { StudentDetailPage } from './pages/students/student-detail.page';
+import { ServantListComponent } from './pages/servants/servant-list/servant-list';
+import { ServantDetailPage } from './pages/servants/servant-details/servant-detail.page';
+import { StudentListAdminComponent } from './pages/students/student-list-admin/student-list-admin';
+import { StudentDetailPage } from './pages/students/student-details/student-detail.page';
 import { BackupsPage } from './pages/backups/backups.page';
 import { RemovalRequestsPage } from './pages/removal-requests/removal-requests.page';
 import { AssignmentRequestsPage } from './pages/assignment-requests/assignment-requests.page';
@@ -27,7 +27,7 @@ import { authGuard } from './core/guards/auth.guard';
 import { redirectIfAuthGuard } from './core/guards/redirect-if-auth.guard';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginPage, canActivate: [redirectIfAuthGuard] },
+  { path: 'login', component: LoginComponent, canActivate: [redirectIfAuthGuard] },
   { path: 'change-password', component: ChangePasswordPage, canActivate: [authGuard] },
   { path: 'complete-profile', component: CompleteProfilePage, canActivate: [authGuard] },
   {
@@ -37,34 +37,78 @@ export const routes: Routes = [
     children: [
       { path: 'stats', component: StatsPage, data: { title: 'الإحصائيات' } },
       { path: 'attendance', component: AttendancePage, data: { title: 'تسجيل الحضور' } },
-      { path: 'servants', component: ServantsPage, data: { title: 'الخدام' } },
+      { path: 'servants', component: ServantListComponent, data: { title: 'الخدام' } },
       { path: 'servants/:id', component: ServantDetailPage, data: { title: 'تفاصيل الخادم' } },
       { path: 'students/:id', component: StudentDetailPage, data: { title: 'تفاصيل المخدوم' } },
-      { path: 'students', component: StudentsPage, data: { title: 'المخدومين' } },
-      { path: 'removal-requests', component: RemovalRequestsPage, data: { title: 'طلبات الإزالة' } },
-      { path: 'assignment-requests', component: AssignmentRequestsPage, data: { title: 'طلبات التخصيص' } },
-      { path: 'student-addition-requests', component: StudentAdditionRequestsPage, data: { title: 'طلبات إضافة مخدومين' } },
+      { path: 'students', component: StudentListAdminComponent, data: { title: 'المخدومين' } },
+      {
+        path: 'removal-requests',
+        component: RemovalRequestsPage,
+        data: { title: 'طلبات الإزالة' },
+      },
+      {
+        path: 'assignment-requests',
+        component: AssignmentRequestsPage,
+        data: { title: 'طلبات التخصيص' },
+      },
+      {
+        path: 'student-addition-requests',
+        component: StudentAdditionRequestsPage,
+        data: { title: 'طلبات إضافة مخدومين' },
+      },
       {
         path: 'reports',
         component: ReportsPage,
         data: { title: 'التقارير' },
         children: [
-          { path: 'servant-follow-up', component: ServantFollowUpPage, data: { title: 'متابعة الخادم' } },
-          { path: 'student-distribution', component: StudentDistributionPage, data: { title: 'توزيع المخدومين' } },
-          { path: 'servant-performance', component: ServantPerformanceReportPage, data: { title: 'أداء الخادم' } },
-          { path: 'servant-activity', component: ServantActivityReportPage, data: { title: 'نشاط الخادم' } },
-          { path: 'students-no-contact', component: StudentsNoContactReportPage, data: { title: 'بدون اتصال' } },
-          { path: 'students-by-area', component: StudentsByAreaReportPage, data: { title: 'حسب المنطقة' } },
-          { path: 'students-by-year', component: StudentsByYearReportPage, data: { title: 'حسب السنة' } },
-          { path: 'students-by-birth-month', component: StudentsByBirthMonthReportPage, data: { title: 'حسب شهر الميلاد' } },
-          { path: '', redirectTo: 'servant-follow-up', pathMatch: 'full' }
-        ]
+          {
+            path: 'servant-follow-up',
+            component: ServantFollowUpPage,
+            data: { title: 'متابعة الخادم' },
+          },
+          {
+            path: 'student-distribution',
+            component: StudentDistributionPage,
+            data: { title: 'توزيع المخدومين' },
+          },
+          {
+            path: 'servant-performance',
+            component: ServantPerformanceReportPage,
+            data: { title: 'أداء الخادم' },
+          },
+          {
+            path: 'servant-activity',
+            component: ServantActivityReportPage,
+            data: { title: 'نشاط الخادم' },
+          },
+          {
+            path: 'students-no-contact',
+            component: StudentsNoContactReportPage,
+            data: { title: 'بدون اتصال' },
+          },
+          {
+            path: 'students-by-area',
+            component: StudentsByAreaReportPage,
+            data: { title: 'حسب المنطقة' },
+          },
+          {
+            path: 'students-by-year',
+            component: StudentsByYearReportPage,
+            data: { title: 'حسب السنة' },
+          },
+          {
+            path: 'students-by-birth-month',
+            component: StudentsByBirthMonthReportPage,
+            data: { title: 'حسب شهر الميلاد' },
+          },
+          { path: '', redirectTo: 'servant-follow-up', pathMatch: 'full' },
+        ],
       },
       { path: 'backups', component: BackupsPage, data: { title: 'النسخ الاحتياطي' } },
       { path: 'profile', component: ProfilePage, data: { title: 'الملف الشخصي' } },
-      { path: '', redirectTo: 'stats', pathMatch: 'full' }
-    ]
+      { path: '', redirectTo: 'stats', pathMatch: 'full' },
+    ],
   },
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
-  { path: '**', redirectTo: '/dashboard' }
+  { path: '**', redirectTo: '/dashboard' },
 ];

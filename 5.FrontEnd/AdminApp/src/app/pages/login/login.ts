@@ -2,7 +2,7 @@ import { Component, signal, inject, ChangeDetectionStrategy } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
-import { CardComponent, FormFieldComponent } from '../common/common';
+import { CardComponent, FormFieldComponent } from '../../components/common/common';
 
 @Component({
   selector: 'app-login',

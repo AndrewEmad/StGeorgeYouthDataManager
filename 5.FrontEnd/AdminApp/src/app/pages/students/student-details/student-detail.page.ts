@@ -11,20 +11,24 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
-import { StudentQueriesService } from '../../services/student-queries.service';
-import { FollowUpService } from '../../services/follow-up.service';
+import { StudentQueriesService } from '../../../services/student-queries.service';
+import { FollowUpService } from '../../../services/follow-up.service';
 import {
   StudentEditLogDto,
   CallLogDto,
   HomeVisitDto,
   HomeVisitParticipantDto,
-} from '../../shared/models';
-import { ContentHeaderComponent, LoaderComponent, DetailSectionComponent } from '../../components/common/common';
-import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
-import type { DataTableColumn } from '../../shared/components/data-table/data-table-column';
-import { DateFormatPipe } from '../../shared/pipes/date-format.pipe';
-import { CallStatusPipe } from '../../shared/pipes/call-status.pipe';
-import { VisitOutcomePipe } from '../../shared/pipes/visit-outcome.pipe';
+} from '../../../shared/models';
+import {
+  ContentHeaderComponent,
+  LoaderComponent,
+  DetailSectionComponent,
+} from '../../../components/common/common';
+import { DataTableComponent } from '../../../shared/components/data-table/data-table.component';
+import type { DataTableColumn } from '../../../shared/components/data-table/data-table-column';
+import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
+import { CallStatusPipe } from '../../../shared/pipes/call-status.pipe';
+import { VisitOutcomePipe } from '../../../shared/pipes/visit-outcome.pipe';
 
 @Component({
   selector: 'app-student-detail-page',
@@ -75,9 +79,12 @@ export class StudentDetailPage implements OnInit, AfterViewInit {
   callsColumns = signal<DataTableColumn<CallLogDto>[]>([]);
   visitsColumns = signal<DataTableColumn<HomeVisitDto>[]>([]);
 
-  private callStatusCellTpl = viewChild<TemplateRef<{ $implicit: CallLogDto; value: unknown }>>('callStatusCell');
-  private visitOutcomeCellTpl = viewChild<TemplateRef<{ $implicit: HomeVisitDto; value: unknown }>>('visitOutcomeCell');
-  private participantsCellTpl = viewChild<TemplateRef<{ $implicit: HomeVisitDto; value: unknown }>>('participantsCell');
+  private callStatusCellTpl =
+    viewChild<TemplateRef<{ $implicit: CallLogDto; value: unknown }>>('callStatusCell');
+  private visitOutcomeCellTpl =
+    viewChild<TemplateRef<{ $implicit: HomeVisitDto; value: unknown }>>('visitOutcomeCell');
+  private participantsCellTpl =
+    viewChild<TemplateRef<{ $implicit: HomeVisitDto; value: unknown }>>('participantsCell');
 
   constructor() {
     this.destroyRef.onDestroy(() => {
@@ -146,6 +153,11 @@ export class StudentDetailPage implements OnInit, AfterViewInit {
   formatParticipants(participants: HomeVisitParticipantDto[] | undefined | unknown): string {
     const list = Array.isArray(participants) ? participants : undefined;
     if (!list?.length) return '—';
-    return list.map((p: HomeVisitParticipantDto) => p.servantName).filter(Boolean).join('، ') || '—';
+    return (
+      list
+        .map((p: HomeVisitParticipantDto) => p.servantName)
+        .filter(Boolean)
+        .join('، ') || '—'
+    );
   }
 }

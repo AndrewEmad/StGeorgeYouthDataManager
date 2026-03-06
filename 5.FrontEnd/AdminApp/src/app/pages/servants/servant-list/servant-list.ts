@@ -1,22 +1,22 @@
-import { Component, OnInit } from '@angular/core';
-import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
+import { AfterViewInit, Component, OnInit, TemplateRef, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { UsersService } from '../../../services/users.service';
-import { User } from '../../../shared/models';
-import { ServantWithStats } from '../../../shared/models/report.model';
-import { ReportsService } from '../../../services/reports.service';
 import {
+  CardComponent,
   ContentHeaderComponent,
   FiltersBarComponent,
   FormFieldComponent,
-  CardComponent,
   LoaderComponent,
-  PaginationComponent,
   ModalComponent,
   PhotoCropModalComponent,
-  ProfilePhotoInputComponent
-} from '../../common/common';
+  ProfilePhotoInputComponent,
+} from '../../../components/common/common';
+import { ReportsService } from '../../../services/reports.service';
+import { UsersService } from '../../../services/users.service';
+import type { DataTableColumn } from '../../../shared/components/data-table/data-table-column';
+import { DataTableComponent } from '../../../shared/components/data-table/data-table.component';
+import { ServantWithStats } from '../../../shared/models/report.model';
+import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
 
 @Component({
   selector: 'app-servant-list',
@@ -29,15 +29,15 @@ import {
     FormFieldComponent,
     CardComponent,
     LoaderComponent,
-    PaginationComponent,
     ModalComponent,
     PhotoCropModalComponent,
-    ProfilePhotoInputComponent
+    ProfilePhotoInputComponent,
+    DataTableComponent,
   ],
   templateUrl: './servant-list.html',
   styleUrls: ['./servant-list.css'],
 })
-export class ServantListComponent implements OnInit {
+export class ServantListComponent implements OnInit, AfterViewInit {
   servants: ServantWithStats[] = [];
   totalCount = 0;
   page = 1;
@@ -78,6 +78,17 @@ export class ServantListComponent implements OnInit {
   pendingCropFile: File | null = null;
   cropTarget: 'new' | 'edit' | null = null;
 
+  servantColumns = signal<DataTableColumn<ServantWithStats>[]>([]);
+  private roleCellTpl =
+    viewChild<TemplateRef<{ $implicit: ServantWithStats; value: unknown }>>('roleCell');
+  private statusCellTpl =
+    viewChild<TemplateRef<{ $implicit: ServantWithStats; value: unknown }>>('statusCell');
+  private lastCallDateTpl =
+    viewChild<TemplateRef<{ $implicit: ServantWithStats; value: unknown }>>('lastCallDateCell');
+  private lastVisitDateTpl =
+    viewChild<TemplateRef<{ $implicit: ServantWithStats; value: unknown }>>('lastVisitDateCell');
+  rowActionsTpl = viewChild<TemplateRef<{ $implicit: ServantWithStats }>>('rowActionsTemplate');
+
   constructor(
     private usersService: UsersService,
     private router: Router,
@@ -92,9 +103,46 @@ export class ServantListComponent implements OnInit {
     this.loadServants();
   }
 
-  setSort(column: string) {
-    if (this.sortBy === column) this.sortDesc = !this.sortDesc;
-    else { this.sortBy = column; this.sortDesc = false; }
+  ngAfterViewInit() {
+    const roleTpl = this.roleCellTpl();
+    const statusTpl = this.statusCellTpl();
+    const lastCallTpl = this.lastCallDateTpl();
+    const lastVisitTpl = this.lastVisitDateTpl();
+    const cols: DataTableColumn<ServantWithStats>[] = [
+      { key: 'fullName', header: 'الاسم', sortable: true },
+      { key: 'userName', header: 'اسم المستخدم', sortable: true },
+      {
+        key: 'role',
+        header: 'الدور',
+        sortable: true,
+        ...(roleTpl && { template: roleTpl }),
+      },
+      { key: 'assignedStudentsCount', header: 'عدد المخدومين', sortable: true },
+      {
+        key: 'lastCallDate',
+        header: 'آخر مكالمة',
+        sortable: true,
+        ...(lastCallTpl ? { template: lastCallTpl } : { format: 'date' }),
+      },
+      {
+        key: 'lastVisitDate',
+        header: 'آخر زيارة',
+        sortable: true,
+        ...(lastVisitTpl ? { template: lastVisitTpl } : { format: 'date' }),
+      },
+      {
+        key: 'isActive',
+        header: 'الحالة',
+        sortable: true,
+        ...(statusTpl && { template: statusTpl }),
+      },
+    ];
+    this.servantColumns.set(cols);
+  }
+
+  onSortChange(event: { column: string; desc: boolean }) {
+    this.sortBy = event.column;
+    this.sortDesc = event.desc;
     this.page = 1;
     this.loadServants();
   }
@@ -226,8 +274,12 @@ export class ServantListComponent implements OnInit {
       next: (id) => {
         if (this.newServantPhoto) {
           this.usersService.uploadPhoto(id, this.newServantPhoto!).subscribe({
-            next: () => { this.finishCreateServant(); },
-            error: () => { this.finishCreateServant(); },
+            next: () => {
+              this.finishCreateServant();
+            },
+            error: () => {
+              this.finishCreateServant();
+            },
           });
         } else {
           this.finishCreateServant();
@@ -265,7 +317,12 @@ export class ServantListComponent implements OnInit {
 
   openEdit(s: ServantWithStats) {
     this.editingServant = s;
-    this.editForm = { fullName: s.fullName || '', phone: s.phone || '', isActive: s.isActive, role: s.role ?? 'Servant' };
+    this.editForm = {
+      fullName: s.fullName || '',
+      phone: s.phone || '',
+      isActive: s.isActive,
+      role: s.role ?? 'Servant',
+    };
     this.editServantPhoto = null;
     if (this.editServantPhotoPreviewUrl) {
       URL.revokeObjectURL(this.editServantPhotoPreviewUrl);
@@ -277,7 +334,9 @@ export class ServantListComponent implements OnInit {
     }
     if (s.photoPath) {
       this.usersService.getPhotoBlobUrl(s.id).subscribe({
-        next: (url) => { this.editServantExistingPhotoUrl = url ?? null; },
+        next: (url) => {
+          this.editServantExistingPhotoUrl = url ?? null;
+        },
         error: () => {},
       });
     }
@@ -314,8 +373,15 @@ export class ServantListComponent implements OnInit {
         this.editingServant!.role = this.editForm.role;
         if (this.editServantPhoto) {
           this.usersService.uploadPhoto(this.editingServant!.id, this.editServantPhoto).subscribe({
-            next: (res) => { this.editingServant!.photoPath = res.photoPath; this.editSaving = false; this.closeEdit(); },
-            error: () => { this.editSaving = false; this.closeEdit(); },
+            next: (res) => {
+              this.editingServant!.photoPath = res.photoPath;
+              this.editSaving = false;
+              this.closeEdit();
+            },
+            error: () => {
+              this.editSaving = false;
+              this.closeEdit();
+            },
           });
         } else {
           this.editSaving = false;

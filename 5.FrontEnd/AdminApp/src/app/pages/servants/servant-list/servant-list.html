@@ -1,3 +1,22 @@
+<ng-template #roleCell let-row>
+  <span class="badge" [class.manager]="row.role === 'Manager'" [class.priest]="row.role === 'Priest'">{{ roleLabel(row.role) }}</span>
+</ng-template>
+<ng-template #statusCell let-row>
+  <span class="status-dot" [class.active]="row.isActive"></span>
+  {{ row.isActive ? 'نشط' : 'متوقف' }}
+</ng-template>
+<ng-template #lastCallDateCell let-row>
+  {{ row.lastCallDate ? (row.lastCallDate | dateFormat) : '—' }}
+</ng-template>
+<ng-template #lastVisitDateCell let-row>
+  {{ row.lastVisitDate ? (row.lastVisitDate | dateFormat) : '—' }}
+</ng-template>
+<ng-template #rowActionsTemplate let-row>
+  <button type="button" class="btn-outline sm" (click)="openEdit(row)">تعديل</button>
+  <button type="button" class="btn-outline sm" (click)="toggleServantStatus(row)">{{ row.isActive ? 'تعطيل' : 'تفعيل' }}</button>
+  <button type="button" class="btn-outline sm danger" (click)="deleteServant(row)">حذف</button>
+</ng-template>
+
 <div class="animate-slide">
   <app-content-header title="إدارة الخدام">
     <button actions class="btn-primary" (click)="openAddModal()">
@@ -34,61 +53,29 @@
   </app-filters-bar>
 
   <app-card class="table-container">
-    @if (!loading) {
-    <table>
-      <thead>
-        <tr>
-          <th class="sortable" (click)="setSort('fullName')">الاسم @if (sortBy === 'fullName') { <span class="sort-icon">{{ sortDesc ? '▼' : '▲' }}</span> }</th>
-          <th class="sortable" (click)="setSort('userName')">اسم المستخدم @if (sortBy === 'userName') { <span class="sort-icon">{{ sortDesc ? '▼' : '▲' }}</span> }</th>
-          <th class="sortable" (click)="setSort('role')">الدور @if (sortBy === 'role') { <span class="sort-icon">{{ sortDesc ? '▼' : '▲' }}</span> }</th>
-          <th class="sortable" (click)="setSort('assignedStudentsCount')">عدد المخدومين @if (sortBy === 'assignedStudentsCount') { <span class="sort-icon">{{ sortDesc ? '▼' : '▲' }}</span> }</th>
-          <th class="sortable" (click)="setSort('lastCallDate')">آخر مكالمة @if (sortBy === 'lastCallDate') { <span class="sort-icon">{{ sortDesc ? '▼' : '▲' }}</span> }</th>
-          <th class="sortable" (click)="setSort('lastVisitDate')">آخر زيارة @if (sortBy === 'lastVisitDate') { <span class="sort-icon">{{ sortDesc ? '▼' : '▲' }}</span> }</th>
-          <th class="sortable" (click)="setSort('isActive')">الحالة @if (sortBy === 'isActive') { <span class="sort-icon">{{ sortDesc ? '▼' : '▲' }}</span> }</th>
-          <th>الإجراءات</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (s of servants; track s.id) {
-        <tr class="row-clickable" (click)="viewServant(s)">
-          <td>{{ s.fullName }}</td>
-          <td>{{ s.userName }}</td>
-          <td>
-            <span class="badge" [class.manager]="s.role === 'Manager'" [class.priest]="s.role === 'Priest'">{{ roleLabel(s.role) }}</span>
-          </td>
-          <td>{{ s.assignedStudentsCount }}</td>
-          <td>{{ s.lastCallDate ? (s.lastCallDate | dateFormat) : '—' }}</td>
-          <td>{{ s.lastVisitDate ? (s.lastVisitDate | dateFormat) : '—' }}</td>
-          <td>
-            <span class="status-dot" [class.active]="s.isActive"></span>
-            {{ s.isActive ? 'نشط' : 'متوقف' }}
-          </td>
-          <td (click)="$event.stopPropagation()">
-            <button class="btn-outline sm" (click)="openEdit(s)">تعديل</button>
-            <button class="btn-outline sm" (click)="toggleServantStatus(s)">{{ s.isActive ? 'تعطيل' : 'تفعيل' }}</button>
-            <button class="btn-outline sm danger" (click)="deleteServant(s)">حذف</button>
-          </td>
-        </tr>
-        }
-      </tbody>
-    </table>
-    }
-    @if (loading) {
+    @if (servantColumns().length > 0) {
+      <admin-data-table
+        [columns]="servantColumns()"
+        [data]="servants"
+        [loading]="loading"
+        [totalCount]="totalCount"
+        [page]="page"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="pageSizeOptions"
+        [sortBy]="sortBy"
+        [sortDesc]="sortDesc"
+        [rowClickable]="true"
+        [actionsTemplate]="rowActionsTpl() ?? null"
+        [emptyMessage]="'لا يوجد خدام'"
+        (pageChange)="goToPage($event)"
+        (pageSizeChange)="setPageSize($event)"
+        (sortChange)="onSortChange($event)"
+        (rowClick)="viewServant($event)"
+      />
+    } @else {
       <app-loader />
     }
   </app-card>
-
-  @if (totalCount > 0) {
-  <app-pagination
-    [total]="totalCount"
-    [page]="page"
-    [pageSize]="pageSize"
-    [pageSizeOptions]="pageSizeOptions"
-    [currentPageCount]="servants.length"
-    (pageChange)="goToPage($event)"
-    (pageSizeChange)="setPageSize($event)"
-  />
-  }
 </div>
 
 <app-modal title="إضافة خادم جديد" [visible]="showModal" (close)="showModal = false">

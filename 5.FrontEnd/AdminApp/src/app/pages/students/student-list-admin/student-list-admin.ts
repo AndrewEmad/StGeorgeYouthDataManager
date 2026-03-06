@@ -1,22 +1,31 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, viewChild, TemplateRef, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
-import { forkJoin } from 'rxjs';
-import { StudentQueriesService } from '../../../services/student-queries.service';
-import { UsersService } from '../../../services/users.service';
-import { StudentCommandsService } from '../../../services/student-commands.service';
-import { User, CreateStudentRequest, UpdateStudentRequest } from '../../../shared/models';
 import {
-  ContentHeaderComponent,
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnInit,
+  TemplateRef,
+  ViewChild,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
+import {
   CardComponent,
+  ContentHeaderComponent,
   FiltersBarComponent,
   FormFieldComponent,
   LoaderComponent,
   PhotoCropModalComponent,
   ProfilePhotoInputComponent,
-} from '../../common/common';
-import { DataTableComponent } from '../../../shared/components/data-table/data-table.component';
+} from '../../../components/common/common';
+import { StudentCommandsService } from '../../../services/student-commands.service';
+import { StudentQueriesService } from '../../../services/student-queries.service';
+import { UsersService } from '../../../services/users.service';
 import type { DataTableColumn } from '../../../shared/components/data-table/data-table-column';
+import { DataTableComponent } from '../../../shared/components/data-table/data-table.component';
+import { CreateStudentRequest, UpdateStudentRequest, User } from '../../../shared/models';
 
 /** Shape of a student row in the list (from getPaged) */
 interface StudentListItem {
@@ -129,9 +138,12 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
 
   studentColumns = signal<DataTableColumn<StudentListItem>[]>([]);
   private selectAllHeaderTpl = viewChild<TemplateRef<unknown>>('selectAllHeader');
-  private rowCheckboxTpl = viewChild<TemplateRef<{ $implicit: StudentListItem; value: unknown }>>('rowCheckbox');
-  private servantNameCellTpl = viewChild<TemplateRef<{ $implicit: StudentListItem; value: unknown }>>('servantNameCell');
-  private lastNoteCellTpl = viewChild<TemplateRef<{ $implicit: StudentListItem; value: unknown }>>('lastNoteCell');
+  private rowCheckboxTpl =
+    viewChild<TemplateRef<{ $implicit: StudentListItem; value: unknown }>>('rowCheckbox');
+  private servantNameCellTpl =
+    viewChild<TemplateRef<{ $implicit: StudentListItem; value: unknown }>>('servantNameCell');
+  private lastNoteCellTpl =
+    viewChild<TemplateRef<{ $implicit: StudentListItem; value: unknown }>>('lastNoteCell');
   rowActionsTpl = viewChild<TemplateRef<{ $implicit: StudentListItem }>>('rowActionsTemplate');
 
   constructor(
@@ -162,7 +174,12 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
       { key: 'academicYear', header: 'السنة الدراسية', sortable: true },
     );
     if (servantTpl) {
-      cols.push({ key: 'servantName', header: 'الخادم الحالي', sortable: true, template: servantTpl });
+      cols.push({
+        key: 'servantName',
+        header: 'الخادم الحالي',
+        sortable: true,
+        template: servantTpl,
+      });
     } else {
       cols.push({ key: 'servantName', header: 'الخادم الحالي', sortable: true });
     }

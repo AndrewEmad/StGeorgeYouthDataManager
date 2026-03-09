@@ -19,13 +19,15 @@ export const authGuard = (_: unknown, state: unknown) => {
     router.navigate(['/dashboard']);
     return false;
   }
-  if (authService.requiresProfileCompletion() && !url.includes('complete-profile')) {
-    router.navigate(['/complete-profile']);
-    return false;
-  }
-  if (!authService.requiresProfileCompletion() && url.includes('complete-profile')) {
-    router.navigate(['/dashboard']);
-    return false;
+  if (!authService.requiresPasswordChange()) {
+    if (authService.requiresProfileCompletion() && !url.includes('complete-profile')) {
+      router.navigate(['/complete-profile']);
+      return false;
+    }
+    if (!authService.requiresProfileCompletion() && url.includes('complete-profile')) {
+      router.navigate(['/dashboard']);
+      return false;
+    }
   }
   return true;
 };

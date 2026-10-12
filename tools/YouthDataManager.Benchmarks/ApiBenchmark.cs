@@ -53,7 +53,7 @@ internal static class ApiBenchmark
                 }
             }
             var results=new List<object>();var passed=true;var requested=operations?.ToHashSet(StringComparer.Ordinal);
-            foreach(var operation in new[]{"list","contact","workload","workload-owners","data-quality","attendance","follow-up","manager"}.Where(o=>requested==null || requested.Contains(o)))
+            foreach(var operation in new[]{"list","contact","workload","workload-owners","data-quality","attendance","follow-up","manager","servant-service-summary","group-attendance","pastoral-follow-up"}.Where(o=>requested==null || requested.Contains(o)))
             {
                 var route=operation=="list" ? "/api/StudentQueries/paged?page=1&pageSize=25" : operation=="manager" ? "/api/reports/dashboard/manager" : "/api/reports/suite/"+operation+"?page=1&pageSize=25";
                 async Task<double> Measure(HttpClient client){var watch=Stopwatch.StartNew();using var response=await client.GetAsync(route);response.EnsureSuccessStatusCode();await response.Content.ReadAsByteArrayAsync();return watch.Elapsed.TotalMilliseconds;}
@@ -64,7 +64,7 @@ internal static class ApiBenchmark
                 Console.WriteLine($"HTTP {operation}: p95 {p95:F1} ms, 20 authenticated users");
             }
             // Mixed pages and areas exercise distinct SQL requests rather than only overlapping identical reads.
-            foreach(var operation in new[]{"contact","workload","attendance","follow-up"}.Where(o=>requested==null || requested.Contains(o)))
+            foreach(var operation in new[]{"contact","workload","attendance","follow-up","group-attendance","pastoral-follow-up"}.Where(o=>requested==null || requested.Contains(o)))
             {
                 async Task<double> Measure(HttpClient client,int index){var route="/api/reports/suite/"+operation+"?page="+(index/10+1)+"&pageSize=25&area="+Uri.EscapeDataString("Area "+index%10);var watch=Stopwatch.StartNew();using var response=await client.GetAsync(route);response.EnsureSuccessStatusCode();await response.Content.ReadAsByteArrayAsync();return watch.Elapsed.TotalMilliseconds;}
                 await Measure(clients[0],0);
@@ -73,12 +73,12 @@ internal static class ApiBenchmark
                 results.Add(new {Operation=operation+"-mixed-filters",Transport="ASP.NET TestServer HTTP",AuthenticatedUsers=20,DistinctQueries=20,Samples=samples.Length,P50Ms=Math.Round(samples[samples.Length/2],1),P95Ms=Math.Round(p95,1),MaxMs=Math.Round(samples[^1],1),TargetMs=1000,Passed=p95<1000});
                 Console.WriteLine($"HTTP {operation} mixed filters: p95 {p95:F1} ms, 20 authenticated users");
             }
-            if(requested==null || requested.Contains("attendance")){
+            foreach(var operation in new[]{"attendance","servant-service-summary","group-attendance","pastoral-follow-up"}.Where(o=>requested==null || requested.Contains(o))){
                 await using var scope=factory.Services.CreateAsyncScope();var db=scope.ServiceProvider.GetRequiredService<AppDbContext>();var ownerIds=await db.UserRoles.Where(ur=>db.Roles.Any(r=>r.Id==ur.RoleId && r.Name=="Servant")).Select(ur=>ur.UserId).OrderBy(id=>id).Take(20).ToArrayAsync();
                 if(ownerIds.Length!=20)throw new InvalidOperationException("Benchmark requires twenty distinct assignment owners.");
-                async Task<double> Measure(HttpClient client,int index){var watch=Stopwatch.StartNew();using var response=await client.GetAsync("/api/reports/suite/attendance?page=1&pageSize=25&servantId="+ownerIds[index]);response.EnsureSuccessStatusCode();await response.Content.ReadAsByteArrayAsync();return watch.Elapsed.TotalMilliseconds;}
+                async Task<double> Measure(HttpClient client,int index){var watch=Stopwatch.StartNew();using var response=await client.GetAsync("/api/reports/suite/"+operation+"?page=1&pageSize=25&servantId="+ownerIds[index]);response.EnsureSuccessStatusCode();await response.Content.ReadAsByteArrayAsync();return watch.Elapsed.TotalMilliseconds;}
                 await Measure(clients[0],0);var samples=(await Task.WhenAll(clients.Select(async(client,index)=>{var rows=new List<double>();for(var i=0;i<3;i++)rows.Add(await Measure(client,index));return rows;}))).SelectMany(x=>x).Order().ToArray();var p95=samples[(int)Math.Ceiling(samples.Length*.95)-1];passed &= p95<1000;
-                results.Add(new {Operation="attendance-mixed-owners",Transport="ASP.NET TestServer HTTP",AuthenticatedUsers=20,DistinctQueries=20,Samples=samples.Length,P50Ms=Math.Round(samples[samples.Length/2],1),P95Ms=Math.Round(p95,1),MaxMs=Math.Round(samples[^1],1),TargetMs=1000,Passed=p95<1000});Console.WriteLine($"HTTP attendance mixed owners: p95 {p95:F1} ms, 20 authenticated users");
+                results.Add(new {Operation=operation+"-mixed-owners",Transport="ASP.NET TestServer HTTP",AuthenticatedUsers=20,DistinctQueries=20,Samples=samples.Length,P50Ms=Math.Round(samples[samples.Length/2],1),P95Ms=Math.Round(p95,1),MaxMs=Math.Round(samples[^1],1),TargetMs=1000,Passed=p95<1000});Console.WriteLine($"HTTP {operation} mixed owners: p95 {p95:F1} ms, 20 authenticated users");
             }
             return (results,passed);
         }

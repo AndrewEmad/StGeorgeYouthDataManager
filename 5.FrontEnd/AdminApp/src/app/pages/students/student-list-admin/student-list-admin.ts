@@ -220,9 +220,10 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
       this.filters.area = params['area'] ?? '';
+      this.filters.servantId = params['servantId'] ?? '';
       this.filters.academicYear = params['academicYear'] ?? '';
       this.filters.birthMonth = params['birthMonth'] ?? '';
-      if (this.filters.area || this.filters.academicYear || this.filters.birthMonth)
+      if (this.filters.area || this.filters.academicYear || this.filters.birthMonth || this.filters.servantId)
         this.showFilters = true;
       this.page = 1;
       this.loadData();

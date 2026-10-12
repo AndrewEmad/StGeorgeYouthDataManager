@@ -16,6 +16,7 @@ public sealed class ReportSuiteFilter
     public string? Type { get; set; }
     public string? Issue { get; set; }
     public int Days { get; set; } = 14;
+    public int MinConsecutiveAbsences { get; set; } = 3;
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 25;
     public ReportRequestDto StudentFilter => new(DateFrom,DateTo,ServantId,Area,College,Search,AcademicYear,Gender,BirthMonth,HasServant);

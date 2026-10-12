@@ -12,7 +12,7 @@ if (typeof document !== 'undefined') document.addEventListener('pointerdown', ev
   selector: 'app-modal',
   standalone: true,
   template: `
-    <dialog #dialog class="ydm-dialog" [attr.aria-labelledby]="headingId"
+    <dialog #dialog class="ydm-dialog" [class.ydm-dialog-drawer]="variant()==='drawer'" [attr.aria-labelledby]="headingId"
       (keydown)="onKeydown($event)" (cancel)="onCancel($event)" (click)="onBackdrop($event)">
       <div class="ydm-dialog-content">
         <header class="ydm-dialog-heading">
@@ -28,6 +28,7 @@ export class ModalComponent {
   title = input.required<string>();
   visible = input.required<boolean>();
   busy = input(false);
+  variant = input<'dialog'|'drawer'>('dialog');
   close = output<void>();
   readonly headingId = `ydm-dialog-${++nextDialogId}`;
   private readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');

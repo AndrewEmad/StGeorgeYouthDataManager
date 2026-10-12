@@ -16,10 +16,19 @@ public partial class ReportDataProvider
     {
         Page(f.Page,f.PageSize,null);
         f.Status=string.IsNullOrWhiteSpace(f.Status) ? null : f.Status;f.Type=string.IsNullOrWhiteSpace(f.Type) ? null : f.Type;f.Issue=string.IsNullOrWhiteSpace(f.Issue) ? null : f.Issue;
-        if(f.Days is <0 or >36500 || f.ServantId==Guid.Empty) throw new DomainValidationException("Invalid report filters.");
+        if(f.Days is <0 or >36500 || f.MinConsecutiveAbsences is <1 or >365 || f.ServantId==Guid.Empty) throw new DomainValidationException("Invalid report filters.");
+        if(report is "servant-service-summary" or "group-attendance" or "pastoral-follow-up")
+        {
+            if(!_caller.IsPrivileged)throw new DomainValidationException("Privileged report required.");
+            var today=TimeZoneInfo.ConvertTimeFromUtc(_caller.UtcNow,BusinessTime.Zone).Date;
+            f.DateFrom ??= new DateTime(today.Year,today.Month,1);f.DateTo ??= today;
+        }
         if(!_caller.IsPrivileged && f.ServantId.HasValue && f.ServantId!=_caller.UserId) throw new DomainValidationException("Invalid caller scope.");
         _=Period(f.DateFrom,f.DateTo);
         return report switch {
+            "servant-service-summary" or "group-attendance" or "pastoral-follow-up" => await ConcurrentReportReads.Run(
+                _context.Database.GetDbConnection().DataSource+"|"+_context.Database.GetDbConnection().Database+"|"+report+"|global|"+export+"|"+System.Text.Json.JsonSerializer.Serialize(f),
+                ()=>report=="servant-service-summary" ? ServantServiceTable(f,export) : report=="group-attendance" ? GroupAttendanceTable(f,export) : PastoralFollowUpTable(f,export),Ct),
             "contact" => await ContactTable(f,export),
             "follow-up" => await TaskTable(f,export),
             "workload" => await WorkloadTable(f,export),
@@ -46,10 +55,15 @@ public partial class ReportDataProvider
         var rows=loadedRows ?? await (export ? ordered.Take(_exportLimit) : ordered.Skip((f.Page-1)*f.PageSize).Take(f.PageSize)).ToListAsync(Ct);
         var properties=typeof(T).GetProperties().ToDictionary(p=>char.ToLowerInvariant(p.Name[0])+p.Name[1..]);
         var mapped=rows.Select(row=>columns.ToDictionary(c=>c.Key,c=>properties.TryGetValue(c.Key,out var p) ? p.GetValue(row) : null)).ToList();
-        foreach(var row in mapped)
+        for(var i=0;i<mapped.Count;i++)
         {
+            var row=mapped[i];
+            foreach(var key in new[]{"id","studentId","ownerId","personId"})
+                if(!row.ContainsKey(key) && properties.TryGetValue(key,out var identifier))row[key]=identifier.GetValue(rows[i]);
             if(row.TryGetValue("eligible",out var d) && d is int denominator && row.TryGetValue("present",out var n) && n is int numerator)
                 row["rate"]=denominator==0 || (row.TryGetValue("rosterKnown",out var known) && known is false) ? null : Math.Round(100m*numerator/denominator,1);
+            if(row.TryGetValue("servantEligible",out var se) && se is int sd && row.TryGetValue("servantPresent",out var sp) && sp is int sn)
+                row["servantRate"]=sd==0 || (row.TryGetValue("rosterKnown",out var confirmed) && confirmed is false) ? null : Math.Round(100m*sn/sd,1);
         }
         var scopeFilters=new List<string>();
         if(!string.IsNullOrWhiteSpace(f.Search))scopeFilters.Add("بحث: "+f.Search.Trim());
@@ -58,7 +72,11 @@ public partial class ReportDataProvider
         if(f.BirthMonth.HasValue)scopeFilters.Add("شهر الميلاد: "+(f.BirthMonth==0 ? "غير مسجل" : f.BirthMonth.ToString()));
         if(f.ServantId.HasValue)scopeFilters.Add("المسؤول / مقدم الطلب: "+await _context.Users.Where(u=>u.Id==f.ServantId).Select(u=>u.FullName).SingleOrDefaultAsync(Ct));
         if(f.Status!=null)scopeFilters.Add("الحالة: "+ReportLabels.Arabic(f.Status));if(f.Type!=null)scopeFilters.Add("النوع: "+ReportLabels.Arabic(f.Type));if(f.Issue!=null)scopeFilters.Add("حالة البيانات: "+ReportLabels.Arabic(f.Issue));
-        scopeFilters.Add("حد الاتصال الحديث / عمر الطلب: "+f.Days+" يومًا");
+        if(f.Issue=="unassigned-group")scopeFilters.Add("مجموعة بلا خادم وقت الاجتماع");
+        if(title=="مخدومون يحتاجون افتقادًا")scopeFilters.Add("حد الغياب المتتالي: "+f.MinConsecutiveAbsences+" اجتماعات؛ حد التواصل الحديث: "+f.Days+" يومًا؛ المجموعة والمهام بحسب الوضع الحالي");
+        else if(title.Contains("حضور مجموعات"))scopeFilters.Add("توزيع المجموعات بحسب الخادم المسجل وقت الاجتماع");
+        else if(title=="ملخص خدمة الخدام")scopeFilters.Add("العمل بحسب مسجل المكالمة ومشارك الزيارة؛ المجموعات والمهام بحسب الوضع الحالي؛ مجموع مشاركات الزيارات قد يتجاوز عدد الزيارات الفعلي");
+        else if(title is "الافتقاد والتواصل" or "متابعة الطلبات")scopeFilters.Add("حد الاتصال الحديث / عمر الطلب: "+f.Days+" يومًا");
         var scope=(export ? "كل الصفوف المطابقة للفلاتر" : "الصفحة الحالية؛ الإجماليات لكل النتائج")+" · "+string.Join(" · ",scopeFilters);
         var period=$"{f.DateFrom?.ToString("yyyy-MM-dd") ?? "كل التواريخ"} – {f.DateTo?.ToString("yyyy-MM-dd") ?? "بلا حد نهائي"} (القاهرة)";
         return new(title,period,scope,columns,mapped,count,export ? 1 : f.Page,export ? count : f.PageSize,totals ?? new(){["total"]=count});
@@ -88,7 +106,7 @@ public partial class ReportDataProvider
         var visitOutcomes=await periodVisits.Where(v=>filteredIds.Contains(v.StudentId)).GroupBy(v=>v.VisitOutcome).Select(g=>new {Status=g.Key,Count=g.Count()}).ToListAsync(Ct);
         foreach(var status in Enum.GetValues<CallStatus>())totals["call"+status]=callOutcomes.FirstOrDefault(o=>o.Status==status)?.Count ?? 0;
         foreach(var status in Enum.GetValues<VisitOutcome>())totals["visit"+status]=visitOutcomes.FirstOrDefault(o=>o.Status==status)?.Count ?? 0;
-        return await Table("التواصل والتغطية",f,export,q.OrderBy(r=>r.Name).ThenBy(r=>r.Id),[new("id","المعرف"),new("name","المخدوم"),new("owner","المسؤول"),new("attempts","محاولات الفترة","number"),new("reached","تم التواصل بنجاح","boolean"),new("lastAttempt","آخر محاولة","datetime"),new("lastSuccess","آخر تواصل ناجح","datetime")],totals,population);
+        return await Table("الافتقاد والتواصل",f,export,q.OrderBy(r=>r.Name).ThenBy(r=>r.Id),[new("id","المعرف"),new("name","المخدوم"),new("owner","المسؤول"),new("attempts","محاولات الفترة","number"),new("reached","تم التواصل بنجاح","boolean"),new("lastAttempt","آخر محاولة","datetime"),new("lastSuccess","آخر تواصل ناجح","datetime")],totals,population);
     }
     private async Task<ReportTable> TaskTable(ReportSuiteFilter f,bool export)
     {
@@ -105,14 +123,14 @@ public partial class ReportDataProvider
         var rows=from t in q join s in _context.Students.IgnoreQueryFilters() on t.StudentId equals s.Id
             join u in _context.Users on t.AssigneeId equals (Guid?)u.Id into owners from u in owners.DefaultIfEmpty()
             select new TaskRow {Id=t.Id,StudentId=s.Id,Name=s.FullName,Owner=u==null ? "قائمة إعادة الإسناد" : u.FullName,Type=t.Type,Status=t.Status,DueAt=t.DueAt,CompletedAt=t.CompletedAt,Source=t.SourceType,Reason=t.Reason};
-        return await Table("مهام المتابعة",f,export,rows.OrderBy(r=>r.DueAt).ThenBy(r=>r.Id),[new("id","المعرف"),new("studentId","معرف المخدوم"),new("name","المخدوم"),new("owner","المسؤول"),new("type","النوع"),new("status","الحالة"),new("dueAt","الاستحقاق","datetime"),new("completedAt","الإنجاز","datetime"),new("source","المصدر"),new("reason","السبب")],totals);
+        return await Table("متابعة الافتقاد",f,export,rows.OrderBy(r=>r.DueAt).ThenBy(r=>r.Id),[new("id","المعرف"),new("studentId","معرف المخدوم"),new("name","المخدوم"),new("owner","المسؤول"),new("type","النوع"),new("status","الحالة"),new("dueAt","الاستحقاق","datetime"),new("completedAt","الإنجاز","datetime"),new("source","المصدر"),new("reason","السبب")],totals);
     }
     private async Task<ReportTable> WorkloadTable(ReportSuiteFilter f,bool export)
     {
         var roster=SuiteRoster(f);var roleIds=_context.Roles.Where(r=>r.Name=="Servant" || r.Name=="Secretary" || r.Name=="Manager").Select(r=>r.Id);var eligibleIds=_context.Users.Where(u=>u.IsActive && _context.UserRoles.Any(r=>r.UserId==u.Id && roleIds.Contains(r.RoleId))).Select(u=>u.Id);var q=roster.Select(s=>new WorkloadRow {Id=s.Id,Name=s.FullName,OwnerId=s.ServantId,Owner=s.Servant==null ? "غير مسند" : s.Servant.FullName,OwnerActive=s.ServantId!=null && eligibleIds.Contains(s.ServantId.Value),Area=s.Area,Year=s.AcademicYear,Tasks=_context.Set<FollowUpTask>().Count(t=>t.StudentId==s.Id && t.Status=="Open")});
         if(f.Issue!=null)q=f.Issue switch {"unassigned"=>q.Where(r=>r.OwnerId==null),"inactive-owner"=>q.Where(r=>r.OwnerId!=null && !r.OwnerActive),_=>throw new DomainValidationException("Invalid workload filter.")};
         var totals=new Dictionary<string,decimal?> { ["roster"]=await q.CountAsync(Ct),["unassigned"]=await q.CountAsync(r=>r.OwnerId==null,Ct),["inactiveOwners"]=await q.CountAsync(r=>r.OwnerId!=null && !r.OwnerActive,Ct),["owners"]=await q.Where(r=>r.OwnerId!=null).Select(r=>r.OwnerId).Distinct().CountAsync(Ct) };
-        return await Table("الإسناد وعبء الخدمة",f,export,q.OrderBy(r=>r.Owner).ThenBy(r=>r.Name).ThenBy(r=>r.Id),[new("id","معرف المخدوم"),new("name","المخدوم"),new("ownerId","معرف المسؤول"),new("owner","المسؤول"),new("ownerActive","مسؤول نشط","boolean"),new("area","المنطقة"),new("year","السنة"),new("tasks","مهام مفتوحة","number")],totals);
+        return await Table("توزيع المخدومين",f,export,q.OrderBy(r=>r.Owner).ThenBy(r=>r.Name).ThenBy(r=>r.Id),[new("id","معرف المخدوم"),new("name","المخدوم"),new("ownerId","معرف المسؤول"),new("owner","المسؤول"),new("ownerActive","مسؤول نشط","boolean"),new("area","المنطقة"),new("year","السنة"),new("tasks","مهام مفتوحة","number")],totals);
     }
     private async Task<ReportTable> OwnerWorkloadTable(ReportSuiteFilter f,bool export)
     {
@@ -132,7 +150,7 @@ public partial class ReportDataProvider
         if(f.Issue!=null)q=f.Issue switch {"unassigned"=>q.Where(r=>r.Id==Guid.Empty),"inactive-owner"=>q.Where(r=>r.Id!=Guid.Empty && !r.Active),_=>throw new DomainValidationException("Invalid workload filter.")};
         var aggregate=await q.GroupBy(_=>1).Select(g=>new {Owners=g.Count(),Roster=g.Sum(r=>r.Eligible),Attempted=g.Sum(r=>r.Attempted),Reached=g.Sum(r=>r.Present)}).SingleOrDefaultAsync(Ct);
         var totals=new Dictionary<string,decimal?> {["owners"]=aggregate?.Owners ?? 0,["roster"]=aggregate?.Roster ?? 0,["attempted"]=aggregate?.Attempted ?? 0,["reached"]=aggregate?.Reached ?? 0,["coverage"]=aggregate?.Roster>0 ? Math.Round(100m*aggregate.Reached/aggregate.Roster,1) : null};
-        return await Table("عبء الخدمة والتغطية لكل مسؤول",f,export,q.OrderBy(r=>r.Name).ThenBy(r=>r.Id),[new("id","معرف المسؤول"),new("name","المسؤول"),new("active","نشط","boolean"),new("eligible","المخدومون المسندون","number"),new("attempted","مخدومين جرت محاولة التواصل معهم","number"),new("present","مخدومين تم التواصل معهم بنجاح","number"),new("rate","تغطية القائمة %","percent")],totals,aggregate?.Owners ?? 0);
+        return await Table("متابعة مجموعات الخدام",f,export,q.OrderBy(r=>r.Name).ThenBy(r=>r.Id),[new("id","معرف المسؤول"),new("name","المسؤول"),new("active","نشط","boolean"),new("eligible","المخدومون المسندون","number"),new("attempted","مخدومين جرت محاولة التواصل معهم","number"),new("present","مخدومين تم التواصل معهم بنجاح","number"),new("rate","تغطية القائمة %","percent")],totals,aggregate?.Owners ?? 0);
     }
     private async Task<ReportTable> QualityTable(ReportSuiteFilter f,bool export)
     {
@@ -184,7 +202,7 @@ public partial class ReportDataProvider
         if(f.Type!=null && f.Type is not ("addition" or "assignment" or "removal"))throw new DomainValidationException("Invalid request kind.");
         var q=ApprovalRows(f);if(f.Type!=null)q=q.Where(r=>r.Kind==f.Type);
         var totals=new Dictionary<string,decimal?> { ["total"]=await q.CountAsync(Ct),["pending"]=await q.CountAsync(r=>r.Status==0,Ct),["stalePending"]=await q.CountAsync(r=>r.Status==0 && r.RequestedAt<_caller.UtcNow.AddDays(-f.Days),Ct),["averageTurnaroundHours"]=await q.Where(r=>r.ProcessedAt!=null).Select(r=>(decimal?)EF.Functions.DateDiffMinute(r.RequestedAt,r.ProcessedAt)/60).AverageAsync(Ct) };
-        return await Table("طلبات الموافقة",f,export,q.OrderByDescending(r=>r.RequestedAt).ThenBy(r=>r.Id),[new("id","معرف الطلب"),new("kind","النوع"),new("requesterName","مقدم الطلب"),new("name","المخدوم"),new("processedByName","من عالج الطلب"),new("requestedAt","تاريخ الطلب","datetime"),new("processedAt","تاريخ المعالجة","datetime"),new("status","الحالة","approval-status"),new("studentId","معرف المخدوم"),new("reason","سبب الإلغاء / المعالجة")],totals);
+        return await Table("متابعة الطلبات",f,export,q.OrderByDescending(r=>r.RequestedAt).ThenBy(r=>r.Id),[new("id","معرف الطلب"),new("kind","النوع"),new("requesterName","مقدم الطلب"),new("name","المخدوم"),new("processedByName","من عالج الطلب"),new("requestedAt","تاريخ الطلب","datetime"),new("processedAt","تاريخ المعالجة","datetime"),new("status","الحالة","approval-status"),new("studentId","معرف المخدوم"),new("reason","سبب الإلغاء / المعالجة")],totals);
     }
     private IQueryable<AttendanceEntry> AttendanceEntries(ReportSuiteFilter f,string kind,bool knownOnly)
     {
@@ -195,6 +213,7 @@ public partial class ReportDataProvider
             select new AttendanceEntry {Id=r.Id,PersonId=r.PersonId,Name=r.Name,OwnerId=r.AssignedServantId,Date=m.Date,Present=r.Present,RosterKnown=m.RosterKnown};
         if(kind=="Servant" && !string.IsNullOrWhiteSpace(f.Search)){var people=_context.Users.Where(u=>u.FullName.Contains(f.Search.Trim())).Select(u=>u.Id);q=q.Where(r=>people.Contains(r.PersonId));}
         if(f.ServantId.HasValue)q=kind=="Student" ? q.Where(r=>r.OwnerId==f.ServantId) : q.Where(r=>r.PersonId==f.ServantId);
+        if(kind=="Student" && f.Issue=="unassigned-group")q=q.Where(r=>r.OwnerId==null);
         if(f.DateFrom.HasValue)q=q.Where(r=>r.Date>=f.DateFrom.Value.Date);if(f.DateTo.HasValue)q=q.Where(r=>r.Date<=f.DateTo.Value.Date);
         return q;
     }
@@ -207,6 +226,7 @@ public partial class ReportDataProvider
         var parameters=new List<SqlParameter>{new("@kind",SqlDbType.NVarChar,20){Value=kind}};
         if(!_caller.IsPrivileged){conditions.Add(kind=="Student" ? "r.AssignedServantId=@caller" : "r.PersonId=@caller");parameters.Add(new("@caller",SqlDbType.UniqueIdentifier){Value=(object?)_caller.UserId ?? DBNull.Value});}
         if(f.ServantId.HasValue){conditions.Add(kind=="Student" ? "r.AssignedServantId=@owner" : "r.PersonId=@owner");parameters.Add(new("@owner",SqlDbType.UniqueIdentifier){Value=f.ServantId.Value});}
+        if(kind=="Student" && f.Issue=="unassigned-group")conditions.Add("r.AssignedServantId IS NULL");
         if(f.DateFrom.HasValue){conditions.Add("m.Date>=@from");parameters.Add(new("@from",SqlDbType.Date){Value=f.DateFrom.Value.Date});}
         if(f.DateTo.HasValue){conditions.Add("m.Date<=@to");parameters.Add(new("@to",SqlDbType.Date){Value=f.DateTo.Value.Date});}
         var eligibleSql="SELECT r.PersonId,r.Present,m.Date FROM dbo.MeetingRosterEntry r INNER HASH JOIN dbo.MeetingSession m ON m.Id=r.SessionId WHERE "+string.Join(" AND ",conditions);
@@ -243,11 +263,14 @@ public partial class ReportDataProvider
     }
     private async Task<ReportTable> MeetingTable(ReportSuiteFilter f,bool export)
     {
-        var entries=AttendanceEntries(f,"Student",false);
+        var entries=AttendanceEntries(f,"Student",true);
+        var servantEntries=AttendanceEntries(new(){DateFrom=f.DateFrom,DateTo=f.DateTo,ServantId=f.ServantId},"Servant",true);
         var q=_context.Set<MeetingSession>().AsNoTracking();
         if(f.DateFrom.HasValue)q=q.Where(m=>m.Date>=f.DateFrom.Value.Date);if(f.DateTo.HasValue)q=q.Where(m=>m.Date<=f.DateTo.Value.Date);
-        var rows=q.Select(m=>new MeetingRow {Id=m.Id,Date=m.Date,Status=m.Status,RosterKnown=m.RosterKnown,Eligible=entries.Count(r=>r.Date==m.Date),Present=entries.Count(r=>r.Date==m.Date && r.Present)});
-        return await Table("إجماليات الاجتماعات واتجاهات الحضور",f,export,rows.OrderByDescending(r=>r.Date).ThenBy(r=>r.Id),[new("id","معرف الاجتماع"),new("date","التاريخ","date"),new("status","الحالة"),new("rosterKnown","تغطية مؤكدة","boolean"),new("eligible","القائمة المؤهلة","number"),new("present","الحضور","number"),new("rate","نسبة الحضور","percent")]);
+        var rows=q.Select(m=>new MeetingRow {Id=m.Id,Date=m.Date,Status=m.Status,RosterKnown=m.RosterKnown,Eligible=entries.Count(r=>r.Date==m.Date),Present=entries.Count(r=>r.Date==m.Date && r.Present),ServantEligible=servantEntries.Count(r=>r.Date==m.Date),ServantPresent=servantEntries.Count(r=>r.Date==m.Date && r.Present)});
+        var studentEligible=await entries.CountAsync(Ct);var studentPresent=await entries.CountAsync(r=>r.Present,Ct);
+        var servantEligible=await servantEntries.CountAsync(Ct);var servantPresent=await servantEntries.CountAsync(r=>r.Present,Ct);
+        return await Table("حضور الاجتماعات: المخدومون والخدام",f,export,rows.OrderByDescending(r=>r.Date).ThenBy(r=>r.Id),[new("date","تاريخ الاجتماع","date"),new("status","الحالة"),new("rosterKnown","قائمة الحضور مؤكدة","boolean"),new("eligible","المخدومون في قائمة الحضور","number"),new("present","حضور المخدومين","number"),new("rate","نسبة حضور المخدومين %","percent"),new("servantEligible","الخدام في قائمة الحضور","number"),new("servantPresent","حضور الخدام","number"),new("servantRate","نسبة حضور الخدام %","percent")],new(){["eligible"]=studentEligible,["present"]=studentPresent,["rate"]=Rate(studentPresent,studentEligible),["servantEligible"]=servantEligible,["servantPresent"]=servantPresent,["servantRate"]=Rate(servantPresent,servantEligible)});
     }
     private sealed class ContactEvent {public Guid StudentId {get;init;}public DateTime At {get;init;}public bool Successful {get;init;}}
     private sealed class ContactRow {public Guid Id {get;init;} public string Name {get;init;}="";public string Owner {get;init;}="";public int Attempts {get;init;}public bool Reached {get;init;}public DateTime? LastAttempt {get;init;}public DateTime? LastSuccess {get;init;} }
@@ -258,5 +281,5 @@ public partial class ReportDataProvider
     private sealed class ApprovalRow {public Guid Id {get;init;}public string Kind {get;init;}="";public Guid RequesterId {get;init;}public string RequesterName {get;init;}="";public string Name {get;init;}="";public string? ProcessedByName {get;init;}public DateTime RequestedAt {get;init;}public DateTime? ProcessedAt {get;init;}public int Status {get;init;}public Guid? StudentId {get;init;}public string? Reason {get;init;} }
     private sealed class AttendanceEntry {public Guid Id {get;init;}public Guid PersonId {get;init;}public string Name {get;init;}="";public Guid? OwnerId {get;init;}public DateTime Date {get;init;}public bool Present {get;init;}public bool RosterKnown {get;init;} }
     public sealed class AttendanceRow {public Guid Id {get;init;}public string Name {get;init;}="";public int Eligible {get;init;}public int Present {get;init;}public DateTime? LastPresent {get;init;}public int ConsecutiveAbsences {get;init;}public int TotalEligible {get;init;}public int TotalPresent {get;init;}public int TotalPeople {get;init;} }
-    private sealed class MeetingRow {public Guid Id {get;init;}public DateTime Date {get;init;}public string Status {get;init;}="";public bool RosterKnown {get;init;}public int Eligible {get;init;}public int Present {get;init;} }
+    private sealed class MeetingRow {public Guid Id {get;init;}public DateTime Date {get;init;}public string Status {get;init;}="";public bool RosterKnown {get;init;}public int Eligible {get;init;}public int Present {get;init;}public int ServantEligible {get;init;}public int ServantPresent {get;init;} }
 }

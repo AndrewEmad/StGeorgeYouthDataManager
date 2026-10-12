@@ -25,9 +25,9 @@ export class ServantPerformanceReportPage implements OnInit {
 
   readonly columns: DataTableColumn<ServantPerformance>[] = [
     { key: 'fullName', header: 'الخادم', sortable: true },
-    { key: 'assignedStudentsCount', header: 'عدد المخدومين المخصصين', sortable: true },
+    { key: 'assignedStudentsCount', header: 'مخدوموه الحاليون', sortable: true },
     { key: 'callsThisWeek', header: 'مكالمات هذا الأسبوع', sortable: true },
-    { key: 'visitsThisWeek', header: 'زيارات هذا الأسبوع', sortable: true },
+    { key: 'visitsThisWeek', header: 'زيارات شارك فيها هذا الأسبوع', sortable: true },
   ];
 
   data = signal<ServantPerformance[]>([]);

@@ -26,7 +26,7 @@
   </header>
 
   <div class="main-layout">
-    <aside class="glass-card sidebar" [hidden]="mobile">
+    <aside class="sidebar" [hidden]="mobile">
       <div class="sidebar-header">
         <span class="material-icons brand-icon" aria-hidden="true">hub</span>
         <h2>الإدارة</h2>
@@ -42,93 +42,20 @@
 </div>
 
 <ng-template #navigation>
-      <nav class="side-nav" aria-label="التنقل الرئيسي">
-        <a routerLink="/dashboard/notifications" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">notifications</span><span>الإشعارات</span></a>
-        <a routerLink="/dashboard/activity-history" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">history</span><span>سجل النشاط</span></a>
-        <a routerLink="/dashboard/tasks" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">checklist</span><span>مهام المتابعة</span></a>
-        <a routerLink="/dashboard/report-suite" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">query_stats</span><span>التقارير الشاملة</span></a>
-        <a routerLink="/dashboard/request-history" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">history</span><span>سجل الطلبات</span></a>
-        <a
-          routerLink="/dashboard/stats"
-          routerLinkActive="active"
-          class="nav-item"
-          (click)="closeSidebar()"
-        >
-          <span class="material-icons" aria-hidden="true">analytics</span>
-          <span>الإحصائيات</span>
-        </a>
-        <a
-          routerLink="/dashboard/servants"
-          routerLinkActive="active"
-          class="nav-item"
-          (click)="closeSidebar()"
-        >
-          <span class="material-icons" aria-hidden="true">badge</span>
-          <span>الخدام</span>
-        </a>
-        <a
-          routerLink="/dashboard/students"
-          routerLinkActive="active"
-          class="nav-item"
-          (click)="closeSidebar()"
-        >
-          <span class="material-icons" aria-hidden="true">groups</span>
-          <span>المخدومين</span>
-        </a>
-        <a
-          routerLink="/dashboard/attendance"
-          routerLinkActive="active"
-          class="nav-item"
-          (click)="closeSidebar()"
-        >
-          <span class="material-icons" aria-hidden="true">event_available</span>
-          <span>تسجيل الحضور</span>
-        </a>
-        <a
-          routerLink="/dashboard/removal-requests"
-          routerLinkActive="active"
-          class="nav-item"
-          (click)="closeSidebar()"
-        >
-          <span class="material-icons" aria-hidden="true">person_remove</span>
-          <span>طلبات الإزالة</span>
-        </a>
-        <a
-          routerLink="/dashboard/assignment-requests"
-          routerLinkActive="active"
-          class="nav-item"
-          (click)="closeSidebar()"
-        >
-          <span class="material-icons" aria-hidden="true">person_add</span>
-          <span>طلبات التخصيص</span>
-        </a>
-        <a
-          routerLink="/dashboard/student-addition-requests"
-          routerLinkActive="active"
-          class="nav-item"
-          (click)="closeSidebar()"
-        >
-          <span class="material-icons" aria-hidden="true">person_add_alt_1</span>
-          <span>طلبات إضافة مخدومين</span>
-        </a>
-        <a
-          routerLink="/dashboard/reports"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: false }"
-          class="nav-item"
-          (click)="closeSidebar()"
-        >
-          <span class="material-icons" aria-hidden="true">assessment</span>
-          <span>التقارير</span>
-        </a>
-        <a
-          routerLink="/dashboard/data-exports"
-          routerLinkActive="active"
-          class="nav-item"
-          (click)="closeSidebar()"
-        >
-          <span class="material-icons" aria-hidden="true">settings_backup_restore</span>
-          <span>تصدير البيانات</span>
-        </a>
-      </nav></ng-template>
-<app-modal [visible]="sidebarOpen && mobile" title="قائمة الإدارة" (close)="closeSidebar()"><div body><ng-container [ngTemplateOutlet]="navigation"/></div></app-modal>
+  <nav class="side-nav" aria-label="التنقل الرئيسي">
+    <a routerLink="/dashboard/stats" routerLinkActive="active"  class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">analytics</span><span>الإحصائيات</span></a>
+    <a routerLink="/dashboard/reports" [class.active]="reportsActive" [attr.aria-current]="reportsActive ? 'page' : null" class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">assessment</span><span>التقارير</span></a>
+    <a routerLink="/dashboard/attendance" routerLinkActive="active"  class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">event_available</span><span>تسجيل الحضور</span></a>
+    <a routerLink="/dashboard/tasks" routerLinkActive="active"  class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">checklist</span><span>متابعة الافتقاد</span></a>
+    <a routerLink="/dashboard/students" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">groups</span><span>المخدومين</span></a>
+    <a routerLink="/dashboard/servants" routerLinkActive="active"  class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">badge</span><span>الخدام</span></a>
+    <a routerLink="/dashboard/student-addition-requests" routerLinkActive="active"  class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">person_add_alt_1</span><span>طلبات إضافة مخدومين</span></a>
+    <a routerLink="/dashboard/assignment-requests" routerLinkActive="active"  class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">person_add</span><span>طلبات توزيع المخدومين</span></a>
+    <a routerLink="/dashboard/removal-requests" routerLinkActive="active"  class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">person_remove</span><span>طلبات الإزالة</span></a>
+    <a routerLink="/dashboard/request-history" routerLinkActive="active"  class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">history</span><span>سجل الطلبات</span></a>
+    <a routerLink="/dashboard/activity-history" routerLinkActive="active"  class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">manage_history</span><span>سجل النشاط</span></a>
+    <a routerLink="/dashboard/notifications" routerLinkActive="active"  class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">notifications</span><span>الإشعارات</span></a>
+    <a routerLink="/dashboard/data-exports" routerLinkActive="active"  class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">download</span><span>تصدير البيانات</span></a>
+  </nav>
+</ng-template>
+<app-modal [visible]="sidebarOpen && mobile" title="قائمة الإدارة" variant="drawer" (close)="closeSidebar()"><div body><ng-container [ngTemplateOutlet]="navigation"/></div></app-modal>

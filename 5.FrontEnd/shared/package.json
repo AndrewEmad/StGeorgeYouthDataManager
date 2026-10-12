@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     "./core/utils": "./core/utils.ts",
+    "./core/report-catalog": "./core/report-catalog.ts",
     "./ui/modal": "./ui/modal.ts",
     "./ui/styles/theme.css": "./ui/styles/theme.css",
     "./core/api": "./core/api.ts",

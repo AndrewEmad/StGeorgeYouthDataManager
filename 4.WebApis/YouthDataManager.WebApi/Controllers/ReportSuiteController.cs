@@ -12,12 +12,14 @@ namespace YouthDataManager.WebApi.Controllers;
 [ApiController,Route("api/reports/suite"),Authorize]
 public sealed class ReportSuiteController(IReportDataProvider provider,YouthDataManager.WebApi.Authorization.ResourceAccess access) : ControllerBase
 {
+    private bool Denied(string report,ReportSuiteFilter filter) => !access.Privileged &&
+        (report is "servant-service-summary" or "group-attendance" or "pastoral-follow-up" || filter.ServantId.HasValue && filter.ServantId!=access.UserId);
     [HttpGet("{report}")]
-    public async Task<IActionResult> Read(string report,[FromQuery] ReportSuiteFilter filter,bool full=false) => !access.Privileged && filter.ServantId.HasValue && filter.ServantId!=access.UserId ? Forbid() : Ok(await provider.Suite(report,filter,full));
+    public async Task<IActionResult> Read(string report,[FromQuery] ReportSuiteFilter filter,bool full=false) => Denied(report,filter) ? Forbid() : Ok(await provider.Suite(report,filter,full));
     [HttpGet("{report}/export")]
     public async Task<IActionResult> Export(string report,[FromQuery] ReportSuiteFilter filter,string format="xlsx")
     {
-        if(!access.Privileged && filter.ServantId.HasValue && filter.ServantId!=access.UserId)return Forbid();
+        if(Denied(report,filter))return Forbid();
         if(format is not ("xlsx" or "csv"))return BadRequest("Invalid export format.");
         var table=await provider.Suite(report,filter,true);var ct=HttpContext.RequestAborted;
         if(format=="csv")

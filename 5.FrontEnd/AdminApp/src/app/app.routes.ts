@@ -16,8 +16,8 @@ export const routes: Routes = [
       {path:'activity-history',loadComponent:()=>import('@ydm/shared/pages/activity-history').then(m=>m.PersonalActivityPage),data:{title:'سجل النشاط'}},
       {path:'notifications',loadComponent:()=>import('@ydm/shared/pages/notifications').then(m=>m.NotificationsPage),data:{title:'الإشعارات والتذكيرات'}},
       {path:'request-history',loadComponent:()=>import('@ydm/shared/pages/requests').then(m=>m.RequestsPage),data:{title:'سجل الطلبات'}},
-      {path:'tasks',loadComponent:()=>import('@ydm/shared/pages/tasks').then(m=>m.TasksPage),data:{title:'مهام المتابعة'}},
-      {path:'report-suite',loadComponent:()=>import('@ydm/shared/pages/reports').then(m=>m.ReportSuitePage),data:{title:'التقارير الشاملة'}},
+      {path:'tasks',loadComponent:()=>import('@ydm/shared/pages/tasks').then(m=>m.TasksPage),data:{title:'متابعة الافتقاد'}},
+      {path:'report-suite',loadComponent:()=>import('@ydm/shared/pages/reports').then(m=>m.ReportSuitePage),data:{title:'التقارير'}},
       { path: 'stats', loadComponent: () => import('./pages/stats/stats.page').then(m => m.StatsPage), data: { title: 'الإحصائيات' } },
       { path: 'attendance', loadComponent: () => import('@ydm/shared/pages/meetings').then(m => m.MeetingsPage), data: { title: 'تسجيل الحضور' } },
       { path: 'servants', loadComponent: () => import('./pages/servants/servant-list/servant-list').then(m => m.ServantListComponent), data: { title: 'الخدام' } },
@@ -32,7 +32,7 @@ export const routes: Routes = [
       {
         path: 'assignment-requests',
         loadComponent: () => import('@ydm/shared/pages/requests').then(m => m.RequestsPage),
-        data: { title: 'طلبات التخصيص' , kind:'assignment', review:true},
+        data: { title: 'طلبات توزيع المخدومين' , kind:'assignment', review:true},
       },
       {
         path: 'student-addition-requests',
@@ -46,8 +46,7 @@ export const routes: Routes = [
         children: [
           {
             path: 'servant-follow-up',
-            loadComponent: () => import('./pages/reports/servant-follow-up.page').then(m => m.ServantFollowUpPage),
-            data: { title: 'متابعة الخادم' },
+            redirectTo: '/dashboard/reports',pathMatch:'full',
           },
           {
             path: 'student-distribution',
@@ -57,7 +56,7 @@ export const routes: Routes = [
           {
             path: 'servant-performance',
             loadComponent: () => import('./pages/reports/servant-performance-report.page').then(m => m.ServantPerformanceReportPage),
-            data: { title: 'أداء الخادم' },
+            data: { title: 'مكالمات وزيارات هذا الأسبوع' },
           },
           {
             path: 'servant-activity',
@@ -84,7 +83,7 @@ export const routes: Routes = [
             loadComponent: () => import('./pages/reports/students-by-birth-month-report.page').then(m => m.StudentsByBirthMonthReportPage),
             data: { title: 'حسب شهر الميلاد' },
           },
-          { path: '', redirectTo: 'servant-follow-up', pathMatch: 'full' },
+          { path: '', loadComponent: () => import('./pages/reports/reports-catalog.page').then(m => m.ReportsCatalogPage),pathMatch:'full',data:{title:'التقارير'} },
         ],
       },
       { path:'backups',redirectTo:'data-exports',pathMatch:'full' },

@@ -1,4 +1,7 @@
 import {Subscription} from 'rxjs';
+import {ActivatedRoute} from '@angular/router';
+import {DestroyRef} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import { Component, OnInit, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ReportsService } from '../../services/reports.service';
 import { UsersService } from '../../services/users.service';
@@ -19,6 +22,8 @@ import { AdvancedFilterConfig, AdvancedFilterModel } from '../../shared/componen
 export class ServantActivityReportPage implements OnInit {
   private request?:Subscription;ngOnDestroy(){this.request?.unsubscribe();}
 
+  private route=inject(ActivatedRoute);
+  private destroy=inject(DestroyRef);
   private reportsService = inject(ReportsService);
   private usersService = inject(UsersService);
 
@@ -51,13 +56,16 @@ export class ServantActivityReportPage implements OnInit {
 
   readonly columns: DataTableColumn<ServantActivitySummary>[] = [
     { key: 'fullName', header: 'الخادم', sortable: true },
-    { key: 'assignedCount', header: 'عدد المخدومين المخصصين', sortable: true },
+    { key: 'assignedCount', header: 'مخدوموه الحاليون', sortable: true },
     { key: 'callsInPeriod', header: 'مكالمات في الفترة', sortable: true },
-    { key: 'visitsInPeriod', header: 'زيارات في الفترة', sortable: true },
+    { key: 'visitsInPeriod', header: 'زيارات شارك فيها خلال الفترة', sortable: true },
   ];
 
   ngOnInit(): void {
-    this.loadData();
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params=>{
+      const model:AdvancedFilterModel={};for(const key of ['dateFrom','dateTo','servantId']){const value=params.get(key);if(value)model[key]=value;}
+      this.filterModel.set(model);this.page.set(1);this.loadData();
+    });
   }
 
   onFilterChange(model: AdvancedFilterModel): void {

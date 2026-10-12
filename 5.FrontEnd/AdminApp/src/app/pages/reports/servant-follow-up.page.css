@@ -2,52 +2,6 @@
   margin-bottom: 32px;
 }
 
-.report-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 20px;
-}
-
-.report-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 28px 20px;
-  text-decoration: none;
-  color: var(--text-primary, #fff);
-  border-radius: 12px;
-  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-  min-height: 140px;
-}
-
-.report-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-.report-card-icon {
-  font-size: 48px;
-  width: 48px;
-  height: 48px;
-  margin-bottom: 16px;
-  opacity: 0.9;
-}
-
-.report-card:hover .report-card-icon {
-  opacity: 1;
-}
-
-.report-card-title {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 600;
-  text-align: center;
-  line-height: 1.4;
-}
-
 .filters {
   display: flex;
   flex-wrap: wrap;

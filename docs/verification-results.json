@@ -2900,6 +2900,250 @@
         "Shared dark background/appearance",
         "No page-wide horizontal overflow"
       ]
-    }
+    },
+    "supersededBy": "churchServiceReportsRevision: the previously incomplete fresh Firefox gate passed on 2026-10-12."
+  },
+  "churchServiceReportsRevision": {
+    "date": "2026-10-12",
+    "scope": "Admin navigation and church-service reporting; local changes only",
+    "reports": [
+      "servant-service-summary",
+      "group-attendance",
+      "pastoral-follow-up"
+    ],
+    "implementation": [
+      "13 ordered navigation links; statistics remains the default route; small header status icon",
+      "Flush 240px desktop sidebar; accessible flush mobile drawer up to 320px; independently scrollable links",
+      "One catalog with four groups and twenty cards; old routes retained or redirected",
+      "Historical confirmed attendance ownership; current pastoral ownership; actor-based deduplicated visit credits; distinct youths; explicit reasons and unknown coverage",
+      "SQL filtering, aggregates and pagination; stable IDs; full filtered Excel/CSV/print; Cairo month dates and configurable absence/contact thresholds",
+      "Drilldowns for servant, current group, group attendance, own attendance, activity and open tasks; explicit task creation only",
+      "Overlapping identical reads share work without retaining completed report results; cancellation and fresh subsequent reads verified",
+      "Current roster excludes archived youths while historical activity remains available"
+    ],
+    "backend": {
+      "fullIntegrationCases": 48,
+      "passed": 48,
+      "failed": 0,
+      "skipped": 0,
+      "latestQueryRegressionCases": 8,
+      "latestQueryRegressionPassed": 8,
+      "coverage": "SQL Server: identical names, role changes, deactivated actors, archive/reassignment, shared and legacy visits, unknown/cancelled meetings, date boundaries, defaults, scope/403, paging/totals, native XLSX dates/phone text, CSV/full reads and concurrent cancellation"
+    },
+    "builds": {
+      "adminInitialKB": 363.25,
+      "servantInitialKB": 357.8,
+      "limitKB": 500,
+      "result": "Passed"
+    },
+    "browser": {
+      "chromiumBroad": {
+        "passed": 72
+      },
+      "webkitBroad": {
+        "passed": 72
+      },
+      "latestFilterPersistence": {
+        "chromium": 14,
+        "webkit": 14,
+        "coverage": "14 final new-report cases per Chromium/WebKit engine, including the added group-attendance link; all passed."
+      },
+      "firefoxTargeted": {
+        "passed": 25,
+        "coverage": "Navigation and new reports across all eight widths, landscape, zoom, keyboard/focus, drilldowns, applied exports, error/empty states and saved URL filters"
+      },
+      "firefoxBroad": {
+        "passed": 73,
+        "failed": 0,
+        "result": "Passed",
+        "coverage": "Final build: both apps, all reachable routes/dialogs, navigation, all eight widths and landscape/200% reflow, accessibility, print, old/new report links, applied-filter exports, saved URL state and visual states."
+      },
+      "uniqueCasesPerEngine": 73,
+      "uniqueCases": 219,
+      "visualBaselines": "18 final new-report baselines (three reports, 390/1440px, all three engines), plus refreshed applicable existing populated/empty/loading/failed/validation/saving baselines. Desktop and portrait outputs inspected.",
+      "finalCaptures": {
+        "uniqueCases": 6,
+        "passed": 6,
+        "result": "Passed after isolated retry",
+        "note": "The extra forced-baseline capture run had one Firefox 390px route-switch timeout while another Firefox run overlapped; five cases passed. Its isolated retry passed in 5.4 seconds. The independent broad Firefox run already passed all 73 cases without retries."
+      }
+    },
+    "widths": [
+      320,
+      360,
+      390,
+      430,
+      768,
+      1024,
+      1440,
+      1920
+    ],
+    "landscape": [
+      [
+        768,
+        360
+      ],
+      [
+        1024,
+        360
+      ]
+    ],
+    "zoom": "200% text reflow",
+    "constraints": "ImageSharp 3.1.5, .NET 8, startup migrations, migrations/model, credentials and frontend-only Pages workflow unchanged.",
+    "performance": {
+      "result": "Passed",
+      "evidence": {
+        "SqlEdition": "Express Edition (64-bit)",
+        "SqlVersion": "17.0.4025.3",
+        "Compatibility": 170,
+        "AvailableHostRamMiB": 32452,
+        "Architecture": "X64",
+        "CapturedAt": "2026-10-12T13:14:09.6443372Z",
+        "Runtime": "8.0.31",
+        "OS": "Microsoft Windows NT 10.0.26200.0",
+        "Processors": 20,
+        "Students": 3000,
+        "Servants": 50,
+        "Calls": 100000,
+        "Visits": 25000,
+        "WeeklyMeetings": 104,
+        "RosterRows": 317200,
+        "Results": [
+          {
+            "Operation": "servant-service-summary",
+            "ConcurrentCallers": 20,
+            "Samples": 60,
+            "P50Ms": 158.2,
+            "P95Ms": 168.1,
+            "MaxMs": 222.1,
+            "MinQueries": 0,
+            "MaxQueries": 3,
+            "TargetMs": 1000,
+            "Passed": true
+          },
+          {
+            "Operation": "group-attendance",
+            "ConcurrentCallers": 20,
+            "Samples": 60,
+            "P50Ms": 237.1,
+            "P95Ms": 281.3,
+            "MaxMs": 282.3,
+            "MinQueries": 0,
+            "MaxQueries": 2,
+            "TargetMs": 1000,
+            "Passed": true
+          },
+          {
+            "Operation": "pastoral-follow-up",
+            "ConcurrentCallers": 20,
+            "Samples": 60,
+            "P50Ms": 578.5,
+            "P95Ms": 853.6,
+            "MaxMs": 856.8,
+            "MinQueries": 0,
+            "MaxQueries": 2,
+            "TargetMs": 1000,
+            "Passed": true
+          }
+        ],
+        "HttpResults": [
+          {
+            "Operation": "servant-service-summary",
+            "Transport": "ASP.NET TestServer HTTP",
+            "AuthenticatedUsers": 20,
+            "Samples": 60,
+            "P50Ms": 792.6,
+            "P95Ms": 812.8,
+            "MaxMs": 813.6,
+            "TargetMs": 1000,
+            "Passed": true
+          },
+          {
+            "Operation": "group-attendance",
+            "Transport": "ASP.NET TestServer HTTP",
+            "AuthenticatedUsers": 20,
+            "Samples": 60,
+            "P50Ms": 243.4,
+            "P95Ms": 273,
+            "MaxMs": 273.3,
+            "TargetMs": 1000,
+            "Passed": true
+          },
+          {
+            "Operation": "pastoral-follow-up",
+            "Transport": "ASP.NET TestServer HTTP",
+            "AuthenticatedUsers": 20,
+            "Samples": 60,
+            "P50Ms": 557.6,
+            "P95Ms": 747.6,
+            "MaxMs": 748.6,
+            "TargetMs": 1000,
+            "Passed": true
+          },
+          {
+            "Operation": "group-attendance-mixed-filters",
+            "Transport": "ASP.NET TestServer HTTP",
+            "AuthenticatedUsers": 20,
+            "DistinctQueries": 20,
+            "Samples": 60,
+            "P50Ms": 79.4,
+            "P95Ms": 190.7,
+            "MaxMs": 304,
+            "TargetMs": 1000,
+            "Passed": true
+          },
+          {
+            "Operation": "pastoral-follow-up-mixed-filters",
+            "Transport": "ASP.NET TestServer HTTP",
+            "AuthenticatedUsers": 20,
+            "DistinctQueries": 20,
+            "Samples": 60,
+            "P50Ms": 676.7,
+            "P95Ms": 946.4,
+            "MaxMs": 1110.1,
+            "TargetMs": 1000,
+            "Passed": true
+          },
+          {
+            "Operation": "servant-service-summary-mixed-owners",
+            "Transport": "ASP.NET TestServer HTTP",
+            "AuthenticatedUsers": 20,
+            "DistinctQueries": 20,
+            "Samples": 60,
+            "P50Ms": 73.3,
+            "P95Ms": 125.3,
+            "MaxMs": 136.7,
+            "TargetMs": 1000,
+            "Passed": true
+          },
+          {
+            "Operation": "group-attendance-mixed-owners",
+            "Transport": "ASP.NET TestServer HTTP",
+            "AuthenticatedUsers": 20,
+            "DistinctQueries": 20,
+            "Samples": 60,
+            "P50Ms": 35.5,
+            "P95Ms": 43.9,
+            "MaxMs": 48,
+            "TargetMs": 1000,
+            "Passed": true
+          },
+          {
+            "Operation": "pastoral-follow-up-mixed-owners",
+            "Transport": "ASP.NET TestServer HTTP",
+            "AuthenticatedUsers": 20,
+            "DistinctQueries": 20,
+            "Samples": 60,
+            "P50Ms": 224.6,
+            "P95Ms": 308.5,
+            "MaxMs": 323.6,
+            "TargetMs": 1000,
+            "Passed": true
+          }
+        ]
+      },
+      "scope": "20 concurrent authenticated managers, 60 samples per operation; identical and twenty distinct area/page and owner queries; SQL Express on the documented local host. ASP.NET TestServer transport excludes external network/TLS/IIS latency. No completed-report cache or schema/index changes."
+    },
+    "deployment": "Not published. Both frontend and API changes require deployment; the Pages workflow remains frontend-only."
   }
 }

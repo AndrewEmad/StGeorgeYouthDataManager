@@ -123,3 +123,17 @@ p,dd,dt,li{overflow-wrap:anywhere}.ydm-history-row p{white-space:pre-wrap} app-c
 @media(max-width:600px){.ydm-toolbar>h1.ydm-grow{flex-basis:100%;margin:0;font-size:1.4rem}}
 
 .ydm-check-target{display:inline-flex;inline-size:44px;min-block-size:44px;align-items:center;justify-content:center;cursor:pointer}
+
+/* Navigation drawers share dialog behavior while occupying the right screen edge. */
+.ydm-dialog.ydm-dialog-drawer { inset: 0 0 0 auto; margin: 0; inline-size: min(320px,100vw); block-size: 100dvh; max-block-size: 100dvh; max-inline-size: 100vw; border: 0; border-inline-end: 1px solid var(--glass-border); border-radius: 0; overflow: hidden; }
+.ydm-dialog-drawer .ydm-dialog-content { display: flex; flex-direction: column; block-size: 100%; padding: 0; }
+.ydm-dialog-drawer .ydm-dialog-heading { flex: none; min-block-size: 56px; margin: 0; padding: calc(8px + var(--safe-top)) max(12px,var(--safe-right)) 8px max(12px,var(--safe-left)); border-block-end: 1px solid var(--glass-border); }
+.ydm-dialog-drawer .ydm-dialog-body,.ydm-dialog-drawer .ydm-dialog-body > [body] { display: flex; flex-direction: column; flex: 1; min-block-size: 0; overflow: hidden; }
+.ydm-dialog-drawer .ydm-dialog-actions { display: none; }
+.ydm-report-cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,260px),1fr)); gap: var(--space-4); }
+.ydm-report-card { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-6); color: var(--text-main); text-decoration: none; min-inline-size: 0; }
+.ydm-report-card h3,.ydm-report-card p { margin: 0; }
+.ydm-report-card .material-icons { color: var(--primary); font-size: 28px; }
+@media(hover:hover) { .ydm-report-card:hover { border-color: var(--primary); } }
+
+.ydm-report-extra-link { display: block; margin-block-start: var(--space-2); }

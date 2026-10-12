@@ -22,6 +22,7 @@ try {
  var users=Enumerable.Range(0,50).Select(i=>new ApplicationUser{Id=Guid.NewGuid(),UserName="bench_"+i,NormalizedUserName="BENCH_"+i,FullName=i<2 ? "Same name" : "Owner "+i,NormalizedFullName="owner "+i,Phone="01012345678",Address="Cairo",IsActive=true}).ToArray();seed.Users.AddRange(users);seed.UserRoles.AddRange(users.Select(u=>new IdentityUserRole<Guid>{UserId=u.Id,RoleId=role.Id}));
  var students=Enumerable.Range(0,3000).Select(i=>new Student{Id=Guid.NewGuid(),FullName="Student "+i.ToString("D4"),NormalizedFullName="student "+i.ToString("D4"),Phone="010"+i.ToString("D8"),Area=i%20==0 ? "" : "Area "+i%10,AcademicYear="Year "+i%5,Address=i%10==0 ? "" : "Cairo",BirthMonth=i%12+1,ServantId=users[i%50].Id}).ToArray();seed.Students.AddRange(students);await seed.SaveChangesAsync();seed.ChangeTracker.Clear();
  Console.WriteLine("Seeding 100,000 calls, 25,000 visits and 104 weekly rosters...");
+ seed.Database.SetCommandTimeout(300); // Bound large fixture seeding separately from report reads.
  await seed.Database.ExecuteSqlRawAsync(@"
 SELECT ROW_NUMBER() OVER(ORDER BY Id)-1 n,Id,FullName,ServantId INTO #students FROM dbo.Students;
 SELECT ROW_NUMBER() OVER(ORDER BY Id)-1 n,Id INTO #owners FROM dbo.AspNetUsers;
@@ -38,9 +39,10 @@ INSERT dbo.MeetingRosterEntry(Id,SessionId,PersonId,Kind,Name,AssignedServantId,
 INSERT dbo.MeetingRosterEntry(Id,SessionId,PersonId,Kind,Name,AssignedServantId,Present) SELECT NEWID(),m.Id,u.Id,'Servant','Owner',NULL,1 FROM dbo.MeetingSession m CROSS JOIN #owners u;
 INSERT dbo.FollowUpTask(Id,StudentId,AssigneeId,Type,Status,DueAt,CreatedAt) SELECT NEWID(),Id,ServantId,'Call','Open',DATEADD(day,-n%30,SYSUTCDATETIME()),SYSUTCDATETIME() FROM #students;
 DROP TABLE #students;DROP TABLE #owners;");
+ seed.Database.SetCommandTimeout(120);
 
  var results=new List<object>();var passed=true;
- foreach(var operation in (args.Length>1 ? args.Skip(1) : new[]{"list","contact","workload","workload-owners","data-quality","attendance","follow-up","manager"})) {
+ foreach(var operation in (args.Length>1 ? args.Skip(1) : new[]{"list","contact","workload","workload-owners","data-quality","attendance","follow-up","manager","servant-service-summary","group-attendance","pastoral-follow-up"})) {
   Console.WriteLine("Measuring "+operation+" with 20 concurrent callers...");
   async Task<(double Ms,int Queries)> Run(){var counter=new QueryCounter();await using var db=Context(counter);var store=new ApplicationStore(db);var report=new ReportDataProvider(db,caller,new ConfigurationBuilder().Build());var watch=Stopwatch.StartNew();
    if(operation=="list")await new StudentQueriesService(store,caller).GetPaged(new(null,null,null,null,null,null,null,null),1,25);

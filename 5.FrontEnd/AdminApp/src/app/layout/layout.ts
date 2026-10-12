@@ -19,6 +19,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   private resize=()=>{this.mobile=this.media.matches || matchMedia('(display-mode:standalone)').matches;if(!this.mobile)this.closeSidebar();};
   sidebarOpen = false;
   pageTitle = '';
+  get reportsActive(){return this.router.url.startsWith('/dashboard/reports') || this.router.url.startsWith('/dashboard/report-suite');}
   private sub?: ReturnType<Router['events']['subscribe']>;
 
   constructor(

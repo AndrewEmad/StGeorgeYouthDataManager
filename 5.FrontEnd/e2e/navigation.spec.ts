@@ -13,13 +13,15 @@ for(const viewport of viewports)test(`admin navigation fits ${viewport.width}x${
   const trigger=page.getByRole('button',{name:'القائمة',exact:true});
   if(mobile)await trigger.click();
   const nav=page.getByRole('navigation',{name:'التنقل الرئيسي'});
-  await expect(nav).toBeVisible();await expect(nav.getByRole('link')).toHaveCount(14);
+  await expect(nav).toBeVisible();await expect(nav.getByRole('link')).toHaveCount(13);
   await expect(nav.getByRole('link',{name:'حالة التطبيق',exact:true})).toHaveCount(0);
+  await expect(nav.getByRole('link').nth(0)).toHaveText('analyticsالإحصائيات');
+  await expect(nav.getByRole('link').nth(1)).toHaveText('assessmentالتقارير');
   const last=nav.getByRole('link',{name:'تصدير البيانات',exact:true});
   await last.scrollIntoViewIfNeeded();const lastBox=(await last.boundingBox())!;
   expect(lastBox.y).toBeGreaterThanOrEqual(0);expect(lastBox.y+lastBox.height).toBeLessThanOrEqual(viewport.height);
   if(mobile){
-    const dialog=page.getByRole('dialog');const close=dialog.getByRole('button',{name:'إغلاق',exact:true});
+    const dialog=page.getByRole('dialog');const drawer=(await dialog.boundingBox())!;expect(drawer.y).toBeCloseTo(0,2);expect(drawer.height).toBeCloseTo(viewport.height,2);expect(drawer.x+drawer.width).toBeCloseTo(viewport.width,2);expect(await dialog.evaluate(e=>getComputedStyle(e).borderRadius)).toBe('0px');const close=dialog.getByRole('button',{name:'إغلاق',exact:true});
     await close.scrollIntoViewIfNeeded();const closeBox=(await close.boundingBox())!;
     expect(closeBox.width).toBeCloseTo(44,2);expect(closeBox.height).toBeCloseTo(44,2);
     await expect(close.locator('.material-icons')).toHaveText('close');await close.click();
@@ -28,7 +30,8 @@ for(const viewport of viewports)test(`admin navigation fits ${viewport.width}x${
     await trigger.click();await last.click();await expect(dialog).not.toBeVisible();await expect(page).toHaveURL(/data-exports/);
   }else{
     const sidebar=(await page.locator('.sidebar').boundingBox())!;
-    expect(sidebar.width).toBeCloseTo(240,2);expect(sidebar.y).toBeGreaterThanOrEqual(56);
+    expect(sidebar.width).toBeCloseTo(240,2);expect(sidebar.y).toBeCloseTo(0,2);expect(sidebar.x+sidebar.width).toBeCloseTo(viewport.width,2);expect(sidebar.height).toBeCloseTo(viewport.height,2);expect(await page.locator('.sidebar').evaluate(e=>getComputedStyle(e).borderRadius)).toBe('0px');
+    const header=(await page.locator('.top-bar').boundingBox())!;expect(header.x+header.width).toBeCloseTo(viewport.width-240,2);
     expect(sidebar.y+sidebar.height).toBeLessThanOrEqual(viewport.height);
   }
   await status.click();await expect(page.locator('main h1')).toHaveText('حالة التطبيق والإشعارات');

@@ -22,7 +22,7 @@ public partial class ReportDataProvider
         _exportLimit=int.TryParse(configuration["Reports:ExportRowLimit"],out var limit) ? Math.Clamp(limit,1,100000) : 20000;
         _weekStart=int.TryParse(configuration["Reports:WeekStart"],out var day) && day is >=0 and <=6 ? day : 5;
     }
-    private IQueryable<Student> Roster => _context.Students.AsNoTracking().Where(s=>_caller.IsPrivileged || s.ServantId==_caller.UserId);
+    private IQueryable<Student> Roster => _context.Students.AsNoTracking().Where(s=>!s.IsDeleted && (_caller.IsPrivileged || s.ServantId==_caller.UserId));
     private IQueryable<CallLog> Calls => _context.CallLogs.IgnoreQueryFilters().AsNoTracking().Where(c=>!c.IsVoided && (_caller.IsPrivileged || c.ServantId==_caller.UserId));
     private IQueryable<HomeVisit> Visits => _context.HomeVisits.IgnoreQueryFilters().AsNoTracking().Where(v=>!v.IsVoided && (_caller.IsPrivileged || v.ServantId==_caller.UserId || v.Participants.Any(p=>p.ServantId==_caller.UserId)));
     private IQueryable<VisitCredit> Credits => Visits.Select(v=>new VisitCredit { VisitId=v.Id,StudentId=v.StudentId,ServantId=v.ServantId,VisitDate=v.VisitDate })

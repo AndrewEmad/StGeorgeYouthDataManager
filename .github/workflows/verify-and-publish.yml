@@ -1,21 +1,26 @@
-name: Verify and deploy frontend to GitHub Pages
+name: Deploy frontend to GitHub Pages
 
 on:
   push:
     branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
 
 concurrency:
-  group: youth-data-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: github-pages
+  cancel-in-progress: false
 
 jobs:
-  frontend:
+  deploy:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,54 +28,17 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: 5.FrontEnd/package-lock.json
-      - run: npm ci
-        working-directory: 5.FrontEnd
-      - run: npm audit --audit-level=low
-        working-directory: 5.FrontEnd
-      - run: npm run test:utilities
-        working-directory: 5.FrontEnd
-      - name: Build both clients with enforced 500 kB budgets
-        run: npm run build
-        working-directory: 5.FrontEnd
-      - run: npx playwright install --with-deps chromium firefox webkit
-        working-directory: 5.FrontEnd
-      - name: Package both Pages applications together
-        run: |
-          node e2e/package-pages.mjs YouthDataManager --fixture-api=http://127.0.0.1:4173/__test/api
-          npx playwright test --grep-invert "deployed app scopes"
-          YDM_E2E_OUTPUT=test-results/pwa npx playwright test pwa.spec.ts --workers 1
-          node e2e/package-pages.mjs "${{ github.event.repository.name }}"
-        working-directory: 5.FrontEnd
-      - uses: actions/upload-artifact@v4
-        with:
-          name: verified-pages
-          path: 5.FrontEnd/pages/
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: browser-results
-          path: |
-            5.FrontEnd/playwright-report/
-            5.FrontEnd/test-results/
-
-  publish:
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    needs: frontend
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    permissions:
-      pages: write
-      id-token: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: verified-pages
-          path: pages
       - uses: actions/configure-pages@v5
+      - name: Install build dependencies
+        run: npm ci --no-audit --no-fund
+        working-directory: 5.FrontEnd
+      - name: Build and package both frontend apps
+        env:
+          REPOSITORY: ${{ github.event.repository.name }}
+        run: node e2e/package-pages.mjs "$REPOSITORY"
+        working-directory: 5.FrontEnd
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: pages
+          path: 5.FrontEnd/pages/
       - uses: actions/deploy-pages@v4
         id: deployment

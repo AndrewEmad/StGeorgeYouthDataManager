@@ -33,8 +33,8 @@
           </div>
         </app-card>
 
-        <a routerLink="/tasks" class="stat-card-link"><app-card [class]="'stat-card'"><span class="material-icons icon-box indigo" aria-hidden="true">checklist</span><div class="stat-info"><h3>{{s?.studentsNeedingFollowUp ?? '—'}}</h3><p>طلاب لديهم مهام مستحقة</p></div></app-card></a>
-        <a routerLink="/report-suite" class="stat-card-link"><app-card [class]="'stat-card'"><span class="material-icons icon-box indigo" aria-hidden="true">person_search</span><div class="stat-info"><h3>{{s?.studentsNotContacted ?? '—'}}</h3><p>طلاب لم تجرِ محاولة التواصل معهم</p></div></app-card></a>
+        <a routerLink="/tasks" class="stat-card-link"><app-card [class]="'stat-card'"><span class="material-icons icon-box indigo" aria-hidden="true">checklist</span><div class="stat-info"><h3>{{s?.studentsNeedingFollowUp ?? '—'}}</h3><p>مخدومين لديهم مهام مستحقة</p></div></app-card></a>
+        <a routerLink="/report-suite" class="stat-card-link"><app-card [class]="'stat-card'"><span class="material-icons icon-box indigo" aria-hidden="true">person_search</span><div class="stat-info"><h3>{{s?.studentsNotContacted ?? '—'}}</h3><p>مخدومين لم تجرِ محاولة التواصل معهم</p></div></app-card></a>
       </div>
 
       <section class="actions-section animate-fade" style="animation-delay: 0.5s">

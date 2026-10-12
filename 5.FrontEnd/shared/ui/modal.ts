@@ -17,7 +17,7 @@ if (typeof document !== 'undefined') document.addEventListener('pointerdown', ev
       <div class="ydm-dialog-content">
         <header class="ydm-dialog-heading">
           <h2 [id]="headingId">{{ title() }}</h2>
-          <button type="button" class="ydm-dialog-close" aria-label="إغلاق" [disabled]="busy()" (click)="close.emit()">×</button>
+          <button type="button" class="ydm-dialog-close ydm-icon-button" aria-label="إغلاق" [disabled]="busy()" (click)="close.emit()"><span class="material-icons" aria-hidden="true">close</span></button>
         </header>
         <div class="ydm-dialog-body"><ng-content select="[body]" /></div>
         <footer class="ydm-dialog-actions"><ng-content select="[actions]" /></footer>

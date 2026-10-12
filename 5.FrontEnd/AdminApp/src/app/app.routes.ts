@@ -11,8 +11,8 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage),
     canActivate: [authGuard],
     children: [
-      {path:'operations',loadComponent:()=>import('@ydm/shared/pages/operations').then(m=>m.OperationsPage),data:{title:'حالة الخدمة'}},
-      {path:'archived-students',loadComponent:()=>import('@ydm/shared/pages/archives').then(m=>m.ArchivesPage),data:{title:'الطلاب المؤرشفون'}},
+      {path:'operations',loadComponent:()=>import('@ydm/shared/pages/operations').then(m=>m.OperationsPage),data:{title:'حالة التطبيق'}},
+      {path:'archived-students',loadComponent:()=>import('@ydm/shared/pages/archives').then(m=>m.ArchivesPage),data:{title:'المخدومون المؤرشفون'}},
       {path:'activity-history',loadComponent:()=>import('@ydm/shared/pages/activity-history').then(m=>m.PersonalActivityPage),data:{title:'سجل النشاط'}},
       {path:'notifications',loadComponent:()=>import('@ydm/shared/pages/notifications').then(m=>m.NotificationsPage),data:{title:'الإشعارات والتذكيرات'}},
       {path:'request-history',loadComponent:()=>import('@ydm/shared/pages/requests').then(m=>m.RequestsPage),data:{title:'سجل الطلبات'}},

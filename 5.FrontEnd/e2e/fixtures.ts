@@ -35,8 +35,10 @@ export async function fixtures(context:BrowserContext,state:'populated'|'empty'|
  else if(p==='meetings')body=paged([{id,date:'2026-10-09',status:'Draft',rosterKnown:true,version:student.version}],51);
  else if(p.startsWith('approvals/'))body=paged([{...student,id,studentId:id,requestedByUserId:owner,requestedByUserName:longName,requestedAt:'2026-10-01T08:00:00Z',status:'Pending',processedAt:null}],51);
  else if(p.includes('requests'))body=[];
+ else if(p==='operations/metrics')body={capturedAt:'2026-10-11T12:00:00Z',api:{errors:2},database:{slowQueries:3},workerLagSeconds:17,failedDeliveries:4,pendingMigrations:0};
+ else if(p==='operations/deliveries')body=paged([]);
  else if(p.includes('notification/schedules'))body=empty ? [] : [{id,daysOfWeek:'5',timeOfDay:'18:00:00',isActive:true}];
- else if(p.includes('reports/suite/'))body={title:'تقرير المتابعة',period:'من 2026-10-01 إلى 2026-10-11 بتوقيت القاهرة',columns:[{key:'name',label:'الطالب',type:'text'},{key:'owner',label:'المسؤول',type:'text'},{key:'lastAttempt',label:'آخر محاولة',type:'datetime'}],rows:empty ? [] : [{name:longName,owner:longName,lastAttempt:'2026-10-01T08:00:00Z'}],totalCount:empty ? 0 : 51,page:1,pageSize:25,totals:{roster:empty ? 0 : 51,attempted:empty ? 0 : 12,coverage:empty ? null : 23.5}};
+ else if(p.includes('reports/suite/'))body={title:'تقرير المتابعة',period:'من 2026-10-01 إلى 2026-10-11 بتوقيت القاهرة',columns:[{key:'name',label:'المخدوم',type:'text'},{key:'owner',label:'المسؤول',type:'text'},{key:'lastAttempt',label:'آخر محاولة',type:'datetime'}],rows:empty ? [] : [{name:longName,owner:longName,lastAttempt:'2026-10-01T08:00:00Z'}],totalCount:empty ? 0 : 51,page:1,pageSize:25,totals:{roster:empty ? 0 : 51,attempted:empty ? 0 : 12,coverage:empty ? null : 23.5}};
  else if(p.includes('reports/dashboard'))body={totalStudents:51,totalServants:51,callsThisWeek:12,visitsThisWeek:3,studentsNeedingFollowUp:4,studentsNotContacted:8,unassignedStudents:1,studentsNeedingVisit:2};
  else if(p.includes('reports/servant-stats'))body=[{servantId:owner,assignedStudentsCount:51,lastCallDate:'2026-10-01T08:00:00Z',lastVisitDate:null}];
  else if(p.includes('reports/servant/') && p.endsWith('performance'))body={servantId:owner,fullName:longName,assignedStudentsCount:51,callsThisWeek:12,visitsThisWeek:3};

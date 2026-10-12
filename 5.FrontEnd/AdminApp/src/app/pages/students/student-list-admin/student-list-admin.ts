@@ -476,7 +476,7 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
         if (this.newStudentPhoto) {
           this.studentCommands.uploadPhoto(id, this.newStudentPhoto).subscribe({
             next: () => this.finishCreateStudent(),
-            error: () => {this.photoRetry={id,file:this.newStudentPhoto!};this.formMessage="تم حفظ الطالب، لكن تعذر رفع الصورة. أعد رفع الصورة فقط.";this.finishCreateStudent();},
+            error: () => {this.photoRetry={id,file:this.newStudentPhoto!};this.formMessage="تم حفظ المخدوم، لكن تعذر رفع الصورة. أعد رفع الصورة فقط.";this.finishCreateStudent();},
           });
         } else {
           this.finishCreateStudent();
@@ -662,7 +662,7 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
 
   archiveTarget:any=null;archiveReason='';archiveBusy=false;archiveError='';
   deleteStudent(s:any){this.archiveTarget=s;this.archiveReason='';this.archiveError='';}
-  archiveStudent(){if(!this.archiveTarget || this.archiveBusy || !this.archiveReason.trim())return;this.archiveBusy=true;this.archiveError='';this.studentCommands.delete(this.archiveTarget.id,this.archiveReason,this.archiveTarget.version).subscribe({next:()=>{this.archiveBusy=false;this.selectedStudentIds.delete(this.archiveTarget.id);this.selectedStudentIds=new Set(this.selectedStudentIds);this.archiveTarget=null;this.formMessage='تمت أرشفة الطالب وإلغاء العمل المفتوح. يمكن استعادته دون إسناد.';this.loadData();},error:e=>{this.archiveBusy=false;this.archiveError=apiError(e);}});}
+  archiveStudent(){if(!this.archiveTarget || this.archiveBusy || !this.archiveReason.trim())return;this.archiveBusy=true;this.archiveError='';this.studentCommands.delete(this.archiveTarget.id,this.archiveReason,this.archiveTarget.version).subscribe({next:()=>{this.archiveBusy=false;this.selectedStudentIds.delete(this.archiveTarget.id);this.selectedStudentIds=new Set(this.selectedStudentIds);this.archiveTarget=null;this.formMessage='تمت أرشفة المخدوم وإلغاء العمل المفتوح. يمكن استعادته دون إسناد.';this.loadData();},error:e=>{this.archiveBusy=false;this.archiveError=apiError(e);}});}
 
   onAssign() {
     if(!this.targetServantId || this.assignSaving || !this.selectedStudent)return;
@@ -671,6 +671,6 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
     request.subscribe({next:()=>{this.assignSaving=false;this.showAssignModal=false;this.formMessage="تم حفظ الإسناد.";this.loadData();},error:e=>{this.assignSaving=false;this.formMessage=apiError(e);}});
   }
   safePicker(input:HTMLInputElement){try{input.showPicker?.();}catch{input.focus();}}
-  retryPhoto(){if(!this.photoRetry || this.photoRetryBusy)return;const retry=this.photoRetry;this.photoRetryBusy=true;this.studentCommands.uploadPhoto(retry.id,retry.file).subscribe({next:()=>{this.photoRetryBusy=false;this.photoRetry=null;this.formMessage="تم رفع الصورة بنجاح.";},error:()=>{this.photoRetryBusy=false;this.formMessage="تعذر رفع الصورة؛ بيانات الطالب محفوظة. يمكنك المحاولة مجددًا.";}});}
+  retryPhoto(){if(!this.photoRetry || this.photoRetryBusy)return;const retry=this.photoRetry;this.photoRetryBusy=true;this.studentCommands.uploadPhoto(retry.id,retry.file).subscribe({next:()=>{this.photoRetryBusy=false;this.photoRetry=null;this.formMessage="تم رفع الصورة بنجاح.";},error:()=>{this.photoRetryBusy=false;this.formMessage="تعذر رفع الصورة؛ بيانات المخدوم محفوظة. يمكنك المحاولة مجددًا.";}});}
 
 }

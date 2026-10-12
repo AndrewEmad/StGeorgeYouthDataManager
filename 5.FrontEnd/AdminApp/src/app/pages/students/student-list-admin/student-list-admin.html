@@ -27,7 +27,7 @@
   @if(listError){<p class="ydm-notice text-error" role="alert">{{listError}} <button class="btn-outline" type="button" (click)="loadData()">إعادة المحاولة</button></p>}
 
   <app-content-header title="إدارة المخدومين" subtitle="عرض وتوزيع المخدومين على الخدام">
-    <div actions class="header-actions"><a class="btn-outline" routerLink="/dashboard/archived-students">الطلاب المؤرشفون</a>
+    <div actions class="header-actions"><a class="btn-outline" routerLink="/dashboard/archived-students">المخدومون المؤرشفون</a>
       <button type="button" class="btn-outline" (click)="openBulkUploadModal()" [disabled]="uploadingCsv">
         <span class="material-icons" aria-hidden="true">upload_file</span>
         {{ uploadingCsv ? 'جاري الاستيراد...' : 'استيراد من ملف' }}
@@ -44,7 +44,7 @@
       <div class="upload-result-header">
         <span class="material-icons" aria-hidden="true">info</span>
         <strong>نتيجة الاستيراد:</strong> تم استيراد {{ uploadResult.created }} مخدوم.
-        <button type="button" class="btn-close" (click)="uploadResult = null" aria-label="إغلاق">&times;</button>
+        <button type="button" class="btn-close ydm-icon-button" (click)="uploadResult = null" aria-label="إغلاق"><span class="material-icons" aria-hidden="true">close</span></button>
       </div>
       @if (uploadResult.errors.length) {
         <div class="upload-result-errors">
@@ -364,4 +364,4 @@
   <div actions><button class="btn-outline" [disabled]="uploadingCsv" (click)="cancelCsv()">إلغاء</button><button class="btn-primary" [disabled]="uploadingCsv || !csvReady" (click)="confirmCsv()">استيراد الصفوف الصالحة</button></div>
 </app-modal>
 
-<app-modal [visible]="archiveTarget!==null" title="أرشفة الطالب" [busy]="archiveBusy" (close)="archiveTarget=null"><div body><p>{{archiveTarget?.fullName}}</p><p>تلغي الأرشفة الطلبات والمهام المفتوحة وتحفظ السجلات التاريخية. الاستعادة تعيد الطالب دون إسناد ولا تعيد فتح العمل السابق.</p><label>سبب الأرشفة<textarea class="form-input" [(ngModel)]="archiveReason" maxlength="1000" [disabled]="archiveBusy" required></textarea></label>@if(archiveError){<p class="text-error" role="alert">{{archiveError}}</p>}</div><div actions><button type="button" class="btn-outline" (click)="archiveTarget=null" [disabled]="archiveBusy">إلغاء</button><button type="button" class="btn-primary" (click)="archiveStudent()" [disabled]="archiveBusy || !archiveReason.trim()">تأكيد الأرشفة</button></div></app-modal>
+<app-modal [visible]="archiveTarget!==null" title="أرشفة المخدوم" [busy]="archiveBusy" (close)="archiveTarget=null"><div body><p>{{archiveTarget?.fullName}}</p><p>تلغي الأرشفة الطلبات والمهام المفتوحة وتحفظ السجلات التاريخية. الاستعادة تعيد المخدوم دون إسناد ولا تعيد فتح العمل السابق.</p><label>سبب الأرشفة<textarea class="form-input" [(ngModel)]="archiveReason" maxlength="1000" [disabled]="archiveBusy" required></textarea></label>@if(archiveError){<p class="text-error" role="alert">{{archiveError}}</p>}</div><div actions><button type="button" class="btn-outline" (click)="archiveTarget=null" [disabled]="archiveBusy">إلغاء</button><button type="button" class="btn-primary" (click)="archiveStudent()" [disabled]="archiveBusy || !archiveReason.trim()">تأكيد الأرشفة</button></div></app-modal>

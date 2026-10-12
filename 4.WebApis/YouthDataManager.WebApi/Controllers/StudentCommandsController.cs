@@ -132,7 +132,7 @@ public class StudentCommandsController : ControllerBase
         student.PhotoPath = result.Data;
         student.UpdatedAt = DateTime.UtcNow;
         _studentRepository.Update(student);
-        if(await _unitOfWork.SaveChangesAsync(HttpContext.RequestAborted)<=0)return StatusCode(500,new {message="تعذر حفظ الصورة. بيانات الطالب وصورته السابقة محفوظة؛ أعد محاولة رفع الصورة."});
+        if(await _unitOfWork.SaveChangesAsync(HttpContext.RequestAborted)<=0)return StatusCode(500,new {message="تعذر حفظ الصورة. بيانات المخدوم وصورته السابقة محفوظة؛ أعد محاولة رفع الصورة."});
         return Ok(new { photoPath = result.Data });
     }
 }

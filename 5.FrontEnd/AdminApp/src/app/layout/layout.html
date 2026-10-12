@@ -1,6 +1,6 @@
 <div class="app-wrapper">
   <header class="top-bar">
-    <div style="display: flex; align-items: center; gap: 16px">
+    <div class="top-bar-heading">
       <button
         type="button"
         class="burger-btn layout-nav-btn"
@@ -12,6 +12,9 @@
       <h1 class="top-bar-title">{{ pageTitle }}</h1>
     </div>
     <div class="top-bar-left">
+      <a routerLink="/dashboard/operations" routerLinkActive="active" class="top-bar-status ydm-icon-button" aria-label="حالة التطبيق" title="حالة التطبيق">
+        <span class="material-icons" aria-hidden="true">monitor_heart</span>
+      </a>
       <a routerLink="/dashboard/profile" class="top-bar-name link-name" [attr.aria-label]="adminName + '، الملف الشخصي'" [title]="adminName">
         <span class="material-icons" aria-hidden="true">account_circle</span>
         <span class="account-name">{{ adminName }}</span>
@@ -27,9 +30,6 @@
       <div class="sidebar-header">
         <span class="material-icons brand-icon" aria-hidden="true">hub</span>
         <h2>الإدارة</h2>
-        <button type="button" class="sidebar-close" (click)="closeSidebar()" aria-label="إغلاق">
-          <span class="material-icons" aria-hidden="true">close</span>
-        </button>
       </div>
 
       <ng-container [ngTemplateOutlet]="navigation"/>
@@ -41,7 +41,8 @@
   </div>
 </div>
 
-<ng-template #navigation>      <nav class="side-nav" aria-label="التنقل الرئيسي"><a routerLink="/dashboard/operations" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">monitor_heart</span><span>حالة الخدمة</span></a>
+<ng-template #navigation>
+      <nav class="side-nav" aria-label="التنقل الرئيسي">
         <a routerLink="/dashboard/notifications" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">notifications</span><span>الإشعارات</span></a>
         <a routerLink="/dashboard/activity-history" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">history</span><span>سجل النشاط</span></a>
         <a routerLink="/dashboard/tasks" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">checklist</span><span>مهام المتابعة</span></a>

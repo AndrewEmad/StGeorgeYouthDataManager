@@ -305,19 +305,7 @@ th.sortable:hover {
   margin: 4px 0 0;
   padding-right: 20px;
 }
-.btn-close {
-  margin-right: auto;
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 1.4rem;
-  cursor: pointer;
-  padding: 0 4px;
-  line-height: 1;
-}
-.btn-close:hover {
-  color: var(--text-main);
-}
+.btn-close { margin-inline-start: auto; }
 
 .add-modal {
   max-width: 520px;
@@ -421,7 +409,7 @@ th.sortable:hover {
   }
 
   .table-container {
-    margin: 0 -12px;
+    margin: 0;
     border-radius: 12px;
   }
 

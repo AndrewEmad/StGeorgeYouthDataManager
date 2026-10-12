@@ -14,6 +14,11 @@
   letter-spacing: normal;
   text-transform: none;
   display: inline-block;
+  /* Keep the icon slot stable while its local font is loading. */
+  inline-size: 1em;
+  block-size: 1em;
+  overflow: hidden;
+  flex-shrink: 0;
   white-space: nowrap;
   word-wrap: normal;
   direction: ltr;

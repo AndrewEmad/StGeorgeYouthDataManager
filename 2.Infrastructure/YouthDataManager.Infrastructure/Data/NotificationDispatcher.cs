@@ -28,7 +28,7 @@ public sealed class NotificationDispatcher(AppDbContext db,IApplicationStore sto
                     if(await db.Set<NotificationDelivery>().AnyAsync(d=>d.OccurrenceKey==key,ct))continue;
                     var count=await db.Set<FollowUpTask>().Where(t=>t.AssigneeId==schedule.UserId && t.Status=="Open" && t.DueAt<=occurrence).Select(t=>t.StudentId).Distinct().CountAsync(ct);
                     if(count==0)continue;
-                    db.Add(new NotificationDelivery {UserId=schedule.UserId,AppType="Any",OccurrenceKey=key,AvailableAt=now,Title="تذكير متابعة",Body=$"لديك {count} طالبًا لديهم مهام مستحقة."});
+                    db.Add(new NotificationDelivery {UserId=schedule.UserId,AppType="Any",OccurrenceKey=key,AvailableAt=now,Title="تذكير متابعة",Body=$"لديك {count} مخدومًا لهم مهام مستحقة."});
                 }
             }
             checkpoint.CompletedThrough=through;await store.Save(ct);return true;

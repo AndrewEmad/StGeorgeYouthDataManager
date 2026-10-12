@@ -88,7 +88,7 @@ public partial class ReportDataProvider
         var visitOutcomes=await periodVisits.Where(v=>filteredIds.Contains(v.StudentId)).GroupBy(v=>v.VisitOutcome).Select(g=>new {Status=g.Key,Count=g.Count()}).ToListAsync(Ct);
         foreach(var status in Enum.GetValues<CallStatus>())totals["call"+status]=callOutcomes.FirstOrDefault(o=>o.Status==status)?.Count ?? 0;
         foreach(var status in Enum.GetValues<VisitOutcome>())totals["visit"+status]=visitOutcomes.FirstOrDefault(o=>o.Status==status)?.Count ?? 0;
-        return await Table("التواصل والتغطية",f,export,q.OrderBy(r=>r.Name).ThenBy(r=>r.Id),[new("id","المعرف"),new("name","الطالب"),new("owner","المسؤول"),new("attempts","محاولات الفترة","number"),new("reached","تم التواصل بنجاح","boolean"),new("lastAttempt","آخر محاولة","datetime"),new("lastSuccess","آخر تواصل ناجح","datetime")],totals,population);
+        return await Table("التواصل والتغطية",f,export,q.OrderBy(r=>r.Name).ThenBy(r=>r.Id),[new("id","المعرف"),new("name","المخدوم"),new("owner","المسؤول"),new("attempts","محاولات الفترة","number"),new("reached","تم التواصل بنجاح","boolean"),new("lastAttempt","آخر محاولة","datetime"),new("lastSuccess","آخر تواصل ناجح","datetime")],totals,population);
     }
     private async Task<ReportTable> TaskTable(ReportSuiteFilter f,bool export)
     {
@@ -105,14 +105,14 @@ public partial class ReportDataProvider
         var rows=from t in q join s in _context.Students.IgnoreQueryFilters() on t.StudentId equals s.Id
             join u in _context.Users on t.AssigneeId equals (Guid?)u.Id into owners from u in owners.DefaultIfEmpty()
             select new TaskRow {Id=t.Id,StudentId=s.Id,Name=s.FullName,Owner=u==null ? "قائمة إعادة الإسناد" : u.FullName,Type=t.Type,Status=t.Status,DueAt=t.DueAt,CompletedAt=t.CompletedAt,Source=t.SourceType,Reason=t.Reason};
-        return await Table("مهام المتابعة",f,export,rows.OrderBy(r=>r.DueAt).ThenBy(r=>r.Id),[new("id","المعرف"),new("studentId","معرف الطالب"),new("name","الطالب"),new("owner","المسؤول"),new("type","النوع"),new("status","الحالة"),new("dueAt","الاستحقاق","datetime"),new("completedAt","الإنجاز","datetime"),new("source","المصدر"),new("reason","السبب")],totals);
+        return await Table("مهام المتابعة",f,export,rows.OrderBy(r=>r.DueAt).ThenBy(r=>r.Id),[new("id","المعرف"),new("studentId","معرف المخدوم"),new("name","المخدوم"),new("owner","المسؤول"),new("type","النوع"),new("status","الحالة"),new("dueAt","الاستحقاق","datetime"),new("completedAt","الإنجاز","datetime"),new("source","المصدر"),new("reason","السبب")],totals);
     }
     private async Task<ReportTable> WorkloadTable(ReportSuiteFilter f,bool export)
     {
         var roster=SuiteRoster(f);var roleIds=_context.Roles.Where(r=>r.Name=="Servant" || r.Name=="Secretary" || r.Name=="Manager").Select(r=>r.Id);var eligibleIds=_context.Users.Where(u=>u.IsActive && _context.UserRoles.Any(r=>r.UserId==u.Id && roleIds.Contains(r.RoleId))).Select(u=>u.Id);var q=roster.Select(s=>new WorkloadRow {Id=s.Id,Name=s.FullName,OwnerId=s.ServantId,Owner=s.Servant==null ? "غير مسند" : s.Servant.FullName,OwnerActive=s.ServantId!=null && eligibleIds.Contains(s.ServantId.Value),Area=s.Area,Year=s.AcademicYear,Tasks=_context.Set<FollowUpTask>().Count(t=>t.StudentId==s.Id && t.Status=="Open")});
         if(f.Issue!=null)q=f.Issue switch {"unassigned"=>q.Where(r=>r.OwnerId==null),"inactive-owner"=>q.Where(r=>r.OwnerId!=null && !r.OwnerActive),_=>throw new DomainValidationException("Invalid workload filter.")};
         var totals=new Dictionary<string,decimal?> { ["roster"]=await q.CountAsync(Ct),["unassigned"]=await q.CountAsync(r=>r.OwnerId==null,Ct),["inactiveOwners"]=await q.CountAsync(r=>r.OwnerId!=null && !r.OwnerActive,Ct),["owners"]=await q.Where(r=>r.OwnerId!=null).Select(r=>r.OwnerId).Distinct().CountAsync(Ct) };
-        return await Table("الإسناد وعبء الخدمة",f,export,q.OrderBy(r=>r.Owner).ThenBy(r=>r.Name).ThenBy(r=>r.Id),[new("id","معرف الطالب"),new("name","الطالب"),new("ownerId","معرف المسؤول"),new("owner","المسؤول"),new("ownerActive","مسؤول نشط","boolean"),new("area","المنطقة"),new("year","السنة"),new("tasks","مهام مفتوحة","number")],totals);
+        return await Table("الإسناد وعبء الخدمة",f,export,q.OrderBy(r=>r.Owner).ThenBy(r=>r.Name).ThenBy(r=>r.Id),[new("id","معرف المخدوم"),new("name","المخدوم"),new("ownerId","معرف المسؤول"),new("owner","المسؤول"),new("ownerActive","مسؤول نشط","boolean"),new("area","المنطقة"),new("year","السنة"),new("tasks","مهام مفتوحة","number")],totals);
     }
     private async Task<ReportTable> OwnerWorkloadTable(ReportSuiteFilter f,bool export)
     {
@@ -132,7 +132,7 @@ public partial class ReportDataProvider
         if(f.Issue!=null)q=f.Issue switch {"unassigned"=>q.Where(r=>r.Id==Guid.Empty),"inactive-owner"=>q.Where(r=>r.Id!=Guid.Empty && !r.Active),_=>throw new DomainValidationException("Invalid workload filter.")};
         var aggregate=await q.GroupBy(_=>1).Select(g=>new {Owners=g.Count(),Roster=g.Sum(r=>r.Eligible),Attempted=g.Sum(r=>r.Attempted),Reached=g.Sum(r=>r.Present)}).SingleOrDefaultAsync(Ct);
         var totals=new Dictionary<string,decimal?> {["owners"]=aggregate?.Owners ?? 0,["roster"]=aggregate?.Roster ?? 0,["attempted"]=aggregate?.Attempted ?? 0,["reached"]=aggregate?.Reached ?? 0,["coverage"]=aggregate?.Roster>0 ? Math.Round(100m*aggregate.Reached/aggregate.Roster,1) : null};
-        return await Table("عبء الخدمة والتغطية لكل مسؤول",f,export,q.OrderBy(r=>r.Name).ThenBy(r=>r.Id),[new("id","معرف المسؤول"),new("name","المسؤول"),new("active","نشط","boolean"),new("eligible","الطلاب المسندون","number"),new("attempted","طلاب جرت محاولة التواصل معهم","number"),new("present","طلاب تم التواصل معهم بنجاح","number"),new("rate","تغطية القائمة %","percent")],totals,aggregate?.Owners ?? 0);
+        return await Table("عبء الخدمة والتغطية لكل مسؤول",f,export,q.OrderBy(r=>r.Name).ThenBy(r=>r.Id),[new("id","معرف المسؤول"),new("name","المسؤول"),new("active","نشط","boolean"),new("eligible","المخدومون المسندون","number"),new("attempted","مخدومين جرت محاولة التواصل معهم","number"),new("present","مخدومين تم التواصل معهم بنجاح","number"),new("rate","تغطية القائمة %","percent")],totals,aggregate?.Owners ?? 0);
     }
     private async Task<ReportTable> QualityTable(ReportSuiteFilter f,bool export)
     {
@@ -148,7 +148,7 @@ public partial class ReportDataProvider
             select new QualityRow {Id=s.Id,Name=s.FullName,Phone=s.Phone,SecondaryPhone=s.SecondaryPhone,MissingPhone=s.NormalizedPhone==null || (s.SecondaryPhone!=null && s.SecondaryPhone!.Trim()!="" && s.NormalizedSecondaryPhone==null),MissingAddress=s.Address==null || s.Address.Trim()=="",MissingArea=s.Area==null || s.Area.Trim()=="",MissingYear=s.AcademicYear==null || s.AcademicYear.Trim()=="",MissingBirthday=s.BirthDate.HasValue ? s.BirthDate>today || s.BirthDate<new DateTime(1900,1,1) : (!s.BirthMonth.HasValue || s.BirthMonth<1 || s.BirthMonth>12),Duplicate=name!=null || primary!=null || secondary!=null}).TagWith("YDM:DataQuality");
         if(f.Issue!=null)q=f.Issue switch {"phone"=>q.Where(r=>r.MissingPhone),"address"=>q.Where(r=>r.MissingAddress),"area"=>q.Where(r=>r.MissingArea),"year"=>q.Where(r=>r.MissingYear),"birthday"=>q.Where(r=>r.MissingBirthday),"duplicates"=>q.Where(r=>r.Duplicate),_=>throw new DomainValidationException("Invalid data quality filter.")};
         else q=q.Where(r=>r.MissingPhone || r.MissingAddress || r.MissingArea || r.MissingYear || r.MissingBirthday || r.Duplicate);
-        return await Table("جودة البيانات ومراجعة التشابه",f,export,q.OrderBy(r=>r.Name).ThenBy(r=>r.Id),[new("id","المعرف"),new("name","الطالب"),new("phone","الهاتف","phone"),new("secondaryPhone","الهاتف البديل","phone"),new("missingPhone","هاتف ناقص أو غير صالح","boolean"),new("missingAddress","عنوان ناقص","boolean"),new("missingArea","منطقة ناقصة","boolean"),new("missingYear","سنة ناقصة","boolean"),new("missingBirthday","ميلاد ناقص","boolean"),new("duplicate","تشابه يحتاج مراجعة","boolean")]);
+        return await Table("جودة البيانات ومراجعة التشابه",f,export,q.OrderBy(r=>r.Name).ThenBy(r=>r.Id),[new("id","المعرف"),new("name","المخدوم"),new("phone","الهاتف","phone"),new("secondaryPhone","الهاتف البديل","phone"),new("missingPhone","هاتف ناقص أو غير صالح","boolean"),new("missingAddress","عنوان ناقص","boolean"),new("missingArea","منطقة ناقصة","boolean"),new("missingYear","سنة ناقصة","boolean"),new("missingBirthday","ميلاد ناقص","boolean"),new("duplicate","تشابه يحتاج مراجعة","boolean")]);
     }
     private IQueryable<ApprovalRow> ApprovalRows(ReportSuiteFilter f)
     {
@@ -184,7 +184,7 @@ public partial class ReportDataProvider
         if(f.Type!=null && f.Type is not ("addition" or "assignment" or "removal"))throw new DomainValidationException("Invalid request kind.");
         var q=ApprovalRows(f);if(f.Type!=null)q=q.Where(r=>r.Kind==f.Type);
         var totals=new Dictionary<string,decimal?> { ["total"]=await q.CountAsync(Ct),["pending"]=await q.CountAsync(r=>r.Status==0,Ct),["stalePending"]=await q.CountAsync(r=>r.Status==0 && r.RequestedAt<_caller.UtcNow.AddDays(-f.Days),Ct),["averageTurnaroundHours"]=await q.Where(r=>r.ProcessedAt!=null).Select(r=>(decimal?)EF.Functions.DateDiffMinute(r.RequestedAt,r.ProcessedAt)/60).AverageAsync(Ct) };
-        return await Table("طلبات الموافقة",f,export,q.OrderByDescending(r=>r.RequestedAt).ThenBy(r=>r.Id),[new("id","معرف الطلب"),new("kind","النوع"),new("requesterName","مقدم الطلب"),new("name","الطالب"),new("processedByName","من عالج الطلب"),new("requestedAt","تاريخ الطلب","datetime"),new("processedAt","تاريخ المعالجة","datetime"),new("status","الحالة","approval-status"),new("studentId","معرف الطالب"),new("reason","سبب الإلغاء / المعالجة")],totals);
+        return await Table("طلبات الموافقة",f,export,q.OrderByDescending(r=>r.RequestedAt).ThenBy(r=>r.Id),[new("id","معرف الطلب"),new("kind","النوع"),new("requesterName","مقدم الطلب"),new("name","المخدوم"),new("processedByName","من عالج الطلب"),new("requestedAt","تاريخ الطلب","datetime"),new("processedAt","تاريخ المعالجة","datetime"),new("status","الحالة","approval-status"),new("studentId","معرف المخدوم"),new("reason","سبب الإلغاء / المعالجة")],totals);
     }
     private IQueryable<AttendanceEntry> AttendanceEntries(ReportSuiteFilter f,string kind,bool knownOnly)
     {
@@ -234,12 +234,12 @@ public partial class ReportDataProvider
         var summary=rows.FirstOrDefault();
         if(summary==null && f.Page>1){parameters.Single(p=>p.ParameterName=="@offset").Value=0;parameters.Single(p=>p.ParameterName=="@take").Value=1;summary=(await _context.Database.SqlQueryRaw<AttendanceRow>(orderedSql,parameters.ToArray()).ToListAsync(Ct)).FirstOrDefault();}
         var eligible=summary?.TotalEligible ?? 0;var present=summary?.TotalPresent ?? 0;
-        return await Table(kind=="Student" ? "نسب حضور الطلاب والغياب المتتالي" : "نسب حضور الخدام",f,export,q.OrderByDescending(r=>r.ConsecutiveAbsences).ThenBy(r=>r.Name).ThenBy(r=>r.Id),[new("id","المعرف"),new("name","الاسم"),new("eligible","اجتماعات مؤهلة","number"),new("present","حضور","number"),new("rate","نسبة الحضور","percent"),new("consecutiveAbsences","غياب متتالي","number"),new("lastPresent","آخر حضور","date")],new(){["eligible"]=eligible,["present"]=present,["rate"]=eligible==0 ? null : Math.Round(100m*present/eligible,1)},summary?.TotalPeople ?? 0,rows);
+        return await Table(kind=="Student" ? "نسب حضور المخدومين والغياب المتتالي" : "نسب حضور الخدام",f,export,q.OrderByDescending(r=>r.ConsecutiveAbsences).ThenBy(r=>r.Name).ThenBy(r=>r.Id),[new("id","المعرف"),new("name","الاسم"),new("eligible","اجتماعات مؤهلة","number"),new("present","حضور","number"),new("rate","نسبة الحضور","percent"),new("consecutiveAbsences","غياب متتالي","number"),new("lastPresent","آخر حضور","date")],new(){["eligible"]=eligible,["present"]=present,["rate"]=eligible==0 ? null : Math.Round(100m*present/eligible,1)},summary?.TotalPeople ?? 0,rows);
     }
     private async Task<ReportTable> AttendanceHistoryTable(string report,ReportSuiteFilter f,bool export)
     {
         var kind=report=="attendance-history" ? "Student" : "Servant";
-        return await Table(kind=="Student" ? "سجل حضور الطلاب" : "سجل حضور الخدام",f,export,AttendanceEntries(f,kind,false).OrderByDescending(r=>r.Date).ThenBy(r=>r.Name).ThenBy(r=>r.Id),[new("id","معرف السجل"),new("personId","معرف الشخص"),new("name","الاسم"),new("date","الاجتماع","date"),new("present","حاضر","boolean"),new("rosterKnown","تغطية القائمة مؤكدة","boolean")]);
+        return await Table(kind=="Student" ? "سجل حضور المخدومين" : "سجل حضور الخدام",f,export,AttendanceEntries(f,kind,false).OrderByDescending(r=>r.Date).ThenBy(r=>r.Name).ThenBy(r=>r.Id),[new("id","معرف السجل"),new("personId","معرف الشخص"),new("name","الاسم"),new("date","الاجتماع","date"),new("present","حاضر","boolean"),new("rosterKnown","تغطية القائمة مؤكدة","boolean")]);
     }
     private async Task<ReportTable> MeetingTable(ReportSuiteFilter f,bool export)
     {

@@ -2759,5 +2759,147 @@
     "verifiedAssets": 97,
     "fixtureApiStringsPresent": false,
     "currentStylesheetsPerApp": 1
+  },
+  "frontendDeployment": {
+    "workflowRun": "https://github.com/AndrewEmad/StGeorgeYouthDataManager/actions/runs/38223633509",
+    "commit": "924a7289db1261be1a898e3d59b318343c32a3f1",
+    "deploymentState": "success",
+    "completedAtUtc": "2026-10-12T08:28:59Z",
+    "landingPage": {
+      "url": "https://andrewemad.github.io/StGeorgeYouthDataManager/",
+      "status": 200,
+      "appLinks": [
+        "./admin/",
+        "./servant/"
+      ]
+    },
+    "apps": [
+      {
+        "project": "AdminApp",
+        "url": "https://andrewemad.github.io/StGeorgeYouthDataManager/admin/",
+        "status": 200,
+        "verifiedAssetHashes": 58,
+        "loginRendered": true,
+        "documentDirection": "rtl",
+        "runtimeErrors": []
+      },
+      {
+        "project": "ServantApp",
+        "url": "https://andrewemad.github.io/StGeorgeYouthDataManager/servant/",
+        "status": 200,
+        "verifiedAssetHashes": 39,
+        "loginRendered": true,
+        "documentDirection": "rtl",
+        "runtimeErrors": []
+      }
+    ],
+    "manifestAndWorkerScopesCorrect": true,
+    "angularAndFirebaseWorkersAvailable": true,
+    "browser": "Chromium",
+    "scope": "Frontend deployment and anonymous login rendering only; no backend requests, account changes, provider delivery or authenticated workflows exercised."
+  },
+  "churchUiRevision": {
+    "date": "2026-10-12",
+    "implementation": [
+      "Arabic student terminology replaced in both clients, API responses, report/export labels and new reminders; internal contracts and historical data unchanged.",
+      "Application status moved from sidebar into a labelled 44px header icon.",
+      "Admin sidebar consolidated into a 240px sticky column with compact links and internal scrolling; obsolete overlays/spacing overrides removed.",
+      "Shared dialog and import-result close controls use the same themed Material close icon and 44px targets.",
+      "Icon dimensions fixed before font load; legacy table negative margins removed and page padding standardized.",
+      "Native select appearance unified with the shared dark theme and RTL-aware arrows without replacing native keyboard selection."
+    ],
+    "builds": {
+      "adminInitialKB": 360.39,
+      "servantInitialKB": 355.03,
+      "backend": "Succeeded with no errors; existing pinned ImageSharp warnings unchanged."
+    },
+    "functionalVerification": {
+      "chromium": {
+        "cases": 66,
+        "result": "All Chromium cases completed without reported failures in the combined run; the later Firefox phase was interrupted."
+      },
+      "webkit": {
+        "cases": 66,
+        "result": "Passed",
+        "durationMinutes": 11.6
+      },
+      "widths": [
+        320,
+        360,
+        390,
+        430,
+        768,
+        1024,
+        1440,
+        1920
+      ],
+      "landscape": [
+        [
+          768,
+          360
+        ],
+        [
+          1024,
+          360
+        ]
+      ],
+      "zoom": "200% text reflow",
+      "coverage": "Both applications: reachable routes, login/onboarding, dialogs, contrast/accessibility, print and selection. Dedicated navigation checks cover status-icon placement, last-link reachability, close/ Escape/focus restoration and contained scrolling."
+    },
+    "firefox": {
+      "result": "Incomplete",
+      "reason": "The bundled browser stalls/fails during page/session setup or teardown on this Windows host (SWGL/Juggler/session-store errors), including an isolated one-worker retry. Some routes/dialogs were exercised successfully, but a complete fresh run cannot be certified. Experimental rendering overrides were removed.",
+      "testCorrections": [
+        "Allow subpixel rounding in DOM rectangle assertions (44 vs 43.999996).",
+        "Give the many-route/dialog accessibility matrices a 300-second whole-case budget and scope dialog audits to the open dialog."
+      ],
+      "remaining": "Complete Firefox functional and visual verification on a working host before closing this UI revision."
+    },
+    "deployment": "Local changes only; no workflow, backend startup-migration setting or dependency version changed.",
+    "visualVerification": {
+      "cases": 40,
+      "result": "Passed",
+      "engines": [
+        "chromium",
+        "webkit"
+      ],
+      "baselineImages": 48,
+      "states": [
+        "populated",
+        "empty",
+        "failed",
+        "loading",
+        "validation",
+        "saving-disabled"
+      ],
+      "widths": [
+        390,
+        1440
+      ],
+      "note": "Final baselines refreshed and inspected after header/sidebar, terminology, close-control and native-select theme changes. All 40 Chromium/WebKit cases pass; Firefox baseline refresh/verification remains incomplete."
+    },
+    "nativeSelectVerification": {
+      "cases": 16,
+      "result": "Passed",
+      "engines": [
+        "chromium",
+        "webkit"
+      ],
+      "widths": [
+        320,
+        360,
+        390,
+        430,
+        768,
+        1024,
+        1440,
+        1920
+      ],
+      "checks": [
+        "Native keyboard selection changes the value",
+        "Shared dark background/appearance",
+        "No page-wide horizontal overflow"
+      ]
+    }
   }
 }

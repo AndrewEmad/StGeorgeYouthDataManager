@@ -66,9 +66,9 @@
         label="زيارات هذا الأسبوع"
         variant="rose"
       />
-      <app-stat-item icon="assignment_late" [value]="statValue('studentsNeedingFollowUp')" label="طلاب لديهم مهام مستحقة" [routerLink]="['/dashboard/tasks']" />
-      <app-stat-item icon="phone_missed" [value]="statValue('studentsNotContacted')" label="طلاب لم تجرِ محاولة التواصل معهم" [routerLink]="['/dashboard/report-suite']" />
-      <app-stat-item icon="person_add" [value]="statValue('unassignedStudents')" label="طلاب غير مسندين" [routerLink]="['/dashboard/students']" />
+      <app-stat-item icon="assignment_late" [value]="statValue('studentsNeedingFollowUp')" label="مخدومين لديهم مهام مستحقة" [routerLink]="['/dashboard/tasks']" />
+      <app-stat-item icon="phone_missed" [value]="statValue('studentsNotContacted')" label="مخدومين لم تجرِ محاولة التواصل معهم" [routerLink]="['/dashboard/report-suite']" />
+      <app-stat-item icon="person_add" [value]="statValue('unassignedStudents')" label="مخدومين غير مسندين" [routerLink]="['/dashboard/students']" />
       <app-stat-item icon="assignment_ind" [value]="statValue('unassignedTasks')" label="مهام تحتاج إسنادًا" [routerLink]="['/dashboard/tasks']" />
     </div>
 

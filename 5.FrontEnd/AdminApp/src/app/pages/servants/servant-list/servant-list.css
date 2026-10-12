@@ -279,7 +279,7 @@ tr.row-clickable { cursor: pointer; }
   }
 
   .table-container {
-    margin: 0 -12px;
+    margin: 0;
     border-radius: 12px;
   }
 }

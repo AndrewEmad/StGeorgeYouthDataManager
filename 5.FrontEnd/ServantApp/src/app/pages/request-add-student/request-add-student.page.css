@@ -1,7 +1,7 @@
 .request-add-student-container {
-  padding: 20px;
-  max-width: 720px;
-  margin: 0 auto;
+  padding: 0;
+  min-width: 0;
+  margin: 0;
 }
 
 :host ::ng-deep app-card.form-card.glass-card {
@@ -19,11 +19,12 @@
 
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2,minmax(0,1fr));
   gap: 16px 20px;
 }
 
 .form-group {
+  min-inline-size: 0;
   text-align: right;
 }
 
@@ -67,6 +68,7 @@
 
 .form-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   justify-content: flex-end;
   margin-top: 24px;
@@ -87,6 +89,6 @@
 
 @media (max-width: 560px) {
   .form-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0,1fr);
   }
 }

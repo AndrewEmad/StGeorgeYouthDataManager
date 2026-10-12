@@ -1,3 +1,4 @@
+import {auditReasonHeaders} from '@ydm/shared/core/utils';
 import { inject } from '@angular/core';
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { catchError, switchMap, throwError } from 'rxjs';
@@ -11,6 +12,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   // Authenticated API data always uses the network; only the static shell is cached.
   req=req.clone({setHeaders:{'ngsw-bypass':'true'}});
   const match=req.headers.get('If-Match');if(match && !match.startsWith('\"'))req=req.clone({setHeaders:{'If-Match':'\"'+match+'\"'}});
+  const reason=req.headers.get('X-Audit-Reason');if(reason!==null && !req.headers.has('X-Audit-Reason-Encoding'))req=req.clone({setHeaders:auditReasonHeaders(reason)});
   const auth = inject(AuthService);
   const publicEndpoint = /\/Auth\/(login|refresh-token|logout)$/.test(target.pathname);
   const send = (token: string | null) => next(token ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req);

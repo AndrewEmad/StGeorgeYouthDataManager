@@ -4,13 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { YDM_API,YDM_SESSION,apiError,display } from '../core/api';
-import { datetimeLocal,isoDatetime } from '../core/utils';
+import { datetimeLocal,isoDatetime,dateOnly } from '../core/utils';
 import { ModalComponent } from '../ui/modal';
 import { ResourcePickerComponent } from '../ui/resource-picker';
 interface Activity {id:string;studentId:string;studentName:string;callDate?:string;visitDate?:string;callStatus?:number;visitOutcome?:number;notes:string;nextFollowUpDate?:string;nextVisitDate?:string;participants?:{servantId:string;servantName:string}[];recordedByServantId:string;recordedByName:string;isVoided:boolean;voidReason:string;version:string;canCorrect:boolean;}
 @Component({selector:'ydm-activity-history',standalone:true,imports:[FormsModule,ModalComponent,ResourcePickerComponent],template:`
  <section class="ydm-panel glass-card"><header class="ydm-toolbar"><h2 class="ydm-grow">سجل المكالمات والزيارات</h2>@if(studentId() && !archived()){<button class="btn-primary" type="button" (click)="create('calls')" [disabled]="loading()">تسجيل مكالمة</button><button class="btn-primary" type="button" (click)="create('visits')" [disabled]="loading()">تسجيل زيارة</button>}</header>
  <div class="ydm-toolbar" role="group" aria-label="نوع السجل"><button type="button" class="btn-outline" [attr.aria-pressed]="kind==='calls'" (click)="switchKind('calls')">المكالمات</button><button type="button" class="btn-outline" [attr.aria-pressed]="kind==='visits'" (click)="switchKind('visits')">الزيارات والمشاركة</button><span>{{total()}} سجل</span></div>
+ <form class="ydm-filter-grid" (ngSubmit)="applyFilters()"><label>من تاريخ<input class="form-input" type="date" name="from" [(ngModel)]="filters.dateFrom" /></label><label>إلى تاريخ (شامل)<input class="form-input" type="date" name="to" [(ngModel)]="filters.dateTo" /></label><label>بحث باسم المخدوم أو الملاحظات<input class="form-input" type="search" name="search" [(ngModel)]="filters.search" maxlength="200" /></label><label>النتيجة<select class="form-input" name="result" aria-label="النتيجة" [(ngModel)]="filters.outcome"><option value="">كل النتائج</option>@for(label of historyOutcomes();track $index){<option [value]="$index">{{label}}</option>}</select></label><label>حالة السجل<select class="form-input" name="state" aria-label="حالة السجل" [(ngModel)]="filters.status"><option value="">كل السجلات</option><option value="Active">السجلات غير الملغاة</option><option value="Voided">السجلات الملغاة</option></select></label><div class="ydm-toolbar"><button class="btn-primary" type="submit" [disabled]="loading()">تطبيق الفلاتر</button><button class="btn-outline" type="button" (click)="resetFilters()" [disabled]="loading()">مسح الفلاتر</button></div></form>
  @if(error()){<p class="ydm-notice text-error" role="alert">{{error()}} <button class="btn-outline" type="button" (click)="load()">إعادة المحاولة</button></p>}
  @if(message()){<p class="ydm-notice text-success" role="status">{{message()}}</p>}
  @if(loading()){<p class="ydm-notice" role="status">جارٍ تحميل السجل…</p>}@else if(!error() && !rows().length){<p class="ydm-notice">لا توجد سجلات مطابقة.</p>}
@@ -26,15 +27,19 @@ interface Activity {id:string;studentId:string;studentName:string;callDate?:stri
 export class ActivityHistoryComponent {
  studentId=input<string|null>(null);actorId=input<string|null>(null);archived=input(false);private http=inject(HttpClient);private api=inject(YDM_API);private destroy=inject(DestroyRef);session=inject(YDM_SESSION);private request?:Subscription;
  rows=signal<Activity[]>([]);total=signal(0);loading=signal(false);error=signal('');message=signal('');opened=signal(false);saving=signal(false);dialogError=signal('');stale=signal(false);title=signal('');format=display;
+ filters={dateFrom:'',dateTo:'',search:'',outcome:'',status:''};private applied={...this.filters};
  kind='calls';dialogKind='calls';page=1;action='Create';selected:Activity|null=null;
  form={eventAt:'',outcome:1,notes:'',nextAt:'',reason:'',participants:[] as {id:string;name:string}[]};
  constructor(){effect(()=>{this.studentId();this.actorId();this.page=1;this.load();});this.destroy.onDestroy(()=>this.request?.unsubscribe());}
  outcomes(){return this.dialogKind==='calls' ? ['لم يتم الرد','تم الرد','مشغول','مغلق','رقم خاطئ'] : ['زيارة ناجحة','غير موجود','رفض الزيارة','مؤجلة'];}
  outcome(row:Activity){return (this.kind==='calls' ? ['لم يتم الرد','تم الرد','مشغول','مغلق','رقم خاطئ'][row.callStatus ?? -1] : ['زيارة ناجحة','غير موجود','رفض الزيارة','مؤجلة'][row.visitOutcome ?? -1]) || 'غير محدد';}
  participants(row:Activity){return row.participants?.map(p=>p.servantName).join('، ') || '—';}
- switchKind(kind:string){if(this.kind===kind)return;this.kind=kind;this.page=1;this.load();}
+ historyOutcomes(){return this.kind==='calls' ? ['لم يتم الرد','تم الرد','مشغول','مغلق','رقم خاطئ'] : ['زيارة ناجحة','غير موجود','رفض الزيارة','مؤجلة'];}
+ applyFilters(){if(this.loading())return;if([this.filters.dateFrom,this.filters.dateTo].some(d=>d && dateOnly(d)!==d) || (this.filters.dateFrom && this.filters.dateTo && this.filters.dateFrom>this.filters.dateTo)){this.error.set('أدخل فترة صحيحة؛ تاريخ البداية يجب ألا يتجاوز تاريخ النهاية.');return;}this.applied={...this.filters,search:this.filters.search.trim()};this.page=1;this.message.set('');this.load();}
+ resetFilters(){this.filters={dateFrom:'',dateTo:'',search:'',outcome:'',status:''};this.applyFilters();}
+ switchKind(kind:string){if(this.kind===kind)return;this.kind=kind;this.filters.outcome='';this.applied.outcome='';this.page=1;this.load();}
  changePage(delta:number){this.page+=delta;this.load();}
- load(){this.request?.unsubscribe();this.loading.set(true);this.error.set('');const params:Record<string,string|number>={page:this.page,pageSize:25};if(this.studentId())params['studentId']=this.studentId()!;if(this.actorId())params['actorId']=this.actorId()!;
+ load(){this.request?.unsubscribe();this.loading.set(true);this.error.set('');const params:Record<string,string|number>={page:this.page,pageSize:25};if(this.studentId())params['studentId']=this.studentId()!;if(this.actorId())params['actorId']=this.actorId()!;for(const [key,value] of Object.entries(this.applied))if(value!=='')params[key]=value;
   this.request=this.http.get<{items:Activity[];totalCount:number}>(`${this.api}/activity-history/${this.kind}`,{params}).subscribe({next:r=>{this.rows.set(r.items);this.total.set(r.totalCount);this.loading.set(false);},error:e=>{this.rows.set([]);this.loading.set(false);this.error.set(apiError(e));}});}
  create(kind:string){this.action='Create';this.dialogKind=kind;this.selected=null;this.form={eventAt:datetimeLocal(new Date()),outcome:kind==='calls' ? 1 : 0,notes:'',nextAt:'',reason:'',participants:[]};this.title.set(kind==='calls' ? 'تسجيل مكالمة' : 'تسجيل زيارة');this.dialogError.set('');this.stale.set(false);this.opened.set(true);}
  edit(row:Activity,action:string){this.action=action;this.dialogKind=this.kind;this.selected=row;this.form={eventAt:datetimeLocal(row.callDate || row.visitDate),outcome:row.callStatus ?? row.visitOutcome ?? 0,notes:row.notes || '',nextAt:datetimeLocal(row.nextFollowUpDate || row.nextVisitDate),reason:'',participants:(row.participants || []).filter(p=>p.servantId!==row.recordedByServantId).map(p=>({id:p.servantId,name:p.servantName}))};this.title.set(action==='Void' ? 'إلغاء السجل' : 'تصحيح السجل');this.dialogError.set('');this.stale.set(false);this.opened.set(true);}
@@ -46,5 +51,5 @@ export class ActivityHistoryComponent {
   this.saving.set(true);this.dialogError.set('');this.message.set('');const url=`${this.api}/FollowUp/${kind}`;const headers={'X-Audit-Reason':this.form.reason};const request=this.action==='Create' ? this.http.post(url,body) : this.action==='Void' ? this.http.post(`${url}/${this.selected!.id}/void`,body,{headers}) : this.http.put(`${url}/${this.selected!.id}`,body,{headers});
   request.pipe(takeUntilDestroyed(this.destroy)).subscribe({next:()=>{this.saving.set(false);this.opened.set(false);this.kind=this.dialogKind;this.page=1;this.message.set('تم حفظ السجل.');this.load();},error:e=>{this.saving.set(false);this.dialogError.set(apiError(e));if(e.status===409){this.stale.set(true);this.load();}}});}
 }
-@Component({selector:'ydm-personal-activity',standalone:true,imports:[ActivityHistoryComponent],template:`<section class="ydm-page" dir="rtl"><h1>سجل نشاطي ومشاركتي</h1><p class="text-muted">المكالمات التي سجلتها والزيارات التي سجلتها أو شاركت فيها، بما فيها السجلات التاريخية.</p><ydm-activity-history/></section>`})
-export class PersonalActivityPage {}
+@Component({selector:'ydm-personal-activity',standalone:true,imports:[ActivityHistoryComponent],template:`<section class="ydm-page" dir="rtl"><h1>سجل نشاطي ومشاركتي</h1><p class="text-muted">المكالمات التي سجلتها والزيارات التي سجلتها أو شاركت فيها، بما فيها السجلات التاريخية.</p><ydm-activity-history [actorId]="session().userId"/></section>`})
+export class PersonalActivityPage {session=inject(YDM_SESSION);}

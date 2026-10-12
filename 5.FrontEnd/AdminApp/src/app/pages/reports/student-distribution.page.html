@@ -1,22 +1,7 @@
-<div class="animate-slide">
-  <header class="content-header reports-header">
-    <h1>توزيع المخدومين</h1>
-    <p class="text-muted">حسب المنطقة والسنة الدراسية</p>
-    <div class="report-tabs">
-      <a routerLink="/dashboard/reports/servant-follow-up" routerLinkActive="active" class="tab">متابعة الخدام</a>
-      <a routerLink="/dashboard/reports/student-distribution" routerLinkActive="active" class="tab">توزيع المخدومين</a>
-    </div>
-  </header>
-
-  <section class="report-section">
-    <h2 class="section-title-row">حسب المنطقة <a routerLink="/dashboard/reports/students-by-area" class="btn-outline sm">عرض في صفحة منفصلة</a></h2>
-  </section>
-
-  <section class="report-section">
-    <h2 class="section-title-row">حسب السنة الدراسية <a routerLink="/dashboard/reports/students-by-year" class="btn-outline sm">عرض في صفحة منفصلة</a></h2>
-  </section>
-
-  <section class="report-section">
-    <h2 class="section-title-row">حسب شهر الميلاد <a routerLink="/dashboard/reports/students-by-birth-month" class="btn-outline sm">عرض في صفحة منفصلة</a></h2>
-  </section>
-</div>
+<section class="ydm-page" dir="rtl">
+  <header class="content-header"><h1>توزيع المخدومين</h1><p class="text-muted">اختر المنطقة أو السنة الدراسية أو شهر الميلاد، ثم افتح المجموعة لعرض مخدوميها.</p><a class="btn-outline" routerLink="/dashboard/reports">كل التقارير</a></header>
+  <div class="glass-card ydm-panel ydm-filter-grid"><label>عرض التوزيع حسب<select class="form-input" aria-label="عرض التوزيع حسب" [ngModel]="group()" (ngModelChange)="changeGroup($event)" [disabled]="loading()"><option value="area">المنطقة</option><option value="year">السنة الدراسية</option><option value="birthMonth">شهر الميلاد</option></select></label></div>
+  <admin-report-viewer [columns]="columns()" [data]="data()" [loading]="loading()" [error]="error()" (retry)="loadData()" [totalCount]="totalCount()" [page]="page()" [pageSize]="pageSize()" [pageSizeOptions]="pageSizeOptions" [sortBy]="sortBy()" [sortDesc]="sortDesc()" [rowClickable]="false" [actionsTemplate]="actionsTplRef() ?? null" (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)" (sortChange)="onSortChange($event)" />
+  <ng-template #groupNameTpl let-row>{{groupName(row.groupKey)}}</ng-template>
+  <ng-template #rowActionsTpl let-row><a routerLink="/dashboard/students" [queryParams]="studentFilter(row.groupKey)" class="btn-outline sm">عرض المخدومين</a></ng-template>
+</section>

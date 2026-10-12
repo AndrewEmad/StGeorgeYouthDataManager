@@ -33,7 +33,7 @@ export async function fixtures(context:BrowserContext,state:'populated'|'empty'|
  else if(p.startsWith('meetings/') && p.endsWith('eligibility-candidates'))body=paged([{id,name:longName}],51);
  else if(p.startsWith('meetings/') && p.endsWith('roster'))body=paged([{id,personId:id,name:longName,present:false,assignedServantId:owner}],51);
  else if(p==='meetings')body=paged([{id,date:'2026-10-09',status:'Draft',rosterKnown:true,version:student.version}],51);
- else if(p.startsWith('approvals/'))body=paged([{...student,id,studentId:id,requestedByUserId:owner,requestedByUserName:longName,requestedAt:'2026-10-01T08:00:00Z',status:'Pending',processedAt:null}],51);
+ else if(p.startsWith('approvals/'))body=paged([{...student,kind:p.split('/')[1]==='all' ? 'addition' : p.split('/')[1],id,studentId:id,requestedByUserId:owner,requestedByUserName:longName,requestedAt:'2026-10-01T08:00:00Z',status:'Pending',processedAt:null}],51);
  else if(p.includes('requests'))body=[];
  else if(p==='operations/metrics')body={capturedAt:'2026-10-11T12:00:00Z',api:{errors:2},database:{slowQueries:3},workerLagSeconds:17,failedDeliveries:4,pendingMigrations:0};
  else if(p==='operations/deliveries')body=paged([]);

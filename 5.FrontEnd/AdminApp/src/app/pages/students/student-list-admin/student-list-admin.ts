@@ -248,7 +248,7 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
         ? null
         : (() => {
             const n = +this.filters.birthMonth;
-            return n >= 1 && n <= 12 ? n : null;
+            return n >= 0 && n <= 12 ? n : null;
           })();
     this.listRequest=this.studentQueries
       .getPaged({

@@ -3145,5 +3145,107 @@
       "scope": "20 concurrent authenticated managers, 60 samples per operation; identical and twenty distinct area/page and owner queries; SQL Express on the documented local host. ASP.NET TestServer transport excludes external network/TLS/IIS latency. No completed-report cache or schema/index changes."
     },
     "deployment": "Not published. Both frontend and API changes require deployment; the Pages workflow remains frontend-only."
+  },
+  "activitySpacingRevision": {
+    "date": "2026-10-12",
+    "status": "Passed",
+    "deployment": "Local changes only; API and both clients require publication.",
+    "changes": [
+      "PersonalActivityPage explicitly supplies the authenticated actor; unfiltered activity API reads also default to that actor for every role, including Admin/Manager/Priest",
+      "Calls use the recorded actor; visits include recorder or participant without duplicate rows; explicit authorized student/actor histories preserve existing permissions and historical/archived records",
+      "Added applied date range, youth-name/notes search, outcome and active/voided filters; page changes retain filters, activity-kind changes reset the incompatible outcome, superseded reads are cancelled, invalid dates never submit",
+      "A single shared --page-gutter matches the former servant-list gutter (clamp 12px, 2vw, 24px); authenticated layout owns it once; nested page/container padding and narrow outer wrappers removed; title margin collapse corrected",
+      "Request-add form uses shrinkable grid tracks and wrapping actions to support 320px at 200% text size"
+    ],
+    "backend": {
+      "result": "Passed",
+      "cases": 8,
+      "failed": 0,
+      "skipped": 0,
+      "coverage": "Five actual API role cases plus three import/archive regressions: default and explicit actor scope, recordId narrowing, authorized student histories, archived youth/changed owner, shared visits, totals vs page rows, inclusive Cairo calendar dates, search/outcome/state validation and 403/400 behavior."
+    },
+    "build": {
+      "result": "Passed",
+      "adminInitialKB": 363.51,
+      "servantInitialKB": 358.06,
+      "limitKB": 500
+    },
+    "browser": {
+      "initialFinalRun": {
+        "result": "Passed",
+        "cases": 102,
+        "engines": [
+          "chromium",
+          "firefox",
+          "webkit"
+        ],
+        "coverage": "36 new activity/spacing cases, six print cases and sixty existing visual-state cases; both apps, eight widths, two landscape sizes, 200% reflow, accessible filter controls and applied-filter paging/switch/reset."
+      },
+      "finalRoutes": {
+        "result": "Passed",
+        "distinctCases": 18,
+        "coverage": "Twelve all-reachable-route cases across both apps at 320/1920px and six church-report capture cases at 390/1440px, on Chromium/Firefox/WebKit. No page-wide overflow or obscured headings. Eighteen maintained report baselines refreshed.",
+        "personalHistoryRecheck": "Five of six personal-activity repeats passed in the combined run; Firefox Admin had a locator timeout. Both Firefox personal-activity cases passed in isolation without source changes (2 passed, no retries). Final portrait capture inspected.",
+        "combinedRun": {
+          "passed": 23,
+          "failed": 1
+        },
+        "isolatedFirefoxRun": {
+          "passed": 2,
+          "failed": 0
+        }
+      },
+      "distinctCasesPassed": 120
+    },
+    "constraints": "ImageSharp 3.1.5, .NET 8, automatic startup migrations, appsettings credentials and frontend-only Pages workflows unchanged."
+  },
+  "unifiedPagesRevision": {
+    "date": "2026-10-12",
+    "status": "Passed",
+    "deployment": "Local changes only; publish the API and both clients together.",
+    "changes": [
+      "One canonical /requests page per app; Admin sidebar has one requests entry. Type (including all), status and personal scope are URL-backed filters; paging retains applied filters and refresh/back preserve them. Ordinary roles always send personal scope.",
+      "Mixed request feed counts, orders and pages the three request tables in SQL, then reads at most one bounded detail projection per kind. Each row includes its kind; review/approve/reject/withdraw use the row kind, including stale-review refresh. Single-kind API contracts remain available.",
+      "Legacy addition/assignment/removal/history links redirect with matching filters and keep request-ID links; privileged request-ID history links retain global review access. Approval report drilldowns target the canonical page.",
+      "One distribution report selects area/year/birth month; old group routes redirect. Explicit missing-group labels and drilldowns include birthMonth=0. The current-student list now retains that missing-birthday filter.",
+      "One servant activity report selects custom period or the existing server-defined report week; old weekly route redirects. Existing row details and paging/sorting remain available. Three duplicate catalog entries and eight unreachable report source/template files removed.",
+      "Both API-scoped interceptors encode audit-reason headers explicitly; CallerContext decodes the marked URI value. Arabic body reasons and audited original text are preserved; legacy unmarked headers keep their existing behavior."
+    ],
+    "backend": {
+      "result": "Passed",
+      "cases": 8,
+      "failed": 0,
+      "skipped": 0,
+      "coverage": "Five roles: all-kind SQL union translation/count/stable paging, own/global scope and 403, detail parity including archived targets and prior single-kind contracts, withdrawal and Arabic audit reason round trip, invalid filters. Two existing approval retry/stale transaction cases plus the existing archived history API regression."
+    },
+    "build": {
+      "result": "Passed",
+      "adminInitialKB": 366.32,
+      "servantInitialKB": 360.54,
+      "limitKB": 500
+    },
+    "browser": {
+      "result": "Passed",
+      "engines": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "coverage": "51 unified-page cases (seven workflows and ten viewport/reflow cases per engine), 18 session/interceptor regressions, six all-route 320px cases, six church-report/catalog capture cases and 24 Admin report visual-state cases.",
+      "distinctCasesPassed": 105,
+      "broadRun": {
+        "passed": 102,
+        "failed": 3,
+        "cause": "The three grouping drilldown cases exposed the existing StudentQueriesService dropping the explicit missing-birthday value 0. The list and service now preserve 0."
+      },
+      "finalAffectedRun": {
+        "passed": 12,
+        "failed": 0,
+        "skipped": 0,
+        "coverage": "After the final production build, all three grouping/drilldown cases and nine 320/390/1440px responsive/accessibility cases pass across Chromium/Firefox/WebKit. Includes missing birthdays and a known May birthday group."
+      },
+      "visualReview": "Final requests and distribution portrait captures inspected; affected maintained Admin/report baselines refreshed."
+    },
+    "constraints": "ImageSharp 3.1.5, .NET 8, automatic startup migrations, appsettings credentials and frontend-only Pages workflows unchanged."
   }
 }

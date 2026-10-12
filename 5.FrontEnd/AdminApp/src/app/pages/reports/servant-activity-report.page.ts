@@ -1,11 +1,11 @@
-import {Subscription} from 'rxjs';
+import {Subscription,map} from 'rxjs';
+import {FormsModule} from '@angular/forms';
+import {Router,RouterLink} from '@angular/router';
 import {ActivatedRoute} from '@angular/router';
 import {DestroyRef} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import { Component, OnInit, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ReportsService } from '../../services/reports.service';
-import { UsersService } from '../../services/users.service';
-import { User } from '../../shared/models';
 import { ServantActivitySummary } from '../../shared/models/report.model';
 import { ReportViewerComponent } from '../../shared/components/report-viewer/report-viewer.component';
 import { DataTableColumn } from '../../shared/components/data-table/data-table-column';
@@ -14,7 +14,7 @@ import { AdvancedFilterConfig, AdvancedFilterModel } from '../../shared/componen
 @Component({
   selector: 'app-servant-activity-report-page',
   standalone: true,
-  imports: [ReportViewerComponent],
+  imports: [ReportViewerComponent,FormsModule,RouterLink],
   templateUrl: './servant-activity-report.page.html',
   styleUrls: ['./servant-follow-up.page.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,12 +22,10 @@ import { AdvancedFilterConfig, AdvancedFilterModel } from '../../shared/componen
 export class ServantActivityReportPage implements OnInit {
   private request?:Subscription;ngOnDestroy(){this.request?.unsubscribe();}
 
-  private route=inject(ActivatedRoute);
+  private route=inject(ActivatedRoute);private router=inject(Router);period=signal('custom');
   private destroy=inject(DestroyRef);
   private reportsService = inject(ReportsService);
-  private usersService = inject(UsersService);
 
-  servants = signal<User[]>([]);
   data = signal<ServantActivitySummary[]>([]);
   loading = signal(false);
   error = signal('');
@@ -40,7 +38,7 @@ export class ServantActivityReportPage implements OnInit {
   filterModel = signal<AdvancedFilterModel>({});
 
   filterConfig = computed<AdvancedFilterConfig>(() => {
-    const list = this.servants();
+    if(this.period()==='week')return [];
     return [
       { key: 'dateFrom', label: 'من تاريخ', type: 'date' },
       { key: 'dateTo', label: 'إلى تاريخ', type: 'date' },
@@ -49,7 +47,6 @@ export class ServantActivityReportPage implements OnInit {
         label: 'الخادم',
         type: 'resource',resourceKind:'report-actors',
         placeholder: 'الكل',
-        options: list.map((s) => ({ value: s.id ?? '', label: s.fullName ?? s.userName ?? '' })),
       },
     ];
   });
@@ -63,16 +60,16 @@ export class ServantActivityReportPage implements OnInit {
 
   ngOnInit(): void {
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params=>{
-      const model:AdvancedFilterModel={};for(const key of ['dateFrom','dateTo','servantId']){const value=params.get(key);if(value)model[key]=value;}
+      this.period.set(params.get('period')==='week' ? 'week' : 'custom');const model:AdvancedFilterModel={};for(const key of ['dateFrom','dateTo','servantId']){const value=params.get(key);if(value)model[key]=value;}
       this.filterModel.set(model);this.page.set(1);this.loadData();
     });
   }
 
   onFilterChange(model: AdvancedFilterModel): void {
-    this.filterModel.set(model);
-    this.page.set(1);
-    this.loadData();
+    void this.router.navigate([],{relativeTo:this.route,queryParams:{period:'custom',...Object.fromEntries(Object.entries(model).filter(([,v])=>v!==null && v!==''))}});
   }
+
+  changePeriod(period:string){if(this.loading())return;void this.router.navigate([],{relativeTo:this.route,queryParams:{period,...(period==='custom' ? this.filterModel() : {})}});}
 
   loadData(): void {
     this.request?.unsubscribe();this.loading.set(true);
@@ -99,7 +96,9 @@ export class ServantActivityReportPage implements OnInit {
     if (dateTo != null && String(dateTo).trim()) params.dateTo = String(dateTo).trim();
     if (servantId != null && String(servantId).trim()) params.servantId = String(servantId).trim();
 
-    this.request=this.reportsService.getServantActivitySummary(params).subscribe({
+    const weekSort:Record<string,string>={assignedCount:'assignedStudentsCount',callsInPeriod:'callsThisWeek',visitsInPeriod:'visitsThisWeek'};
+    const request=this.period()==='week' ? this.reportsService.getServantPerformancesPaged({page:params.page,pageSize:params.pageSize,sortBy:weekSort[params.sortBy || ''] || params.sortBy,sortDesc:params.sortDesc}).pipe(map(r=>({...r,items:r.items.map(x=>({servantId:x.servantId,fullName:x.fullName,assignedCount:x.assignedStudentsCount,callsInPeriod:x.callsThisWeek,visitsInPeriod:x.visitsThisWeek}))}))) : this.reportsService.getServantActivitySummary(params);
+    this.request=request.subscribe({
       next: (res) => {
         this.data.set(res.items ?? []);
         this.totalCount.set(res.totalCount ?? 0);
@@ -107,11 +106,13 @@ export class ServantActivityReportPage implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('فشل تحميل التقرير');
+        this.data.set([]);this.error.set('فشل تحميل التقرير');
         this.loading.set(false);
       },
     });
   }
+
+  onRowClick(row:ServantActivitySummary){void this.router.navigate(['/dashboard/servants',row.servantId]);}
 
   onPageChange(p: number): void {
     this.page.set(p);

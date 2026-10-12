@@ -1,7 +1,6 @@
 .servant-detail {
-  padding-bottom: 2rem;
-  max-width: 900px;
-  margin: 0 auto;
+  min-width: 0;
+  margin: 0;
 }
 
 .servant-detail .content-header {

@@ -23,7 +23,7 @@ async function reportFixtures(context:BrowserContext,state='populated'){
 for(const viewport of [...[320,360,390,430,768,1024,1440,1920].map(width=>({width,height:900})),{width:768,height:360},{width:1024,height:360}])test(`church reports and catalog fit ${viewport.width}x${viewport.height}`,async({page,context},info)=>{
  await authenticate(context,'admin');await reportFixtures(context);await page.setViewportSize(viewport);await page.clock.setFixedTime(new Date('2026-10-12T08:00:00Z'));
  await page.goto('/admin/#/dashboard/reports');await expect(page.locator('main h1')).toHaveText('تقارير خدمة الشباب');
- await expect(page.locator('main .ydm-report-group')).toHaveCount(4);await expect(page.locator('main .ydm-report-card')).toHaveCount(20);
+ await expect(page.locator('main .ydm-report-group')).toHaveCount(4);await expect(page.locator('main .ydm-report-card')).toHaveCount(17);
  expect((await noOverflow(page)).scroll).toBeLessThanOrEqual(viewport.width+1);
  for(const key of keys){
   await page.goto('/admin/#/dashboard/report-suite?report='+key);await expect(page.locator('main h1')).toHaveText(definitions[key].title);await expect(page.getByText('جارٍ تحميل النتائج…')).not.toBeVisible();

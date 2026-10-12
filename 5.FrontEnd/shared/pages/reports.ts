@@ -85,7 +85,7 @@ export class ReportSuitePage {
     if(['contact','workload','data-quality','pastoral-follow-up','attendance'].includes(this.activeReport))return {path:root+'/students/'+id};
     if(this.activeReport==='attendance-history' && row['personId'])return {path:root+'/students/'+row['personId']};
     if(this.activeReport==='follow-up')return {path:root+'/tasks',query:{taskId:id}};
-    if(this.activeReport==='approvals')return {path:root+'/request-history',query:{requestId:id,kind:String(row['kind'])}};
+    if(this.activeReport==='approvals')return {path:root+'/requests',query:{requestId:id,kind:String(row['kind']),mine:'false',status:''}};
     if(this.activeReport==='meeting-trends' && (this.session().privileged || this.session().role==='Secretary'))return {path:root+'/attendance',query:{date:String(row['date']).slice(0,10)}};
     return null;
   };

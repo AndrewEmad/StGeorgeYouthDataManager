@@ -17,12 +17,9 @@ import {reportDefinitions} from '@ydm/shared/core/report-catalog';
   </section>`})
 export class ReportsCatalogPage {
   private reports=[...reportDefinitions.map(r=>({...r,path:'/dashboard/report-suite',query:{report:r.key} as Record<string,string>})),
-    {key:'weekly-activity',name:'مكالمات وزيارات هذا الأسبوع',description:'الملخص الأسبوعي المسجل لكل خادم.',group:'خدمة الخدام والافتقاد',icon:'date_range',path:'/dashboard/reports/servant-performance',query:{}},
-    {key:'activity',name:'نشاط الخدام خلال فترة',description:'عدد المكالمات والزيارات المسجلة لكل خادم خلال الفترة التي تختارها.',group:'خدمة الخدام والافتقاد',icon:'timeline',path:'/dashboard/reports/servant-activity',query:{}},
+    {key:'activity',name:'نشاط الخدام',description:'المكالمات والزيارات لكل خادم خلال هذا الأسبوع أو فترة تختارها.',group:'خدمة الخدام والافتقاد',icon:'timeline',path:'/dashboard/reports/servant-activity',query:{}},
     {key:'no-contact',name:'مخدومون بلا محاولة افتقاد حديثة',description:'آخر محاولة تواصل للمخدومين الذين لم تُسجل لهم محاولة حديثة.',group:'خدمة الخدام والافتقاد',icon:'contact_phone',path:'/dashboard/reports/students-no-contact',query:{}},
-    {key:'areas',name:'المخدومون حسب المنطقة',description:'توزيع المخدومين جغرافيًا مع فتح تفاصيل كل منطقة.',group:'بيانات المخدومين',icon:'map',path:'/dashboard/reports/students-by-area',query:{}},
-    {key:'years',name:'المخدومون حسب السنة الدراسية',description:'توزيع المخدومين حسب سنوات الدراسة.',group:'بيانات المخدومين',icon:'school',path:'/dashboard/reports/students-by-year',query:{}},
-    {key:'birthdays',name:'أعياد الميلاد',description:'توزيع أعياد ميلاد المخدومين حسب الشهر.',group:'بيانات المخدومين',icon:'cake',path:'/dashboard/reports/students-by-birth-month',query:{}}
+    {key:'areas',name:'توزيع المخدومين',description:'حسب المنطقة أو السنة الدراسية أو شهر الميلاد، مع فتح تفاصيل كل مجموعة.',group:'بيانات المخدومين',icon:'map',path:'/dashboard/reports/student-distribution',query:{}},
   ];
   groups=['الحضور','خدمة الخدام والافتقاد','بيانات المخدومين','الطلبات'].map(name=>({name,reports:this.reports.filter(r=>r.group===name)}));
 }

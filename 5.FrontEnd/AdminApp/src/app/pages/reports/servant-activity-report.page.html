@@ -1,13 +1,11 @@
 <div class="animate-slide">
+  <header class="content-header"><h1>نشاط الخدام</h1><p class="text-muted">{{period()==='week' ? 'هذا الأسبوع حسب يوم بداية أسبوع الخدمة المحدد في إعدادات الحضور.' : 'اختر الفترة والخادم من البحث المتقدم.'}}</p><a class="btn-outline" routerLink="/dashboard/reports">كل التقارير</a></header>
+  <div class="glass-card ydm-panel ydm-filter-grid"><label>فترة النشاط<select class="form-input" aria-label="فترة النشاط" [ngModel]="period()" (ngModelChange)="changePeriod($event)" [disabled]="loading()"><option value="custom">فترة تختارها</option><option value="week">هذا الأسبوع</option></select></label></div>
   @if (error()) {
     <p class="error-msg">{{ error() }}</p>
   }
   <admin-report-viewer
-    title="ملخص نشاط الخدام"
-    subtitle="تقرير منفصل"
-    backLink="/dashboard/reports/servant-follow-up"
-    backLabel="العودة لمتابعة الخدام"
-    [filterConfig]="filterConfig()"
+    [filterConfig]="filterConfig()" [initialFilterModel]="filterModel()"
     [columns]="columns"
     [data]="data()"
     [loading]="loading()" [error]="error()" (retry)="loadData()"
@@ -17,7 +15,7 @@
     [pageSizeOptions]="pageSizeOptions"
     [sortBy]="sortBy()"
     [sortDesc]="sortDesc()"
-    [rowClickable]="false"
+    [rowClickable]="true" (rowClick)="onRowClick($event)"
     (filterChange)="onFilterChange($event)"
     (pageChange)="onPageChange($event)"
     (pageSizeChange)="onPageSizeChange($event)"

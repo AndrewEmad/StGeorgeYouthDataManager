@@ -65,3 +65,8 @@ export function parseCsv(text: string): { values: string[]; line: number }[] {
   if(field || row.length)finish();
   return records;
 }
+
+/** HTTP headers require ASCII bytes; the API decodes this explicit transport marker. */
+export function auditReasonHeaders(reason:string):Record<string,string> {
+  return {'X-Audit-Reason':encodeURIComponent(reason),'X-Audit-Reason-Encoding':'uri'};
+}

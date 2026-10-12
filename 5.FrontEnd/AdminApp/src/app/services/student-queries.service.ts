@@ -43,7 +43,7 @@ export class StudentQueriesService {
     if (params.servantId && params.servantId !== '_none') httpParams['servantId'] = params.servantId;
     if (params.hasServant === true) httpParams['hasServant'] = 'true';
     if (params.hasServant === false) httpParams['hasServant'] = 'false';
-    if (params.birthMonth != null && params.birthMonth >= 1 && params.birthMonth <= 12) httpParams['birthMonth'] = String(params.birthMonth);
+    if (params.birthMonth != null && params.birthMonth >= 0 && params.birthMonth <= 12) httpParams['birthMonth'] = String(params.birthMonth);
     return this.http.get<{ items: any[]; totalCount: number; page: number; pageSize: number }>(`${this.apiUrl}/paged`, { params: httpParams });
   }
 

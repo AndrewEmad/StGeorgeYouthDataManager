@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./core/route-aliases": "./core/route-aliases.ts",
     "./core/utils": "./core/utils.ts",
     "./core/report-catalog": "./core/report-catalog.ts",
     "./ui/modal": "./ui/modal.ts",

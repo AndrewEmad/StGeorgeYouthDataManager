@@ -1,3 +1,4 @@
+import {requestsRedirect} from '@ydm/shared/core/route-aliases';
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { redirectIfAuthGuard } from './core/guards/redirect-if-auth.guard';
@@ -14,7 +15,8 @@ export const routes: Routes = [
     children: [
       {path:'activity-history',loadComponent:()=>import('@ydm/shared/pages/activity-history').then(m=>m.PersonalActivityPage),data:{title:'سجل النشاط'}},
       {path:'notifications',loadComponent:()=>import('@ydm/shared/pages/notifications').then(m=>m.NotificationsPage),data:{title:'الإشعارات والتذكيرات'}},
-      {path:'request-history',loadComponent:()=>import('@ydm/shared/pages/requests').then(m=>m.RequestsPage),data:{title:'سجل الطلبات'}},
+      {path:'requests',loadComponent:()=>import('@ydm/shared/pages/requests').then(m=>m.RequestsPage),data:{title:'طلباتي'}},
+      {path:'request-history',redirectTo:requestsRedirect('',{kind:'all',status:'',mine:'true'}),pathMatch:'full'},
       {path:'tasks',loadComponent:()=>import('@ydm/shared/pages/tasks').then(m=>m.TasksPage),data:{title:'مهام المتابعة'}},
       {path:'report-suite',loadComponent:()=>import('@ydm/shared/pages/reports').then(m=>m.ReportSuitePage),data:{title:'التقارير الشاملة'}},
       { path: 'dashboard', loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage), data: { title: 'لوحة التحكم' } },

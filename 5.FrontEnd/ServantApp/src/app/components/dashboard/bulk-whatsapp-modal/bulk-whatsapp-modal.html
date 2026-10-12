@@ -2,8 +2,8 @@
   <div class="bulk-whatsapp-modal-content glass-card" (click)="$event.stopPropagation()">
     <h3 class="bulk-whatsapp-title">إرسال واتساب جماعي</h3>
     @if (step === 1) {
-      <label class="bulk-whatsapp-label">نص الرسالة</label>
-      <textarea [(ngModel)]="message" class="form-input bulk-whatsapp-textarea" placeholder="اكتب الرسالة..." rows="4"></textarea>
+      <label class="bulk-whatsapp-label" for="ydm-bulk-whatsapp-modal-1">نص الرسالة</label>
+      <textarea id="ydm-bulk-whatsapp-modal-1" [(ngModel)]="message" class="form-input bulk-whatsapp-textarea" placeholder="اكتب الرسالة..." rows="4"></textarea>
       <div class="bulk-whatsapp-footer">
         <button type="button" class="btn-outline" (click)="onClose()">إلغاء</button>
         <button type="button" class="btn-primary" (click)="nextStep()">التالي</button>

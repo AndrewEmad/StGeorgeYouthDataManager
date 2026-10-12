@@ -79,6 +79,7 @@ public static class DependencyInjectionExtensions
             .AddTransient<IStudentRemovalRequestService, StudentRemovalRequestService>()
             .AddTransient<IStudentAssignmentRequestService, StudentAssignmentRequestService>()
             .AddTransient<IStudentAdditionRequestService, StudentAdditionRequestService>()
+            .AddTransient<IMeetingService, MeetingService>()
             .AddTransient<IAttendanceService, AttendanceService>();
     }
 
@@ -121,6 +122,7 @@ public static class DependencyInjectionExtensions
         IConfiguration configuration)
     {
         return services
+            .AddTransient<IFollowUpTaskService, FollowUpTaskService>()
             .AddTransient<IFollowUpCommandsService, FollowUpCommandsService>();
     }
 
@@ -142,16 +144,11 @@ public static class DependencyInjectionExtensions
     public static IServiceCollection AddNotificationServices(this IServiceCollection services)
     {
         services.AddTransient<IFcmService, FcmService>();
+        services.AddTransient<IPushTransport, FcmService>();
         services.AddScoped<INotificationService, NotificationService>();
 
         // Domain Event Handlers
-        services.AddScoped<IDomainEventHandler<StudentAdditionRequestCreatedEvent>, StudentAdditionRequestCreatedEventHandler>();
-        services.AddScoped<IDomainEventHandler<StudentAssignmentRequestCreatedEvent>, StudentAssignmentRequestCreatedEventHandler>();
 
-        services.AddScoped<IDomainEventHandler<StudentAdditionRequestApprovedEvent>, StudentAdditionRequestApprovedEventHandler>();
-        services.AddScoped<IDomainEventHandler<StudentAdditionRequestRejectedEvent>, StudentAdditionRequestRejectedEventHandler>();
-        services.AddScoped<IDomainEventHandler<StudentAssignmentRequestApprovedEvent>, StudentAssignmentRequestApprovedEventHandler>();
-        services.AddScoped<IDomainEventHandler<StudentAssignmentRequestRejectedEvent>, StudentAssignmentRequestRejectedEventHandler>();
 
         return services;
     }

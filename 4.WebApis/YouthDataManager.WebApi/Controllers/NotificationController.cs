@@ -37,6 +37,13 @@ public class NotificationController : ControllerBase
         return Ok(result.Data);
     }
 
+    [HttpPut("schedules/{id:guid}")]
+    public async Task<IActionResult> UpdateSchedule(Guid id,UpdateScheduleRequest request)
+    {
+        var result=await _notificationService.UpdateSchedule(GetUserId(),id,request);
+        return result.Status==ServiceResultStatus.Success ? Ok(result.Data) : BadRequest(result);
+    }
+
     [HttpDelete("schedules/{id}")]
     public async Task<IActionResult> DeleteSchedule(Guid id)
     {

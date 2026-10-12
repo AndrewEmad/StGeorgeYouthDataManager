@@ -4,5 +4,6 @@ public enum AssignmentRequestStatus
 {
     Pending,
     Approved,
-    Rejected
+    Rejected,
+    Cancelled
 }

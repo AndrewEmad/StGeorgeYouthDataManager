@@ -35,7 +35,7 @@ public class StudentRemovalRequestsController : ControllerBase
 
         var result = await _service.CreateRequest(dto.StudentId, userId, (RemovalRequestType)dto.RemovalType);
         if (result.Status != ServiceResultStatus.Success)
-            return BadRequest(result);
+            return result.Errors.Any(e=>e.Code=="Conflict") ? Conflict(result) : BadRequest(result);
         return Ok(new { id = result.Data });
     }
 
@@ -48,7 +48,7 @@ public class StudentRemovalRequestsController : ControllerBase
 
         var result = await _service.GetMyRequests(userId);
         if (result.Status != ServiceResultStatus.Success)
-            return BadRequest(result);
+            return result.Errors.Any(e=>e.Code=="Conflict") ? Conflict(result) : BadRequest(result);
         return Ok(result.Data);
     }
 
@@ -61,7 +61,7 @@ public class StudentRemovalRequestsController : ControllerBase
 
         var result = await _service.GetPendingForStudentAndUser(studentId, userId);
         if (result.Status != ServiceResultStatus.Success)
-            return BadRequest(result);
+            return result.Errors.Any(e=>e.Code=="Conflict") ? Conflict(result) : BadRequest(result);
         return Ok(result.Data);
     }
 
@@ -71,7 +71,7 @@ public class StudentRemovalRequestsController : ControllerBase
     {
         var result = await _service.GetPendingForAdmin();
         if (result.Status != ServiceResultStatus.Success)
-            return BadRequest(result);
+            return result.Errors.Any(e=>e.Code=="Conflict") ? Conflict(result) : BadRequest(result);
         return Ok(result.Data);
     }
 
@@ -85,7 +85,7 @@ public class StudentRemovalRequestsController : ControllerBase
 
         var result = await _service.Approve(id, adminUserId);
         if (result.Status != ServiceResultStatus.Success)
-            return BadRequest(result);
+            return result.Errors.Any(e=>e.Code=="Conflict") ? Conflict(result) : BadRequest(result);
         return Ok();
     }
 
@@ -99,7 +99,7 @@ public class StudentRemovalRequestsController : ControllerBase
 
         var result = await _service.Reject(id, adminUserId);
         if (result.Status != ServiceResultStatus.Success)
-            return BadRequest(result);
+            return result.Errors.Any(e=>e.Code=="Conflict") ? Conflict(result) : BadRequest(result);
         return Ok();
     }
 }

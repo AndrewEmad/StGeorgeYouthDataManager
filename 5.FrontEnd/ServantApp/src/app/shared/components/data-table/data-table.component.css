@@ -35,7 +35,7 @@
   font-weight: 600;
   font-size: 0.9rem;
   color: var(--text-muted, #94a3b8);
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .data-table th.sortable {
@@ -105,7 +105,7 @@
   height: 40px;
   border: 3px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
-  border-top-color: var(--primary, #6366f1);
+  border-top-color: var(--primary, var(--primary));
   animation: table-spin 0.8s linear infinite;
 }
 

@@ -8,6 +8,8 @@
     <app-loader />
   }
 
+  @if(loadError){<p class="ydm-notice text-error" role="alert">{{loadError}} <button type="button" class="btn-outline" (click)="ngOnInit()">إعادة المحاولة</button></p>}
+  @if(performanceError){<p class="ydm-notice text-error" role="alert">{{performanceError}}</p>}
   @if (!loading && servant; as s) {
   <div class="detail-content">
     <app-detail-section title="بيانات الخادم">
@@ -45,7 +47,7 @@
       <p class="priest-notice muted small">لا يُخصص للاب الكاهن مخدومين ولا يسجل مكالمات أو زيارات — عرض البيانات والإدارة فقط.</p>
       }
       <button type="button" class="btn-secondary mt-2" (click)="openChangePassword()">
-        <span class="material-icons">lock_reset</span>
+        <span class="material-icons" aria-hidden="true">lock_reset</span>
         تغيير كلمة المرور
       </button>
     </app-detail-section>
@@ -60,75 +62,7 @@
     </app-detail-section>
     }
 
-    @if (s.role !== 'Priest') {
-    <app-detail-section title="سجل المتابعة الهاتفية">
-      <div class="table-wrap">
-        @if (calls.length) {
-        <table>
-          <thead>
-            <tr>
-              <th>المخدوم</th>
-              <th>التاريخ</th>
-              <th>الحالة</th>
-              <th>ملاحظات</th>
-              <th>متابعة قادمة</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (c of calls; track c.id) {
-            <tr>
-              <td>
-                <a [routerLink]="['/dashboard/students', c.studentId]" class="student-link">{{ c.studentName || '—' }}</a>
-              </td>
-              <td>{{ c.callDate | dateFormat }}</td>
-              <td>{{ c.callStatus | callStatus }}</td>
-              <td>{{ c.notes || '—' }}</td>
-              <td>{{ c.nextFollowUpDate | dateFormat }}</td>
-            </tr>
-            }
-          </tbody>
-        </table>
-        } @else {
-        <p class="muted">لا توجد مكالمات مسجلة</p>
-        }
-      </div>
-    </app-detail-section>
-
-    <app-detail-section title="سجل الزيارات المنزلية">
-      <div class="table-wrap">
-        @if (visits.length) {
-        <table>
-          <thead>
-            <tr>
-              <th>المخدوم</th>
-              <th>التاريخ</th>
-              <th>النتيجة</th>
-              <th>المرافقين</th>
-              <th>ملاحظات</th>
-              <th>زيارة قادمة</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (v of visits; track v.id) {
-            <tr>
-              <td>
-                <a [routerLink]="['/dashboard/students', v.studentId]" class="student-link">{{ v.studentName || '—' }}</a>
-              </td>
-              <td>{{ v.visitDate | dateFormat }}</td>
-              <td>{{ v.visitOutcome | visitOutcome }}</td>
-              <td>{{ formatParticipants(v.participants) }}</td>
-              <td>{{ v.notes || '—' }}</td>
-              <td>{{ v.nextVisitDate | dateFormat }}</td>
-            </tr>
-            }
-          </tbody>
-        </table>
-        } @else {
-        <p class="muted">لا توجد زيارات مسجلة</p>
-        }
-      </div>
-    </app-detail-section>
-    }
+    <ydm-activity-history [actorId]="s.id"/>
   </div>
   }
 
@@ -139,25 +73,25 @@
 
 <app-modal
   title="تغيير كلمة المرور"
-  [visible]="showPasswordModal"
+  [visible]="showPasswordModal" [busy]="passwordLoading"
   (close)="closeChangePassword()"
 >
   <div body>
     <p class="muted small">سيُطلب من الخادم اختيار كلمة مرور جديدة عند أول دخول له.</p>
     <div class="form-group">
-      <label>كلمة المرور الجديدة</label>
-      <input type="password" [(ngModel)]="newPassword" class="form-input" placeholder="6 أحرف على الأقل" />
+      <label>كلمة المرور الجديدة
+      <input type="password" [(ngModel)]="newPassword" class="form-input" placeholder="6 أحرف على الأقل" [disabled]="passwordLoading" autocomplete="new-password" /></label>
     </div>
     <div class="form-group">
-      <label>تأكيد كلمة المرور</label>
-      <input type="password" [(ngModel)]="confirmPassword" class="form-input" placeholder="تأكيد كلمة المرور" />
+      <label>تأكيد كلمة المرور
+      <input type="password" [(ngModel)]="confirmPassword" class="form-input" placeholder="تأكيد كلمة المرور" [disabled]="passwordLoading" autocomplete="new-password" /></label>
     </div>
     @if (passwordError) {
-      <p class="error-msg">{{ passwordError }}</p>
+      <p class="error-msg" role="alert">{{ passwordError }}</p>
     }
   </div>
   <div actions>
-    <button type="button" class="btn-secondary" (click)="closeChangePassword()">إلغاء</button>
+    <button type="button" class="btn-secondary" (click)="closeChangePassword()" [disabled]="passwordLoading">إلغاء</button>
     <button type="button" class="btn-primary" (click)="submitChangePassword()" [disabled]="passwordLoading">
       {{ passwordLoading ? 'جاري الحفظ...' : 'تعيين كلمة المرور' }}
     </button>

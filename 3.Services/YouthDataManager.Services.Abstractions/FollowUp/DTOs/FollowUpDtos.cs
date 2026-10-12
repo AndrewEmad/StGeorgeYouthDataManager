@@ -40,7 +40,9 @@ public record UpdateHomeVisitRequest(
     YouthDataManager.Domain.Enums.VisitOutcome VisitOutcome,
     string Notes,
     DateTime? NextVisitDate,
-    List<Guid>? ParticipantServantIds
+    List<Guid>? ParticipantServantIds,
+    string? Reason = null,
+    string? Version = null
 );
 
 public record CreateHomeVisitRequest(
@@ -51,3 +53,6 @@ public record CreateHomeVisitRequest(
     DateTime? NextVisitDate,
     List<Guid>? ParticipantServantIds
 );
+
+public record UpdateCallLogRequest(DateTime CallDate, YouthDataManager.Domain.Enums.CallStatus CallStatus, string Notes, DateTime? NextFollowUpDate, string Reason, string? Version = null);
+public record VoidActivityRequest(string Reason, string Version);

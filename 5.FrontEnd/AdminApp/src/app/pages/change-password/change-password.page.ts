@@ -23,6 +23,7 @@ export class ChangePasswordPage {
   loading = signal(false);
 
   onSubmit(): void {
+    if(this.loading())return;
     this.error.set('');
     const current = this.currentPassword();
     const newP = this.newPassword();
@@ -43,7 +44,7 @@ export class ChangePasswordPage {
     this.authService.changePassword(current, newP).subscribe({
       next: (res) => {
         this.authService.setUserAfterPasswordChange(res);
-        this.router.navigate(res.requiresProfileCompletion ? ['/complete-profile'] : ['/dashboard']);
+        this.loading.set(false);this.authService.navigateAfterAuthentication();
       },
       error: (err: { error?: { message?: string } }) => {
         this.error.set(err.error?.message || 'فشل تغيير كلمة المرور. تحقق من كلمة المرور الحالية.');

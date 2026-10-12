@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Identity;
+using YouthDataManager.Shared.Service.Abstractions;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,13 +20,14 @@ namespace YouthDataManager.Infrastructure.DependencyInjection;
 public static class DependencyInjectionExtensions
 {
     public static IServiceCollection AddInfrastructure(
-        this IServiceCollection services, 
+        this IServiceCollection services,
         IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("MainDatabase");
 
-        services.AddDbContext<AppDbContext>(options => 
-            options.UseSqlServer(connectionString));
+        services.AddSingleton<DatabaseTelemetry>();
+        services.AddDbContext<AppDbContext>((provider,options) =>
+            options.UseSqlServer(new SqlConnectionStringBuilder(connectionString) { MultipleActiveResultSets = false }.ConnectionString).AddInterceptors(provider.GetRequiredService<DatabaseTelemetry>()));
 
         services
             .AddIdentityCore<ApplicationUser>()
@@ -34,11 +37,14 @@ public static class DependencyInjectionExtensions
 
         return services
             // Unit of Work
+            .AddScoped<IApplicationStore,ApplicationStore>()
+            .AddScoped<NotificationDispatcher>()
+            .AddScoped<LegacyBackfill>()
             .AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<AppDbContext>())
-            
+
             // Seeders
             .AddScoped<DatabaseSeeder>()
-            
+
             // Tracking repositories
             .AddTransient<IStudentRepository, StudentRepository>()
             .AddTransient<ICallLogRepository, CallLogRepository>()
@@ -49,7 +55,7 @@ public static class DependencyInjectionExtensions
             .AddTransient<IStudentAttendanceRepository, StudentAttendanceRepository>()
             .AddTransient<IServantAttendanceRepository, ServantAttendanceRepository>()
             .AddTransient<IStudentEditLogRepository, StudentEditLogRepository>()
-            
+
             // NoTracking repositories
             .AddTransient<IStudentNoTrackingRepository, StudentNoTrackingRepository>()
             .AddTransient<ICallLogNoTrackingRepository, CallLogNoTrackingRepository>()

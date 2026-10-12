@@ -14,7 +14,7 @@
       (filterChange)="filterChange.emit($event)"
     />
   }
-  <section class="report-section">
+  <section class="report-section">@if(error()){<p class="ydm-notice text-error" role="alert">{{error()}}</p><button type="button" class="btn-outline" (click)="retry.emit()">إعادة المحاولة</button>}@else{
     <admin-data-table
       [columns]="columns()"
       [data]="data()"
@@ -33,5 +33,5 @@
       (sortChange)="sortChange.emit($event)"
       (rowClick)="rowClick.emit($event)"
     />
-  </section>
+  }</section>
 </div>

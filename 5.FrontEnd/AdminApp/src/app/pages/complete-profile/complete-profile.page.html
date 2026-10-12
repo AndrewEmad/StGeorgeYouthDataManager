@@ -1,7 +1,7 @@
 <div class="complete-profile-container">
   <app-card class="login-card animate-slide">
     <div class="login-header">
-      <span class="material-icons logo-icon">person</span>
+      <span class="material-icons logo-icon" aria-hidden="true">person</span>
       <h1>إكمال الملف الشخصي</h1>
       <p class="text-muted">يرجى تعبئة البيانات المطلوبة للمتابعة</p>
     </div>
@@ -19,11 +19,11 @@
           <input type="tel" [ngModel]="phone()" (ngModelChange)="phone.set($event)" name="phone" class="form-input" placeholder="رقم التليفون" required />
         </app-form-field>
         <app-form-field label="العنوان">
-          <textarea [ngModel]="address()" (ngModelChange)="address.set($event)" name="address" class="form-input form-textarea" placeholder="العنوان" rows="3" required></textarea>
+          <textarea [ngModel]="address()" (ngModelChange)="address.set($event)" name="address" class="form-input form-textarea" placeholder="العنوان" rows="3" [required]="addressRequired()"></textarea>
         </app-form-field>
         @if (error()) {
           <div class="error-msg">
-            <span class="material-icons">error_outline</span>
+            <span class="material-icons" aria-hidden="true">error_outline</span>
             {{ error() }}
           </div>
         }

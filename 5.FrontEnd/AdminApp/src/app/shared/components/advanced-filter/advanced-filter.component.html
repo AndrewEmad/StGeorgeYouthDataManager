@@ -6,6 +6,7 @@
   <div class="filters-grid">
     @for (field of config(); track trackByKey($index, field)) {
       @switch (field.type) {
+        @case ('resource'){<ydm-resource-picker [kind]="field.resourceKind || 'report-actors'" [label]="field.label" [value]="getValue(field.key)" emptyLabel="الكل" [allowEmpty]="true" (valueChange)="setValue(field.key,$event)"/>}
         @case ('text') {
           <div class="filter-field">
             <label [for]="'filter-' + field.key" class="field-label">{{ field.label }}</label>
@@ -53,13 +54,13 @@
             <input
               type="date"
               class="form-input"
-              [value]="getValue(field.key + '_from') ?? ''"
+              [value]="getValue(field.key + '_from') ?? ''" [attr.aria-label]="field.label + '، من تاريخ'"
               (input)="setValue(field.key + '_from', $any($event.target).value || null)"
             />
             <input
               type="date"
               class="form-input"
-              [value]="getValue(field.key + '_to') ?? ''"
+              [value]="getValue(field.key + '_to') ?? ''" [attr.aria-label]="field.label + '، إلى تاريخ'"
               (input)="setValue(field.key + '_to', $any($event.target).value || null)"
             />
           </div>

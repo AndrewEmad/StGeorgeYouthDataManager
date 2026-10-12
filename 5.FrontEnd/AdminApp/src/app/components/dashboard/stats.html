@@ -9,7 +9,7 @@
     <section class="priest-card-section">
       <div class="glass-card stat-item priest-card row-clickable" (click)="viewServant(priest()!.id!)">
         <div class="s-info-container">
-          <span class="material-icons">person</span>
+          <span class="material-icons" aria-hidden="true">person</span>
           <div class="s-info">
             <h3>الاب الكاهن المسئول</h3>
             <p>{{ priest()!.fullName }}</p>
@@ -25,7 +25,8 @@
     </section>
   }
 
-  @if (!loading()) {
+  @if (error()) {<p class="ydm-notice text-error" role="alert">{{error()}} <button class="btn-outline" type="button" (click)="loadStats()">إعادة المحاولة</button></p>}
+  @if (!loading() && !error()) {
     <div class="stats-grid">
       <app-stat-item
         icon="people"
@@ -65,6 +66,10 @@
         label="زيارات هذا الأسبوع"
         variant="rose"
       />
+      <app-stat-item icon="assignment_late" [value]="statValue('studentsNeedingFollowUp')" label="طلاب لديهم مهام مستحقة" [routerLink]="['/dashboard/tasks']" />
+      <app-stat-item icon="phone_missed" [value]="statValue('studentsNotContacted')" label="طلاب لم تجرِ محاولة التواصل معهم" [routerLink]="['/dashboard/report-suite']" />
+      <app-stat-item icon="person_add" [value]="statValue('unassignedStudents')" label="طلاب غير مسندين" [routerLink]="['/dashboard/students']" />
+      <app-stat-item icon="assignment_ind" [value]="statValue('unassignedTasks')" label="مهام تحتاج إسنادًا" [routerLink]="['/dashboard/tasks']" />
     </div>
 
     <section class="recent-activity">
@@ -75,7 +80,7 @@
         }
         @for (act of recentActivities(); track $index) {
           <div class="activity-item">
-            <span class="material-icons">history</span>
+            <span class="material-icons" aria-hidden="true">history</span>
             <p>{{ act.description }}</p>
             <span class="time">{{ act.date | dateFormat }}</span>
           </div>

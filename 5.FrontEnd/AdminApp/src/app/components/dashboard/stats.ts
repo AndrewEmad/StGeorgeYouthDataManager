@@ -4,6 +4,7 @@ import { ReportsService } from '../../services/reports.service';
 import { UsersService } from '../../services/users.service';
 import { User } from '../../shared/models';
 import { ContentHeaderComponent, LoaderComponent, StatItemComponent, CardComponent } from '../common/common';
+import { apiError } from '@ydm/shared/core/api';
 import { DateFormatPipe } from '../../shared/pipes/date-format.pipe';
 
 @Component({
@@ -21,11 +22,12 @@ export class StatsComponent implements OnInit {
 
   stats = signal<Record<string, unknown> | null>(null);
   loading = signal(true);
+  error = signal('');
   priest = signal<User | null>(null);
 
-  statValue(key: string): number {
+  statValue(key: string): number | string {
     const v = this.stats()?.[key];
-    return typeof v === 'number' ? v : Number(v) || 0;
+    return typeof v === 'number' && Number.isFinite(v) ? v : '—';
   }
 
   recentActivities(): { description: string; date: string }[] {
@@ -38,16 +40,21 @@ export class StatsComponent implements OnInit {
     this.router.navigate(['/dashboard/servants', servantId]);
   }
 
-  ngOnInit(): void {
+  loadStats(): void {
+    if(this.loading() && this.stats())return;this.loading.set(true);this.error.set('');this.stats.set(null);
     this.reportsService.getManagerDashboard().subscribe({
       next: (data: Record<string, unknown>) => {
         this.stats.set(data);
         this.loading.set(false);
       },
-      error: () => {
-        this.loading.set(false);
+      error: (e) => {
+        this.error.set(apiError(e));this.loading.set(false);
       },
     });
+  }
+
+  ngOnInit(): void {
+    this.loadStats();
     this.usersService.getPaged({ page: 1, pageSize: 1, role: 'Priest' }).subscribe({
       next: (res) => {
         this.priest.set(res.items?.length ? res.items[0] ?? null : null);

@@ -1,3 +1,6 @@
+import { apiError } from '@ydm/shared/core/api';
+import { dateOnly } from '@ydm/shared/core/utils';
+import { ResourcePickerComponent } from '@ydm/shared/ui/resource-picker';
 import {
   AfterViewInit,
   Component,
@@ -9,9 +12,10 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { ActivatedRoute, Router,RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import {
+  ModalComponent,
   CardComponent,
   ContentHeaderComponent,
   FiltersBarComponent,
@@ -20,7 +24,7 @@ import {
   PhotoCropModalComponent,
   ProfilePhotoInputComponent,
 } from '../../../components/common/common';
-import { StudentCommandsService } from '../../../services/student-commands.service';
+import { StudentCommandsService, CsvStudentRow } from '../../../services/student-commands.service';
 import { StudentQueriesService } from '../../../services/student-queries.service';
 import { UsersService } from '../../../services/users.service';
 import type { DataTableColumn } from '../../../shared/components/data-table/data-table-column';
@@ -43,9 +47,11 @@ interface StudentListItem {
   selector: 'app-student-list-admin',
   standalone: true,
   imports: [
-    FormsModule,
+    FormsModule,RouterLink,
+    ResourcePickerComponent,
     ContentHeaderComponent,
-    CardComponent,
+    ModalComponent,
+  CardComponent,
     FiltersBarComponent,
     FormFieldComponent,
     LoaderComponent,
@@ -60,8 +66,12 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
   students: StudentListItem[] = [];
   totalCount = 0;
   page = 1;
-  pageSize = 10;
-  pageSizeOptions = [5, 10, 20, 50];
+  pageSize = 25;
+  pageSizeOptions = [10,25,50,100];
+  listError="";
+  private listRequest?:Subscription;
+  private searchTimer?:ReturnType<typeof setTimeout>;
+  private scopeKey="";
   servants: User[] = [];
   loading = true;
   selectedStudent: any = null;
@@ -75,9 +85,17 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
   addSaving = false;
   showEditModal = false;
   editingStudent: any = null;
+  assignSaving=false;
+  formMessage="";
+  photoRetry:{id:string;file:File}|null=null;
+  photoRetryBusy=false;
+  birthMonths=Array.from({length:12},(_,i)=>i+1);
   editForm: {
     fullName: string;
     phone: string;
+    secondaryPhone:string|null;
+    birthMonth:number|null;
+    notes:string|null;
     address: string | null;
     area: string | null;
     college: string | null;
@@ -89,6 +107,7 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
   } = {
     fullName: '',
     phone: '',
+    secondaryPhone:null,birthMonth:null,notes:null,
     address: null,
     area: null,
     college: null,
@@ -102,6 +121,9 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
   editStudentPhotoPreviewUrl: string | null = null;
   editStudentExistingPhotoUrl: string | null = null;
   editSaving = false;
+  csvPreview: CsvStudentRow[] | null = null;
+  csvOperationId = "";csvReviewed=false;csvReviewError="";
+  private csvReader?: FileReader;
   showBulkUploadModal = false;
   uploadingCsv = false;
   uploadResult: { created: number; errors: { row: number; message: string }[] } | null = null;
@@ -209,6 +231,8 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
   }
 
   loadData() {
+    this.listRequest?.unsubscribe();this.loading=true;this.listError="";
+    const scope=JSON.stringify(this.filters);if(this.scopeKey && this.scopeKey!==scope && this.selectedStudentIds.size){this.selectedStudentIds.clear();this.formMessage="تغير نطاق البحث؛ تم مسح الاختيارات.";}this.scopeKey=scope;
     const genderNum = this.filters.gender === '' ? null : Number(this.filters.gender);
     const hasServant =
       this.filters.hasServant === 'yes'
@@ -225,7 +249,7 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
             const n = +this.filters.birthMonth;
             return n >= 1 && n <= 12 ? n : null;
           })();
-    this.studentQueries
+    this.listRequest=this.studentQueries
       .getPaged({
         page: this.page,
         pageSize: this.pageSize,
@@ -246,7 +270,7 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
           this.page = res.page;
           this.loading = false;
         },
-        error: () => (this.loading = false),
+        error: (e) => {this.students=[];this.loading=false;this.listError=apiError(e);},
       });
   }
 
@@ -261,13 +285,11 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
         this.academicYearOptions = years || [];
       },
     });
-    this.usersService.getAll().subscribe((data) => {
-      this.servants = data
-        .filter((u) => u.role !== 'Priest' && String(u.role) !== 'Admin')
-        .sort((a, b) => (a.fullName || '').localeCompare(b.fullName || '', 'ar'));
-    });
+
   }
 
+  searchChanged(){if(this.searchTimer)clearTimeout(this.searchTimer);this.searchTimer=setTimeout(()=>this.applyFilters(),300);}
+  ngOnDestroy(){this.listRequest?.unsubscribe();if(this.searchTimer)clearTimeout(this.searchTimer);this.csvReader?.abort();}
   applyFilters() {
     this.page = 1;
     this.loadData();
@@ -346,47 +368,43 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
     this.studentCommands.downloadCsvTemplate();
   }
 
-  onCsvFileSelected(event: Event) {
-    this.showBulkUploadModal = false;
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    input.value = '';
+  async onCsvFileSelected(event: Event) {
+    if (this.uploadingCsv) return;
+    const input = event.target as HTMLInputElement; const file = input.files?.[0]; input.value = '';
     if (!file) return;
+    this.showBulkUploadModal = false; this.uploadingCsv = true; this.uploadResult = null;
+    if (file.size > 2_000_000) { this.csvError('الملف أكبر من الحد المسموح (2 ميجابايت)'); return; }
+    try {
+      const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', await file.arrayBuffer()))].map(b => b.toString(16).padStart(2, '0')).join('');
+      const account = localStorage.getItem('ydm.adminapp.user') || '';
+      const key = `ydm.adminapp.import.${JSON.parse(account || '{}').userId || ''}.${hash}`;
+      this.csvOperationId = sessionStorage.getItem(key) || crypto.randomUUID(); sessionStorage.setItem(key, this.csvOperationId);
+      const reader = this.csvReader = new FileReader();
+      reader.onerror = () => this.csvError('تعذر قراءة الملف. أعد اختياره.');
+      reader.onabort = () => { this.uploadingCsv = false; this.csvPreview = null; };
+      reader.onload = () => {
+        try { this.csvPreview = this.studentCommands.previewCsv(String(reader.result || '')); this.uploadingCsv = false;this.csvReviewed=false;this.reviewCsv(); if (!this.csvPreview.length) this.csvError('الملف لا يحتوي على صفوف بيانات.'); }
+        catch (e) { this.csvError(e instanceof Error ? e.message : 'ملف CSV غير صالح'); }
+      };
+      reader.readAsText(file, 'UTF-8');
+    } catch { this.csvError('تعذر قراءة الملف. أعد اختياره.'); }
+  }
+  private csvError(message: string) { this.uploadingCsv = false; this.uploadResult = { created: 0, errors: [{ row: 0, message }] }; }
+  cancelCsv() { this.csvReader?.abort(); this.csvPreview = null; }
+  reviewCsv(){if(!this.csvPreview?.length)return;this.uploadingCsv=true;this.csvReviewError='';this.studentCommands.reviewImport(this.csvOperationId,this.csvPreview).subscribe({next:rows=>{this.uploadingCsv=false;this.csvReviewed=true;for(const row of this.csvPreview || []){const server=rows.find(r=>r.row===row.row);if(server){row.candidates=server.candidates;row.error ||= server.error || undefined;}}},error:()=>{this.uploadingCsv=false;this.csvReviewed=false;this.csvReviewError='تعذر مراجعة الأسماء المتشابهة. احتفظنا بالمعاينة؛ أعد المحاولة.';}});}
+  get csvReady(){return this.csvReviewed && !!this.validCsvCount && !this.csvPreview?.some(r=>!r.error && r.candidates?.length && !r.duplicateReviewed);}
+  get validCsvCount() { return this.csvPreview?.filter(r => !r.error).length || 0; }
+  confirmCsv() {
+    if (this.uploadingCsv || !this.csvPreview || !this.csvReady) return;
     this.uploadingCsv = true;
-    this.uploadResult = null;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const text = (reader.result as string) || '';
-      const items = this.studentCommands.parseCsvToStudents(text);
-      if (items.length === 0) {
-        this.uploadingCsv = false;
-        this.uploadResult = {
-          created: 0,
-          errors: [
-            { row: 0, message: 'لم يتم العثور على صفوف صالحة (الاسم ورقم التليفون مطلوبان)' },
-          ],
-        };
-        return;
-      }
-      this.studentCommands.bulkImport(items).subscribe({
-        next: (res) => {
-          this.uploadingCsv = false;
-          this.uploadResult = { created: res.created, errors: res.errors || [] };
-          this.loadData();
-        },
-        error: (err) => {
-          this.uploadingCsv = false;
-          this.uploadResult = {
-            created: 0,
-            errors: [{ row: 0, message: err.error?.message || err.message || 'خطأ في الاستيراد' }],
-          };
-        },
-      });
-    };
-    reader.readAsText(file, 'UTF-8');
+    this.studentCommands.importRows(this.csvOperationId, this.csvPreview).subscribe({
+      next: result => { this.uploadingCsv = false; this.uploadResult = result; this.csvPreview = null; this.loadData(); },
+      error: err => { this.uploadingCsv = false; this.uploadResult = { created: 0, errors: [{ row: 0, message: err.error?.message || 'تعذر إتمام الاستيراد. أعد المحاولة؛ الصفوف المحفوظة لن تتكرر.' }] }; }
+    });
   }
 
   openAddModal() {
+    this.formMessage="";
     this.newStudent = {
       fullName: '',
       phone: '',
@@ -441,8 +459,10 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
   }
 
   onCreateStudent() {
+    if(this.addSaving)return;
+    this.formMessage="";
     if (!this.newStudent.fullName?.trim() || !this.newStudent.phone?.trim()) {
-      alert('الاسم ورقم التليفون مطلوبان');
+      this.formMessage='الاسم ورقم التليفون مطلوبان';
       return;
     }
     this.addSaving = true;
@@ -456,15 +476,15 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
         if (this.newStudentPhoto) {
           this.studentCommands.uploadPhoto(id, this.newStudentPhoto).subscribe({
             next: () => this.finishCreateStudent(),
-            error: () => this.finishCreateStudent(),
+            error: () => {this.photoRetry={id,file:this.newStudentPhoto!};this.formMessage="تم حفظ الطالب، لكن تعذر رفع الصورة. أعد رفع الصورة فقط.";this.finishCreateStudent();},
           });
         } else {
           this.finishCreateStudent();
         }
       },
-      error: () => {
+      error: (err) => {
         this.addSaving = false;
-        alert('خطأ في إضافة المخدوم');
+        this.formMessage=apiError(err);
       },
     });
   }
@@ -496,9 +516,11 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
     this.selectedStudentIds = new Set(this.selectedStudentIds);
   }
 
+  clearSelection() { if(this.bulkAssignSaving)return;this.selectedStudentIds=new Set<string>();this.formMessage='تم مسح الاختيارات عبر الصفحات.'; }
+
   selectAllFiltered() {
     const all = this.students.every((s: any) => this.selectedStudentIds.has(s.id));
-    if (all) this.selectedStudentIds.clear();
+    if (all) this.students.forEach(s => this.selectedStudentIds.delete(s.id));
     else this.students.forEach((s: any) => this.selectedStudentIds.add(s.id));
     this.selectedStudentIds = new Set(this.selectedStudentIds);
   }
@@ -516,34 +538,32 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
   }
 
   onBulkAssign() {
-    if (!this.bulkTargetServantId || this.selectedStudentIds.size === 0) return;
+    if (this.bulkAssignSaving || !this.bulkTargetServantId || this.selectedStudentIds.size === 0) return;
     this.bulkAssignSaving = true;
     const ids = Array.from(this.selectedStudentIds);
-    const requests = ids.map((id) =>
-      this.studentCommands.assignToServant(id, this.bulkTargetServantId),
-    );
-    forkJoin(requests).subscribe({
-      next: () => {
+    this.studentCommands.bulkAssign(ids, this.bulkTargetServantId).subscribe({
+      next: result => {
         this.bulkAssignSaving = false;
-        this.showBulkAssignModal = false;
-        this.selectedStudentIds.clear();
-        this.selectedStudentIds = new Set(this.selectedStudentIds);
+        this.selectedStudentIds = new Set(result.outcomes.filter(o => !o.success).map(o => o.studentId));
+        this.uploadResult = { created: result.outcomes.filter(o => o.success).length, errors: result.outcomes.filter(o => !o.success).map((o, i) => ({ row: i + 1, message: o.error || 'تعذر التخصيص؛ الاختيار محفوظ لإعادة المحاولة' })) };
+        if (!this.selectedStudentIds.size) this.showBulkAssignModal = false;
         this.loadData();
       },
-      error: () => {
-        this.bulkAssignSaving = false;
-        alert('حدث خطأ في تخصيص بعض المخدومين');
-      },
+      error: () => { this.bulkAssignSaving = false; this.uploadResult = { created: 0, errors: [{ row: 0, message: 'تعذر التخصيص. الاختيارات محفوظة لإعادة المحاولة.' }] }; }
     });
   }
+  get pageSelectionIndeterminate() { return this.students.some(s => this.selectedStudentIds.has(s.id)) && !this.allFilteredSelected; }
+
 
   openEdit(s: any) {
+    this.formMessage="";
     this.studentQueries.getById(s.id).subscribe({
       next: (st) => {
         this.editingStudent = st;
         this.editForm = {
           fullName: st.fullName || '',
           phone: st.phone || '',
+          secondaryPhone:st.secondaryPhone ?? null,birthMonth:st.birthMonth ?? null,notes:st.notes ?? null,
           address: st.address ?? null,
           area: st.area ?? null,
           college: st.college ?? null,
@@ -551,7 +571,7 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
           confessionFather: st.confessionFather ?? null,
           gender: st.gender ?? 0,
           servantId: st.servantId ?? null,
-          birthDate: st.birthDate || null,
+          birthDate: dateOnly(st.birthDate) || null,
         };
         this.editStudentPhoto = null;
         if (this.editStudentPhotoPreviewUrl) {
@@ -572,7 +592,7 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
         }
         this.showEditModal = true;
       },
-      error: () => alert('فشل تحميل بيانات المخدوم'),
+      error: (err) => {this.formMessage=apiError(err);},
     });
   }
 
@@ -591,12 +611,14 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
   }
 
   onUpdateStudent() {
-    if (!this.editingStudent) return;
+    if (!this.editingStudent || this.editSaving || !this.editForm.fullName.trim() || !this.editForm.phone.trim()) return;
+    this.formMessage="";
     this.editSaving = true;
     const req: UpdateStudentRequest = {
       id: this.editingStudent.id,
       fullName: this.editForm.fullName.trim(),
       phone: this.editForm.phone.trim(),
+      secondaryPhone:this.editForm.secondaryPhone,notes:this.editForm.notes,birthMonth:this.editForm.birthMonth,
       address: this.editForm.address ?? null,
       area: this.editForm.area ?? null,
       college: this.editForm.college ?? null,
@@ -606,7 +628,7 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
       servantId: this.editForm.servantId ?? null,
       birthDate: this.editForm.birthDate || null,
     };
-    this.studentCommands.update(req).subscribe({
+    this.studentCommands.update(req,this.editingStudent?.version).subscribe({
       next: () => {
         if (this.editStudentPhoto) {
           this.studentCommands
@@ -619,6 +641,7 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
                 this.loadData();
               },
               error: () => {
+                this.photoRetry={id:this.editingStudent.id,file:this.editStudentPhoto!};this.formMessage="تم حفظ التعديلات، لكن تعذر رفع الصورة. أعد رفع الصورة فقط.";
                 this.editSaving = false;
                 this.closeEdit();
                 this.loadData();
@@ -632,54 +655,22 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
       },
       error: (err: any) => {
         this.editSaving = false;
-        alert('خطأ في التحديث: ' + (err.error?.message || err.message));
+        this.formMessage=apiError(err);
       },
     });
   }
 
-  deleteStudent(s: any) {
-    if (!confirm(`حذف المخدوم «${s.fullName}»؟ لا يمكن التراجع.`)) return;
-    this.studentCommands.delete(s.id).subscribe({
-      next: () => {
-        this.loadData();
-      },
-      error: (err: any) => alert('خطأ في الحذف: ' + (err.error?.message || err.message)),
-    });
-  }
+  archiveTarget:any=null;archiveReason='';archiveBusy=false;archiveError='';
+  deleteStudent(s:any){this.archiveTarget=s;this.archiveReason='';this.archiveError='';}
+  archiveStudent(){if(!this.archiveTarget || this.archiveBusy || !this.archiveReason.trim())return;this.archiveBusy=true;this.archiveError='';this.studentCommands.delete(this.archiveTarget.id,this.archiveReason,this.archiveTarget.version).subscribe({next:()=>{this.archiveBusy=false;this.selectedStudentIds.delete(this.archiveTarget.id);this.selectedStudentIds=new Set(this.selectedStudentIds);this.archiveTarget=null;this.formMessage='تمت أرشفة الطالب وإلغاء العمل المفتوح. يمكن استعادته دون إسناد.';this.loadData();},error:e=>{this.archiveBusy=false;this.archiveError=apiError(e);}});}
 
   onAssign() {
-    if (!this.targetServantId) return;
-
-    if (this.targetServantId === '_none') {
-      const req: UpdateStudentRequest = {
-        id: this.selectedStudent.id,
-        fullName: this.selectedStudent.fullName,
-        phone: this.selectedStudent.phone,
-        address: this.selectedStudent.address ?? null,
-        area: this.selectedStudent.area ?? null,
-        college: this.selectedStudent.college ?? null,
-        academicYear: this.selectedStudent.academicYear ?? null,
-        confessionFather: this.selectedStudent.confessionFather ?? null,
-        gender: this.selectedStudent.gender ?? 0,
-        servantId: null,
-        birthDate: this.selectedStudent.birthDate || null,
-      };
-      this.studentCommands.update(req).subscribe({
-        next: () => {
-          this.showAssignModal = false;
-          this.loadData();
-        },
-        error: (err) => alert('خطأ: ' + (err.error?.message || 'فشل إلغاء التخصيص')),
-      });
-      return;
-    }
-
-    this.studentCommands.assignToServant(this.selectedStudent.id, this.targetServantId).subscribe({
-      next: () => {
-        this.showAssignModal = false;
-        this.loadData();
-      },
-      error: (err) => alert('خطأ في التخصيص'),
-    });
+    if(!this.targetServantId || this.assignSaving || !this.selectedStudent)return;
+    this.assignSaving=true;this.formMessage="";
+    const request=this.targetServantId==='_none' ? this.studentCommands.unassign(this.selectedStudent.id) : this.studentCommands.assignToServant(this.selectedStudent.id,this.targetServantId);
+    request.subscribe({next:()=>{this.assignSaving=false;this.showAssignModal=false;this.formMessage="تم حفظ الإسناد.";this.loadData();},error:e=>{this.assignSaving=false;this.formMessage=apiError(e);}});
   }
+  safePicker(input:HTMLInputElement){try{input.showPicker?.();}catch{input.focus();}}
+  retryPhoto(){if(!this.photoRetry || this.photoRetryBusy)return;const retry=this.photoRetry;this.photoRetryBusy=true;this.studentCommands.uploadPhoto(retry.id,retry.file).subscribe({next:()=>{this.photoRetryBusy=false;this.photoRetry=null;this.formMessage="تم رفع الصورة بنجاح.";},error:()=>{this.photoRetryBusy=false;this.formMessage="تعذر رفع الصورة؛ بيانات الطالب محفوظة. يمكنك المحاولة مجددًا.";}});}
+
 }

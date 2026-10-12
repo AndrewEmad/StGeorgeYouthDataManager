@@ -1,0 +1,32 @@
+{
+  "name": "youth-data-manager-frontend",
+  "private": true,
+  "workspaces": [
+    "AdminApp",
+    "ServantApp",
+    "shared"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace admin-app && npm run build --workspace servant-app",
+    "test:utilities": "node --test shared/core/utils.test.mjs"
+  },
+  "devDependencies": {
+    "@angular/build": "20.3.39",
+    "@angular/cli": "20.3.39",
+    "@angular/common": "20.3.33",
+    "@angular/compiler": "20.3.33",
+    "@angular/compiler-cli": "20.3.33",
+    "@angular/core": "20.3.33",
+    "@angular/forms": "20.3.33",
+    "@angular/platform-browser": "20.3.33",
+    "@angular/router": "20.3.33",
+    "@angular/service-worker": "20.3.33",
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.64.0",
+    "rxjs": "7.8.2",
+    "typescript": "~5.9.2"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "1.14.6"
+  }
+}

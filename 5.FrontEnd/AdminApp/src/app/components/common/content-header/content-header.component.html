@@ -1,7 +1,7 @@
 <header class="content-header">
   @if (backLink()) {
     <a [routerLink]="backLink()!" class="back-link">
-      <span class="material-icons">arrow_forward</span>
+      <span class="material-icons" aria-hidden="true">arrow_forward</span>
       {{ backLabel() }}
     </a>
   }

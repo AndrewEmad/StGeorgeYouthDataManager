@@ -1,3 +1,4 @@
+import { csvDocument } from '@ydm/shared/core/utils';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -126,18 +127,9 @@ export class DataTableComponent<T extends Record<string, unknown> = Record<strin
   /** Export current data (or sliced data in client mode) to CSV. */
   exportToCsv(filename = 'export.csv'): void {
     const cols = this.columns();
-    const rows = this.mode() === 'client' ? this.sortedData() : this.data();
-    const headers = cols.map((c) => c.label);
-    const lines = [headers.join(',')];
-    for (const row of rows) {
-      const cells = cols.map((c) => {
-        const v = this.getCellValue(row as T, c.key);
-        const s = v == null ? '' : String(v);
-        return s.includes(',') || s.includes('"') ? `"${s.replace(/"/g, '""')}"` : s;
-      });
-      lines.push(cells.join(','));
-    }
-    const blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const rows = this.slicedData();
+    const csv = csvDocument(cols.map(c => c.label), rows.map(row => cols.map(c => this.getCellValue(row, c.key))));
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = filename;

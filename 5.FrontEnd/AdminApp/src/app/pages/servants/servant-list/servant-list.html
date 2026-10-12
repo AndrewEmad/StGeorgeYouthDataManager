@@ -12,15 +12,15 @@
   {{ row.lastVisitDate ? (row.lastVisitDate | dateFormat) : '—' }}
 </ng-template>
 <ng-template #rowActionsTemplate let-row>
-  <button type="button" class="btn-outline sm" (click)="openEdit(row)">تعديل</button>
-  <button type="button" class="btn-outline sm" (click)="toggleServantStatus(row)">{{ row.isActive ? 'تعطيل' : 'تفعيل' }}</button>
-  <button type="button" class="btn-outline sm danger" (click)="deleteServant(row)">حذف</button>
+  <button type="button" class="btn-outline sm" (click)="openEdit(row)" [disabled]="loading || busy.has(row.id)">تعديل</button>
+  <button type="button" class="btn-outline sm" (click)="toggleServantStatus(row)" [disabled]="loading || busy.has(row.id)">{{ row.isActive ? 'تعطيل' : 'تفعيل' }}</button>
+  <button type="button" class="btn-outline sm danger" (click)="deleteServant(row)" [disabled]="loading || busy.has(row.id)">حذف</button>
 </ng-template>
 
 <div class="animate-slide">
   <app-content-header title="إدارة الخدام">
-    <button actions class="btn-primary" (click)="openAddModal()">
-      <span class="material-icons">person_add</span>
+    <button actions class="btn-primary" (click)="openAddModal()" [disabled]="opening">
+      <span class="material-icons" aria-hidden="true">person_add</span>
       إضافة خادم جديد
     </button>
   </app-content-header>
@@ -28,7 +28,7 @@
   <app-filters-bar [open]="showFilters" (openChange)="showFilters = !showFilters">
     <div class="filters-grid">
       <app-form-field label="بحث (اسم، اسم مستخدم)">
-        <input type="text" [(ngModel)]="filters.search" (ngModelChange)="applyFilters()" class="form-input" placeholder="بحث..." />
+        <input type="text" [(ngModel)]="filters.search" (ngModelChange)="searchChanged()" class="form-input" placeholder="بحث..." />
       </app-form-field>
       <app-form-field label="الدور">
         <select [(ngModel)]="filters.role" (ngModelChange)="applyFilters()" class="form-input">
@@ -52,8 +52,10 @@
     </div>
   </app-filters-bar>
 
+  @if(message){<p role="status" class="text-success">{{message}}</p>}
+  @if(error){<p role="alert" class="text-error">{{error}}</p><button class="btn-outline" type="button" (click)="loadServants()">إعادة المحاولة</button>}
   <app-card class="table-container">
-    @if (servantColumns().length > 0) {
+    @if (servantColumns().length > 0 && !error) {
       <admin-data-table
         [columns]="servantColumns()"
         [data]="servants"
@@ -72,13 +74,13 @@
         (sortChange)="onSortChange($event)"
         (rowClick)="viewServant($event)"
       />
-    } @else {
+    } @else if (!error) {
       <app-loader />
     }
   </app-card>
 </div>
 
-<app-modal title="إضافة خادم جديد" [visible]="showModal" (close)="showModal = false">
+<app-modal title="إضافة خادم جديد" [visible]="showModal" [busy]="creatingServant" (close)="!creatingServant && (showModal = false)">
   <div body>
     <app-form-field label="صورة شخصية (اختياري)">
       <app-profile-photo-input
@@ -90,7 +92,7 @@
       @if (creatingServant) { <p class="photo-saving-indicator"><span class="photo-spinner"></span> جاري الحفظ...</p> }
     </app-form-field>
     <form (ngSubmit)="onCreateServant()" id="addServantForm">
-    <div class="form-grid">
+    <fieldset class="form-grid ydm-fieldset" [disabled]="creatingServant || !!createdId">
       <app-form-field label="الاسم الكامل">
         <input type="text" [(ngModel)]="newServant.fullName" name="fullName" class="form-input" required />
       </app-form-field>
@@ -101,7 +103,7 @@
         <input type="email" [(ngModel)]="newServant.email" name="email" class="form-input" required />
       </app-form-field>
       <app-form-field label="رقم الهاتف">
-        <input type="text" [(ngModel)]="newServant.phone" name="phone" class="form-input" />
+        <input type="text" [(ngModel)]="newServant.phone" name="phone" class="form-input" required maxlength="20" dir="ltr" />
       </app-form-field>
       <app-form-field label="كلمة المرور">
         <input type="password" [(ngModel)]="newServant.password" name="password" class="form-input" required />
@@ -115,16 +117,17 @@
         </select>
         @if (priestAlreadyExists) { <p class="muted sm">يوجد بالفعل مستخدم بدور الاب الكاهن المسئول.</p> }
       </app-form-field>
-    </div>
+    </fieldset>
     </form>
+    @if(dialogError){<p role="alert" class="text-error">{{dialogError}}</p>}
   </div>
   <div actions>
     <button type="button" class="btn-outline" (click)="showModal = false" [disabled]="creatingServant">إلغاء</button>
-    <button type="submit" class="btn-primary" form="addServantForm" [disabled]="creatingServant">{{ creatingServant ? 'جاري الحفظ...' : 'حفظ البيانات' }}</button>
+    <button type="submit" class="btn-primary" form="addServantForm" [disabled]="creatingServant">{{ creatingServant ? 'جاري الحفظ...' : createdId ? 'إعادة رفع الصورة فقط' : 'حفظ البيانات' }}</button>
   </div>
 </app-modal>
 
-<app-modal title="تعديل الخادم" [visible]="showEditModal" (close)="closeEdit()">
+<app-modal title="تعديل الخادم" [visible]="showEditModal" [busy]="editSaving" (close)="closeEdit()">
   <div body>
     <app-form-field label="تغيير الصورة (اختياري)">
       <app-profile-photo-input
@@ -136,17 +139,17 @@
       @if (editSaving) { <p class="photo-saving-indicator"><span class="photo-spinner"></span> جاري الحفظ...</p> }
     </app-form-field>
     <form (ngSubmit)="onUpdateServant()" id="editServantForm">
-    <div class="form-grid">
+    <fieldset class="form-grid ydm-fieldset" [disabled]="editSaving || editRecordSaved">
       <app-form-field label="الاسم الكامل">
         <input type="text" [(ngModel)]="editForm.fullName" name="editFullName" class="form-input" required />
       </app-form-field>
       <app-form-field label="رقم الهاتف">
-        <input type="text" [(ngModel)]="editForm.phone" name="editPhone" class="form-input" />
+        <input type="text" [(ngModel)]="editForm.phone" name="editPhone" class="form-input" required maxlength="20" dir="ltr" />
       </app-form-field>
       <app-form-field label="الحالة">
         <select [(ngModel)]="editForm.isActive" name="editIsActive" class="form-input">
-          <option [value]="true">نشط</option>
-          <option [value]="false">متوقف</option>
+          <option [ngValue]="true">نشط</option>
+          <option [ngValue]="false">متوقف</option>
         </select>
       </app-form-field>
       <app-form-field label="الدور">
@@ -154,17 +157,19 @@
           <option value="Servant">خادم</option>
           <option value="Manager">مسئول</option>
           <option value="Secretary">سكرتارية</option>
+          <option value="Admin">مسؤول النظام</option>
           <option value="Priest" [disabled]="priestOptionDisabledInEdit">الاب الكاهن المسئول (مستخدم واحد فقط)</option>
         </select>
         @if (priestOptionDisabledInEdit) { <p class="muted sm">يوجد بالفعل مستخدم بدور الاب الكاهن المسئول.</p> }
       </app-form-field>
-    </div>
+    </fieldset>
     @if (editingServant) { <p class="muted">اسم المستخدم: {{ editingServant.userName }}</p> }
     </form>
+    @if(dialogError){<p role="alert" class="text-error">{{dialogError}}</p>}
   </div>
   <div actions>
     <button type="button" class="btn-outline" (click)="closeEdit()" [disabled]="editSaving">إلغاء</button>
-    <button type="submit" class="btn-primary" form="editServantForm" [disabled]="editSaving">{{ editSaving ? 'جاري الحفظ...' : 'حفظ التعديلات' }}</button>
+    <button type="submit" class="btn-primary" form="editServantForm" [disabled]="editSaving">{{ editSaving ? 'جاري الحفظ...' : editRecordSaved ? 'إعادة رفع الصورة فقط' : 'حفظ التعديلات' }}</button>
   </div>
 </app-modal>
 
@@ -175,3 +180,5 @@
   (cancel)="onCropCancel()"
 />
 }
+
+<app-modal title="إزالة مستخدم" [visible]="!!deleting" (close)="deleting && !busy.has(deleting.id) && (deleting=null)"><div body>@if(deleting){<p>تأكيد إزالة {{deleting.fullName}}؟ إذا كان للمستخدم سجل تاريخي، سيُعطّل مع الاحتفاظ بالسجل ونقل العمل المفتوح إلى قائمة إعادة الإسناد.</p>}@if(dialogError){<p class="text-error" role="alert">{{dialogError}}</p>}</div><div actions><button type="button" class="btn-outline" (click)="deleting=null" [disabled]="!!deleting && busy.has(deleting.id)">إلغاء</button><button type="button" class="btn-primary" (click)="confirmDelete()" [disabled]="!!deleting && busy.has(deleting.id)">تأكيد الإجراء</button></div></app-modal>

@@ -44,7 +44,10 @@ export class CompleteProfilePage {
       });
   }
 
+  addressRequired(): boolean { return !['Admin','Priest'].includes(this.authService.currentUser()?.role || ''); }
+
   onSubmit(): void {
+    if(this.loading() || this.profileLoading())return;
     this.error.set('');
     const phoneVal = this.phone().trim();
     const addressVal = this.address().trim();
@@ -52,13 +55,13 @@ export class CompleteProfilePage {
       this.error.set('يرجى إدخال رقم التليفون');
       return;
     }
-    if (!addressVal) {
+    if (this.addressRequired() && !addressVal) {
       this.error.set('يرجى إدخال العنوان');
       return;
     }
     this.loading.set(true);
     this.authService
-      .updateProfile({ phone: phoneVal, address: addressVal })
+      .updateProfile({ fullName:this.fullName().trim(),phone: phoneVal, address: addressVal })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -66,7 +69,7 @@ export class CompleteProfilePage {
           if (res?.token) {
             this.authService.setUserAfterProfileCompletion(res.token);
           }
-          this.router.navigate(['/dashboard']);
+          this.authService.navigateAfterAuthentication();
         },
         error: (err) => {
           this.error.set(err.error?.message || 'فشل حفظ البيانات');

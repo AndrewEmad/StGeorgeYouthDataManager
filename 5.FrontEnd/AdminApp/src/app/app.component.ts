@@ -1,3 +1,4 @@
+import { PwaStatusComponent } from '@ydm/shared/ui/pwa-status';
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AddToHomeScreenComponent } from './components/add-to-home-screen/add-to-home-screen.component';
@@ -5,7 +6,7 @@ import { AddToHomeScreenComponent } from './components/add-to-home-screen/add-to
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, AddToHomeScreenComponent],
+  imports: [RouterOutlet, AddToHomeScreenComponent,PwaStatusComponent],
   templateUrl: './app.component.html'
 })
 export class AppComponent {

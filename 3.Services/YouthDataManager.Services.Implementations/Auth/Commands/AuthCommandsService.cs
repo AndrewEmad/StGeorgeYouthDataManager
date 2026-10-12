@@ -1,9 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using YouthDataManager.Auth.Service.Abstractions;
 using YouthDataManager.Auth.Service.Abstractions.Commands;
 using YouthDataManager.Auth.Service.Abstractions.DTOs;
@@ -12,100 +10,81 @@ using YouthDataManager.Shared.Service.Abstractions;
 
 namespace YouthDataManager.Auth.Service.Implementations.Commands;
 
-public class AuthCommandsService : IAuthCommandsService
+public sealed class AuthCommandsService(UserManager<ApplicationUser> users, IJwtTokenService jwt, IApplicationStore store) : IAuthCommandsService
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IJwtTokenService _jwtService;
-    private readonly ILogger<AuthCommandsService> _logger;
+    private static string Hash(string token) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
+    private static ServiceResult<LoginResponse> Invalid() => ServiceResult<LoginResponse>.Failure("Invalid or expired session.");
 
-    public AuthCommandsService(
-        UserManager<ApplicationUser> userManager,
-        IJwtTokenService jwtService,
-        ILogger<AuthCommandsService> logger)
+    public Task<ServiceResult<LoginResponse>> Login(LoginRequest request) => store.Transaction(async () =>
     {
-        _userManager = userManager;
-        _jwtService = jwtService;
-        _logger = logger;
+        var user = await users.FindByNameAsync(request.Username?.Trim() ?? "");
+        if (user == null || !user.IsActive || await users.IsLockedOutAsync(user)) return Invalid();
+        if (!await users.CheckPasswordAsync(user, request.Password))
+        {
+            var failed=await users.AccessFailedAsync(user);
+            if(!failed.Succeeded)return Invalid();
+            return Invalid();
+        }
+        var reset = await users.ResetAccessFailedCountAsync(user);
+        if (!reset.Succeeded) return Invalid();
+        return await Issue(user, Guid.NewGuid());
+    });
+
+    public async Task<ServiceResult<LoginResponse>> Issue(ApplicationUser user, Guid family)
+    {
+        if (!user.IsActive) return Invalid();
+        var roles = await users.GetRolesAsync(user);
+        var incomplete = string.IsNullOrWhiteSpace(user.FullName) || user.FullName.Trim().Length>200 || PhoneFields.Canonical(user.Phone)=="" || user.Phone.Trim().Length>20 || ((!roles.Contains("Admin") && !roles.Contains("Priest")) && (string.IsNullOrWhiteSpace(user.Address) || user.Address.Trim().Length>500));
+        var refresh = jwt.GenerateRefreshToken();
+        store.Add(new RefreshSession { UserId = user.Id, TokenHash = Hash(refresh), FamilyId = family,
+            SecurityStamp = user.SecurityStamp ?? "", ExpiresAt = DateTime.UtcNow.AddDays(30) });
+        await store.Save();
+        return ServiceResult<LoginResponse>.Success(new LoginResponse(jwt.GenerateToken(user, roles, user.MustChangePassword, incomplete, family),
+            refresh, user.FullName, roles.FirstOrDefault() ?? "Servant", user.Id, user.MustChangePassword, incomplete));
     }
 
-    public async Task<ServiceResult<LoginResponse>> Login(LoginRequest request)
+    public Task<ServiceResult<LoginResponse>> RefreshToken(RefreshTokenRequest request) => store.Transaction(async () =>
     {
-        try
+        if (string.IsNullOrWhiteSpace(request.RefreshToken) || request.RefreshToken.Length > 512) return Invalid();
+        var hash = Hash(request.RefreshToken);
+        var session = await store.Query<RefreshSession>().SingleOrDefaultAsync(s => s.TokenHash == hash);
+        if (session == null) return Invalid();
+        var now = DateTime.UtcNow;
+        if (session.RevokedAt != null)
         {
-            var user = await _userManager.FindByNameAsync(request.Username);
-            if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
-            {
-                return ServiceResult<LoginResponse>.Failure("Invalid username or password");
-            }
-
-            if (!user.IsActive)
-            {
-                return ServiceResult<LoginResponse>.Failure("Your account is deactivated. Please contact your administrator.");
-            }
-
-            var roles = await _userManager.GetRolesAsync(user);
-            var mustChange = user.MustChangePassword;
-            var isExempt = roles.Contains("Admin") || roles.Contains("Priest");
-            var profileIncomplete = !isExempt && (
-                string.IsNullOrWhiteSpace(user.FullName) ||
-                string.IsNullOrWhiteSpace(user.Phone) ||
-                string.IsNullOrWhiteSpace(user.Address));
-            var token = _jwtService.GenerateToken(user, roles, mustChange, profileIncomplete);
-            var refreshToken = _jwtService.GenerateRefreshToken();
-
-            return ServiceResult<LoginResponse>.Success(new LoginResponse(
-                token,
-                refreshToken,
-                user.FullName,
-                roles.FirstOrDefault() ?? "Servant",
-                user.Id,
-                RequiresPasswordChange: mustChange,
-                RequiresProfileCompletion: profileIncomplete
-            ));
+            // A replay revokes every descendant. Commit the revocation even though refresh fails.
+            foreach (var s in await store.Query<RefreshSession>().Where(s => s.FamilyId == session.FamilyId && s.RevokedAt == null).ToListAsync()) s.RevokedAt = now;
+            var compromised=await users.FindByIdAsync(session.UserId.ToString());
+            if(compromised!=null){var revoke=await users.UpdateSecurityStampAsync(compromised);if(!revoke.Succeeded)throw new InvalidOperationException("Could not revoke compromised session.");}
+            return Invalid();
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error during login for user {Username}", request.Username);
-            return ServiceResult<LoginResponse>.Failure("An error occurred during the login process.");
-        }
-    }
+        session.RevokedAt = now;
+        var user = await users.FindByIdAsync(session.UserId.ToString());
+        if (user == null || !user.IsActive || session.ExpiresAt <= now || session.SecurityStamp != user.SecurityStamp) return Invalid();
+        return await Issue(user, session.FamilyId);
+    });
 
-    public async Task<ServiceResult<LoginResponse>> RefreshToken(RefreshTokenRequest request)
+    public Task<ServiceResult> Logout(Guid userId,string? refreshToken,string? deviceToken=null) => store.Transaction(async()=>
     {
-        return ServiceResult<LoginResponse>.Failure("Refresh token logic not fully implemented yet.");
-    }
+        if(string.IsNullOrWhiteSpace(refreshToken) || refreshToken.Length>512)return ServiceResult.Failure("Refresh token required.");
+        var hash=Hash(refreshToken);var session=await store.Query<RefreshSession>().SingleOrDefaultAsync(s=>s.TokenHash==hash);
+        if(session==null || (userId!=Guid.Empty && session.UserId!=userId))return ServiceResult.Success();
+        foreach(var active in await store.Query<RefreshSession>().Where(s=>s.FamilyId==session.FamilyId && s.RevokedAt==null).ToListAsync())active.RevokedAt=DateTime.UtcNow;
+        if(!string.IsNullOrEmpty(deviceToken))foreach(var device in await store.Query<UserDeviceToken>().Where(d=>d.UserId==session.UserId && d.Token==deviceToken).ToListAsync())store.Remove(device);
+        return ServiceResult.Success();
+    },r=>r.Status==ServiceResultStatus.Success);
 
-    public async Task<ServiceResult<LoginResponse>> ChangePassword(Guid userId, ChangePasswordRequest request)
+    public Task<ServiceResult<LoginResponse>> ChangePassword(Guid userId, ChangePasswordRequest request) => store.Transaction(async () =>
     {
-        try
-        {
-            var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user == null)
-                return ServiceResult<LoginResponse>.Failure("User not found.");
-            if (!user.MustChangePassword)
-                return ServiceResult<LoginResponse>.Failure("Password change is not required.");
-            if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 6)
-                return ServiceResult<LoginResponse>.Failure("New password must be at least 6 characters.");
-            var changeResult = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
-            if (!changeResult.Succeeded)
-                return ServiceResult<LoginResponse>.Failure(string.Join("; ", changeResult.Errors.Select(e => e.Description)));
-            user.MustChangePassword = false;
-            user.UpdatedAt = DateTime.UtcNow;
-            await _userManager.UpdateAsync(user);
-            var roles = await _userManager.GetRolesAsync(user);
-            var isExempt = roles.Contains("Admin") || roles.Contains("Priest");
-            var profileIncomplete = !isExempt && (
-                string.IsNullOrWhiteSpace(user.FullName) ||
-                string.IsNullOrWhiteSpace(user.Phone) ||
-                string.IsNullOrWhiteSpace(user.Address));
-            var jwt = _jwtService.GenerateToken(user, roles, false, profileIncomplete);
-            var refreshToken = _jwtService.GenerateRefreshToken();
-            return ServiceResult<LoginResponse>.Success(new LoginResponse(jwt, refreshToken, user.FullName, roles.FirstOrDefault() ?? "Servant", user.Id, RequiresPasswordChange: false, RequiresProfileCompletion: profileIncomplete));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error changing password for user {UserId}", userId);
-            return ServiceResult<LoginResponse>.Failure("An error occurred while changing password.");
-        }
-    }
+        var user = await users.FindByIdAsync(userId.ToString());
+        if (user == null || !user.IsActive) return Invalid();
+        var change = await users.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+        if (!change.Succeeded) return ServiceResult<LoginResponse>.Failure(string.Join("; ", change.Errors.Select(e => e.Description)));
+        user.MustChangePassword = false;
+        user.UpdatedAt = DateTime.UtcNow;
+        var update = await users.UpdateAsync(user);
+        if (!update.Succeeded) return ServiceResult<LoginResponse>.Failure(string.Join("; ", update.Errors.Select(e => e.Description)));
+        foreach (var s in await store.Query<RefreshSession>().Where(s => s.UserId == userId && s.RevokedAt == null).ToListAsync()) s.RevokedAt = DateTime.UtcNow;
+        return await Issue(user, Guid.NewGuid());
+    }, r => r.Status == ServiceResultStatus.Success);
 }

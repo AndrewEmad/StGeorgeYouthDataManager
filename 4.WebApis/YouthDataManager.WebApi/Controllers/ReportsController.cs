@@ -1,3 +1,4 @@
+using YouthDataManager.WebApi.Authorization;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -14,11 +15,12 @@ namespace YouthDataManager.WebApi.Controllers;
 [Authorize]
 public class ReportsController : ControllerBase
 {
+    private readonly ResourceAccess _access;
     private readonly IReportQueriesService _service;
 
-    public ReportsController(IReportQueriesService service)
+    public ReportsController(IReportQueriesService service, ResourceAccess access)
     {
-        _service = service;
+        _service = service; _access = access;
     }
 
     [HttpGet("dashboard/servant")]
@@ -26,10 +28,11 @@ public class ReportsController : ControllerBase
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var result = await _service.GetServantDashboard(userId);
-        return Ok(result.Data);
+        return result.Status == ServiceResultStatus.Success ? Ok(result.Data) : StatusCode(500,result);
     }
 
     [HttpGet("dashboard/manager")]
+    [Authorize(Roles = RolePolicies.AdminManagerPriestRoles)]
     // [Authorize(Roles = "Manager")] // Add specific role if needed
     public async Task<IActionResult> GetManagerDashboard()
     {
@@ -38,7 +41,8 @@ public class ReportsController : ControllerBase
     }
 
     [HttpGet("servant-performances-paged")]
-    public async Task<IActionResult> GetServantPerformancesPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
+    [Authorize(Roles = RolePolicies.AdminManagerPriestRoles)]
+    public async Task<IActionResult> GetServantPerformancesPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 25, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
     {
         var result = await _service.GetServantPerformancesPaged(page, pageSize, sortBy, sortDesc);
         if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
@@ -48,6 +52,7 @@ public class ReportsController : ControllerBase
     [HttpGet("servant/{servantId:guid}/performance")]
     public async Task<IActionResult> GetServantPerformance(Guid servantId)
     {
+        if (!_access.Privileged && servantId != _access.UserId) return Forbid();
         var result = await _service.GetServantPerformance(servantId);
         if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
         return Ok(result.Data);
@@ -57,21 +62,24 @@ public class ReportsController : ControllerBase
     public async Task<IActionResult> GetServantStats([FromQuery] Guid[]? ids = null)
     {
         var list = ids ?? Array.Empty<Guid>();
+        if (!_access.Privileged && list.Any(id => id != _access.UserId)) return Forbid();
         var result = await _service.GetServantStats(list);
         if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
         return Ok(result.Data);
     }
 
     [HttpGet("servants-paged-with-stats")]
-    public async Task<IActionResult> GetServantsPagedWithStats([FromQuery] int page = 1, [FromQuery] int pageSize = 50, [FromQuery] string? search = null, [FromQuery] string? role = null, [FromQuery] bool? isActive = null, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
+    [Authorize(Roles = RolePolicies.AdminManagerPriestRoles)]
+    public async Task<IActionResult> GetServantsPagedWithStats([FromQuery] int page = 1, [FromQuery] int pageSize = 25, [FromQuery] string? search = null, [FromQuery] string? role = null, [FromQuery] bool? isActive = null, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
     {
-        if (pageSize > 50) pageSize = 50;
+        if (page < 1 || pageSize is < 1 or > 100) return BadRequest("Invalid pagination.");
         var result = await _service.GetServantsPagedWithStats(page, pageSize, search, role, isActive, sortBy, sortDesc);
         if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
         return Ok(result.Data);
     }
 
     [HttpGet("export/students")]
+    [Authorize(Roles = RolePolicies.AdminManagerPriestRoles)]
     public async Task<IActionResult> ExportStudents([FromQuery] ReportRequestDto filter)
     {
         var result = await _service.ExportStudentsExcel(filter);
@@ -81,6 +89,7 @@ public class ReportsController : ControllerBase
     }
 
     [HttpGet("export/calls")]
+    [Authorize(Roles = RolePolicies.AdminManagerPriestRoles)]
     public async Task<IActionResult> ExportCalls([FromQuery] ReportRequestDto filter)
     {
         var result = await _service.ExportCallsExcel(filter);
@@ -90,6 +99,7 @@ public class ReportsController : ControllerBase
     }
 
     [HttpGet("export/visits")]
+    [Authorize(Roles = RolePolicies.AdminManagerPriestRoles)]
     public async Task<IActionResult> ExportVisits([FromQuery] ReportRequestDto filter)
     {
         var result = await _service.ExportVisitsExcel(filter);
@@ -99,7 +109,8 @@ public class ReportsController : ControllerBase
     }
 
     [HttpGet("servant-activity")]
-    public async Task<IActionResult> GetServantActivitySummary([FromQuery] DateTime? dateFrom, [FromQuery] DateTime? dateTo, [FromQuery] Guid? servantId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
+    [Authorize(Roles = RolePolicies.AdminManagerPriestRoles)]
+    public async Task<IActionResult> GetServantActivitySummary([FromQuery] DateTime? dateFrom, [FromQuery] DateTime? dateTo, [FromQuery] Guid? servantId, [FromQuery] int page = 1, [FromQuery] int pageSize = 25, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
     {
         var result = await _service.GetServantActivitySummary(dateFrom, dateTo, servantId, page, pageSize, sortBy, sortDesc);
         if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
@@ -107,7 +118,8 @@ public class ReportsController : ControllerBase
     }
 
     [HttpGet("students-no-contact")]
-    public async Task<IActionResult> GetStudentsWithNoRecentContact([FromQuery] int days = 14, [FromQuery] Guid? servantId = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
+    [Authorize(Roles = RolePolicies.AdminManagerPriestRoles)]
+    public async Task<IActionResult> GetStudentsWithNoRecentContact([FromQuery] int days = 14, [FromQuery] Guid? servantId = null, [FromQuery] int page = 1, [FromQuery] int pageSize = 25, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
     {
         var result = await _service.GetStudentsWithNoRecentContact(days, servantId, page, pageSize, sortBy, sortDesc);
         if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
@@ -115,7 +127,8 @@ public class ReportsController : ControllerBase
     }
 
     [HttpGet("students-by-area")]
-    public async Task<IActionResult> GetStudentsByArea([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
+    [Authorize(Roles = RolePolicies.AdminManagerPriestRoles)]
+    public async Task<IActionResult> GetStudentsByArea([FromQuery] int page = 1, [FromQuery] int pageSize = 25, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
     {
         var result = await _service.GetStudentsByArea(page, pageSize, sortBy, sortDesc);
         if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
@@ -123,7 +136,8 @@ public class ReportsController : ControllerBase
     }
 
     [HttpGet("students-by-academic-year")]
-    public async Task<IActionResult> GetStudentsByAcademicYear([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
+    [Authorize(Roles = RolePolicies.AdminManagerPriestRoles)]
+    public async Task<IActionResult> GetStudentsByAcademicYear([FromQuery] int page = 1, [FromQuery] int pageSize = 25, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
     {
         var result = await _service.GetStudentsByAcademicYear(page, pageSize, sortBy, sortDesc);
         if (result.Status != ServiceResultStatus.Success) return BadRequest(result);
@@ -131,7 +145,8 @@ public class ReportsController : ControllerBase
     }
 
     [HttpGet("students-by-birth-month")]
-    public async Task<IActionResult> GetStudentsByBirthMonth([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
+    [Authorize(Roles = RolePolicies.AdminManagerPriestRoles)]
+    public async Task<IActionResult> GetStudentsByBirthMonth([FromQuery] int page = 1, [FromQuery] int pageSize = 25, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
     {
         var result = await _service.GetStudentsByBirthMonth(page, pageSize, sortBy, sortDesc);
         if (result.Status != ServiceResultStatus.Success) return BadRequest(result);

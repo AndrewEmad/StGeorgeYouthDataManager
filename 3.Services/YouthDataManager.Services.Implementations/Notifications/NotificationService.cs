@@ -37,21 +37,13 @@ public class NotificationService : INotificationService
 
     public async Task<ServiceResult<ScheduleDto>> CreateSchedule(Guid userId, CreateScheduleRequest request)
     {
-        if (!TimeOnly.TryParse(request.TimeOfDay, out var timeOfDay))
-            return ServiceResult<ScheduleDto>.Failure("Invalid time format. Use HH:mm.");
-
-        // Validate days format
-        var days = request.DaysOfWeek.Split(',', StringSplitOptions.RemoveEmptyEntries);
-        foreach (var day in days)
-        {
-            if (!int.TryParse(day.Trim(), out var d) || d < 0 || d > 6)
-                return ServiceResult<ScheduleDto>.Failure("Invalid day. Use comma-separated values 0-6.");
-        }
+        if(!ParseSchedule(request.DaysOfWeek,request.TimeOfDay,out var canonical,out var timeOfDay))
+            return ServiceResult<ScheduleDto>.Failure("Choose at least one day (0-6) and a valid HH:mm time.");
 
         var schedule = new NotificationSchedule
         {
             UserId = userId,
-            DaysOfWeek = request.DaysOfWeek,
+            DaysOfWeek = canonical,
             TimeOfDay = timeOfDay,
             IsActive = true
         };
@@ -61,6 +53,23 @@ public class NotificationService : INotificationService
 
         var dto = new ScheduleDto(schedule.Id, schedule.DaysOfWeek, schedule.TimeOfDay.ToString("HH:mm"), schedule.IsActive);
         return ServiceResult<ScheduleDto>.Success(dto);
+    }
+
+    private static bool ParseSchedule(string days,string time,out string canonical,out TimeOnly value)
+    {
+        canonical="";value=default;
+        if(string.IsNullOrWhiteSpace(days) || !TimeOnly.TryParseExact(time,"HH:mm",System.Globalization.CultureInfo.InvariantCulture,System.Globalization.DateTimeStyles.None,out value))return false;
+        var parts=days.Split(',');var parsed=new HashSet<int>();
+        foreach(var part in parts){if(!int.TryParse(part.Trim(),out var day) || day is <0 or >6)return false;parsed.Add(day);}
+        canonical=string.Join(',',parsed.Order());return parsed.Count>0;
+    }
+    public async Task<ServiceResult<ScheduleDto>> UpdateSchedule(Guid userId,Guid scheduleId,UpdateScheduleRequest request)
+    {
+        if(!ParseSchedule(request.DaysOfWeek,request.TimeOfDay,out var days,out var time))return ServiceResult<ScheduleDto>.Failure("Choose at least one day (0-6) and a valid HH:mm time.");
+        var schedule=await _scheduleRepo.GetById(scheduleId);
+        if(schedule==null || schedule.UserId!=userId)return ServiceResult<ScheduleDto>.Failure("Schedule not found.");
+        schedule.DaysOfWeek=days;schedule.TimeOfDay=time;schedule.IsActive=request.IsActive;schedule.UpdatedAt=DateTime.UtcNow;
+        await _unitOfWork.SaveChangesAsync();return ServiceResult<ScheduleDto>.Success(new(schedule.Id,days,time.ToString("HH:mm"),schedule.IsActive));
     }
 
     public async Task<ServiceResult> DeleteSchedule(Guid userId, Guid scheduleId)
@@ -77,6 +86,7 @@ public class NotificationService : INotificationService
 
     public async Task<ServiceResult> RegisterDeviceToken(Guid userId, RegisterDeviceTokenRequest request)
     {
+        if(string.IsNullOrWhiteSpace(request.Token) || request.Token.Length>4096 || request.AppType is not ("Admin" or "Servant") || request.DeviceName?.Length>200)return ServiceResult.Failure("Invalid device registration.");
         var existing = await _tokenRepo.GetByToken(request.Token);
         if (existing != null)
         {

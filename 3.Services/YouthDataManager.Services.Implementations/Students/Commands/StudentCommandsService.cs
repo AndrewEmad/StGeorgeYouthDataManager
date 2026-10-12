@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using YouthDataManager.Domain.Entities;
-using YouthDataManager.Domain.Repositories.Tracking;
+using YouthDataManager.Domain.Enums;
 using YouthDataManager.Domain.Utilities;
 using YouthDataManager.Shared.Service.Abstractions;
 using YouthDataManager.Students.Service.Abstractions.Commands;
@@ -13,195 +8,101 @@ using YouthDataManager.Students.Service.Abstractions.DTOs;
 
 namespace YouthDataManager.Students.Service.Implementations.Commands;
 
-public class StudentCommandsService : IStudentCommandsService
+public sealed class StudentCommandsService(IApplicationStore store, ICallerContext caller) : IStudentCommandsService
 {
-    private readonly IStudentRepository _repository;
-    private readonly IStudentEditLogRepository _editLogRepository;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IActivityLogger _activityLogger;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly ILogger<StudentCommandsService> _logger;
+    private static ServiceResult Fail(string message, string code = "Validation") => ServiceResult.Failure(message, new ServiceError(code));
+    private Task<ServiceResult> Operation(Func<Task<ServiceResult>> action) => store.Transaction(action, r => r.Status == ServiceResultStatus.Success);
 
-    public StudentCommandsService(
-        IStudentRepository repository,
-        IStudentEditLogRepository editLogRepository,
-        IUnitOfWork unitOfWork,
-        IActivityLogger activityLogger,
-        IHttpContextAccessor httpContextAccessor,
-        ILogger<StudentCommandsService> logger)
+    public Task<ServiceResult<Guid>> Create(CreateStudentRequest r) => store.Transaction(async () =>
     {
-        _repository = repository;
-        _editLogRepository = editLogRepository;
-        _unitOfWork = unitOfWork;
-        _activityLogger = activityLogger;
-        _httpContextAccessor = httpContextAccessor;
-        _logger = logger;
+        if (!caller.IsPrivileged) return ServiceResult<Guid>.Failure("Approval required.", new ServiceError("Forbidden"));
+        var error = StudentFields.Validate(r.FullName,r.Phone,r.SecondaryPhone,r.Address,r.Area,r.College,r.AcademicYear,r.ConfessionFather,r.Notes,r.Gender,r.BirthDate,r.BirthMonth);
+        if (error != null) return ServiceResult<Guid>.Failure(error);
+        if (r.ServantId.HasValue && !await EligibleUsers.Query(store).AnyAsync(u => u.Id == r.ServantId, caller.CancellationToken)) return ServiceResult<Guid>.Failure("Assignee is inactive or ineligible.");
+        var student = new Student { Id = Guid.NewGuid(), FullName = r.FullName.Trim(), NormalizedFullName = ArabicNormalizer.Normalize(r.FullName.Trim()),
+            Phone = r.Phone.Trim(), SecondaryPhone = r.SecondaryPhone?.Trim(), Address = r.Address?.Trim() ?? "", Area = r.Area?.Trim() ?? "",
+            College = r.College?.Trim() ?? "", AcademicYear = r.AcademicYear?.Trim() ?? "", ConfessionFather = r.ConfessionFather?.Trim() ?? "",
+            Notes = r.Notes?.Trim() ?? "", Gender = r.Gender, ServantId = r.ServantId, BirthDate = r.BirthDate?.Date, BirthMonth = r.BirthDate?.Month ?? r.BirthMonth };
+        store.Add(student);
+        return ServiceResult<Guid>.Success(student.Id);
+    }, result => result.Status == ServiceResultStatus.Success);
+
+    public Task<ServiceResult> Update(UpdateStudentRequest r, Guid? currentUserId, bool isAdmin) => Operation(async () =>
+    {
+        var s = await store.Query<Student>().SingleOrDefaultAsync(s => s.Id == r.Id, caller.CancellationToken);
+        if (s == null) return Fail("Student not found.","NotFound");
+        if (!caller.IsPrivileged && s.ServantId != caller.UserId) return Fail("Not authorized.","Forbidden");
+        if(caller.ExpectedVersion!=null && caller.ExpectedVersion!=Convert.ToBase64String(s.Version))return Fail("Student changed. Refresh before retrying.","Conflict");
+        var fullName=r.FullName.IsPresent ? r.FullName.Value ?? "" : s.FullName;
+        var phone=r.Phone.IsPresent ? r.Phone.Value ?? "" : s.Phone;
+        var address=r.Address.IsPresent ? r.Address.Value?.Trim() ?? "" : s.Address;
+        var area=r.Area.IsPresent ? r.Area.Value?.Trim() ?? "" : s.Area;
+        var college=r.College.IsPresent ? r.College.Value?.Trim() ?? "" : s.College;
+        var year=r.AcademicYear.IsPresent ? r.AcademicYear.Value?.Trim() ?? "" : s.AcademicYear;
+        var father=r.ConfessionFather.IsPresent ? r.ConfessionFather.Value?.Trim() ?? "" : s.ConfessionFather;
+        var gender=r.Gender.IsPresent ? r.Gender.Value : s.Gender;
+        if(!gender.HasValue)return Fail("Gender is required.");
+        var birth = r.BirthDate.IsPresent ? r.BirthDate.Value?.Date : s.BirthDate;
+        var month = birth?.Month ?? (r.BirthMonth.IsPresent ? r.BirthMonth.Value : s.BirthMonth);
+        var secondary = r.SecondaryPhone.IsPresent ? r.SecondaryPhone.Value?.Trim() : s.SecondaryPhone;
+        var notes = r.Notes.IsPresent ? r.Notes.Value?.Trim() ?? "" : s.Notes;
+        var error = StudentFields.Validate(fullName,phone,secondary,address,area,college,year,father,notes,gender.Value,birth,month);
+        if (error != null) return Fail(error);
+        if (r.ServantId.IsPresent && r.ServantId.Value != s.ServantId)
+        {
+            if (!caller.IsPrivileged) return Fail("Reassignment requires approval.","Forbidden");
+            if (r.ServantId.Value.HasValue && !await EligibleUsers.Query(store).AnyAsync(u => u.Id == r.ServantId.Value, caller.CancellationToken)) return Fail("Assignee is inactive or ineligible.");
+            s.ServantId = r.ServantId.Value;
+            await TransferTasks(s.Id,s.ServantId);
+        }
+        s.FullName = fullName.Trim(); s.NormalizedFullName = ArabicNormalizer.Normalize(s.FullName); s.Phone = phone.Trim(); s.SecondaryPhone = secondary;
+        s.Address = address; s.Area = area; s.College = college;
+        s.AcademicYear = year; s.ConfessionFather = father; s.Notes = notes; s.Gender = gender.Value;
+        s.BirthDate = birth; s.BirthMonth = month; s.UpdatedAt = DateTime.UtcNow;
+        store.Add(new StudentEditLog { Id = Guid.NewGuid(),StudentId=s.Id,UpdatedAt=s.UpdatedAt.Value,UpdatedByUserId=caller.UserId ?? Guid.Empty,UpdatedByUserName=caller.UserId?.ToString() ?? "System",Details="Student fields updated; see structured audit for before/after values." });
+        return ServiceResult.Success();
+    });
+
+    public Task<ServiceResult> Delete(Guid id) => Operation(async () =>
+    {
+        if (!caller.IsPrivileged) return Fail("Approval required.","Forbidden");
+        var s = await store.Query<Student>(true,true).SingleOrDefaultAsync(s => s.Id == id, caller.CancellationToken);
+        if (s == null) return Fail("Student not found.","NotFound");
+        if(s.IsDeleted)return ServiceResult.Success();
+        if(string.IsNullOrWhiteSpace(caller.Reason) || caller.Reason.Length>1000)return Fail("An archival reason (1–1000 characters) is required.");
+        if(caller.ExpectedVersion!=null && caller.ExpectedVersion!=Convert.ToBase64String(s.Version))return Fail("Student changed. Refresh before archiving.","Conflict");
+        s.IsDeleted = true; s.ServantId = null; s.UpdatedAt = DateTime.UtcNow;
+        await ArchiveWork(store,id,caller);
+        return ServiceResult.Success();
+    });
+
+    public Task<ServiceResult> AssignToServant(Guid id, Guid servantId) => Operation(async () =>
+    {
+        if (!caller.IsPrivileged) return Fail("Approval required.","Forbidden");
+        if (!await EligibleUsers.Query(store).AnyAsync(u => u.Id == servantId, caller.CancellationToken)) return Fail("Assignee is inactive or ineligible.");
+        var s = await store.Query<Student>().SingleOrDefaultAsync(s => s.Id == id, caller.CancellationToken);
+        if (s == null) return Fail("Student not found.","NotFound");
+        s.ServantId = servantId; s.UpdatedAt = DateTime.UtcNow;
+        await TransferTasks(id,servantId);
+        return ServiceResult.Success();
+    });
+    public Task<ServiceResult> UnassignFromServant(Guid id) => Operation(async () =>
+    {
+        if (!caller.IsPrivileged) return Fail("Approval required.","Forbidden");
+        var s = await store.Query<Student>().SingleOrDefaultAsync(s => s.Id == id, caller.CancellationToken);
+        if (s == null) return Fail("Student not found.","NotFound");
+        s.ServantId = null; s.UpdatedAt = DateTime.UtcNow;
+        await TransferTasks(id,null);
+        return ServiceResult.Success();
+    });
+    private async Task TransferTasks(Guid id, Guid? owner)
+    {
+        foreach (var task in await store.Query<FollowUpTask>().Where(t => t.StudentId == id && (t.Status == "Open" || t.Status == "PendingReview")).ToListAsync(caller.CancellationToken)) task.AssigneeId = owner;
     }
-
-    public async Task<ServiceResult<Guid>> Create(CreateStudentRequest request)
+    public static async Task ArchiveWork(IApplicationStore store, Guid id,ICallerContext caller)
     {
-        try
-        {
-            var student = new Student
-            {
-                Id = Guid.NewGuid(),
-                FullName = request.FullName,
-                NormalizedFullName = ArabicNormalizer.Normalize(request.FullName),
-                Phone = request.Phone,
-                SecondaryPhone = request.SecondaryPhone,
-                Address = request.Address ?? string.Empty,
-                Area = request.Area ?? string.Empty,
-                College = request.College ?? string.Empty,
-                AcademicYear = request.AcademicYear ?? string.Empty,
-                ConfessionFather = request.ConfessionFather ?? string.Empty,
-                Notes = request.Notes ?? string.Empty,
-                Gender = request.Gender,
-                ServantId = request.ServantId,
-                BirthDate = request.BirthDate,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _repository.Add(student);
-            await _unitOfWork.SaveChangesAsync();
-
-            await _activityLogger.LogAsync("إضافة مخدوم", $"تم إضافة مخدوم جديد: {student.FullName}");
-
-            return ServiceResult<Guid>.Success(student.Id);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating student {StudentName}", request.FullName);
-            return ServiceResult<Guid>.Failure("An error occurred while creating the student.");
-        }
-    }
-
-    public async Task<ServiceResult> Update(UpdateStudentRequest request, Guid? currentUserId, bool isAdmin)
-    {
-        try
-        {
-            var student = await _repository.GetById(request.Id);
-            if (student == null)
-                return ServiceResult.Failure("Student not found", new ServiceError("NotFound", "Student ID does not exist"));
-
-            if (!isAdmin)
-            {
-                if (!currentUserId.HasValue || student.ServantId != currentUserId.Value)
-                    return ServiceResult.Failure("Not authorized to update this student.");
-            }
-
-            student.FullName = request.FullName;
-            student.NormalizedFullName = ArabicNormalizer.Normalize(request.FullName);
-            student.Phone = request.Phone;
-            student.Address = request.Address ?? string.Empty;
-            student.Area = request.Area ?? string.Empty;
-            student.College = request.College ?? string.Empty;
-            student.AcademicYear = request.AcademicYear ?? string.Empty;
-            student.ConfessionFather = request.ConfessionFather ?? string.Empty;
-            student.Gender = request.Gender;
-            if (isAdmin)
-                student.ServantId = request.ServantId;
-            student.BirthDate = request.BirthDate;
-            student.UpdatedAt = DateTime.UtcNow;
-
-            _repository.Update(student);
-
-            var userName = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value
-                ?? _httpContextAccessor.HttpContext?.User?.Identity?.Name
-                ?? "غير معروف";
-            var userId = currentUserId ?? Guid.Empty;
-            _editLogRepository.Add(new StudentEditLog
-            {
-                Id = Guid.NewGuid(),
-                StudentId = student.Id,
-                UpdatedAt = student.UpdatedAt.Value,
-                UpdatedByUserId = userId,
-                UpdatedByUserName = userName,
-                Details = "تحديث بيانات المخدوم"
-            });
-
-            await _unitOfWork.SaveChangesAsync();
-
-            await _activityLogger.LogAsync("تحديث مخدوم", $"تم تحديث بيانات المخدوم: {student.FullName}");
-
-            return ServiceResult.Success();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating student {StudentId}", request.Id);
-            return ServiceResult.Failure("An error occurred while updating the student.");
-        }
-    }
-
-    public async Task<ServiceResult> Delete(Guid id)
-    {
-        try
-        {
-            var student = await _repository.GetById(id);
-            if (student == null)
-                return ServiceResult.Failure("Student not found");
-
-            _repository.Remove(student);
-            await _unitOfWork.SaveChangesAsync();
-
-            await _activityLogger.LogAsync("حذف مخدوم", $"تم حذف المخدوم: {student.FullName}");
-
-            return ServiceResult.Success();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting student {StudentId}", id);
-            return ServiceResult.Failure("An error occurred while deleting the student.");
-        }
-    }
-
-    public async Task<ServiceResult> AssignToServant(Guid studentId, Guid servantId)
-    {
-        try
-        {
-            var student = await _repository.GetById(studentId);
-            if (student == null)
-                return ServiceResult.Failure("Student not found");
-
-            student.ServantId = servantId;
-            student.UpdatedAt = DateTime.UtcNow;
-
-            _repository.Update(student);
-            await _unitOfWork.SaveChangesAsync();
-
-            await _activityLogger.LogAsync("تعيين خادم", $"تم تعيين خادم للمخدوم: {student.FullName}");
-
-            return ServiceResult.Success();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error assigning student {StudentId} to servant {ServantId}", studentId, servantId);
-            return ServiceResult.Failure("An error occurred while assigning the servant.");
-        }
-    }
-
-    public async Task<ServiceResult> UnassignFromServant(Guid studentId)
-    {
-        try
-        {
-            var student = await _repository.GetById(studentId);
-            if (student == null)
-                return ServiceResult.Failure("Student not found");
-
-            student.ServantId = null;
-            student.IsDeleted = true;
-            student.UpdatedAt = DateTime.UtcNow;
-
-            _repository.Update(student);
-            await _unitOfWork.SaveChangesAsync();
-
-            await _activityLogger.LogAsync("إزالة مخدوم من الخادم", $"تم إزالة المخدوم: {student.FullName}");
-
-            return ServiceResult.Success();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error unassigning student {StudentId}", studentId);
-            return ServiceResult.Failure("An error occurred while unassigning the student.");
-        }
+        foreach (var t in await store.Query<FollowUpTask>().Where(t => t.StudentId == id && (t.Status == "Open" || t.Status == "PendingReview")).ToListAsync(caller.CancellationToken)) { t.Status="Cancelled"; t.Reason="Student archived"; }
+        foreach (var r in await store.Query<StudentAssignmentRequest>().Where(r => r.StudentId==id && r.Status==AssignmentRequestStatus.Pending).ToListAsync(caller.CancellationToken)) { r.Status=AssignmentRequestStatus.Cancelled; r.ProcessedAt=caller.UtcNow; r.ProcessedByUserId=caller.UserId;r.ProcessingReason="Student archived"; }
+        foreach (var r in await store.Query<StudentRemovalRequest>().Where(r => r.StudentId==id && r.Status==RemovalRequestStatus.Pending).ToListAsync(caller.CancellationToken)) { r.Status=RemovalRequestStatus.Cancelled; r.ProcessedAt=caller.UtcNow; r.ProcessedByUserId=caller.UserId;r.ProcessingReason="Student archived"; }
     }
 }

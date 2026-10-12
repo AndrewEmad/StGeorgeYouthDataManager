@@ -7,7 +7,7 @@
   <div class="report-cards">
     @for (card of reportCards; track card.route) {
       <a [routerLink]="card.route" class="report-card glass-card">
-        <span class="report-card-icon material-icons">{{ card.icon }}</span>
+        <span class="report-card-icon material-icons" aria-hidden="true">{{ card.icon }}</span>
         <h2 class="report-card-title">{{ card.title }}</h2>
       </a>
     }

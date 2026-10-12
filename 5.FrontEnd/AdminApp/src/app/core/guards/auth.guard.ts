@@ -1,33 +1,10 @@
-import { inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
-
-export const authGuard = (_: unknown, state: unknown) => {
-  const authService = inject(AuthService);
-  const router = inject(Router);
-  const url = (state as { url?: string })?.url ?? router.url;
-
-  if (!authService.isLoggedIn()) {
-    router.navigate(['/login']);
-    return false;
-  }
-  if (authService.requiresPasswordChange() && !url.includes('change-password')) {
-    router.navigate(['/change-password']);
-    return false;
-  }
-  if (!authService.requiresPasswordChange() && url.includes('change-password')) {
-    router.navigate(['/dashboard']);
-    return false;
-  }
-  if (!authService.requiresPasswordChange()) {
-    if (authService.requiresProfileCompletion() && !url.includes('complete-profile')) {
-      router.navigate(['/complete-profile']);
-      return false;
-    }
-    if (!authService.requiresProfileCompletion() && url.includes('complete-profile')) {
-      router.navigate(['/dashboard']);
-      return false;
-    }
-  }
-  return true;
+import {inject} from '@angular/core';
+import {Router,ActivatedRouteSnapshot,RouterStateSnapshot} from '@angular/router';
+import {AuthService} from '../services/auth.service';
+export const authGuard=(_:ActivatedRouteSnapshot,state:RouterStateSnapshot)=>{
+ const auth=inject(AuthService),router=inject(Router),path=state.url.split('?')[0].replace(/\/$/,'');
+ if(!auth.isLoggedIn())return router.parseUrl('/login');
+ const destination=auth.requiresPasswordChange() ? '/change-password' : auth.requiresProfileCompletion() ? '/complete-profile' : '/dashboard';
+ if((auth.requiresPasswordChange() && path!=='/change-password') || (!auth.requiresPasswordChange() && auth.requiresProfileCompletion() && path!=='/complete-profile') || (!auth.requiresPasswordChange() && path==='/change-password') || (!auth.requiresProfileCompletion() && path==='/complete-profile'))return router.parseUrl(destination);
+ return true;
 };

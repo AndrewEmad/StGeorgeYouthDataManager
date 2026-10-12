@@ -1,3 +1,6 @@
+using YouthDataManager.WebApi.Authorization;
+using YouthDataManager.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
@@ -13,11 +16,9 @@ public class RequireProfileCompletionMiddleware
     {
         if (context.User?.Identity?.IsAuthenticated == true)
         {
-            var profileIncomplete = context.User.FindFirst("profile_incomplete")?.Value == "true";
-            var path = context.Request.Path.Value ?? "";
-            var allowedPath = path.Contains("Profile", System.StringComparison.OrdinalIgnoreCase) ||
-                              path.Contains("Auth/change-password", System.StringComparison.OrdinalIgnoreCase);
-            if (profileIncomplete && !allowedPath)
+            var restricted = context.Items["ProfileIncomplete"] is true;
+            var allowed = context.GetEndpoint()?.Metadata.GetMetadata<AllowRestrictedAccountAttribute>() != null || context.GetEndpoint()?.Metadata.GetMetadata<IAllowAnonymous>() != null;
+            if (restricted && !allowed)
             {
                 context.Response.StatusCode = 403;
                 context.Response.ContentType = "application/json";

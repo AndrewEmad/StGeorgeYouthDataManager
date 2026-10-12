@@ -9,7 +9,7 @@
     backLabel="العودة لتوزيع المخدومين"
     [columns]="columns"
     [data]="data()"
-    [loading]="loading()"
+    [loading]="loading()" [error]="error()" (retry)="loadData()"
     [totalCount]="totalCount()"
     [page]="page()"
     [pageSize]="pageSize()"
@@ -22,6 +22,6 @@
     (sortChange)="onSortChange($event)"
   />
   <ng-template #rowActionsTpl let-row>
-    <a [routerLink]="['/dashboard/students']" [queryParams]="{ academicYear: row.groupKey }" class="btn-outline sm" (click)="$event.stopPropagation()">عرض المخدومين</a>
+    <a [routerLink]="['/dashboard/students']" [queryParams]="{ academicYear: row.groupKey || '__missing__' }" class="btn-outline sm" (click)="$event.stopPropagation()">عرض المخدومين</a>
   </ng-template>
 </div>

@@ -1,7 +1,7 @@
 <div class="filter-section" [class.collapsed]="collapsed()">
   <button type="button" class="filter-header" (click)="toggle()" [attr.aria-expanded]="!collapsed()">
     <h3 class="filter-title">{{ filterTitle() }}</h3>
-    <span class="material-icons filter-toggle-icon">{{ collapsed() ? 'expand_more' : 'expand_less' }}</span>
+    <span class="material-icons filter-toggle-icon" aria-hidden="true">{{ collapsed() ? 'expand_more' : 'expand_less' }}</span>
   </button>
   @if (!collapsed() && form(); as f) {
     <div class="filter-body">

@@ -1,25 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { PwaStatusComponent } from '@ydm/shared/ui/pwa-status';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AddToHomeScreenComponent } from './components/add-to-home-screen/add-to-home-screen.component';
-import { AuthService } from './core/services/auth.service';
-import { ReminderService } from './services/reminder.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, AddToHomeScreenComponent],
-  template: `<router-outlet></router-outlet><app-add-to-home-screen />`,
+  imports: [RouterOutlet, AddToHomeScreenComponent,PwaStatusComponent],
+  template: `<router-outlet></router-outlet><app-add-to-home-screen /><ydm-pwa-status />`,
   styles: []
 })
-export class AppComponent implements OnInit {
-  title = 'ServantApp';
-
-  constructor(
-    private authService: AuthService,
-    private reminderService: ReminderService
-  ) {}
-
-  ngOnInit(): void {
-    // Keep empty or add other init logic
-  }
-}
+export class AppComponent {title = 'ServantApp';}

@@ -7,3 +7,5 @@ public record ScheduleDto(Guid Id, string DaysOfWeek, string TimeOfDay, bool IsA
 public record RegisterDeviceTokenRequest(string Token, string? DeviceName, string AppType = "Servant");
 
 public record UnregisterDeviceTokenRequest(string Token);
+
+public record UpdateScheduleRequest(string DaysOfWeek,string TimeOfDay,bool IsActive);

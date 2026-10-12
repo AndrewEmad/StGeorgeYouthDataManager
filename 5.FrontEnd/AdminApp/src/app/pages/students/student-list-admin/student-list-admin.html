@@ -1,10 +1,10 @@
 <ng-template #selectAllHeader>
-  <input type="checkbox" [checked]="allFilteredSelected" (change)="selectAllFiltered()" title="تحديد الكل" class="col-checkbox-input" />
+  <label class="ydm-check-target"><input type="checkbox" [checked]="allFilteredSelected" [indeterminate]="pageSelectionIndeterminate" [disabled]="loading || bulkAssignSaving" aria-label="تحديد الصفحة الحالية" (change)="selectAllFiltered()" title="تحديد الصفحة الحالية" class="col-checkbox-input" /></label>
 </ng-template>
 <ng-template #rowCheckbox let-row>
-  <span (click)="$event.stopPropagation()">
-    <input type="checkbox" [checked]="isSelected(row)" (change)="toggleSelection(row)" class="col-checkbox-input" />
-  </span>
+  <label class="ydm-check-target" (click)="$event.stopPropagation()">
+    <input type="checkbox" [checked]="isSelected(row)" (change)="toggleSelection(row)" [attr.aria-label]="'تحديد '+row.fullName" class="col-checkbox-input" />
+  </label>
 </ng-template>
 <ng-template #servantNameCell let-row>
   @if (row.servantName) {
@@ -19,18 +19,21 @@
 <ng-template #rowActionsTemplate let-row>
   <button type="button" class="btn-outline sm" (click)="openEdit(row)">تعديل</button>
   <button type="button" class="btn-outline sm" (click)="openAssignModal(row)">تخصيص</button>
-  <button type="button" class="btn-outline sm danger" (click)="deleteStudent(row)">حذف</button>
+  <button type="button" class="btn-outline sm danger" (click)="deleteStudent(row)">أرشفة</button>
 </ng-template>
 
 <div class="animate-slide">
+  @if(formMessage){<p class="ydm-notice" role="status">{{formMessage}} @if(photoRetry){<button class="btn-outline" type="button" (click)="retryPhoto()" [disabled]="photoRetryBusy">إعادة رفع الصورة فقط</button>}</p>}
+  @if(listError){<p class="ydm-notice text-error" role="alert">{{listError}} <button class="btn-outline" type="button" (click)="loadData()">إعادة المحاولة</button></p>}
+
   <app-content-header title="إدارة المخدومين" subtitle="عرض وتوزيع المخدومين على الخدام">
-    <div actions class="header-actions">
+    <div actions class="header-actions"><a class="btn-outline" routerLink="/dashboard/archived-students">الطلاب المؤرشفون</a>
       <button type="button" class="btn-outline" (click)="openBulkUploadModal()" [disabled]="uploadingCsv">
-        <span class="material-icons">upload_file</span>
+        <span class="material-icons" aria-hidden="true">upload_file</span>
         {{ uploadingCsv ? 'جاري الاستيراد...' : 'استيراد من ملف' }}
       </button>
       <button class="btn-primary" (click)="openAddModal()">
-        <span class="material-icons">person_add</span>
+        <span class="material-icons" aria-hidden="true">person_add</span>
         إضافة مخدوم
       </button>
     </div>
@@ -39,7 +42,7 @@
   @if (uploadResult) {
     <app-card class="upload-result">
       <div class="upload-result-header">
-        <span class="material-icons">info</span>
+        <span class="material-icons" aria-hidden="true">info</span>
         <strong>نتيجة الاستيراد:</strong> تم استيراد {{ uploadResult.created }} مخدوم.
         <button type="button" class="btn-close" (click)="uploadResult = null" aria-label="إغلاق">&times;</button>
       </div>
@@ -59,11 +62,11 @@
   <app-filters-bar [open]="showFilters" (openChange)="showFilters = !showFilters">
     <div class="filters-grid">
       <app-form-field label="بحث (اسم، تليفون، منطقة)">
-        <input type="text" [(ngModel)]="filters.search" (ngModelChange)="applyFilters()" class="form-input" placeholder="بحث..." />
+        <input type="text" [(ngModel)]="filters.search" (ngModelChange)="searchChanged()" class="form-input" placeholder="بحث..." />
       </app-form-field>
       <app-form-field label="المنطقة">
         <select [(ngModel)]="filters.area" (ngModelChange)="applyFilters()" class="form-input">
-          <option value="">— الكل —</option>
+          <option value="">— الكل —</option><option value="__missing__">منطقة غير مسجلة</option>
           @for (a of regionOptions; track a) {
             <option [value]="a">{{ a }}</option>
           }
@@ -71,7 +74,7 @@
       </app-form-field>
       <app-form-field label="السنة الدراسية">
         <select [(ngModel)]="filters.academicYear" (ngModelChange)="applyFilters()" class="form-input">
-          <option value="">— الكل —</option>
+          <option value="">— الكل —</option><option value="__missing__">سنة غير مسجلة</option>
           @for (y of academicYearOptions; track y) {
             <option [value]="y">{{ y }}</option>
           }
@@ -84,15 +87,8 @@
           <option value="1">أنثى</option>
         </select>
       </app-form-field>
-      <app-form-field label="الخادم">
-        <select [(ngModel)]="filters.servantId" (ngModelChange)="applyFilters()" class="form-input">
-          <option value="">— الكل —</option>
-          <option value="_none">غير مخصص</option>
-          @for (serv of servants; track serv.id) {
-            <option [value]="serv.id">{{ serv.fullName }}</option>
-          }
-        </select>
-      </app-form-field>
+      <ydm-resource-picker kind="servants" label="الخادم" [value]="filters.servantId" [allowEmpty]="true" emptyLabel="كل الخدام" (valueChange)="filters.servantId=$event || '';applyFilters()"/>
+      <label>حالة الإسناد<select class="form-input" [(ngModel)]="filters.hasServant" (ngModelChange)="applyFilters()"><option value="">الكل</option><option value="yes">مسند</option><option value="no">غير مسند</option></select></label>
       <!-- <app-form-field label="التخصيص">
         <select [(ngModel)]="filters.hasServant" (ngModelChange)="applyFilters()" class="form-input">
           <option value="">— الكل —</option>
@@ -110,8 +106,9 @@
   @if (selectedStudentIds.size > 0) {
   <div class="bulk-actions">
     <span class="selected-count">{{ selectedStudentIds.size }} مخدوم محدد</span>
+    <button type="button" class="btn-outline" (click)="clearSelection()" [disabled]="bulkAssignSaving">مسح الاختيارات</button>
     <button type="button" class="btn-primary" (click)="openBulkAssignModal()">
-      <span class="material-icons">group_work</span>
+      <span class="material-icons" aria-hidden="true">group_work</span>
       تخصيص المحددين لخادم
     </button>
   </div>
@@ -143,13 +140,13 @@
   </app-card>
 </div>
 
-<input #csvFileInput type="file" accept=".csv" (change)="onCsvFileSelected($event)" class="hidden-file-input" />
+<input #csvFileInput type="file" accept=".csv" aria-label="اختيار ملف CSV للاستيراد" (change)="onCsvFileSelected($event)" class="hidden-file-input" />
 
 <!-- Modals outside animate-slide so position:fixed is relative to viewport -->
 @if (showAddModal) {
-<div class="modal-overlay">
-    <div class="glass-card modal-content animate-slide add-modal">
-      <h3>إضافة مخدوم جديد</h3>
+<app-modal title="إضافة مخدوم جديد" [visible]="showAddModal" [busy]="addSaving" (close)="showAddModal = false"><div body><fieldset class="ydm-fieldset" [disabled]="addSaving">
+      @if(formMessage){<p class="text-error" role="alert">{{formMessage}}</p>}
+
       <div class="form-group">
         <label>صورة (اختياري)</label>
         <app-profile-photo-input
@@ -161,29 +158,32 @@
         @if (addSaving) { <p class="photo-saving-indicator"><span class="photo-spinner"></span> جاري الحفظ...</p> }
       </div>
       <div class="form-group">
-        <label>الاسم الكامل *</label>
-        <input type="text" [(ngModel)]="newStudent.fullName" class="form-input" placeholder="الاسم الكامل" />
+        <label for="ydm-student-list-admin-1">الاسم الكامل *</label>
+        <input id="ydm-student-list-admin-1" type="text" maxlength="200" [(ngModel)]="newStudent.fullName" class="form-input" placeholder="الاسم الكامل" />
       </div>
       <div class="form-group">
-        <label>رقم التليفون *</label>
-        <input type="tel" [(ngModel)]="newStudent.phone" class="form-input" placeholder="رقم التليفون" />
+        <label for="ydm-student-list-admin-2">رقم التليفون *</label>
+        <input id="ydm-student-list-admin-2" type="tel" maxlength="20" dir="ltr" [(ngModel)]="newStudent.phone" class="form-input" placeholder="رقم التليفون" />
       </div>
+      <div class="form-group"><label>الهاتف البديل<input type="tel" dir="ltr" [(ngModel)]="newStudent.secondaryPhone" maxlength="20" class="form-input" /></label></div>
+      <div class="form-group"><label>شهر الميلاد (إذا كان التاريخ غير معروف)<select [(ngModel)]="newStudent.birthMonth" class="form-input" [disabled]="!!newStudent.birthDate"><option [ngValue]="null">غير معروف</option>@for(month of birthMonths;track month){<option [ngValue]="month">{{month}}</option>}</select></label></div>
+      <div class="form-group"><label>ملاحظات<textarea [(ngModel)]="newStudent.notes" maxlength="2000" class="form-input"></textarea></label></div>
       <div class="form-group">
         <label>تاريخ الميلاد</label>
-        <span class="date-input-wrap" (click)="birthDateInput.showPicker()"><input #birthDateInput type="date" [(ngModel)]="newStudent.birthDate" class="form-input" /></span>
+        <span class="date-input-wrap" (click)="safePicker(birthDateInput)"><input #birthDateInput type="date" aria-label="تاريخ الميلاد" [(ngModel)]="newStudent.birthDate" class="form-input" /></span>
       </div>
       <div class="form-group">
-        <label>العنوان</label>
-        <input type="text" [(ngModel)]="newStudent.address" class="form-input" placeholder="العنوان" />
+        <label for="ydm-student-list-admin-3">العنوان</label>
+        <input id="ydm-student-list-admin-3" type="text" [(ngModel)]="newStudent.address" class="form-input" placeholder="العنوان" />
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label>المنطقة</label>
-          <input type="text" [(ngModel)]="newStudent.area" class="form-input" placeholder="المنطقة" />
+          <label for="ydm-student-list-admin-4">المنطقة</label>
+          <input id="ydm-student-list-admin-4" type="text" [(ngModel)]="newStudent.area" class="form-input" placeholder="المنطقة" />
         </div>
         <div class="form-group">
-          <label>النوع</label>
-          <select [(ngModel)]="newStudent.gender" class="form-input">
+          <label for="ydm-student-list-admin-5">النوع</label>
+          <select id="ydm-student-list-admin-5" [(ngModel)]="newStudent.gender" class="form-input">
             <option [value]="0">ذكر</option>
             <option [value]="1">أنثى</option>
           </select>
@@ -191,26 +191,21 @@
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label>الكلية</label>
-          <input type="text" [(ngModel)]="newStudent.college" class="form-input" placeholder="الكلية" />
+          <label for="ydm-student-list-admin-6">الكلية</label>
+          <input id="ydm-student-list-admin-6" type="text" [(ngModel)]="newStudent.college" class="form-input" placeholder="الكلية" />
         </div>
         <div class="form-group">
-          <label>السنة الدراسية</label>
-          <input type="text" [(ngModel)]="newStudent.academicYear" class="form-input" placeholder="السنة" />
+          <label for="ydm-student-list-admin-7">السنة الدراسية</label>
+          <input id="ydm-student-list-admin-7" type="text" [(ngModel)]="newStudent.academicYear" class="form-input" placeholder="السنة" />
         </div>
       </div>
       <div class="form-group">
-        <label>أب الاعتراف</label>
-        <input type="text" [(ngModel)]="newStudent.confessionFather" class="form-input" placeholder="أب الاعتراف" />
+        <label for="ydm-student-list-admin-8">أب الاعتراف</label>
+        <input id="ydm-student-list-admin-8" type="text" [(ngModel)]="newStudent.confessionFather" class="form-input" placeholder="أب الاعتراف" />
       </div>
       <div class="form-group">
         <label>تخصيص لخادم</label>
-        <select [(ngModel)]="newStudent.servantId" class="form-input">
-          <option value="">-- بدون تخصيص --</option>
-          @for (serv of servants; track serv.id) {
-            <option [value]="serv.id">{{ serv.fullName }}</option>
-          }
-        </select>
+        <ydm-resource-picker kind="servants" label="المسؤول" [value]="newStudent.servantId || null" (valueChange)="newStudent.servantId=$event" [allowEmpty]="true" [disabled]="addSaving" />
       </div>
       <div class="modal-actions">
         <button class="btn-outline" (click)="showAddModal = false" [disabled]="addSaving">إلغاء</button>
@@ -218,14 +213,13 @@
           {{ addSaving ? 'جاري الحفظ...' : 'إضافة' }}
         </button>
       </div>
-    </div>
-  </div>
+    </fieldset></div></app-modal>
 }
 
 @if (showEditModal) {
-<div class="modal-overlay" (click)="closeEdit()">
-  <div class="glass-card modal-content animate-slide add-modal" (click)="$event.stopPropagation()">
-    <h3>تعديل المخدوم</h3>
+<app-modal title="تعديل المخدوم" [visible]="showEditModal" [busy]="editSaving" (close)="closeEdit()"><div body><fieldset class="ydm-fieldset" [disabled]="editSaving">
+    @if(formMessage){<p class="text-error" role="alert">{{formMessage}}</p>}
+
     <div class="form-group">
       <label>صورة (اختياري)</label>
       <app-profile-photo-input
@@ -237,29 +231,32 @@
       @if (editSaving) { <p class="photo-saving-indicator"><span class="photo-spinner"></span> جاري الحفظ...</p> }
     </div>
     <div class="form-group">
-      <label>الاسم الكامل *</label>
-      <input type="text" [(ngModel)]="editForm.fullName" class="form-input" placeholder="الاسم الكامل" />
+      <label for="ydm-student-list-admin-9">الاسم الكامل *</label>
+      <input id="ydm-student-list-admin-9" type="text" maxlength="200" [(ngModel)]="editForm.fullName" class="form-input" placeholder="الاسم الكامل" />
     </div>
     <div class="form-group">
-      <label>رقم التليفون *</label>
-      <input type="tel" [(ngModel)]="editForm.phone" class="form-input" placeholder="رقم التليفون" />
+      <label for="ydm-student-list-admin-10">رقم التليفون *</label>
+      <input id="ydm-student-list-admin-10" type="tel" maxlength="20" dir="ltr" [(ngModel)]="editForm.phone" class="form-input" placeholder="رقم التليفون" />
     </div>
+      <div class="form-group"><label>الهاتف البديل<input type="tel" dir="ltr" [(ngModel)]="editForm.secondaryPhone" maxlength="20" class="form-input" /></label></div>
+      <div class="form-group"><label>شهر الميلاد (إذا كان التاريخ غير معروف)<select [(ngModel)]="editForm.birthMonth" class="form-input" [disabled]="!!editForm.birthDate"><option [ngValue]="null">غير معروف</option>@for(month of birthMonths;track month){<option [ngValue]="month">{{month}}</option>}</select></label></div>
+      <div class="form-group"><label>ملاحظات<textarea [(ngModel)]="editForm.notes" maxlength="2000" class="form-input"></textarea></label></div>
     <div class="form-group">
       <label>تاريخ الميلاد</label>
-      <span class="date-input-wrap" (click)="editBirthDateInput.showPicker()"><input #editBirthDateInput type="date" [(ngModel)]="editForm.birthDate" class="form-input" /></span>
+      <span class="date-input-wrap" (click)="safePicker(editBirthDateInput)"><input #editBirthDateInput type="date" aria-label="تاريخ الميلاد" [(ngModel)]="editForm.birthDate" class="form-input" /></span>
     </div>
     <div class="form-group">
-      <label>العنوان</label>
-      <input type="text" [(ngModel)]="editForm.address" class="form-input" placeholder="العنوان" />
+      <label for="ydm-student-list-admin-11">العنوان</label>
+      <input id="ydm-student-list-admin-11" type="text" [(ngModel)]="editForm.address" class="form-input" placeholder="العنوان" />
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>المنطقة</label>
-        <input type="text" [(ngModel)]="editForm.area" class="form-input" placeholder="المنطقة" />
+        <label for="ydm-student-list-admin-12">المنطقة</label>
+        <input id="ydm-student-list-admin-12" type="text" [(ngModel)]="editForm.area" class="form-input" placeholder="المنطقة" />
       </div>
       <div class="form-group">
-        <label>النوع</label>
-        <select [(ngModel)]="editForm.gender" class="form-input">
+        <label for="ydm-student-list-admin-13">النوع</label>
+        <select id="ydm-student-list-admin-13" [(ngModel)]="editForm.gender" class="form-input">
           <option [value]="0">ذكر</option>
           <option [value]="1">أنثى</option>
         </select>
@@ -267,26 +264,21 @@
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>الكلية</label>
-        <input type="text" [(ngModel)]="editForm.college" class="form-input" placeholder="الكلية" />
+        <label for="ydm-student-list-admin-14">الكلية</label>
+        <input id="ydm-student-list-admin-14" type="text" [(ngModel)]="editForm.college" class="form-input" placeholder="الكلية" />
       </div>
       <div class="form-group">
-        <label>السنة الدراسية</label>
-        <input type="text" [(ngModel)]="editForm.academicYear" class="form-input" placeholder="السنة" />
+        <label for="ydm-student-list-admin-15">السنة الدراسية</label>
+        <input id="ydm-student-list-admin-15" type="text" [(ngModel)]="editForm.academicYear" class="form-input" placeholder="السنة" />
       </div>
     </div>
     <div class="form-group">
-      <label>أب الاعتراف</label>
-      <input type="text" [(ngModel)]="editForm.confessionFather" class="form-input" placeholder="أب الاعتراف" />
+      <label for="ydm-student-list-admin-16">أب الاعتراف</label>
+      <input id="ydm-student-list-admin-16" type="text" [(ngModel)]="editForm.confessionFather" class="form-input" placeholder="أب الاعتراف" />
     </div>
     <div class="form-group">
       <label>تخصيص لخادم</label>
-      <select [(ngModel)]="editForm.servantId" class="form-input">
-        <option value="">-- بدون تخصيص --</option>
-        @for (serv of servants; track serv.id) {
-          <option [value]="serv.id">{{ serv.fullName }}</option>
-        }
-      </select>
+      <ydm-resource-picker kind="servants" label="المسؤول" [value]="editForm.servantId || null" (valueChange)="editForm.servantId=$event" [allowEmpty]="true" [disabled]="editSaving" />
     </div>
     <div class="modal-actions">
       <button type="button" class="btn-outline" (click)="closeEdit()" [disabled]="editSaving">إلغاء</button>
@@ -294,55 +286,44 @@
         {{ editSaving ? 'جاري الحفظ...' : 'حفظ التعديلات' }}
       </button>
     </div>
-  </div>
-</div>
+  </fieldset></div></app-modal>
 }
 
 @if (showAssignModal) {
-<div class="modal-overlay">
-  <div class="glass-card modal-content animate-slide sm">
-    <h3>تخصيص مخدوم لخادم</h3>
+<app-modal title="تخصيص مخدوم لخادم" [visible]="showAssignModal" [busy]="assignSaving" (close)="showAssignModal = false"><div body><fieldset class="ydm-fieldset" [disabled]="assignSaving">
+
     <p>تخصيص المخدوم: <strong>{{selectedStudent?.fullName}}</strong></p>
-    
+
     <div class="form-group mt-4">
       <label>الخادم</label>
-      <select [(ngModel)]="targetServantId" class="form-input">
-        <option value="">-- اختر خادماً --</option>
-        <option value="_none">— إلغاء التخصيص (بدون خادم) —</option>
-        @for (serv of servants; track serv.id) {
-          <option [value]="serv.id">{{ serv.fullName }}</option>
-        }
-      </select>
+      <ydm-resource-picker kind="servants" label="المسؤول" [value]="targetServantId" [selectedLabel]="selectedStudent?.servantName || ''" [allowEmpty]="true" [disabled]="assignSaving" (valueChange)="targetServantId=$event || '_none'"/>
     </div>
 
     <div class="modal-actions">
       <button class="btn-outline" (click)="showAssignModal = false">إلغاء</button>
       <button class="btn-primary" [disabled]="!targetServantId" (click)="onAssign()">{{ targetServantId === '_none' ? 'حفظ (إلغاء التخصيص)' : 'تأكيد التخصيص' }}</button>
     </div>
-  </div>
-</div>
+  </fieldset></div></app-modal>
 }
 
 @if (showBulkUploadModal) {
-<div class="modal-overlay bulk-upload-modal-overlay" (click)="closeBulkUploadModal()">
-  <div class="glass-card modal-content bulk-upload-modal-content animate-slide" (click)="$event.stopPropagation()">
-    <h3>استيراد من ملف CSV</h3>
+<app-modal title="استيراد من ملف CSV" [visible]="showBulkUploadModal" [busy]="uploadingCsv" (close)="closeBulkUploadModal()"><div body><fieldset class="ydm-fieldset" [disabled]="uploadingCsv">
+
     <p class="text-muted small">حمّل النموذج واملأه ثم اختر الملف للاستيراد.</p>
     <div class="bulk-upload-modal-buttons">
       <button type="button" class="btn-outline bulk-upload-btn" (click)="downloadCsvTemplate()">
-        <span class="material-icons">download</span>
+        <span class="material-icons" aria-hidden="true">download</span>
         تحميل النموذج
       </button>
       <button type="button" class="btn-primary bulk-upload-btn" (click)="triggerCsvFileSelect()">
-        <span class="material-icons">upload_file</span>
+        <span class="material-icons" aria-hidden="true">upload_file</span>
         اختيار ملف CSV
       </button>
     </div>
     <div class="modal-actions">
       <button type="button" class="btn-outline" (click)="closeBulkUploadModal()">إغلاق</button>
     </div>
-  </div>
-</div>
+  </fieldset></div></app-modal>
 }
 
 @if (pendingCropFile) {
@@ -354,18 +335,12 @@
 }
 
 @if (showBulkAssignModal) {
-<div class="modal-overlay">
-  <div class="glass-card modal-content animate-slide sm">
-    <h3>تخصيص مخدومين لخادم</h3>
+<app-modal title="تخصيص مخدومين لخادم" [visible]="showBulkAssignModal" [busy]="bulkAssignSaving" (close)="showBulkAssignModal = false"><div body><fieldset class="ydm-fieldset" [disabled]="bulkAssignSaving">
+
     <p>تخصيص <strong>{{ selectedStudentIds.size }}</strong> مخدوم للخادم المختار.</p>
     <div class="form-group mt-4">
       <label>اختر الخادم</label>
-      <select [(ngModel)]="bulkTargetServantId" class="form-input">
-        <option value="">-- اختر خادماً --</option>
-        @for (serv of servants; track serv.id) {
-          <option [value]="serv.id">{{ serv.fullName }}</option>
-        }
-      </select>
+      <ydm-resource-picker kind="servants" label="المسؤول" [value]="bulkTargetServantId" [disabled]="bulkAssignSaving" (valueChange)="bulkTargetServantId=$event || ''"/>
     </div>
     <div class="modal-actions">
       <button class="btn-outline" (click)="showBulkAssignModal = false" [disabled]="bulkAssignSaving">إلغاء</button>
@@ -373,6 +348,20 @@
         {{ bulkAssignSaving ? 'جاري التخصيص...' : 'تأكيد التخصيص' }}
       </button>
     </div>
-  </div>
-</div>
+  </fieldset></div></app-modal>
 }
+
+<app-modal title="معاينة ملف الاستيراد" [visible]="csvPreview !== null" [busy]="uploadingCsv" (close)="cancelCsv()">
+  <div body>
+    <p>صفوف صالحة: {{ validCsvCount }} من {{ csvPreview?.length }}. راجع الأسماء وأرقام الهواتف قبل الاستيراد.</p>
+    <div class="table-wrap" role="region" aria-label="صفوف ملف الاستيراد" tabindex="0">
+      <table><thead><tr><th>الصف الأصلي</th><th>الاسم</th><th>الهاتف</th><th>النتيجة</th></tr></thead><tbody>
+        @for (row of csvPreview || []; track row.row) { <tr><td>{{ row.row }}</td><td>{{ row.student.fullName }}</td><td dir="ltr">{{ row.student.phone }}</td><td [class.text-error]="row.error">{{ row.error || 'صالح للاستيراد' }}@if(row.candidates?.length){<p>تطابق محتمل:</p>@for(candidate of row.candidates;track $index){<p>{{candidate.name}} {{candidate.row ? '· صف ' + candidate.row : '· مسجل بالفعل'}}</p>}<label class="ydm-check"><input type="checkbox" [(ngModel)]="row.duplicateReviewed" [disabled]="uploadingCsv || !!row.error" />راجعت التطابق؛ هذا سجل مستقل مقصود.</label>}</td></tr> }
+      </tbody></table>
+    </div>
+    <p class="text-error" role="alert">{{csvReviewError}}</p>@if(!csvReviewed){<button type="button" class="btn-outline" (click)="reviewCsv()" [disabled]="uploadingCsv">مراجعة التطابق مجددًا</button>}<p role="status">{{ uploadingCsv ? 'جارٍ حفظ الصفوف...' : '' }}</p>
+  </div>
+  <div actions><button class="btn-outline" [disabled]="uploadingCsv" (click)="cancelCsv()">إلغاء</button><button class="btn-primary" [disabled]="uploadingCsv || !csvReady" (click)="confirmCsv()">استيراد الصفوف الصالحة</button></div>
+</app-modal>
+
+<app-modal [visible]="archiveTarget!==null" title="أرشفة الطالب" [busy]="archiveBusy" (close)="archiveTarget=null"><div body><p>{{archiveTarget?.fullName}}</p><p>تلغي الأرشفة الطلبات والمهام المفتوحة وتحفظ السجلات التاريخية. الاستعادة تعيد الطالب دون إسناد ولا تعيد فتح العمل السابق.</p><label>سبب الأرشفة<textarea class="form-input" [(ngModel)]="archiveReason" maxlength="1000" [disabled]="archiveBusy" required></textarea></label>@if(archiveError){<p class="text-error" role="alert">{{archiveError}}</p>}</div><div actions><button type="button" class="btn-outline" (click)="archiveTarget=null" [disabled]="archiveBusy">إلغاء</button><button type="button" class="btn-primary" (click)="archiveStudent()" [disabled]="archiveBusy || !archiveReason.trim()">تأكيد الأرشفة</button></div></app-modal>

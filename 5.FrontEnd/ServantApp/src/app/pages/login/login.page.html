@@ -2,7 +2,7 @@
   <app-card class="login-card animate-fade">
     <div class="login-header">
       <div class="logo">
-        <span class="material-icons logo-icon">group</span>
+        <span class="material-icons logo-icon" aria-hidden="true">group</span>
       </div>
       <h1>افتقاد الشباب</h1>
       <p class="text-muted">نظام إدارة بيانات وخدمة الشباب</p>
@@ -10,16 +10,16 @@
 
     <form (submit)="onSubmit(); $event.preventDefault()">
       <div class="form-group">
-        <label>اسم المستخدم</label>
-        <input type="text" [value]="username()" (input)="username.set($any($event.target).value)" name="username" class="form-input" placeholder="أدخل اسم المستخدم" required />
+        <label for="ydm-login-page-1">اسم المستخدم</label>
+        <input id="ydm-login-page-1" type="text" [value]="username()" (input)="username.set($any($event.target).value)" name="username" class="form-input" placeholder="أدخل اسم المستخدم" required />
       </div>
       <div class="form-group">
-        <label>كلمة المرور</label>
-        <input type="password" [value]="password()" (input)="password.set($any($event.target).value)" name="password" class="form-input" placeholder="أدخل كلمة المرور" required />
+        <label for="ydm-login-page-2">كلمة المرور</label>
+        <input id="ydm-login-page-2" type="password" [value]="password()" (input)="password.set($any($event.target).value)" name="password" class="form-input" placeholder="أدخل كلمة المرور" required />
       </div>
       @if (error()) {
-        <div class="error-msg animate-fade">
-          <span class="material-icons">error_outline</span>
+        <div class="error-msg animate-fade" role="alert">
+          <span class="material-icons" aria-hidden="true">error_outline</span>
           {{ error() }}
         </div>
       }

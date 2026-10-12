@@ -1,17 +1,22 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterLink, RouterOutlet, RouterLinkActive, ActivatedRoute, NavigationEnd } from '@angular/router';
+import {NgTemplateOutlet} from '@angular/common';
+import {ModalComponent} from '@ydm/shared/ui/modal';
 import { filter } from 'rxjs/operators';
 import { AuthService } from '../core/services/auth.service';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterLink, RouterOutlet, RouterLinkActive],
+  imports: [RouterLink, RouterOutlet, RouterLinkActive,NgTemplateOutlet,ModalComponent],
   templateUrl: './layout.html',
   styleUrls: ['./layout.css'],
 })
 export class LayoutComponent implements OnInit, OnDestroy {
-  adminName = '';
+  get adminName(){return this.authService.currentUser()?.fullName || 'الإدارة';}
+  mobile=matchMedia('(max-width:768px)').matches || matchMedia('(display-mode:standalone)').matches;
+  private media=matchMedia('(max-width:768px)');
+  private resize=()=>{this.mobile=this.media.matches || matchMedia('(display-mode:standalone)').matches;if(!this.mobile)this.closeSidebar();};
   sidebarOpen = false;
   pageTitle = '';
   private sub?: ReturnType<Router['events']['subscribe']>;
@@ -21,7 +26,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute
   ) {
-    this.adminName = this.authService.currentUser()?.fullName || 'المدير';
+    this.media.addEventListener('change',this.resize);
   }
 
   ngOnInit() {
@@ -38,7 +43,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.sub?.unsubscribe();
+    this.sub?.unsubscribe();this.media.removeEventListener('change',this.resize);
     document.body.classList.remove('sidebar-open-mobile');
   }
 

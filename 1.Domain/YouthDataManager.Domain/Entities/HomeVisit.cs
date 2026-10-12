@@ -4,6 +4,10 @@ namespace YouthDataManager.Domain.Entities;
 
 public class HomeVisit
 {
+    public byte[] Version { get; set; } = [];
+    public bool IsVoided { get; set; }
+    public string? VoidReason { get; set; }
+
     public Guid Id { get; set; }
     public Guid StudentId { get; set; }
     public Student Student { get; set; } = null!;

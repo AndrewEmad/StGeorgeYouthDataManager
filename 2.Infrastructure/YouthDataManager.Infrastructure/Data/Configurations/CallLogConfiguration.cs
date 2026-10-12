@@ -9,7 +9,7 @@ public class CallLogConfiguration : IEntityTypeConfiguration<CallLog>
     public void Configure(EntityTypeBuilder<CallLog> builder)
     {
         builder.HasKey(e => e.Id);
-        builder.Property(e => e.Notes).HasMaxLength(1000);
+        builder.Property(e => e.Notes).HasMaxLength(2000);
 
         builder.HasOne(e => e.Student)
             .WithMany(s => s.CallLogs)

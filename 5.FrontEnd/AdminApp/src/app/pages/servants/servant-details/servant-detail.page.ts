@@ -1,3 +1,5 @@
+import {ActivityHistoryComponent} from '@ydm/shared/pages/activity-history';
+import {apiError} from '@ydm/shared/core/api';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -20,16 +22,13 @@ import { VisitOutcomePipe } from '../../../shared/pipes/visit-outcome.pipe';
   selector: 'app-servant-detail-page',
   standalone: true,
   imports: [
-    FormsModule,
-    RouterLink,
+    FormsModule,ActivityHistoryComponent,
     ContentHeaderComponent,
     LoaderComponent,
     DetailSectionComponent,
     StatItemComponent,
     ModalComponent,
     DateFormatPipe,
-    CallStatusPipe,
-    VisitOutcomePipe,
   ],
   templateUrl: './servant-detail.page.html',
   styleUrls: ['./servant-detail.page.css'],
@@ -40,7 +39,7 @@ export class ServantDetailPage implements OnInit, OnDestroy {
   performance: any = null;
   calls: CallLogDto[] = [];
   visits: HomeVisitDto[] = [];
-  loading = true;
+  loading = true;loadError='';performanceError='';
   showPasswordModal = false;
   newPassword = '';
   confirmPassword = '';
@@ -64,33 +63,11 @@ export class ServantDetailPage implements OnInit, OnDestroy {
         if (user.photoPath) {
           this.usersService.getPhotoBlobUrl(id).subscribe((url) => (this.servantPhotoUrl = url));
         }
-        let done = 0;
-        const check = () => {
-          if (++done === 3) this.loading = false;
-        };
-        this.reportsService.getServantPerformance(id).subscribe({
-          next: (p) => {
-            this.performance = p;
-            check();
-          },
-          error: check,
-        });
-        this.followUp.getServantCallHistory(id).subscribe({
-          next: (c) => {
-            this.calls = c || [];
-            check();
-          },
-          error: check,
-        });
-        this.followUp.getServantVisitHistory(id).subscribe({
-          next: (v) => {
-            this.visits = v || [];
-            check();
-          },
-          error: check,
-        });
+        this.loading=false;
+        this.reportsService.getServantPerformance(id).subscribe({next:p=>this.performance=p,error:e=>this.performanceError=apiError(e)});
+
       },
-      error: () => (this.loading = false),
+      error: e => {this.loading=false;this.loadError=apiError(e);},
     });
   }
 
@@ -146,11 +123,13 @@ export class ServantDetailPage implements OnInit, OnDestroy {
   }
 
   closeChangePassword() {
+    if(this.passwordLoading)return;
     this.showPasswordModal = false;
     this.passwordError = '';
   }
 
   submitChangePassword() {
+    if(this.passwordLoading)return;
     this.passwordError = '';
     if (!this.newPassword.trim()) {
       this.passwordError = 'أدخل كلمة المرور الجديدة';

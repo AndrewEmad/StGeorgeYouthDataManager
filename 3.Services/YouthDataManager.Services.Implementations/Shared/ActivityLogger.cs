@@ -5,16 +5,16 @@ using Microsoft.AspNetCore.Http;
 using YouthDataManager.Domain.Entities;
 using YouthDataManager.Domain.Repositories.Tracking;
 using YouthDataManager.Shared.Service.Abstractions;
-using YouthDataManager.Infrastructure.Data;
+
 
 namespace YouthDataManager.Shared.Service.Implementations
 {
     public class ActivityLogger : IActivityLogger
     {
-        private readonly AppDbContext _context;
+        private readonly IApplicationStore _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ActivityLogger(AppDbContext context, IHttpContextAccessor httpContextAccessor)
+        public ActivityLogger(IApplicationStore context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
@@ -28,8 +28,8 @@ namespace YouthDataManager.Shared.Service.Implementations
 
             var log = new ActivityLog(action, details, userName, userRole);
 
-            _context.ActivityLogs.Add(log);
-            await _context.SaveChangesAsync();
+            _context.Add(log);
+            await _context.Save();
         }
     }
 }

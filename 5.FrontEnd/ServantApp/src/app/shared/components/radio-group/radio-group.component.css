@@ -26,7 +26,7 @@
 .radio-input {
   width: 18px;
   height: 18px;
-  accent-color: var(--primary, #6366f1);
+  accent-color: var(--primary, var(--primary));
   cursor: pointer;
 }
 

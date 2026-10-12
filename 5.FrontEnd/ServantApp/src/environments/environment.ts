@@ -1,5 +1,5 @@
 export const environment = {
-  production: false,
+  production: true,
   apiUrl: 'https://stgeorge-youth-data.runasp.net/api',
   firebase: {
     apiKey: "AIzaSyAd8mOVdDYhv9Jau5yYYjuLhH54-JZtHXk",

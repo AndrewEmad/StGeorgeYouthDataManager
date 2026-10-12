@@ -418,3 +418,12 @@ FodyWeavers.xsd
 appSettings.json
 appsettings.Development.json
 /4.WebApis/YouthDataManager.WebApi/firebase-service-account.json
+
+# Local dependency migration backups and browser test output
+node_modules.pre-workspace/
+package-lock.pre-workspace.json
+playwright-report/
+test-results/
+
+/artifacts/
+/5.FrontEnd/pages/

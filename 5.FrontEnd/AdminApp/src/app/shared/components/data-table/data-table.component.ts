@@ -1,3 +1,4 @@
+import { csvDocument } from '@ydm/shared/core/utils';
 import {
   Component,
   input,
@@ -27,8 +28,8 @@ export class DataTableComponent<T extends object = Record<string, unknown>> {
   loading = input<boolean>(false);
   totalCount = input<number>(0);
   page = input<number>(1);
-  pageSize = input<number>(10);
-  pageSizeOptions = input<number[]>([5, 10, 20, 50]);
+  pageSize = input<number>(25);
+  pageSizeOptions = input<number[]>([25, 50, 100]);
   sortBy = input<string | null>(null);
   sortDesc = input<boolean>(false);
   emptyMessage = input<string>('لا توجد بيانات');
@@ -62,15 +63,7 @@ export class DataTableComponent<T extends object = Record<string, unknown>> {
   exportCsv(): void {
     const cols = this.columns();
     const rows = this.data();
-    const headers = cols.map((c) => c.header).join(',');
-    const escape = (v: unknown) => {
-      const s = v == null ? '' : String(v);
-      return s.includes(',') || s.includes('"') ? `"${s.replace(/"/g, '""')}"` : s;
-    };
-    const lines = rows.map((row) =>
-      cols.map((c) => escape(this.getValue(row, c.key))).join(',')
-    );
-    const csv = ['\ufeff', headers, ...lines].join('\r\n');
+    const csv = csvDocument(cols.map(c => c.header), rows.map(row => cols.map(c => this.getValue(row, c.key))));
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

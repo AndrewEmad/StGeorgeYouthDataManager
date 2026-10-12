@@ -33,7 +33,7 @@ export class LoginPage {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          this.router.navigate(res.requiresPasswordChange ? ['/change-password'] : ['/dashboard']);
+          this.authService.navigateAfterAuthentication();
         },
         error: () => {
           this.error.set('اسم المستخدم أو كلمة المرور غير صحيحة');

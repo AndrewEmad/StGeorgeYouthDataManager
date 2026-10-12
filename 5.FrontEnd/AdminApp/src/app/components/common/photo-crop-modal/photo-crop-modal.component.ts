@@ -1,10 +1,11 @@
 import { Component, input, output, viewChild, signal, computed } from '@angular/core';
+import { ModalComponent } from '@ydm/shared/ui/modal';
 import { ImageCropperComponent, ImageCroppedEvent } from 'ngx-image-cropper';
 
 @Component({
   selector: 'app-photo-crop-modal',
   standalone: true,
-  imports: [ImageCropperComponent],
+  imports: [ImageCropperComponent,ModalComponent],
   templateUrl: './photo-crop-modal.component.html',
   styleUrl: './photo-crop-modal.component.css',
 })
@@ -15,11 +16,13 @@ export class PhotoCropModalComponent {
   cropperRef = viewChild<ImageCropperComponent>(ImageCropperComponent);
   cropError = signal<string | null>(null);
   cropping = signal(false);
+  ready = signal(false);
 
   croppedFile = output<File>();
   cancel = output<void>();
 
   onConfirm(): void {
+    if (this.cropping() || !this.ready()) return;
     const cropper = this.cropperRef();
     if (!cropper) {
       this.cropError.set('لم يتم تحميل الصورة بعد');
@@ -56,7 +59,7 @@ export class PhotoCropModalComponent {
   }
 
   onCancel(): void {
-    this.cancel.emit();
+    if (!this.cropping()) this.cancel.emit();
   }
 
   onLoadFailed(): void {

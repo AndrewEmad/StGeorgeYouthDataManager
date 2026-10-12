@@ -40,9 +40,9 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("paged")]
-    public async Task<IActionResult> GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 50, [FromQuery] string? search = null, [FromQuery] string? role = null, [FromQuery] bool? isActive = null, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
+    public async Task<IActionResult> GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 25, [FromQuery] string? search = null, [FromQuery] string? role = null, [FromQuery] bool? isActive = null, [FromQuery] string? sortBy = null, [FromQuery] bool? sortDesc = null)
     {
-        if (pageSize > 50) pageSize = 50;
+        if(page<1 || pageSize is <1 or >100 || (long)(page-1)*pageSize>int.MaxValue)return BadRequest("Invalid pagination.");
         var result = await _userService.GetPagedAsync(page, pageSize, search, role, isActive, sortBy, sortDesc);
         if (result.Status != ServiceResultStatus.Success) return BadRequest(result.Message);
         return Ok(result.Data);
@@ -111,7 +111,8 @@ public class UsersController : ControllerBase
             return BadRequest(new { message = result.Message });
         user.PhotoPath = result.Data;
         user.UpdatedAt = DateTime.UtcNow;
-        await _userManager.UpdateAsync(user);
+        var saved=await _userManager.UpdateAsync(user);
+        if(!saved.Succeeded)return StatusCode(500,new {message="Photo file prepared, but metadata could not be saved. The previous photo remains available."});
         return Ok(new { photoPath = result.Data });
     }
 

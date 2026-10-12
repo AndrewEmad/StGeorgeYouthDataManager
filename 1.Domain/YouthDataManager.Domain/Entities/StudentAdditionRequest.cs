@@ -4,6 +4,12 @@ namespace YouthDataManager.Domain.Entities;
 
 public class StudentAdditionRequest
 {
+    public Guid? CreatedStudentId { get; set; }
+
+    public string? RequestKey { get; set; }
+    public string? ProcessingReason { get; set; }
+    public byte[] Version { get; set; } = [];
+
     public Guid Id { get; set; }
     public Guid RequestedByUserId { get; set; }
     public ApplicationUser RequestedByUser { get; set; } = null!;
@@ -23,5 +29,6 @@ public class StudentAdditionRequest
     public string? ConfessionFather { get; set; }
     public string? Notes { get; set; }
     public Gender Gender { get; set; }
+    public int? BirthMonth { get; set; }
     public DateTime? BirthDate { get; set; }
 }

@@ -1,4 +1,1 @@
-<div class="form-group">
-  <label [for]="id() || null">{{ label() }}</label>
-  <ng-content />
-</div>
+<div class="form-group"><label [attr.for]="id() || null"><span>{{label()}}</span><ng-content /></label></div>

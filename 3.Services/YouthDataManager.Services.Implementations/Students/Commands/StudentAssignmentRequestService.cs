@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using YouthDataManager.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +21,8 @@ public class StudentAssignmentRequestService : IStudentAssignmentRequestService
     private readonly IStudentCommandsService _studentCommandsService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IActivityLogger _activityLogger;
+    private readonly IApplicationStore _store;
+    private readonly ICallerContext _caller;
     private readonly ILogger<StudentAssignmentRequestService> _logger;
     private readonly IDomainEventDispatcher _dispatcher;
 
@@ -27,7 +31,7 @@ public class StudentAssignmentRequestService : IStudentAssignmentRequestService
         IStudentRepository studentRepository,
         IStudentCommandsService studentCommandsService,
         IUnitOfWork unitOfWork,
-        IActivityLogger activityLogger,
+        IActivityLogger activityLogger, IApplicationStore store, ICallerContext caller,
         ILogger<StudentAssignmentRequestService> logger,
         IDomainEventDispatcher dispatcher)
     {
@@ -35,13 +39,18 @@ public class StudentAssignmentRequestService : IStudentAssignmentRequestService
         _studentRepository = studentRepository;
         _studentCommandsService = studentCommandsService;
         _unitOfWork = unitOfWork;
-        _activityLogger = activityLogger;
+        _activityLogger = activityLogger; _store = store; _caller=caller;
         _logger = logger;
         _dispatcher = dispatcher;
     }
 
-    public async Task<ServiceResult<Guid>> CreateRequest(Guid studentId, Guid requestedByUserId)
+    public Task<ServiceResult> Approve(Guid requestId, Guid adminUserId) => _store.Transaction(() => ApproveCore(requestId, adminUserId), r => r.Status == ServiceResultStatus.Success);
+    public Task<ServiceResult> Reject(Guid requestId, Guid adminUserId) => _store.Transaction(() => RejectCore(requestId, adminUserId), r => r.Status == ServiceResultStatus.Success);
+    public Task<ServiceResult<Guid>> CreateRequest(Guid studentId, Guid requestedByUserId) => _store.Transaction(() => CreateRequestCore(studentId, requestedByUserId), r => r.Status == ServiceResultStatus.Success);
+
+    private async Task<ServiceResult<Guid>> CreateRequestCore(Guid studentId, Guid requestedByUserId)
     {
+        if (!await EligibleUsers.Query(_store).AnyAsync(u=>u.Id==requestedByUserId, _caller.CancellationToken)) return ServiceResult<Guid>.Failure("Requester is inactive or ineligible.");
         try
         {
             var student = await _studentRepository.GetById(studentId);
@@ -71,6 +80,7 @@ public class StudentAssignmentRequestService : IStudentAssignmentRequestService
 
             return ServiceResult<Guid>.Success(request.Id);
         }
+        catch (DbUpdateException) { throw; }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating assignment request for student {StudentId}", studentId);
@@ -86,6 +96,7 @@ public class StudentAssignmentRequestService : IStudentAssignmentRequestService
             var dtos = list.Select(r => MapToDto(r));
             return ServiceResult<IEnumerable<StudentAssignmentRequestDto>>.Success(dtos);
         }
+        catch (DbUpdateException) { throw; }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting pending assignment requests");
@@ -101,6 +112,7 @@ public class StudentAssignmentRequestService : IStudentAssignmentRequestService
             var dtos = list.Select(r => MapToDto(r));
             return ServiceResult<IEnumerable<StudentAssignmentRequestDto>>.Success(dtos);
         }
+        catch (DbUpdateException) { throw; }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting assignment requests for user {UserId}", userId);
@@ -115,6 +127,7 @@ public class StudentAssignmentRequestService : IStudentAssignmentRequestService
             var r = await _requestRepository.GetPendingByStudent(studentId);
             return ServiceResult<StudentAssignmentRequestDto?>.Success(r != null ? MapToDto(r) : null);
         }
+        catch (DbUpdateException) { throw; }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting pending assignment request for student {StudentId}", studentId);
@@ -122,16 +135,22 @@ public class StudentAssignmentRequestService : IStudentAssignmentRequestService
         }
     }
 
-    public async Task<ServiceResult> Approve(Guid requestId, Guid adminUserId)
+    private async Task<ServiceResult> ApproveCore(Guid requestId, Guid adminUserId)
     {
         try
         {
             var request = await _requestRepository.GetById(requestId);
             if (request == null)
                 return ServiceResult.Failure("Request not found");
+            if (request.Status == AssignmentRequestStatus.Approved) return ServiceResult.Success();
+            if (_caller.ExpectedVersion!=null && _caller.ExpectedVersion!=Convert.ToBase64String(request.Version)) return ServiceResult.Failure("Request changed. Refresh before retrying.",new ServiceError("Conflict"));
             if (request.Status != AssignmentRequestStatus.Pending)
-                return ServiceResult.Failure("Request is already processed.");
+                return ServiceResult.Failure("Request is already processed.",new ServiceError("Conflict"));
+            if (!await EligibleUsers.Query(_store).AnyAsync(u=>u.Id==request.RequestedByUserId, _caller.CancellationToken)) return ServiceResult.Failure("Requester is inactive or ineligible.",new ServiceError("Conflict"));
 
+
+            var currentStudent=await _studentRepository.GetById(request.StudentId);
+            if (currentStudent==null || currentStudent.ServantId!=null) return ServiceResult.Failure("Ownership or student status changed.",new ServiceError("Conflict"));
             var assignResult = await _studentCommandsService.AssignToServant(request.StudentId, request.RequestedByUserId);
             if (assignResult.Status != ServiceResultStatus.Success)
                 return assignResult;
@@ -139,6 +158,7 @@ public class StudentAssignmentRequestService : IStudentAssignmentRequestService
             request.Status = AssignmentRequestStatus.Approved;
             request.ProcessedAt = DateTime.UtcNow;
             request.ProcessedByUserId = adminUserId;
+            request.ProcessingReason=_caller.Reason?.Trim();
             _requestRepository.Update(request);
 
             await _unitOfWork.SaveChangesAsync();
@@ -148,6 +168,7 @@ public class StudentAssignmentRequestService : IStudentAssignmentRequestService
 
             return ServiceResult.Success();
         }
+        catch (DbUpdateException) { throw; }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error approving assignment request {RequestId}", requestId);
@@ -155,19 +176,22 @@ public class StudentAssignmentRequestService : IStudentAssignmentRequestService
         }
     }
 
-    public async Task<ServiceResult> Reject(Guid requestId, Guid adminUserId)
+    private async Task<ServiceResult> RejectCore(Guid requestId, Guid adminUserId)
     {
         try
         {
             var request = await _requestRepository.GetById(requestId);
             if (request == null)
                 return ServiceResult.Failure("Request not found");
+            if (_caller.ExpectedVersion!=null && _caller.ExpectedVersion!=Convert.ToBase64String(request.Version)) return ServiceResult.Failure("Request changed. Refresh before retrying.",new ServiceError("Conflict"));
+            if (request.Status == AssignmentRequestStatus.Rejected) return ServiceResult.Success();
             if (request.Status != AssignmentRequestStatus.Pending)
-                return ServiceResult.Failure("Request is already processed.");
+                return ServiceResult.Failure("Request is already processed.",new ServiceError("Conflict"));
 
             request.Status = AssignmentRequestStatus.Rejected;
             request.ProcessedAt = DateTime.UtcNow;
             request.ProcessedByUserId = adminUserId;
+            request.ProcessingReason=_caller.Reason?.Trim();
             _requestRepository.Update(request);
             await _unitOfWork.SaveChangesAsync();
 
@@ -175,6 +199,7 @@ public class StudentAssignmentRequestService : IStudentAssignmentRequestService
 
             return ServiceResult.Success();
         }
+        catch (DbUpdateException) { throw; }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error rejecting assignment request {RequestId}", requestId);

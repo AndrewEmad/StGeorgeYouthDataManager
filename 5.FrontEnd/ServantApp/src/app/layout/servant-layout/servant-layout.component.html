@@ -2,24 +2,24 @@
   <div class="header-right">
     @if (!isDashboard) {
       <a routerLink="/dashboard" class="layout-nav-btn btn-back" aria-label="رجوع">
-        <span class="material-icons">arrow_forward</span>
+        <span class="material-icons" aria-hidden="true">arrow_forward</span>
       </a>
     }
     <h1 class="page-title">{{ pageTitle }}</h1>
   </div>
   <div class="header-left">
-    <a routerLink="/profile" class="profile-link" aria-label="الملف الشخصي">
-      <span class="material-icons">account_circle</span>
+    <a routerLink="/profile" class="profile-link" [attr.aria-label]="servantName + '، الملف الشخصي'" [title]="servantName">
+      <span class="material-icons" aria-hidden="true">account_circle</span>
       <span class="profile-name">{{ servantName }}</span>
     </a>
-    <a routerLink="/reminders" class="btn-notifications" aria-label="الإشعارات والتذكيرات">
-      <span class="material-icons">notifications</span>
+    <a routerLink="/notifications" class="btn-notifications" aria-label="الإشعارات والتذكيرات">
+      <span class="material-icons" aria-hidden="true">notifications</span>
     </a>
     <button type="button" class="btn-logout" (click)="logout()" aria-label="تسجيل الخروج">
-      <span class="material-icons">logout</span>
+      <span class="material-icons" aria-hidden="true">logout</span>
     </button>
   </div>
 </header>
-<div class="layout-content">
+<main class="layout-content">
   <router-outlet></router-outlet>
-</div>
+</main>

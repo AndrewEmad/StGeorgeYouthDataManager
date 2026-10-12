@@ -1,3 +1,4 @@
+using YouthDataManager.WebApi.Authorization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,16 +20,17 @@ namespace YouthDataManager.WebApi.Controllers;
 [Authorize]
 public class FollowUpController : ControllerBase
 {
+    private readonly ResourceAccess _access;
     private readonly IFollowUpCommandsService _commands;
     private readonly IFollowUpQueriesService _queries;
     private readonly UserManager<ApplicationUser> _userManager;
 
     public FollowUpController(
-        IFollowUpCommandsService commands,
+        IFollowUpCommandsService commands, ResourceAccess access,
         IFollowUpQueriesService queries,
         UserManager<ApplicationUser> userManager)
     {
-        _commands = commands;
+        _commands = commands; _access = access;
         _queries = queries;
         _userManager = userManager;
     }
@@ -40,7 +42,7 @@ public class FollowUpController : ControllerBase
         var result = await _commands.RegisterCall(request, userId);
         
         if (result.Status != ServiceResultStatus.Success)
-            return BadRequest(result);
+            return result.Errors.Any(e=>e.Code=="Forbidden") ? Forbid() : result.Errors.Any(e=>e.Code=="Conflict") ? Conflict(result) : BadRequest(result);
 
         return Ok(result.Data);
     }
@@ -52,7 +54,7 @@ public class FollowUpController : ControllerBase
         var result = await _commands.RegisterVisit(request, userId);
         
         if (result.Status != ServiceResultStatus.Success)
-            return BadRequest(result);
+            return result.Errors.Any(e=>e.Code=="Forbidden") ? Forbid() : result.Errors.Any(e=>e.Code=="Conflict") ? Conflict(result) : BadRequest(result);
 
         return Ok(result.Data);
     }
@@ -64,35 +66,47 @@ public class FollowUpController : ControllerBase
         var result = await _commands.UpdateVisit(id, request, userId);
 
         if (result.Status != ServiceResultStatus.Success)
-            return BadRequest(result);
+            return result.Errors.Any(e=>e.Code=="Forbidden") ? Forbid() : result.Errors.Any(e=>e.Code=="Conflict") ? Conflict(result) : BadRequest(result);
 
         return Ok();
     }
 
+    [HttpPut("call/{id:guid}")]
+    public async Task<IActionResult> UpdateCall(Guid id,UpdateCallLogRequest request) => Result(await _commands.UpdateCall(id,request,_access.UserId));
+    [HttpPost("call/{id:guid}/void")]
+    public async Task<IActionResult> VoidCall(Guid id,VoidActivityRequest request) => Result(await _commands.Void(id,false,request));
+    [HttpPost("visit/{id:guid}/void")]
+    public async Task<IActionResult> VoidVisit(Guid id,VoidActivityRequest request) => Result(await _commands.Void(id,true,request));
+    private IActionResult Result(ServiceResult r) => r.Status==ServiceResultStatus.Success ? Ok() : r.Errors.Any(e=>e.Code=="Forbidden") ? Forbid() : r.Errors.Any(e=>e.Code=="Conflict") ? Conflict(r) : BadRequest(r);
+
     [HttpGet("history/calls/{studentId}")]
     public async Task<IActionResult> GetCallHistory(Guid studentId)
     {
+        if (!await _access.Student(studentId)) return Forbid();
         var result = await _queries.GetStudentCallHistory(studentId);
-        return Ok(result.Data);
+        return result.Status==ServiceResultStatus.Success ? Ok(result.Data) : StatusCode(500,result);
     }
 
     [HttpGet("history/visits/{studentId}")]
     public async Task<IActionResult> GetVisitHistory(Guid studentId)
     {
+        if (!await _access.Student(studentId)) return Forbid();
         var result = await _queries.GetStudentVisitHistory(studentId);
-        return Ok(result.Data);
+        return result.Status==ServiceResultStatus.Success ? Ok(result.Data) : StatusCode(500,result);
     }
 
     [HttpGet("history/calls/servant/{servantId}")]
     public async Task<IActionResult> GetServantCallHistory(Guid servantId)
     {
+        if (!_access.Privileged && servantId != _access.UserId) return Forbid();
         var result = await _queries.GetServantCallHistory(servantId);
-        return Ok(result.Data);
+        return result.Status==ServiceResultStatus.Success ? Ok(result.Data) : StatusCode(500,result);
     }
 
     [HttpGet("history/visits/servant/{servantId}")]
     public async Task<IActionResult> GetServantVisitHistory(Guid servantId)
     {
+        if (!_access.Privileged && servantId != _access.UserId) return Forbid();
         var result = await _queries.GetServantVisitHistory(servantId);
         return Ok(result.Data);
     }

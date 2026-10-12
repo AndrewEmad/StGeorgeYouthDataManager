@@ -5,48 +5,55 @@
         type="button"
         class="burger-btn layout-nav-btn"
         (click)="toggleSidebar()"
-        aria-label="القائمة"
+        aria-label="القائمة" [attr.aria-expanded]="sidebarOpen"
       >
-        <span class="material-icons">{{ sidebarOpen ? 'close' : 'menu' }}</span>
+        <span class="material-icons" aria-hidden="true">{{ sidebarOpen ? 'close' : 'menu' }}</span>
       </button>
       <h1 class="top-bar-title">{{ pageTitle }}</h1>
     </div>
     <div class="top-bar-left">
-      <a routerLink="/dashboard/profile" class="top-bar-name link-name">
-        <span class="material-icons">account_circle</span>
-        {{ adminName }}
+      <a routerLink="/dashboard/profile" class="top-bar-name link-name" [attr.aria-label]="adminName + '، الملف الشخصي'" [title]="adminName">
+        <span class="material-icons" aria-hidden="true">account_circle</span>
+        <span class="account-name">{{ adminName }}</span>
       </a>
-      <button type="button" class="btn-logout" (click)="logout()">
-        <span class="material-icons">logout</span>
+      <button type="button" class="btn-logout" aria-label="تسجيل الخروج" (click)="logout()">
+        <span class="material-icons" aria-hidden="true">logout</span>
       </button>
     </div>
   </header>
 
   <div class="main-layout">
-    <div
-      class="sidebar-overlay"
-      [class.is-open]="sidebarOpen"
-      (click)="closeSidebar()"
-      aria-hidden="true"
-    ></div>
-
-    <aside class="glass-card sidebar" [class.is-open]="sidebarOpen">
+    <aside class="glass-card sidebar" [hidden]="mobile">
       <div class="sidebar-header">
-        <span class="material-icons brand-icon">hub</span>
+        <span class="material-icons brand-icon" aria-hidden="true">hub</span>
         <h2>الإدارة</h2>
         <button type="button" class="sidebar-close" (click)="closeSidebar()" aria-label="إغلاق">
-          <span class="material-icons">close</span>
+          <span class="material-icons" aria-hidden="true">close</span>
         </button>
       </div>
 
-      <nav class="side-nav">
+      <ng-container [ngTemplateOutlet]="navigation"/>
+    </aside>
+
+    <main class="content-area">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
+
+<ng-template #navigation>      <nav class="side-nav" aria-label="التنقل الرئيسي"><a routerLink="/dashboard/operations" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">monitor_heart</span><span>حالة الخدمة</span></a>
+        <a routerLink="/dashboard/notifications" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">notifications</span><span>الإشعارات</span></a>
+        <a routerLink="/dashboard/activity-history" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">history</span><span>سجل النشاط</span></a>
+        <a routerLink="/dashboard/tasks" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">checklist</span><span>مهام المتابعة</span></a>
+        <a routerLink="/dashboard/report-suite" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">query_stats</span><span>التقارير الشاملة</span></a>
+        <a routerLink="/dashboard/request-history" routerLinkActive="active" class="nav-item" (click)="closeSidebar()"><span class="material-icons" aria-hidden="true">history</span><span>سجل الطلبات</span></a>
         <a
           routerLink="/dashboard/stats"
           routerLinkActive="active"
           class="nav-item"
           (click)="closeSidebar()"
         >
-          <span class="material-icons">analytics</span>
+          <span class="material-icons" aria-hidden="true">analytics</span>
           <span>الإحصائيات</span>
         </a>
         <a
@@ -55,7 +62,7 @@
           class="nav-item"
           (click)="closeSidebar()"
         >
-          <span class="material-icons">badge</span>
+          <span class="material-icons" aria-hidden="true">badge</span>
           <span>الخدام</span>
         </a>
         <a
@@ -64,7 +71,7 @@
           class="nav-item"
           (click)="closeSidebar()"
         >
-          <span class="material-icons">groups</span>
+          <span class="material-icons" aria-hidden="true">groups</span>
           <span>المخدومين</span>
         </a>
         <a
@@ -73,7 +80,7 @@
           class="nav-item"
           (click)="closeSidebar()"
         >
-          <span class="material-icons">event_available</span>
+          <span class="material-icons" aria-hidden="true">event_available</span>
           <span>تسجيل الحضور</span>
         </a>
         <a
@@ -82,7 +89,7 @@
           class="nav-item"
           (click)="closeSidebar()"
         >
-          <span class="material-icons">person_remove</span>
+          <span class="material-icons" aria-hidden="true">person_remove</span>
           <span>طلبات الإزالة</span>
         </a>
         <a
@@ -91,7 +98,7 @@
           class="nav-item"
           (click)="closeSidebar()"
         >
-          <span class="material-icons">person_add</span>
+          <span class="material-icons" aria-hidden="true">person_add</span>
           <span>طلبات التخصيص</span>
         </a>
         <a
@@ -100,7 +107,7 @@
           class="nav-item"
           (click)="closeSidebar()"
         >
-          <span class="material-icons">person_add_alt_1</span>
+          <span class="material-icons" aria-hidden="true">person_add_alt_1</span>
           <span>طلبات إضافة مخدومين</span>
         </a>
         <a
@@ -110,23 +117,17 @@
           class="nav-item"
           (click)="closeSidebar()"
         >
-          <span class="material-icons">assessment</span>
+          <span class="material-icons" aria-hidden="true">assessment</span>
           <span>التقارير</span>
         </a>
         <a
-          routerLink="/dashboard/backups"
+          routerLink="/dashboard/data-exports"
           routerLinkActive="active"
           class="nav-item"
           (click)="closeSidebar()"
         >
-          <span class="material-icons">settings_backup_restore</span>
-          <span>النسخ الاحتياطي</span>
+          <span class="material-icons" aria-hidden="true">settings_backup_restore</span>
+          <span>تصدير البيانات</span>
         </a>
-      </nav>
-    </aside>
-
-    <main class="content-area">
-      <router-outlet></router-outlet>
-    </main>
-  </div>
-</div>
+      </nav></ng-template>
+<app-modal [visible]="sidebarOpen && mobile" title="قائمة الإدارة" (close)="closeSidebar()"><div body><ng-container [ngTemplateOutlet]="navigation"/></div></app-modal>

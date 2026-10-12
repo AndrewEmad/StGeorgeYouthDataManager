@@ -2,7 +2,7 @@
   <app-card class="login-card animate-slide">
     <div class="login-header">
       <div class="logo">
-        <span class="material-icons logo-icon">admin_panel_settings</span>
+        <span class="material-icons logo-icon" aria-hidden="true">admin_panel_settings</span>
       </div>
       <h1>مدير افتقاد الشباب</h1>
       <p class="text-muted">نظام إدارة بيانات وخدمة الشباب - الإدارة</p>
@@ -34,8 +34,8 @@
       </app-form-field>
 
       @if (error()) {
-        <div class="error-msg">
-          <span class="material-icons">error_outline</span>
+        <div class="error-msg" role="alert">
+          <span class="material-icons" aria-hidden="true">error_outline</span>
           {{ error() }}
         </div>
       }

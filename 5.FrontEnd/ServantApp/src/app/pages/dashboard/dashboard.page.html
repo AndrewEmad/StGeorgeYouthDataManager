@@ -1,15 +1,17 @@
 <div class="dashboard-wrapper">
-  <main class="container">
+  <section class="container">
     <p class="text-muted animate-fade">نظرة عامة على المخدومين ومتابعة الأسبوع</p>
 
     @if (loading()) {
       <app-loader />
+    } @else if(error()) {
+      <p class="ydm-notice text-error" role="alert">{{error()}} <button type="button" class="btn-outline" (click)="loadStats()">إعادة المحاولة</button></p>
     } @else {
       @let s = stats();
       <div class="stats-grid">
         <a routerLink="/students" class="stat-card-link">
           <app-card [class]="'stat-card animate-fade'" style="animation-delay: 0.1s">
-            <span class="material-icons icon-box indigo">people</span>
+            <span class="material-icons icon-box indigo" aria-hidden="true">people</span>
             <div class="stat-info">
               <h3>{{ s ? s.totalStudents : 0 }}</h3>
               <p>إجمالي المخدومين</p>
@@ -17,53 +19,59 @@
           </app-card>
         </a>
         <app-card [class]="'stat-card animate-fade'" style="animation-delay: 0.2s">
-          <span class="material-icons icon-box cyan">phone</span>
+          <span class="material-icons icon-box cyan" aria-hidden="true">phone</span>
           <div class="stat-info">
             <h3>{{ s ? s.callsThisWeek : 0 }}</h3>
             <p>مكالمات هذا الأسبوع</p>
           </div>
         </app-card>
         <app-card [class]="'stat-card animate-fade'" style="animation-delay: 0.3s">
-          <span class="material-icons icon-box emerald">home</span>
+          <span class="material-icons icon-box emerald" aria-hidden="true">home</span>
           <div class="stat-info">
             <h3>{{ s ? s.visitsThisWeek : 0 }}</h3>
             <p>زيارات هذا الأسبوع</p>
           </div>
         </app-card>
 
+        <a routerLink="/tasks" class="stat-card-link"><app-card [class]="'stat-card'"><span class="material-icons icon-box indigo" aria-hidden="true">checklist</span><div class="stat-info"><h3>{{s?.studentsNeedingFollowUp ?? '—'}}</h3><p>طلاب لديهم مهام مستحقة</p></div></app-card></a>
+        <a routerLink="/report-suite" class="stat-card-link"><app-card [class]="'stat-card'"><span class="material-icons icon-box indigo" aria-hidden="true">person_search</span><div class="stat-info"><h3>{{s?.studentsNotContacted ?? '—'}}</h3><p>طلاب لم تجرِ محاولة التواصل معهم</p></div></app-card></a>
       </div>
 
       <section class="actions-section animate-fade" style="animation-delay: 0.5s">
         <h2>روابط سريعة</h2>
         <div class="actions-grid">
+          <a routerLink="/tasks" class="glass-card action-item"><span class="material-icons" aria-hidden="true">checklist</span><span>مهام المتابعة</span></a>
+          <a routerLink="/activity-history" class="glass-card action-item"><span class="material-icons" aria-hidden="true">phone_in_talk</span><span>سجل مكالماتي وزياراتي</span></a>
+          <a routerLink="/request-history" class="glass-card action-item"><span class="material-icons" aria-hidden="true">history</span><span>سجل طلباتي</span></a>
+          <a routerLink="/report-suite" class="glass-card action-item"><span class="material-icons" aria-hidden="true">query_stats</span><span>تقارير المتابعة</span></a>
           <a routerLink="/students" class="glass-card action-item">
-            <span class="material-icons">list_alt</span>
+            <span class="material-icons" aria-hidden="true">list_alt</span>
             <span>قائمة المخدومين</span>
           </a>
           @if (s && s.totalStudents > 0) {
             <button type="button" class="glass-card action-item action-item-btn" (click)="openBulkWhatsAppModal()">
-              <span class="material-icons">chat</span>
+              <span class="material-icons" aria-hidden="true">chat</span>
               <span>إرسال واتساب جماعي</span>
             </button>
             <button type="button" class="glass-card action-item action-item-btn" (click)="openBulkSmsModal()">
-              <span class="material-icons">sms</span>
+              <span class="material-icons" aria-hidden="true">sms</span>
               <span>إرسال SMS جماعي</span>
             </button>
           }
           <a routerLink="/request-add-student" class="glass-card action-item">
-            <span class="material-icons">person_add</span>
+            <span class="material-icons" aria-hidden="true">person_add</span>
             <span>طلب إضافة مخدوم</span>
           </a>
           @if (authService.canRecordStudentAttendance()) {
             <a routerLink="/attendance" class="glass-card action-item">
-              <span class="material-icons">event_available</span>
+              <span class="material-icons" aria-hidden="true">event_available</span>
               <span>تسجيل الحضور</span>
             </a>
           }
         </div>
       </section>
     }
-  </main>
+  </section>
 </div>
 
 @if (showBulkWhatsAppModal()) {

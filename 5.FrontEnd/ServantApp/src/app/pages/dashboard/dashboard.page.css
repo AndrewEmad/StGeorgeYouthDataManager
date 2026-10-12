@@ -32,9 +32,9 @@
   font-size: 28px;
 }
 
-.icon-box.indigo { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
-.icon-box.cyan { background: rgba(6, 182, 212, 0.2); color: #22d3ee; }
-.icon-box.emerald { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+.icon-box.indigo { background: rgba(129, 140, 248, 0.2); color: #818cf8; }
+.icon-box.cyan { background: rgba(168, 85, 247, 0.2); color: var(--primary); }
+.icon-box.emerald { background: rgba(168, 85, 247, 0.2); color: var(--secondary); }
 .icon-box.amber { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
 
 .stat-info h3 {

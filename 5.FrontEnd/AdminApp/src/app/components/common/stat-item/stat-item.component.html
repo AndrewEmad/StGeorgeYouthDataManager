@@ -1,6 +1,6 @@
 @if (routerLink()) {
   <a [routerLink]="routerLink()" class="glass-card stat-item stat-item-link" [class]="variant()">
-    <span class="material-icons">{{ icon() }}</span>
+    <span class="material-icons" aria-hidden="true">{{ icon() }}</span>
     <div class="s-info">
       <h3>{{ value() }}</h3>
       <p>{{ label() }}</p>
@@ -9,7 +9,7 @@
   </a>
 } @else {
   <div class="glass-card stat-item" [class]="variant()">
-    <span class="material-icons">{{ icon() }}</span>
+    <span class="material-icons" aria-hidden="true">{{ icon() }}</span>
     <div class="s-info">
       <h3>{{ value() }}</h3>
       <p>{{ label() }}</p>

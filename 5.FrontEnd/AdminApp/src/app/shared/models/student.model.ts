@@ -10,6 +10,9 @@ export interface StudentEditLogDto {
 export interface CreateStudentRequest {
   fullName: string;
   phone: string;
+  secondaryPhone?: string | null;
+  notes?: string | null;
+  birthMonth?: number | null;
   address?: string | null;
   area?: string | null;
   college?: string | null;
@@ -24,6 +27,9 @@ export interface UpdateStudentRequest {
   id: string;
   fullName: string;
   phone: string;
+  secondaryPhone?: string | null;
+  notes?: string | null;
+  birthMonth?: number | null;
   address?: string | null;
   area?: string | null;
   college?: string | null;

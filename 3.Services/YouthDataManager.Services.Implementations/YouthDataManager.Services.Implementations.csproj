@@ -6,16 +6,16 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\1.Domain\YouthDataManager.Domain\YouthDataManager.Domain.csproj" />
-    <ProjectReference Include="..\..\2.Infrastructure\YouthDataManager.Infrastructure\YouthDataManager.Infrastructure.csproj" />
     <ProjectReference Include="..\YouthDataManager.Services.Abstractions\YouthDataManager.Services.Abstractions.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="FirebaseAdmin" Version="3.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.31" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
     <PackageReference Include="ClosedXML" Version="0.102.2" />
+    <!-- Patched transitive Excel packaging dependency; keep the existing export API. -->
+    <PackageReference Include="System.IO.Packaging" Version="8.0.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.6.2" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
   </ItemGroup>

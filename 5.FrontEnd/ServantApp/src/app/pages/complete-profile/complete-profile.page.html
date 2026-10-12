@@ -1,7 +1,7 @@
 <div class="complete-profile-container">
   <app-card class="login-card animate-fade">
     <div class="login-header">
-      <span class="material-icons logo-icon">person</span>
+      <span class="material-icons logo-icon" aria-hidden="true">person</span>
       <h1>إكمال الملف الشخصي</h1>
       <p class="text-muted">يرجى تعبئة البيانات المطلوبة للمتابعة</p>
     </div>
@@ -13,20 +13,20 @@
     @if (!profileLoading()) {
       <form (submit)="onSubmit(); $event.preventDefault()">
         <div class="form-group">
-          <label>الاسم الكامل</label>
-          <p class="form-readonly">{{ fullName() || '—' }}</p>
+          <label for="ydm-complete-profile-page-1">الاسم الكامل</label>
+          <input id="ydm-complete-profile-page-1" class="form-input" name="fullName" [value]="fullName()" (input)="fullName.set($any($event.target).value)" maxlength="200" required [disabled]="loading()" />
         </div>
         <div class="form-group">
-          <label>رقم التليفون</label>
-          <input type="tel" [value]="phone()" (input)="phone.set($any($event.target).value)" name="phone" class="form-input" placeholder="رقم التليفون" required />
+          <label for="ydm-complete-profile-page-2">رقم التليفون</label>
+          <input id="ydm-complete-profile-page-2" type="tel" [value]="phone()" (input)="phone.set($any($event.target).value)" name="phone" class="form-input" placeholder="رقم التليفون" required />
         </div>
         <div class="form-group">
-          <label>العنوان</label>
-          <textarea [value]="address()" (input)="address.set($any($event.target).value)" name="address" class="form-input form-textarea" placeholder="العنوان" rows="3" required></textarea>
+          <label for="ydm-complete-profile-page-3">العنوان</label>
+          <textarea id="ydm-complete-profile-page-3" [value]="address()" (input)="address.set($any($event.target).value)" name="address" class="form-input form-textarea" placeholder="العنوان" rows="3" [required]="addressRequired()"></textarea>
         </div>
         @if (error()) {
           <div class="error-msg">
-            <span class="material-icons">error_outline</span>
+            <span class="material-icons" aria-hidden="true">error_outline</span>
             {{ error() }}
           </div>
         }

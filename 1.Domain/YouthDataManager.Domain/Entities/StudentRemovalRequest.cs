@@ -4,6 +4,9 @@ namespace YouthDataManager.Domain.Entities;
 
 public class StudentRemovalRequest
 {
+    public string? ProcessingReason { get; set; }
+    public byte[] Version { get; set; } = [];
+
     public Guid Id { get; set; }
     public Guid StudentId { get; set; }
     public Student Student { get; set; } = null!;

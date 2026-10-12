@@ -1,0 +1,33 @@
+{
+  "name": "@ydm/shared",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./core/utils": "./core/utils.ts",
+    "./ui/modal": "./ui/modal.ts",
+    "./ui/styles/theme.css": "./ui/styles/theme.css",
+    "./core/api": "./core/api.ts",
+    "./ui/report-table": "./ui/report-table.ts",
+    "./pages/reports": "./pages/reports.ts",
+    "./pages/tasks": "./pages/tasks.ts",
+    "./pages/meetings": "./pages/meetings.ts",
+    "./ui/resource-picker": "./ui/resource-picker.ts",
+    "./pages/requests": "./pages/requests.ts",
+    "./core/push": "./core/push.ts",
+    "./pages/notifications": "./pages/notifications.ts",
+    "./ui/pwa-status": "./ui/pwa-status.ts",
+    "./pages/activity-history": "./pages/activity-history.ts",
+    "./pages/student-detail": "./pages/student-detail.ts",
+    "./pages/profile": "./pages/profile.ts",
+    "./ui/install": "./ui/install.ts",
+    "./ui/messaging": "./ui/messaging.ts",
+    "./pages/archives": "./pages/archives.ts",
+    "./pages/operations": "./pages/operations.ts",
+    "./ui/card": "./ui/card/card.component.ts",
+    "./ui/loader": "./ui/loader/loader.component.ts"
+  },
+  "peerDependencies": {
+    "@angular/core": "20.3.33"
+  }
+}

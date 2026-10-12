@@ -9,7 +9,7 @@ public class HomeVisitConfiguration : IEntityTypeConfiguration<HomeVisit>
     public void Configure(EntityTypeBuilder<HomeVisit> builder)
     {
         builder.HasKey(e => e.Id);
-        builder.Property(e => e.Notes).HasMaxLength(1000);
+        builder.Property(e => e.Notes).HasMaxLength(2000);
 
         builder.HasOne(e => e.Student)
             .WithMany(s => s.HomeVisits)

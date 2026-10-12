@@ -1,3 +1,6 @@
+using YouthDataManager.WebApi.Authorization;
+using YouthDataManager.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
@@ -13,9 +16,9 @@ public class RequirePasswordChangeMiddleware
     {
         if (context.User?.Identity?.IsAuthenticated == true)
         {
-            var mustChange = context.User.FindFirst("must_change_password")?.Value == "true";
-            var path = context.Request.Path.Value ?? "";
-            if (mustChange && !path.Contains("Auth/change-password", System.StringComparison.OrdinalIgnoreCase))
+            var restricted = (context.Items["Account"] as ApplicationUser)?.MustChangePassword == true;
+            var allowed = context.GetEndpoint()?.Metadata.GetMetadata<AllowRestrictedAccountAttribute>() != null || context.GetEndpoint()?.Metadata.GetMetadata<IAllowAnonymous>() != null;
+            if (restricted && !allowed)
             {
                 context.Response.StatusCode = 403;
                 context.Response.ContentType = "application/json";

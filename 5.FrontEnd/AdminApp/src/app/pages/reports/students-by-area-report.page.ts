@@ -1,3 +1,4 @@
+import {Subscription} from 'rxjs';
 import { Component, OnInit, signal, inject, ChangeDetectionStrategy, viewChild, TemplateRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ReportsService } from '../../services/reports.service';
@@ -14,15 +15,17 @@ import { DataTableColumn } from '../../shared/components/data-table/data-table-c
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudentsByAreaReportPage implements OnInit {
+  private request?:Subscription;ngOnDestroy(){this.request?.unsubscribe();}
+
   private reportsService = inject(ReportsService);
 
   data = signal<StudentsByGroup[]>([]);
   loading = signal(false);
   error = signal('');
   page = signal(1);
-  pageSize = signal(10);
+  pageSize = signal(25);
   totalCount = signal(0);
-  pageSizeOptions = [5, 10, 20, 50];
+  pageSizeOptions = [25, 50, 100];
   sortBy = signal<string | null>('groupKey');
   sortDesc = signal(false);
 
@@ -38,9 +41,9 @@ export class StudentsByAreaReportPage implements OnInit {
   }
 
   loadData(): void {
-    this.loading.set(true);
+    this.request?.unsubscribe();this.loading.set(true);
     this.error.set('');
-    this.reportsService
+    this.request=this.reportsService
       .getStudentsByArea({
         page: this.page(),
         pageSize: this.pageSize(),

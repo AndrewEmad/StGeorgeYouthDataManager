@@ -5,31 +5,23 @@
     @if (data().length === 0) {
       <app-empty-state [message]="emptyMessage()" />
     } @else {
-      <div class="table-wrap">
+      <div class="table-wrap ydm-table-region" role="region" aria-label="جدول النتائج؛ يمكن تمريره أفقيًا" tabindex="0">
         <table class="data-table">
           <thead>
             <tr>
               @for (col of columns(); track trackByKey($index, col)) {
                 @if (col.headerTemplate) {
-                  <th class="header-custom">
+                  <th class="header-custom" scope="col">
                     <ng-container [ngTemplateOutlet]="col.headerTemplate" />
                   </th>
                 } @else if (col.sortable) {
-                  <th
-                    class="sortable"
-                    (click)="onSort(col.key)"
-                  >
-                    {{ col.header }}
-                    @if (sortBy() === col.key) {
-                      <span class="sort-icon">{{ sortDesc() ? '▼' : '▲' }}</span>
-                    }
-                  </th>
+                  <th scope="col" [attr.aria-sort]="sortBy()===col.key ? (sortDesc() ? 'descending' : 'ascending') : 'none'"><button type="button" class="ydm-sort-button" (click)="onSort(col.key)">{{ col.header }}@if(sortBy()===col.key){<span aria-hidden="true">{{sortDesc() ? '▼' : '▲'}}</span>}</button></th>
                 } @else {
-                  <th>{{ col.header }}</th>
+                  <th scope="col">{{ col.header }}</th>
                 }
               }
               @if (actionsTemplate()) {
-                <th class="actions-col"></th>
+                <th class="actions-col" scope="col">الإجراءات</th>
               }
             </tr>
           </thead>
@@ -51,7 +43,7 @@
                       {{ getValue(row, col.key) | dateFormat }}
                     } @else if (col.format === 'month') {
                       {{ getValue(row, col.key) | monthName }}
-                    } @else {
+                    } @else if(rowClickable() && col.key==='fullName'){<button type="button" class="ydm-row-link" (click)="$event.stopPropagation();rowClick.emit(row)">{{getValue(row,col.key)}}</button>} @else {
                       {{ getValue(row, col.key) }}
                     }
                   </td>
@@ -69,6 +61,9 @@
           </tbody>
         </table>
       </div>
+      <div class="ydm-mobile-rows"><div class="ydm-toolbar">@for(col of columns();track col.key){@if(col.headerTemplate){<ng-container [ngTemplateOutlet]="col.headerTemplate"/>}@else if(col.sortable){<button type="button" class="btn-outline" (click)="onSort(col.key)" [attr.aria-label]="'ترتيب حسب ' + col.header">{{col.header}} {{sortBy()===col.key ? (sortDesc() ? '↓' : '↑') : ''}}</button>}}</div>
+      @for(row of data();track trackByIndex($index)){<dl class="glass-card ydm-mobile-row">@for(col of columns();track col.key){<div><dt>{{col.header || 'اختيار'}}</dt><dd>@if(col.template){<ng-container [ngTemplateOutlet]="col.template" [ngTemplateOutletContext]="{$implicit:row,value:getValue(row,col.key)}"/>}@else if(col.format==='date'){{{getValue(row,col.key) | dateFormat}}}@else if(col.format==='month'){{{getValue(row,col.key) | monthName}}}@else if(rowClickable() && col.key==='fullName'){<button type="button" class="ydm-row-link" (click)="rowClick.emit(row)">{{getValue(row,col.key)}}</button>}@else{{{getValue(row,col.key)}}}</dd></div>}@if(actionsTemplate();as tpl){<div><dt>الإجراءات</dt><dd><ng-container [ngTemplateOutlet]="tpl" [ngTemplateOutletContext]="{$implicit:row}"/></dd></div>}</dl>}
+      </div>
       @if (totalCount() > 0) {
         <app-pagination
           [total]="totalCount()"
@@ -85,7 +80,7 @@
   @if (!loading() && data().length > 0 && totalCount() > 0) {
     <div class="table-actions">
       <button type="button" class="btn-outline sm" (click)="exportCsv()">
-        تصدير CSV
+        CSV · الصفحة الحالية
       </button>
     </div>
   }

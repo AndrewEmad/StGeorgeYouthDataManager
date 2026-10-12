@@ -1,35 +1,29 @@
 import { Routes } from '@angular/router';
-import { ServantLayoutComponent } from './layout/servant-layout/servant-layout.component';
-import { LoginPage } from './pages/login/login.page';
-import { ChangePasswordPage } from './pages/change-password/change-password.page';
-import { CompleteProfilePage } from './pages/complete-profile/complete-profile.page';
-import { DashboardPage } from './pages/dashboard/dashboard.page';
-import { ProfilePage } from './pages/profile/profile.page';
-import { StudentsPage } from './pages/students/students.page';
-import { StudentDetailPage } from './pages/students/student-detail/student-detail.page';
-import { RequestAddStudentPage } from './pages/request-add-student/request-add-student.page';
-import { RemindersPage } from './pages/reminders/reminders.page';
-import { AttendancePage } from './pages/attendance/attendance.page';
 import { authGuard } from './core/guards/auth.guard';
 import { redirectIfAuthGuard } from './core/guards/redirect-if-auth.guard';
 import { secretaryGuard } from './core/guards/secretary.guard';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginPage, canActivate: [redirectIfAuthGuard] },
-  { path: 'change-password', component: ChangePasswordPage, canActivate: [authGuard] },
-  { path: 'complete-profile', component: CompleteProfilePage, canActivate: [authGuard] },
+  { path: 'login', loadComponent: () => import('./pages/login/login.page').then(m => m.LoginPage), canActivate: [redirectIfAuthGuard] },
+  { path: 'change-password', loadComponent: () => import('./pages/change-password/change-password.page').then(m => m.ChangePasswordPage), canActivate: [authGuard] },
+  { path: 'complete-profile', loadComponent: () => import('./pages/complete-profile/complete-profile.page').then(m => m.CompleteProfilePage), canActivate: [authGuard] },
   {
     path: '',
-    component: ServantLayoutComponent,
+    loadComponent: () => import('./layout/servant-layout/servant-layout.component').then(m => m.ServantLayoutComponent),
     canActivate: [authGuard],
     children: [
-      { path: 'dashboard', component: DashboardPage, data: { title: 'لوحة التحكم' } },
-      { path: 'profile', component: ProfilePage, data: { title: 'الملف الشخصي' } },
-      { path: 'reminders', component: RemindersPage, data: { title: 'تذكيرات المتابعة' } },
-      { path: 'students', component: StudentsPage, data: { title: 'المخدومين' } },
-      { path: 'request-add-student', component: RequestAddStudentPage, data: { title: 'طلب إضافة مخدوم' } },
-      { path: 'attendance', component: AttendancePage, canActivate: [secretaryGuard], data: { title: 'تسجيل الحضور' } },
-      { path: 'students/:id', component: StudentDetailPage, data: { title: 'تفاصيل المخدوم' } },
+      {path:'activity-history',loadComponent:()=>import('@ydm/shared/pages/activity-history').then(m=>m.PersonalActivityPage),data:{title:'سجل النشاط'}},
+      {path:'notifications',loadComponent:()=>import('@ydm/shared/pages/notifications').then(m=>m.NotificationsPage),data:{title:'الإشعارات والتذكيرات'}},
+      {path:'request-history',loadComponent:()=>import('@ydm/shared/pages/requests').then(m=>m.RequestsPage),data:{title:'سجل الطلبات'}},
+      {path:'tasks',loadComponent:()=>import('@ydm/shared/pages/tasks').then(m=>m.TasksPage),data:{title:'مهام المتابعة'}},
+      {path:'report-suite',loadComponent:()=>import('@ydm/shared/pages/reports').then(m=>m.ReportSuitePage),data:{title:'التقارير الشاملة'}},
+      { path: 'dashboard', loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage), data: { title: 'لوحة التحكم' } },
+      { path: 'profile', loadComponent: () => import('@ydm/shared/pages/profile').then(m => m.ProfilePage), data: { title: 'الملف الشخصي' } },
+      { path: 'reminders', redirectTo:'notifications',pathMatch:'full', data: { title: 'تذكيرات المتابعة' } },
+      { path: 'students', loadComponent: () => import('./pages/students/students.page').then(m => m.StudentsPage), data: { title: 'المخدومين' } },
+      { path: 'request-add-student', loadComponent: () => import('./pages/request-add-student/request-add-student.page').then(m => m.RequestAddStudentPage), data: { title: 'طلب إضافة مخدوم' } },
+      { path: 'attendance', loadComponent: () => import('@ydm/shared/pages/meetings').then(m => m.MeetingsPage), canActivate: [secretaryGuard], data: { title: 'تسجيل الحضور' } },
+      { path: 'students/:id', loadComponent: () => import('@ydm/shared/pages/student-detail').then(m => m.StudentDetailPage), data: { title: 'تفاصيل المخدوم' } },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: '**', redirectTo: 'dashboard' },
     ]

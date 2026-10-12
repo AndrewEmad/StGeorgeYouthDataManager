@@ -1,3 +1,5 @@
+using YouthDataManager.WebApi.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -8,6 +10,7 @@ using YouthDataManager.Shared.Service.Abstractions;
 
 namespace YouthDataManager.WebApi.Controllers;
 
+[AllowRestrictedAccount]
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
@@ -19,6 +22,8 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
+    [AllowAnonymous]
+    [EnableRateLimiting("login")]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
@@ -28,13 +33,23 @@ public class AuthController : ControllerBase
         return Ok(result.Data);
     }
 
+    [AllowAnonymous]
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
     {
         var result = await _authService.RefreshToken(request);
         if (result.Status != ServiceResultStatus.Success)
-            return BadRequest(result);
+            return Unauthorized(result);
         return Ok(result.Data);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
+    {
+        var id = Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier),out var userId) ? userId : Guid.Empty;
+        var result = await _authService.Logout(id, request.RefreshToken,request.DeviceToken);
+        return result.Status == ServiceResultStatus.Success ? Ok() : BadRequest(result);
     }
 
     [Authorize]
@@ -50,3 +65,5 @@ public class AuthController : ControllerBase
         return Ok(result.Data);
     }
 }
+
+public record LogoutRequest(string RefreshToken,string? DeviceToken=null);

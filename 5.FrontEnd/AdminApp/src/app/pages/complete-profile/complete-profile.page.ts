@@ -42,7 +42,10 @@ export class CompleteProfilePage implements OnInit {
     });
   }
 
+  addressRequired(): boolean { return !['Admin','Priest'].includes(this.authService.currentUser()?.role || ''); }
+
   onSubmit(): void {
+    if(this.loading() || this.profileLoading())return;
     this.error.set('');
     const fullName = this.fullName().trim();
     const phone = this.phone().trim();
@@ -55,7 +58,7 @@ export class CompleteProfilePage implements OnInit {
       this.error.set('يرجى إدخال رقم التليفون');
       return;
     }
-    if (!address) {
+    if (this.addressRequired() && !address) {
       this.error.set('يرجى إدخال العنوان');
       return;
     }
@@ -67,7 +70,7 @@ export class CompleteProfilePage implements OnInit {
           this.authService.setUserAfterProfileCompletion(res.token);
           this.authService.refreshCurrentUserFullName(fullName);
         }
-        this.router.navigate(['/dashboard']);
+        this.authService.navigateAfterAuthentication();
       },
       error: (err: { error?: { message?: string } }) => {
         this.error.set(err.error?.message || 'فشل حفظ البيانات');

@@ -1,111 +1,95 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './pages/login/login';
-import { ChangePasswordPage } from './pages/change-password/change-password.page';
-import { CompleteProfilePage } from './pages/complete-profile/complete-profile.page';
-import { DashboardPage } from './pages/dashboard/dashboard.page';
-import { StatsPage } from './pages/stats/stats.page';
-import { ServantListComponent } from './pages/servants/servant-list/servant-list';
-import { ServantDetailPage } from './pages/servants/servant-details/servant-detail.page';
-import { StudentListAdminComponent } from './pages/students/student-list-admin/student-list-admin';
-import { StudentDetailPage } from './pages/students/student-details/student-detail.page';
-import { BackupsPage } from './pages/backups/backups.page';
-import { RemovalRequestsPage } from './pages/removal-requests/removal-requests.page';
-import { AssignmentRequestsPage } from './pages/assignment-requests/assignment-requests.page';
-import { StudentAdditionRequestsPage } from './pages/student-addition-requests/student-addition-requests.page';
-import { ReportsPage } from './pages/reports/reports.page';
-import { ServantFollowUpPage } from './pages/reports/servant-follow-up.page';
-import { StudentDistributionPage } from './pages/reports/student-distribution.page';
-import { ServantActivityReportPage } from './pages/reports/servant-activity-report.page';
-import { StudentsNoContactReportPage } from './pages/reports/students-no-contact-report.page';
-import { StudentsByAreaReportPage } from './pages/reports/students-by-area-report.page';
-import { StudentsByYearReportPage } from './pages/reports/students-by-year-report.page';
-import { StudentsByBirthMonthReportPage } from './pages/reports/students-by-birth-month-report.page';
-import { ServantPerformanceReportPage } from './pages/reports/servant-performance-report.page';
-import { AttendancePage } from './pages/attendance/attendance.page';
-import { ProfilePage } from './pages/profile/profile.page';
 import { authGuard } from './core/guards/auth.guard';
 import { redirectIfAuthGuard } from './core/guards/redirect-if-auth.guard';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent, canActivate: [redirectIfAuthGuard] },
-  { path: 'change-password', component: ChangePasswordPage, canActivate: [authGuard] },
-  { path: 'complete-profile', component: CompleteProfilePage, canActivate: [authGuard] },
+  { path: 'login', loadComponent: () => import('./pages/login/login').then(m => m.LoginComponent), canActivate: [redirectIfAuthGuard] },
+  { path: 'change-password', loadComponent: () => import('./pages/change-password/change-password.page').then(m => m.ChangePasswordPage), canActivate: [authGuard] },
+  { path: 'complete-profile', loadComponent: () => import('./pages/complete-profile/complete-profile.page').then(m => m.CompleteProfilePage), canActivate: [authGuard] },
   {
     path: 'dashboard',
-    component: DashboardPage,
+    loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage),
     canActivate: [authGuard],
     children: [
-      { path: 'stats', component: StatsPage, data: { title: 'الإحصائيات' } },
-      { path: 'attendance', component: AttendancePage, data: { title: 'تسجيل الحضور' } },
-      { path: 'servants', component: ServantListComponent, data: { title: 'الخدام' } },
-      { path: 'servants/:id', component: ServantDetailPage, data: { title: 'تفاصيل الخادم' } },
-      { path: 'students/:id', component: StudentDetailPage, data: { title: 'تفاصيل المخدوم' } },
-      { path: 'students', component: StudentListAdminComponent, data: { title: 'المخدومين' } },
+      {path:'operations',loadComponent:()=>import('@ydm/shared/pages/operations').then(m=>m.OperationsPage),data:{title:'حالة الخدمة'}},
+      {path:'archived-students',loadComponent:()=>import('@ydm/shared/pages/archives').then(m=>m.ArchivesPage),data:{title:'الطلاب المؤرشفون'}},
+      {path:'activity-history',loadComponent:()=>import('@ydm/shared/pages/activity-history').then(m=>m.PersonalActivityPage),data:{title:'سجل النشاط'}},
+      {path:'notifications',loadComponent:()=>import('@ydm/shared/pages/notifications').then(m=>m.NotificationsPage),data:{title:'الإشعارات والتذكيرات'}},
+      {path:'request-history',loadComponent:()=>import('@ydm/shared/pages/requests').then(m=>m.RequestsPage),data:{title:'سجل الطلبات'}},
+      {path:'tasks',loadComponent:()=>import('@ydm/shared/pages/tasks').then(m=>m.TasksPage),data:{title:'مهام المتابعة'}},
+      {path:'report-suite',loadComponent:()=>import('@ydm/shared/pages/reports').then(m=>m.ReportSuitePage),data:{title:'التقارير الشاملة'}},
+      { path: 'stats', loadComponent: () => import('./pages/stats/stats.page').then(m => m.StatsPage), data: { title: 'الإحصائيات' } },
+      { path: 'attendance', loadComponent: () => import('@ydm/shared/pages/meetings').then(m => m.MeetingsPage), data: { title: 'تسجيل الحضور' } },
+      { path: 'servants', loadComponent: () => import('./pages/servants/servant-list/servant-list').then(m => m.ServantListComponent), data: { title: 'الخدام' } },
+      { path: 'servants/:id', loadComponent: () => import('./pages/servants/servant-details/servant-detail.page').then(m => m.ServantDetailPage), data: { title: 'تفاصيل الخادم' } },
+      { path: 'students/:id', loadComponent: () => import('@ydm/shared/pages/student-detail').then(m => m.StudentDetailPage), data: { title: 'تفاصيل المخدوم' } },
+      { path: 'students', loadComponent: () => import('./pages/students/student-list-admin/student-list-admin').then(m => m.StudentListAdminComponent), data: { title: 'المخدومين' } },
       {
         path: 'removal-requests',
-        component: RemovalRequestsPage,
-        data: { title: 'طلبات الإزالة' },
+        loadComponent: () => import('@ydm/shared/pages/requests').then(m => m.RequestsPage),
+        data: { title: 'طلبات الإزالة' , kind:'removal', review:true},
       },
       {
         path: 'assignment-requests',
-        component: AssignmentRequestsPage,
-        data: { title: 'طلبات التخصيص' },
+        loadComponent: () => import('@ydm/shared/pages/requests').then(m => m.RequestsPage),
+        data: { title: 'طلبات التخصيص' , kind:'assignment', review:true},
       },
       {
         path: 'student-addition-requests',
-        component: StudentAdditionRequestsPage,
-        data: { title: 'طلبات إضافة مخدومين' },
+        loadComponent: () => import('@ydm/shared/pages/requests').then(m => m.RequestsPage),
+        data: { title: 'طلبات إضافة مخدومين' , kind:'addition', review:true},
       },
       {
         path: 'reports',
-        component: ReportsPage,
+        loadComponent: () => import('./pages/reports/reports.page').then(m => m.ReportsPage),
         data: { title: 'التقارير' },
         children: [
           {
             path: 'servant-follow-up',
-            component: ServantFollowUpPage,
+            loadComponent: () => import('./pages/reports/servant-follow-up.page').then(m => m.ServantFollowUpPage),
             data: { title: 'متابعة الخادم' },
           },
           {
             path: 'student-distribution',
-            component: StudentDistributionPage,
+            loadComponent: () => import('./pages/reports/student-distribution.page').then(m => m.StudentDistributionPage),
             data: { title: 'توزيع المخدومين' },
           },
           {
             path: 'servant-performance',
-            component: ServantPerformanceReportPage,
+            loadComponent: () => import('./pages/reports/servant-performance-report.page').then(m => m.ServantPerformanceReportPage),
             data: { title: 'أداء الخادم' },
           },
           {
             path: 'servant-activity',
-            component: ServantActivityReportPage,
+            loadComponent: () => import('./pages/reports/servant-activity-report.page').then(m => m.ServantActivityReportPage),
             data: { title: 'نشاط الخادم' },
           },
           {
             path: 'students-no-contact',
-            component: StudentsNoContactReportPage,
+            loadComponent: () => import('./pages/reports/students-no-contact-report.page').then(m => m.StudentsNoContactReportPage),
             data: { title: 'بدون اتصال' },
           },
           {
             path: 'students-by-area',
-            component: StudentsByAreaReportPage,
+            loadComponent: () => import('./pages/reports/students-by-area-report.page').then(m => m.StudentsByAreaReportPage),
             data: { title: 'حسب المنطقة' },
           },
           {
             path: 'students-by-year',
-            component: StudentsByYearReportPage,
+            loadComponent: () => import('./pages/reports/students-by-year-report.page').then(m => m.StudentsByYearReportPage),
             data: { title: 'حسب السنة' },
           },
           {
             path: 'students-by-birth-month',
-            component: StudentsByBirthMonthReportPage,
+            loadComponent: () => import('./pages/reports/students-by-birth-month-report.page').then(m => m.StudentsByBirthMonthReportPage),
             data: { title: 'حسب شهر الميلاد' },
           },
           { path: '', redirectTo: 'servant-follow-up', pathMatch: 'full' },
         ],
       },
-      { path: 'backups', component: BackupsPage, data: { title: 'النسخ الاحتياطي' } },
-      { path: 'profile', component: ProfilePage, data: { title: 'الملف الشخصي' } },
+      { path:'backups',redirectTo:'data-exports',pathMatch:'full' },
+      { path: 'data-exports', loadComponent: () => import('./pages/backups/backups.page').then(m => m.BackupsPage), data: { title: 'تصدير البيانات' } },
+      { path: 'profile', loadComponent: () => import('@ydm/shared/pages/profile').then(m => m.ProfilePage), data: { title: 'الملف الشخصي' } },
       { path: '', redirectTo: 'stats', pathMatch: 'full' },
     ],
   },

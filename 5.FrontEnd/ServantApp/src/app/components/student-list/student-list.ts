@@ -1,3 +1,6 @@
+import {Subscription} from 'rxjs';
+import {apiError} from '@ydm/shared/core/api';
+import { phoneInternational } from '@ydm/shared/core/utils';
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -23,10 +26,11 @@ export class StudentListComponent {
   private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
+  private request?:Subscription;phone=phoneInternational;readonly error=signal('');readonly message=signal('');
   readonly items = signal<ServantStudentItem[]>([]);
   readonly totalCount = signal(0);
   readonly page = signal(1);
-  readonly pageSize = signal(20);
+  readonly pageSize = signal(25);
   readonly searchTerm = signal('');
   readonly filterArea = signal('');
   readonly filterAcademicYear = signal('');
@@ -41,14 +45,15 @@ export class StudentListComponent {
   readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalCount() / this.pageSize())));
 
   constructor() {
+    this.destroyRef.onDestroy(()=>this.request?.unsubscribe());
     this.studentQueriesService
       .getDistinctAreas()
       .pipe(takeUntilDestroyed())
-      .subscribe({ next: (r) => this.areas.set(Array.isArray(r) ? r : []) });
+      .subscribe({next:r=>this.areas.set(Array.isArray(r) ? r : []),error:e=>this.error.set(apiError(e))});
     this.studentQueriesService
       .getDistinctAcademicYears()
       .pipe(takeUntilDestroyed())
-      .subscribe({ next: (r) => this.academicYears.set(Array.isArray(r) ? r : []) });
+      .subscribe({next:r=>this.academicYears.set(Array.isArray(r) ? r : []),error:e=>this.error.set(apiError(e))});
     this.loadPage();
   }
 
@@ -60,8 +65,8 @@ export class StudentListComponent {
       this.loading.set(false);
       return;
     }
-    this.loading.set(true);
-    this.studentQueriesService
+    this.request?.unsubscribe();this.loading.set(true);this.error.set('');
+    this.request=this.studentQueriesService
       .getPagedForServant({
         page: this.page(),
         pageSize: this.pageSize(),
@@ -79,7 +84,8 @@ export class StudentListComponent {
           this.pageSize.set(res.pageSize ?? this.pageSize());
           this.loading.set(false);
         },
-        error: () => {
+        error: e => {
+          this.error.set(apiError(e));
           this.items.set([]);
           this.totalCount.set(0);
           this.loading.set(false);
@@ -121,15 +127,15 @@ export class StudentListComponent {
             this.items.update((list) =>
               list.slice(0, idx).concat([{ student, segment: 'Requested' }], list.slice(idx + 1))
             );
-          this.requestingId.set(null);
+          this.requestingId.set(null);this.message.set('تم إرسال طلب الإسناد للمراجعة.');
         },
-        error: () => this.requestingId.set(null),
+        error: e=>{this.requestingId.set(null);this.error.set(apiError(e));},
       });
   }
 
   getWaMeUrl(phone: string): string {
-    const digits = (phone || '').replace(/\D/g, '');
+    const digits = phoneInternational(phone);
     if (!digits) return '#';
-    return `https://wa.me/2${digits}`;
+    return `https://wa.me/${digits}`;
   }
 }

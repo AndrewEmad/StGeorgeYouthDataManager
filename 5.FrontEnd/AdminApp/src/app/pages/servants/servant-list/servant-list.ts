@@ -1,4 +1,6 @@
-import { AfterViewInit, Component, OnInit, TemplateRef, signal, viewChild } from '@angular/core';
+import { AfterViewInit, Component, OnInit, OnDestroy, TemplateRef, signal, viewChild } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { apiError } from '@ydm/shared/core/api';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
@@ -37,12 +39,17 @@ import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
   templateUrl: './servant-list.html',
   styleUrls: ['./servant-list.css'],
 })
-export class ServantListComponent implements OnInit, AfterViewInit {
+export class ServantListComponent implements OnInit, AfterViewInit, OnDestroy {
   servants: ServantWithStats[] = [];
+  error = ''; message = ''; dialogError = ''; createdId = ''; editRecordSaved = false;
+  busy = new Set<string>(); deleting: ServantWithStats | null = null; opening = false;
+  private listRequest?: Subscription; private searchTimer?: ReturnType<typeof setTimeout>;
+  ngOnDestroy() { this.listRequest?.unsubscribe();clearTimeout(this.searchTimer);for(const url of [this.newServantPhotoPreviewUrl,this.editServantPhotoPreviewUrl,this.editServantExistingPhotoUrl])if(url)URL.revokeObjectURL(url); }
+  searchChanged(){clearTimeout(this.searchTimer);this.searchTimer=setTimeout(()=>this.applyFilters(),300);}
   totalCount = 0;
   page = 1;
-  pageSize = 10;
-  pageSizeOptions = [5, 10, 20, 50];
+  pageSize = 25;
+  pageSizeOptions = [25, 50, 100];
   loading = true;
   showModal = false;
   showEditModal = false;
@@ -154,8 +161,8 @@ export class ServantListComponent implements OnInit, AfterViewInit {
         : this.filters.status === 'inactive'
           ? false
           : undefined;
-    this.loading = true;
-    this.reportsService
+    this.listRequest?.unsubscribe();this.loading = true;this.error = '';
+    this.listRequest = this.reportsService
       .getServantsPagedWithStats({
         page: this.page,
         pageSize: this.pageSize,
@@ -172,7 +179,7 @@ export class ServantListComponent implements OnInit, AfterViewInit {
           this.page = res.page;
           this.loading = false;
         },
-        error: () => (this.loading = false),
+        error: e => {this.loading=false;this.servants=[];this.error=apiError(e);},
       });
   }
 
@@ -187,12 +194,8 @@ export class ServantListComponent implements OnInit, AfterViewInit {
   }
 
   openAddModal() {
-    this.usersService.getPaged({ page: 1, pageSize: 1, role: 'Priest' }).subscribe({
-      next: (r) => {
-        this.priestAlreadyExists = r.totalCount > 0;
-        this.showModal = true;
-      },
-    });
+    if(this.opening)return;this.opening=true;this.error='';this.dialogError='';
+    this.usersService.getPaged({page:1,pageSize:1,role:'Priest'}).subscribe({next:r=>{this.opening=false;this.priestAlreadyExists=r.totalCount>0;this.createdId='';this.showModal=true;},error:e=>{this.opening=false;this.error=apiError(e);}});
   }
 
   applyFilters() {
@@ -227,9 +230,8 @@ export class ServantListComponent implements OnInit, AfterViewInit {
   }
 
   toggleServantStatus(servant: ServantWithStats) {
-    this.usersService.toggleStatus(servant.id).subscribe(() => {
-      servant.isActive = !servant.isActive;
-    });
+    if(this.busy.has(servant.id))return;this.busy.add(servant.id);this.error='';this.message='';
+    this.usersService.toggleStatus(servant.id).subscribe({next:()=>{this.busy.delete(servant.id);this.message='تم تحديث حالة المستخدم وإبطال جلساته عند التعطيل.';this.loadServants();},error:e=>{this.busy.delete(servant.id);this.error=apiError(e);}});
   }
 
   onNewServantPhotoFile(file: File) {
@@ -269,35 +271,15 @@ export class ServantListComponent implements OnInit, AfterViewInit {
   }
 
   onCreateServant() {
-    this.creatingServant = true;
-    this.usersService.create(this.newServant).subscribe({
-      next: (id) => {
-        if (this.newServantPhoto) {
-          this.usersService.uploadPhoto(id, this.newServantPhoto!).subscribe({
-            next: () => {
-              this.finishCreateServant();
-            },
-            error: () => {
-              this.finishCreateServant();
-            },
-          });
-        } else {
-          this.finishCreateServant();
-        }
-      },
-      error: (err: any) => {
-        this.creatingServant = false;
-        alert('خطأ في إنشاء الخادم: ' + (err.error?.message ?? err.error ?? err.message));
-      },
-    });
+    if(this.creatingServant)return;this.dialogError='';this.message='';this.creatingServant=true;
+    if(this.createdId){this.uploadNewPhoto();return;}
+    this.usersService.create(this.newServant).subscribe({next:id=>{this.createdId=id;this.uploadNewPhoto();},error:e=>{this.creatingServant=false;this.dialogError=apiError(e);}});
   }
-
-  private finishCreateServant() {
-    this.creatingServant = false;
-    this.showModal = false;
-    this.loadServants();
-    this.resetForm();
+  private uploadNewPhoto(){
+    if(!this.newServantPhoto){this.finishCreateServant();return;}
+    this.usersService.uploadPhoto(this.createdId,this.newServantPhoto).subscribe({next:()=>this.finishCreateServant(),error:e=>{this.creatingServant=false;this.dialogError='تم حفظ المستخدم، لكن رفع الصورة فشل. '+apiError(e);this.loadServants();}});
   }
+  private finishCreateServant(){this.creatingServant=false;this.showModal=false;this.createdId='';this.message='تم حفظ المستخدم والصورة المختارة.';this.loadServants();this.resetForm();}
 
   resetForm() {
     this.newServant = {
@@ -316,7 +298,7 @@ export class ServantListComponent implements OnInit, AfterViewInit {
   }
 
   openEdit(s: ServantWithStats) {
-    this.editingServant = s;
+    this.dialogError='';this.editRecordSaved=false;this.editingServant = s;
     this.editForm = {
       fullName: s.fullName || '',
       phone: s.phone || '',
@@ -349,7 +331,7 @@ export class ServantListComponent implements OnInit, AfterViewInit {
   }
 
   closeEdit() {
-    this.showEditModal = false;
+    if(this.editSaving)return;this.showEditModal = false;
     this.editingServant = null;
     this.editServantPhoto = null;
     if (this.editServantPhotoPreviewUrl) {
@@ -363,43 +345,15 @@ export class ServantListComponent implements OnInit, AfterViewInit {
   }
 
   onUpdateServant() {
-    if (!this.editingServant) return;
-    this.editSaving = true;
-    this.usersService.update(this.editingServant.id, this.editForm).subscribe({
-      next: () => {
-        this.editingServant!.fullName = this.editForm.fullName;
-        this.editingServant!.phone = this.editForm.phone;
-        this.editingServant!.isActive = this.editForm.isActive;
-        this.editingServant!.role = this.editForm.role;
-        if (this.editServantPhoto) {
-          this.usersService.uploadPhoto(this.editingServant!.id, this.editServantPhoto).subscribe({
-            next: (res) => {
-              this.editingServant!.photoPath = res.photoPath;
-              this.editSaving = false;
-              this.closeEdit();
-            },
-            error: () => {
-              this.editSaving = false;
-              this.closeEdit();
-            },
-          });
-        } else {
-          this.editSaving = false;
-          this.closeEdit();
-        }
-      },
-      error: (err: any) => {
-        this.editSaving = false;
-        alert('خطأ في التحديث: ' + (err.error || err.message));
-      },
-    });
+    if(!this.editingServant || this.editSaving)return;this.editSaving=true;this.dialogError='';this.message='';
+    if(this.editRecordSaved){this.uploadEditPhoto();return;}
+    this.usersService.update(this.editingServant.id,this.editForm).subscribe({next:()=>{this.editRecordSaved=true;this.uploadEditPhoto();},error:e=>{this.editSaving=false;this.dialogError=apiError(e);}});
   }
-
-  deleteServant(s: ServantWithStats) {
-    if (!confirm(`حذف الخادم «${s.fullName}»؟ لا يمكن التراجع.`)) return;
-    this.usersService.delete(s.id).subscribe({
-      next: () => this.loadServants(),
-      error: (err: any) => alert('خطأ في الحذف: ' + (err.error?.message || err.message)),
-    });
+  private uploadEditPhoto(){
+    const finish=()=>{this.editSaving=false;this.message='تم حفظ التعديلات والصورة المختارة.';this.closeEdit();this.loadServants();};
+    if(!this.editServantPhoto || !this.editingServant){finish();return;}
+    this.usersService.uploadPhoto(this.editingServant.id,this.editServantPhoto).subscribe({next:finish,error:e=>{this.editSaving=false;this.dialogError='تم حفظ التعديلات، لكن رفع الصورة فشل. '+apiError(e);this.loadServants();}});
   }
+  deleteServant(s:ServantWithStats){if(this.busy.has(s.id))return;this.deleting=s;this.dialogError='';}
+  confirmDelete(){const s=this.deleting;if(!s || this.busy.has(s.id))return;this.busy.add(s.id);this.dialogError='';this.usersService.delete(s.id).subscribe({next:()=>{this.busy.delete(s.id);this.deleting=null;this.message='تم تنفيذ الإجراء. المستخدم الذي لديه سجل تاريخي يُعطّل للحفاظ على السجل.';this.loadServants();},error:e=>{this.busy.delete(s.id);this.dialogError=apiError(e);}});}
 }

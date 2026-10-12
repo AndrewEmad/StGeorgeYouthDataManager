@@ -11,7 +11,7 @@
     [initialFilterModel]="{ days: 14 }"
     [columns]="columns"
     [data]="data()"
-    [loading]="loading()"
+    [loading]="loading()" [error]="error()" (retry)="loadData()"
     [totalCount]="totalCount()"
     [page]="page()"
     [pageSize]="pageSize()"

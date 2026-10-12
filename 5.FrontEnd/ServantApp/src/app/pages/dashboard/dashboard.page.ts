@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {apiError} from '@ydm/shared/core/api';
 import { ReportsService } from '../../services/reports.service';
 import { AuthService } from '../../core/services/auth.service';
 import { LoaderComponent, CardComponent } from '../../shared/components';
@@ -29,6 +30,7 @@ export class DashboardPage {
 
   readonly stats = signal<ServantDashboardStats | null>(null);
   readonly loading = signal(true);
+  readonly error = signal('');
   readonly showBulkWhatsAppModal = signal(false);
   readonly showBulkSmsModal = signal(false);
 
@@ -39,6 +41,7 @@ export class DashboardPage {
   }
 
   loadStats(): void {
+    this.loading.set(true);this.error.set('');
     this.reportsService
       .getServantDashboard()
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -47,14 +50,9 @@ export class DashboardPage {
           this.stats.set(data);
           this.loading.set(false);
         },
-        error: () => {
-          this.stats.set({
-            totalStudents: 0,
-            callsThisWeek: 0,
-            visitsThisWeek: 0,
-            studentsNeedingFollowUp: 0,
-            studentsNotContacted: 0,
-          });
+        error: (e) => {
+          this.error.set(apiError(e));
+          this.stats.set(null);
           this.loading.set(false);
         },
       });

@@ -1,0 +1,2763 @@
+{
+  "description": "Retained results from the completed remediation verification runs. Raw logs, build outputs, disposable backup files and caches may be removed by the prepared cleanup script; reusable test sources and visual baselines must remain. These results do not certify production hosting or provider delivery.",
+  "cleanupPreparedDate": "2026-10-12",
+  "cleanupStatus": "Prepared; automatic approval review blocked deletion; no generated files removed by the agent.",
+  "backend": {
+    "counters": {
+      "total": 41,
+      "executed": 41,
+      "passed": 41,
+      "failed": 0,
+      "error": 0,
+      "timeout": 0,
+      "aborted": 0,
+      "inconclusive": 0,
+      "passedButRunAborted": 0,
+      "notRunnable": 0,
+      "notExecuted": 0,
+      "disconnected": 0,
+      "warning": 0,
+      "completed": 0,
+      "inProgress": 0,
+      "pending": 0
+    },
+    "times": {
+      "creation": "2026-10-12T09:28:21.7922097+03:00",
+      "queuing": "2026-10-12T09:28:21.7922103+03:00",
+      "start": "2026-10-12T09:28:18.5114953+03:00",
+      "finish": "2026-10-12T09:28:49.5855114+03:00"
+    },
+    "startupMigrationCases": [
+      {
+        "name": "YouthDataManager.IntegrationTests.StartupMigrationTests.Startup_migrates_a_fresh_database_by_default_and_restarts_without_duplicate_data(environment: \"Development\")",
+        "outcome": "Passed"
+      },
+      {
+        "name": "YouthDataManager.IntegrationTests.StartupMigrationTests.Explicit_opt_out_keeps_an_isolated_test_database_uninitialized",
+        "outcome": "Passed"
+      },
+      {
+        "name": "YouthDataManager.IntegrationTests.StartupMigrationTests.Startup_migrates_a_fresh_database_by_default_and_restarts_without_duplicate_data(environment: \"Production\")",
+        "outcome": "Passed"
+      }
+    ]
+  },
+  "browser": {
+    "uniqueCases": 336,
+    "passed": 336,
+    "unresolvedFailures": [],
+    "runs": [
+      {
+        "log": "final-browser-verified.log",
+        "cases": 309
+      },
+      {
+        "log": "final-firefox-dialogs.log",
+        "cases": 8
+      },
+      {
+        "log": "final-pwa.log",
+        "cases": 3
+      },
+      {
+        "log": "final-publishing.log",
+        "cases": 24
+      }
+    ],
+    "note": "Latest targeted reruns supersede prior results for the same engine/file/title; the full run had one Firefox install-help fixture timing failure, corrected and verified at all eight widths.",
+    "builds": {
+      "AdminApp": "453350bfd369e9b6a7f4fc68eef08f549106d25b4409a50a8fdad27a2b9e13b2",
+      "ServantApp": "7bd1232cd9dc05c1db25094916a8ec3d68547ca4034bb9409da9ad913354aafa"
+    },
+    "cases": [
+      {
+        "engine": "chromium",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 320px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 360px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 430px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/accessibility.spec.ts",
+        "title": "servant accessible route controls and contrast",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 768px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 1024px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 1920px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 320px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 360px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 430px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/accessibility.spec.ts",
+        "title": "admin accessible route controls and contrast",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 768px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 1024px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 320px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 1920px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 360px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 430px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 768px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 1024px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 1920px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 320px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 360px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 430px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 768px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 1024px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/print.spec.ts",
+        "title": "admin print uses the full filtered report and readable RTL print layout",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/print.spec.ts",
+        "title": "servant print uses the full filtered report and readable RTL print layout",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 320px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 1920px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 360px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 430px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 768px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 1024px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 320px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 360px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 1920px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 430px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 768px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 1024px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin empty states keep controls contained",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin loading states keep controls contained",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin failed states keep controls contained",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 1920px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant loading states keep controls contained",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant empty states keep controls contained",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "dialog traps focus, closes with Escape and restores trigger",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "landscape and enlarged text reflow",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant failed states keep controls contained",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/selection.spec.ts",
+        "title": "attendance page deselection keeps earlier-page choices and saving locks dependent controls",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/selection.spec.ts",
+        "title": "bulk partial assignment retains only failed choices for retry",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/selection.spec.ts",
+        "title": "phone actions normalize both fields once and preserve international codes",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/sessions.spec.ts",
+        "title": "corrupt stored account is cleared without throwing or restoring protected state",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/sessions.spec.ts",
+        "title": "same-app tabs synchronize logout while the other application keeps its account",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/sessions.spec.ts",
+        "title": "concurrent expired requests refresh once and refresh failure is an honest logout",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/sessions.spec.ts",
+        "title": "a delayed refresh never signs a switched account out or restores the previous account",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/sessions.spec.ts",
+        "title": "two tabs coordinate a single refresh and both use the server replacement session",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/sessions.spec.ts",
+        "title": "each app sends its own API token and static resources never receive a session token",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual populated at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual empty at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual failed at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual loading at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin dialog visual validation and saving at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual populated at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual empty at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual failed at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual loading at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual populated at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual empty at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual failed at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin dialog visual validation and saving at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual loading at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant dialog visual validation and saving at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual populated at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual empty at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual failed at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual loading at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant dialog visual validation and saving at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 320px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 360px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 430px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 768px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 1024px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/workflows.spec.ts",
+        "title": "admin onboarding follows server restrictions and preserves failed profile input",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/workflows.spec.ts",
+        "title": "servant onboarding follows server restrictions and preserves failed profile input",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/workflows.spec.ts",
+        "title": "existing schedule seconds round trip and save one canonical weekly schedule",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 1920px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/workflows.spec.ts",
+        "title": "failed student save keeps input and exposes a themed error inside the dialog",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/workflows.spec.ts",
+        "title": "a saved user with a failed photo offers upload-only retry without creating another account",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/workflows.spec.ts",
+        "title": "file read errors leave import retry available without submitting rows",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 320px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 360px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/accessibility.spec.ts",
+        "title": "servant accessible route controls and contrast",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 430px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 768px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 1024px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 1920px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 320px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 360px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 430px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/accessibility.spec.ts",
+        "title": "admin accessible route controls and contrast",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 768px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 1024px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 1920px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 360px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 320px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 430px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 768px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 1024px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 1920px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 390px",
+        "passed": true,
+        "run": "final-firefox-dialogs.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 360px",
+        "passed": true,
+        "run": "final-firefox-dialogs.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 320px",
+        "passed": true,
+        "run": "final-firefox-dialogs.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 430px",
+        "passed": true,
+        "run": "final-firefox-dialogs.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 768px",
+        "passed": true,
+        "run": "final-firefox-dialogs.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 1024px",
+        "passed": true,
+        "run": "final-firefox-dialogs.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/print.spec.ts",
+        "title": "admin print uses the full filtered report and readable RTL print layout",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/print.spec.ts",
+        "title": "servant print uses the full filtered report and readable RTL print layout",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 1440px",
+        "passed": true,
+        "run": "final-firefox-dialogs.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 1920px",
+        "passed": true,
+        "run": "final-firefox-dialogs.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 320px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 360px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 430px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 768px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 1024px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 320px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 360px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 1920px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 430px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 768px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 1024px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin empty states keep controls contained",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin loading states keep controls contained",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin failed states keep controls contained",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 1920px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant empty states keep controls contained",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant failed states keep controls contained",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "dialog traps focus, closes with Escape and restores trigger",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant loading states keep controls contained",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/routes.spec.ts",
+        "title": "landscape and enlarged text reflow",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/selection.spec.ts",
+        "title": "attendance page deselection keeps earlier-page choices and saving locks dependent controls",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/selection.spec.ts",
+        "title": "bulk partial assignment retains only failed choices for retry",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/selection.spec.ts",
+        "title": "phone actions normalize both fields once and preserve international codes",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/sessions.spec.ts",
+        "title": "corrupt stored account is cleared without throwing or restoring protected state",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/sessions.spec.ts",
+        "title": "concurrent expired requests refresh once and refresh failure is an honest logout",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/sessions.spec.ts",
+        "title": "a delayed refresh never signs a switched account out or restores the previous account",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/sessions.spec.ts",
+        "title": "same-app tabs synchronize logout while the other application keeps its account",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/sessions.spec.ts",
+        "title": "two tabs coordinate a single refresh and both use the server replacement session",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual populated at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/sessions.spec.ts",
+        "title": "each app sends its own API token and static resources never receive a session token",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual empty at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual failed at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin dialog visual validation and saving at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual populated at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual loading at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual empty at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual failed at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual loading at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual empty at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin dialog visual validation and saving at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual failed at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual populated at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual populated at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant dialog visual validation and saving at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual loading at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual empty at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual failed at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual loading at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant dialog visual validation and saving at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 320px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 360px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 430px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 768px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 1024px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/workflows.spec.ts",
+        "title": "admin onboarding follows server restrictions and preserves failed profile input",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/workflows.spec.ts",
+        "title": "servant onboarding follows server restrictions and preserves failed profile input",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/workflows.spec.ts",
+        "title": "existing schedule seconds round trip and save one canonical weekly schedule",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 1920px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/workflows.spec.ts",
+        "title": "file read errors leave import retry available without submitting rows",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/workflows.spec.ts",
+        "title": "failed student save keeps input and exposes a themed error inside the dialog",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/workflows.spec.ts",
+        "title": "a saved user with a failed photo offers upload-only retry without creating another account",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 320px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 360px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 430px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/accessibility.spec.ts",
+        "title": "servant accessible route controls and contrast",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 768px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 1024px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "admin login and restricted onboarding routes at 1920px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 320px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/accessibility.spec.ts",
+        "title": "admin accessible route controls and contrast",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 360px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 430px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 768px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 1024px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 320px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 360px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/auth-routes.spec.ts",
+        "title": "servant login and restricted onboarding routes at 1920px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 430px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 768px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 1024px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/crop-dialog.spec.ts",
+        "title": "image crop dialog fits and supports keyboard dismissal at 1920px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 320px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 360px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 430px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 768px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 1024px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/print.spec.ts",
+        "title": "admin print uses the full filtered report and readable RTL print layout",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/print.spec.ts",
+        "title": "servant print uses the full filtered report and readable RTL print layout",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 320px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 360px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 430px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/dialog-matrix.spec.ts",
+        "title": "remaining reachable dialogs are usable and accessible at 1920px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 768px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 1024px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 320px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 360px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 430px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin reachable routes at 1920px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 768px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 1024px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin empty states keep controls contained",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin loading states keep controls contained",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "admin failed states keep controls contained",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant empty states keep controls contained",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant reachable routes at 1920px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant loading states keep controls contained",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "servant failed states keep controls contained",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "dialog traps focus, closes with Escape and restores trigger",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/routes.spec.ts",
+        "title": "landscape and enlarged text reflow",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/selection.spec.ts",
+        "title": "phone actions normalize both fields once and preserve international codes",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/selection.spec.ts",
+        "title": "bulk partial assignment retains only failed choices for retry",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/selection.spec.ts",
+        "title": "attendance page deselection keeps earlier-page choices and saving locks dependent controls",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/sessions.spec.ts",
+        "title": "corrupt stored account is cleared without throwing or restoring protected state",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/sessions.spec.ts",
+        "title": "concurrent expired requests refresh once and refresh failure is an honest logout",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/sessions.spec.ts",
+        "title": "a delayed refresh never signs a switched account out or restores the previous account",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/sessions.spec.ts",
+        "title": "same-app tabs synchronize logout while the other application keeps its account",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/sessions.spec.ts",
+        "title": "two tabs coordinate a single refresh and both use the server replacement session",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual populated at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/sessions.spec.ts",
+        "title": "each app sends its own API token and static resources never receive a session token",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual failed at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual empty at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual loading at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual populated at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual empty at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin dialog visual validation and saving at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual loading at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin report visual failed at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual populated at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual empty at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual failed at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual loading at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/visual.spec.ts",
+        "title": "admin dialog visual validation and saving at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual populated at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual empty at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant dialog visual validation and saving at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual failed at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant report visual loading at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/visual.spec.ts",
+        "title": "servant dialog visual validation and saving at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 320px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 360px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 390px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 430px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 768px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 1024px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/workflows.spec.ts",
+        "title": "admin onboarding follows server restrictions and preserves failed profile input",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/workflows.spec.ts",
+        "title": "servant onboarding follows server restrictions and preserves failed profile input",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 1440px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/workflows.spec.ts",
+        "title": "existing schedule seconds round trip and save one canonical weekly schedule",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/workflows.spec.ts",
+        "title": "failed student save keeps input and exposes a themed error inside the dialog",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/workflows.spec.ts",
+        "title": "a saved user with a failed photo offers upload-only retry without creating another account",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/workflows.spec.ts",
+        "title": "reachable workflow dialogs fit and expose labelled controls at 1920px",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/workflows.spec.ts",
+        "title": "file read errors leave import retry available without submitting rows",
+        "passed": true,
+        "run": "final-browser-verified.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/pwa.spec.ts",
+        "title": "deployed app scopes cache the shell, report offline data and preserve a draft through an update",
+        "passed": true,
+        "run": "final-pwa.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/pwa.spec.ts",
+        "title": "deployed app scopes cache the shell, report offline data and preserve a draft through an update",
+        "passed": true,
+        "run": "final-pwa.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/pwa.spec.ts",
+        "title": "deployed app scopes cache the shell, report offline data and preserve a draft through an update",
+        "passed": true,
+        "run": "final-pwa.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 320px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 360px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 390px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 430px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 768px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 1024px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 1440px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "chromium",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 1920px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 320px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 390px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 360px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 430px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 768px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 1024px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 1440px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "firefox",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 1920px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 320px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 360px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 390px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 430px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 768px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 1024px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 1440px",
+        "passed": true,
+        "run": "final-publishing.log"
+      },
+      {
+        "engine": "webkit",
+        "file": "e2e/publishing.spec.ts",
+        "title": "combined publication entry page is RTL and usable at 1920px",
+        "passed": true,
+        "run": "final-publishing.log"
+      }
+    ]
+  },
+  "benchmark": {
+    "SqlEdition": "Express Edition (64-bit)",
+    "SqlVersion": "17.0.4025.3",
+    "Compatibility": 170,
+    "AvailableHostRamMiB": 32452,
+    "Architecture": "X64",
+    "CapturedAt": "2026-10-11T13:52:53.8322545Z",
+    "Runtime": "8.0.31",
+    "OS": "Microsoft Windows NT 10.0.26200.0",
+    "Processors": 20,
+    "Students": 3000,
+    "Servants": 50,
+    "Calls": 100000,
+    "Visits": 25000,
+    "WeeklyMeetings": 104,
+    "RosterRows": 317200,
+    "Results": [
+      {
+        "Operation": "list",
+        "ConcurrentCallers": 20,
+        "Samples": 60,
+        "P50Ms": 15.9,
+        "P95Ms": 45.7,
+        "MaxMs": 55.4,
+        "MinQueries": 2,
+        "MaxQueries": 2,
+        "TargetMs": 500,
+        "Passed": true
+      },
+      {
+        "Operation": "contact",
+        "ConcurrentCallers": 20,
+        "Samples": 60,
+        "P50Ms": 311.4,
+        "P95Ms": 547.6,
+        "MaxMs": 684,
+        "MinQueries": 4,
+        "MaxQueries": 4,
+        "TargetMs": 1000,
+        "Passed": true
+      },
+      {
+        "Operation": "workload",
+        "ConcurrentCallers": 20,
+        "Samples": 60,
+        "P50Ms": 115.7,
+        "P95Ms": 203.4,
+        "MaxMs": 214.6,
+        "MinQueries": 6,
+        "MaxQueries": 6,
+        "TargetMs": 1000,
+        "Passed": true
+      },
+      {
+        "Operation": "workload-owners",
+        "ConcurrentCallers": 20,
+        "Samples": 60,
+        "P50Ms": 263.5,
+        "P95Ms": 435.8,
+        "MaxMs": 454,
+        "MinQueries": 2,
+        "MaxQueries": 2,
+        "TargetMs": 1000,
+        "Passed": true
+      },
+      {
+        "Operation": "data-quality",
+        "ConcurrentCallers": 20,
+        "Samples": 60,
+        "P50Ms": 101.9,
+        "P95Ms": 139.2,
+        "MaxMs": 154.4,
+        "MinQueries": 2,
+        "MaxQueries": 2,
+        "TargetMs": 1000,
+        "Passed": true
+      },
+      {
+        "Operation": "attendance",
+        "ConcurrentCallers": 20,
+        "Samples": 60,
+        "P50Ms": 175.8,
+        "P95Ms": 187.3,
+        "MaxMs": 189.8,
+        "MinQueries": 0,
+        "MaxQueries": 1,
+        "TargetMs": 1000,
+        "Passed": true
+      },
+      {
+        "Operation": "follow-up",
+        "ConcurrentCallers": 20,
+        "Samples": 60,
+        "P50Ms": 63.5,
+        "P95Ms": 85.6,
+        "MaxMs": 95,
+        "MinQueries": 7,
+        "MaxQueries": 7,
+        "TargetMs": 1000,
+        "Passed": true
+      },
+      {
+        "Operation": "manager",
+        "ConcurrentCallers": 20,
+        "Samples": 60,
+        "P50Ms": 290.1,
+        "P95Ms": 360,
+        "MaxMs": 370,
+        "MinQueries": 13,
+        "MaxQueries": 13,
+        "TargetMs": 1000,
+        "Passed": true
+      }
+    ],
+    "HttpResults": [
+      {
+        "Operation": "list",
+        "Transport": "ASP.NET TestServer HTTP",
+        "AuthenticatedUsers": 20,
+        "Samples": 60,
+        "P50Ms": 22.6,
+        "P95Ms": 54.7,
+        "MaxMs": 58.9,
+        "TargetMs": 500,
+        "Passed": true
+      },
+      {
+        "Operation": "contact",
+        "Transport": "ASP.NET TestServer HTTP",
+        "AuthenticatedUsers": 20,
+        "Samples": 60,
+        "P50Ms": 392.4,
+        "P95Ms": 458.8,
+        "MaxMs": 467.5,
+        "TargetMs": 1000,
+        "Passed": true
+      },
+      {
+        "Operation": "workload",
+        "Transport": "ASP.NET TestServer HTTP",
+        "AuthenticatedUsers": 20,
+        "Samples": 60,
+        "P50Ms": 126,
+        "P95Ms": 168.1,
+        "MaxMs": 177.6,
+        "TargetMs": 1000,
+        "Passed": true
+      },
+      {
+        "Operation": "workload-owners",
+        "Transport": "ASP.NET TestServer HTTP",
+        "AuthenticatedUsers": 20,
+        "Samples": 60,
+        "P50Ms": 292.3,
+        "P95Ms": 355.3,
+        "MaxMs": 380.5,
+        "TargetMs": 1000,
+        "Passed": true
+      },
+      {
+        "Operation": "data-quality",
+        "Transport": "ASP.NET TestServer HTTP",
+        "AuthenticatedUsers": 20,
+        "Samples": 60,
+        "P50Ms": 117.6,
+        "P95Ms": 138.8,
+        "MaxMs": 146.3,
+        "TargetMs": 1000,
+        "Passed": true
+      },
+      {
+        "Operation": "attendance",
+        "Transport": "ASP.NET TestServer HTTP",
+        "AuthenticatedUsers": 20,
+        "Samples": 60,
+        "P50Ms": 168.6,
+        "P95Ms": 188,
+        "MaxMs": 188.1,
+        "TargetMs": 1000,
+        "Passed": true
+      },
+      {
+        "Operation": "follow-up",
+        "Transport": "ASP.NET TestServer HTTP",
+        "AuthenticatedUsers": 20,
+        "Samples": 60,
+        "P50Ms": 68,
+        "P95Ms": 85.3,
+        "MaxMs": 88.3,
+        "TargetMs": 1000,
+        "Passed": true
+      },
+      {
+        "Operation": "manager",
+        "Transport": "ASP.NET TestServer HTTP",
+        "AuthenticatedUsers": 20,
+        "Samples": 60,
+        "P50Ms": 299.9,
+        "P95Ms": 341.6,
+        "MaxMs": 347.1,
+        "TargetMs": 1000,
+        "Passed": true
+      },
+      {
+        "Operation": "contact-mixed-filters",
+        "Transport": "ASP.NET TestServer HTTP",
+        "AuthenticatedUsers": 20,
+        "DistinctQueries": 20,
+        "Samples": 60,
+        "P50Ms": 80.5,
+        "P95Ms": 116.7,
+        "MaxMs": 130.8,
+        "TargetMs": 1000,
+        "Passed": true
+      },
+      {
+        "Operation": "workload-mixed-filters",
+        "Transport": "ASP.NET TestServer HTTP",
+        "AuthenticatedUsers": 20,
+        "DistinctQueries": 20,
+        "Samples": 60,
+        "P50Ms": 45.3,
+        "P95Ms": 98.2,
+        "MaxMs": 105.1,
+        "TargetMs": 1000,
+        "Passed": true
+      },
+      {
+        "Operation": "attendance-mixed-filters",
+        "Transport": "ASP.NET TestServer HTTP",
+        "AuthenticatedUsers": 20,
+        "DistinctQueries": 20,
+        "Samples": 60,
+        "P50Ms": 128.2,
+        "P95Ms": 186.9,
+        "MaxMs": 235.5,
+        "TargetMs": 1000,
+        "Passed": true
+      },
+      {
+        "Operation": "follow-up-mixed-filters",
+        "Transport": "ASP.NET TestServer HTTP",
+        "AuthenticatedUsers": 20,
+        "DistinctQueries": 20,
+        "Samples": 60,
+        "P50Ms": 42.4,
+        "P95Ms": 108.4,
+        "MaxMs": 134.9,
+        "TargetMs": 1000,
+        "Passed": true
+      },
+      {
+        "Operation": "attendance-mixed-owners",
+        "Transport": "ASP.NET TestServer HTTP",
+        "AuthenticatedUsers": 20,
+        "DistinctQueries": 20,
+        "Samples": 60,
+        "P50Ms": 31.5,
+        "P95Ms": 56.7,
+        "MaxMs": 57.5,
+        "TargetMs": 1000,
+        "Passed": true
+      }
+    ]
+  },
+  "dependencyAudit": {
+    "frontend": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "backendVulnerablePackages": [
+      {
+        "id": "SixLabors.ImageSharp",
+        "resolvedVersion": "3.1.5",
+        "vulnerabilities": [
+          {
+            "severity": "High",
+            "advisoryurl": "https://github.com/advisories/GHSA-2cmq-823j-5qj8"
+          },
+          {
+            "severity": "Moderate",
+            "advisoryurl": "https://github.com/advisories/GHSA-rxmq-m78w-7wmc"
+          },
+          {
+            "severity": "Moderate",
+            "advisoryurl": "https://github.com/advisories/GHSA-gwg2-r3hj-4w44"
+          },
+          {
+            "severity": "High",
+            "advisoryurl": "https://github.com/advisories/GHSA-j3p4-wp97-rph4"
+          },
+          {
+            "severity": "High",
+            "advisoryurl": "https://github.com/advisories/GHSA-j9gm-c75j-xc9q"
+          },
+          {
+            "severity": "Moderate",
+            "advisoryurl": "https://github.com/advisories/GHSA-wmxv-xphr-5c9g"
+          },
+          {
+            "severity": "High",
+            "advisoryurl": "https://github.com/advisories/GHSA-jjfr-hcj7-qf5w"
+          }
+        ]
+      }
+    ]
+  },
+  "apiPublication": {
+    "legacyIdentityRemoved": true,
+    "target": ".NETCoreApp,Version=v8.0",
+    "imageSharp": "3.1.5"
+  },
+  "recovery": {
+    "VerifiedAt": "2026-10-11T13:44:14.5824695Z",
+    "Runtime": "8.0.31",
+    "SourceDatabase": "YDM_RestoreSource_a7b3a75236664d49965b5aed64ee87c2",
+    "RestoredDatabase": "YDM_RestoreCheck_8bf0ed2eb8c04c46a16c5a9d0429bbb8",
+    "DatabaseChecksum": true,
+    "RestoredStudentId": "0efcdd0f-778c-4d8e-a38f-7a71e4d6a901",
+    "PhotoCount": 1,
+    "PhotoHashes": {
+      "students\\0efcdd0f-778c-4d8e-a38f-7a71e4d6a901_1112c13a41fe4fe58c9b852805d28d2f.jpg": "BA70BE83FC85EB0C76B92A48C8086DA267CEA87B92FA6327DCC1DC654070B19B"
+    },
+    "ImageWidth": 64,
+    "ImageHeight": 48,
+    "ProductionTargetTested": false
+  },
+  "productionPagesIntegrity": {
+    "verifiedAssets": 97,
+    "fixtureApiStringsPresent": false,
+    "currentStylesheetsPerApp": 1
+  }
+}

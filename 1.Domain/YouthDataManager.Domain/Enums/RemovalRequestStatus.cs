@@ -4,5 +4,6 @@ public enum RemovalRequestStatus
 {
     Pending,
     Approved,
-    Rejected
+    Rejected,
+    Cancelled
 }

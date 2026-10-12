@@ -1,144 +1,59 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { CreateStudentRequest, UpdateStudentRequest, BulkImportResult } from '../shared/models';
+import { parseCsv, csvDocument } from '@ydm/shared/core/utils';
 
-@Injectable({
-  providedIn: 'root'
-})
+export interface CsvStudentRow { row: number; student: CreateStudentRequest; error?: string; candidates?: {studentId?:string;name:string;row?:number}[];duplicateReviewed?:boolean; }
+
+@Injectable({ providedIn: 'root' })
 export class StudentCommandsService {
   private apiUrl = `${environment.apiUrl}/StudentCommands`;
-
   constructor(private http: HttpClient) {}
-
-  create(request: CreateStudentRequest): Observable<string> {
-    const body = {
-      fullName: request.fullName,
-      phone: request.phone,
-      address: request.address ?? null,
-      area: request.area ?? null,
-      college: request.college ?? null,
-      academicYear: request.academicYear ?? null,
-      confessionFather: request.confessionFather ?? null,
-      gender: Number(request.gender) || 0,
-      servantId: request.servantId ?? null,
-      birthDate: request.birthDate || null
-    };
-    return this.http.post<string>(this.apiUrl, body);
-  }
-
-  assignToServant(studentId: string, servantId: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${studentId}/assign/${servantId}`, {});
-  }
-
-  update(request: UpdateStudentRequest): Observable<void> {
-    const body = {
-      id: request.id,
-      fullName: request.fullName,
-      phone: request.phone,
-      address: request.address ?? null,
-      area: request.area ?? null,
-      college: request.college ?? null,
-      academicYear: request.academicYear ?? null,
-      confessionFather: request.confessionFather ?? null,
-      gender: Number(request.gender) ?? 0,
-      servantId: request.servantId ?? null,
-      birthDate: request.birthDate || null
-    };
-    return this.http.put<void>(`${this.apiUrl}/${request.id}`, body);
-  }
-
-  delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  }
-
-  uploadPhoto(studentId: string, file: File): Observable<{ photoPath: string }> {
-    const form = new FormData();
-    form.append('file', file);
-    return this.http.post<{ photoPath: string }>(`${this.apiUrl}/${studentId}/photo`, form);
-  }
-
-  private static readonly CSV_TEMPLATE =
-  "الاسم الكامل,العنوان,المنطقة,رقم التليفون,تاريخ الميلاد,الكلية,السنة الدراسية,أب الاعتراف,النوع\n";
-
+  create(request: CreateStudentRequest): Observable<string> { return this.http.post<string>(this.apiUrl, {...request,gender:Number(request.gender)}); }
+  update(request: UpdateStudentRequest,version?:string): Observable<void> { return this.http.put<void>(`${this.apiUrl}/${request.id}`, {...request,gender:Number(request.gender)},{headers:version ? {'If-Match':version} : {}}); }
+  unassign(id:string):Observable<unknown>{return this.http.post(`${this.apiUrl}/${id}/unassign`,{});}
+  assignToServant(studentId: string, servantId: string): Observable<unknown> { return this.http.post(`${this.apiUrl}/${studentId}/assign/${servantId}`, {}); }
+  bulkAssign(ids: string[], servantId: string): Observable<{ outcomes: { studentId: string; success: boolean; error?: string }[] }> { return this.http.post<{ outcomes: { studentId: string; success: boolean; error?: string }[] }>(`${this.apiUrl}/bulk-assignment`, { ids, servantId }); }
+  delete(id: string,reason:string='Student archival',version?:string): Observable<void> { return this.http.delete<void>(`${this.apiUrl}/${id}`,{headers:{'X-Audit-Reason':reason,...(version ? {'If-Match':version} : {})}}); }
+  uploadPhoto(id: string, file: File): Observable<{ photoPath: string }> { const data = new FormData(); data.append('file', file); return this.http.post<{ photoPath: string }>(`${this.apiUrl}/${id}/photo`, data); }
   downloadCsvTemplate(): void {
-    const blob = new Blob(['\ufeff' + StudentCommandsService.CSV_TEMPLATE], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'students_template.csv';
-    a.click();
-    URL.revokeObjectURL(url);
+    const headers = ['FullName','Phone','SecondaryPhone','BirthDate','BirthMonth','Address','Area','College','AcademicYear','ConfessionFather','Notes','Gender'];
+    const blob = new Blob([csvDocument(headers, [])], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'students_template.csv'; a.click(); URL.revokeObjectURL(url);
   }
-
-  /** Parse CSV text (Arabic or English headers) into array of CreateStudentRequest. */
-  parseCsvToStudents(csvText: string): CreateStudentRequest[] {
-    const lines = csvText.split(/\r?\n/).filter(l => l.length > 0);
-    if (lines.length < 2) return [];
-    const header = this.parseCsvLine(lines[0]);
-    const getCol = (row: string[], ...names: string[]) => {
-      for (const name of names) {
-        const i = header.findIndex(h => h.trim() === name);
-        if (i >= 0 && i < row.length) return (row[i] ?? '').trim();
+  previewCsv(text: string): CsvStudentRow[] {
+    const records = parseCsv(text); if (!records.length) return [];
+    const headers = records[0].values.map(h => h.trim().replace(/^\uFEFF/, ''));
+    const get = (values: string[], ...names: string[]) => values[headers.findIndex(h => names.includes(h))]?.trim() || '';
+    return records.slice(1).filter(r => r.values.some(v => v.trim())).map(record => {
+      const v = record.values;
+      const fullName = get(v, 'FullName', 'الاسم الكامل'); const phone = get(v, 'Phone', 'رقم التليفون');
+      let birthday = get(v, 'BirthDate', 'تاريخ الميلاد'); const monthText = get(v, 'BirthMonth', 'شهر الميلاد');
+      const genderText = get(v, 'Gender', 'النوع'); const gender = genderText === 'أنثى' ? 1 : genderText === 'ذكر' || !genderText ? 0 : Number(genderText);
+      let error: string | undefined;
+      if (!fullName || !phone) error = 'الاسم ورقم الهاتف مطلوبان';
+      if (birthday) {
+        if (/^\d{2}\/\d{2}\/\d{4}$/.test(birthday)) { const [day, month, year] = birthday.split('/'); birthday = `${year}-${month}-${day}`; }
+        const date = new Date(birthday + 'T00:00:00Z');
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(birthday) || !Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== birthday || date.getUTCFullYear() < 1900 || date > new Date()) error = 'تاريخ الميلاد غير صالح؛ استخدم YYYY-MM-DD أو DD/MM/YYYY';
       }
-      return '';
-    };
-    const result: CreateStudentRequest[] = [];
-    for (let r = 1; r < lines.length; r++) {
-      const row = this.parseCsvLine(lines[r]);
-      if (row.every(c => !c.trim())) continue;
-      const fullName = getCol(row, 'الاسم الكامل', 'FullName');
-      const phone = getCol(row, 'رقم التليفون', 'Phone');
-      if (!fullName || !phone) continue;
-      const bd = getCol(row, 'تاريخ الميلاد', 'BirthDate');
-      let birthDate: string | null = null;
-      if (bd && !isNaN(Date.parse(bd))) birthDate = new Date(bd).toISOString().slice(0, 10);
-      const genderStr = getCol(row, 'النوع', 'Gender');
-      const gender = genderStr === '1' || genderStr === 'أنثى' ? 1 : 0;
-      result.push({
-        fullName,
-        phone,
-        address: getCol(row, 'العنوان', 'Address') || null,
-        area: getCol(row, 'المنطقة', 'Area') || null,
-        college: getCol(row, 'الكلية', 'College') || null,
-        academicYear: getCol(row, 'السنة الدراسية', 'AcademicYear') || null,
-        confessionFather: getCol(row, 'أب الاعتراف', 'ConfessionFather') || null,
-        gender,
-        servantId: null,
-        birthDate
-      });
-    }
-    return result;
+      const birthMonth = monthText ? Number(monthText) : null;
+      if (birthMonth !== null && (!Number.isInteger(birthMonth) || birthMonth < 1 || birthMonth > 12)) error = 'شهر الميلاد يجب أن يكون من 1 إلى 12';
+      if (gender !== 0 && gender !== 1) error = 'النوع يجب أن يكون 0 أو 1';
+      if (record.values.length !== headers.length) error = 'عدد الحقول لا يطابق عناوين الملف';
+      return { row: record.line, error, student: { fullName, phone, secondaryPhone: get(v, 'SecondaryPhone', 'الهاتف الإضافي') || null,
+        birthDate: birthday || null, birthMonth, gender, address: get(v, 'Address', 'العنوان') || null, area: get(v, 'Area', 'المنطقة') || null,
+        college: get(v, 'College', 'الكلية') || null, academicYear: get(v, 'AcademicYear', 'السنة الدراسية') || null,
+        confessionFather: get(v, 'ConfessionFather', 'أب الاعتراف') || null, notes: get(v, 'Notes', 'ملاحظات') || null, servantId: null } };
+    });
   }
-
-  private parseCsvLine(line: string): string[] {
-    const out: string[] = [];
-    let buf = '';
-    let inQuotes = false;
-    for (let i = 0; i < line.length; i++) {
-      const c = line[i];
-      if (c === '"') { inQuotes = !inQuotes; continue; }
-      if (!inQuotes && c === ',') { out.push(buf.trim()); buf = ''; continue; }
-      buf += c;
-    }
-    out.push(buf.trim());
-    return out;
+  parseCsvToStudents(text: string): CreateStudentRequest[] { return this.previewCsv(text).map(r => r.student); }
+  reviewImport(operationId:string,rows:CsvStudentRow[]):Observable<{row:number;candidates:{studentId?:string;name:string;row?:number}[];error?:string}[]>{return this.http.post<any[]>(`${this.apiUrl}/import-preview`,{operationId,rows:rows.map(r=>({row:r.row,student:r.student}))});}
+  importRows(operationId: string, rows: CsvStudentRow[]): Observable<BulkImportResult> {
+    const rejected = rows.filter(r => r.error).map(r => ({ row: r.row, message: r.error! }));
+    return this.http.post<{ outcomes: { row: number; studentId?: string; error?: string }[] }>(`${this.apiUrl}/bulk-import-v2`, { operationId, rows: rows.filter(r => !r.error).map(r => ({ row: r.row, student: r.student,duplicateReviewed:r.duplicateReviewed || false })) }).pipe(map(r => ({ created: r.outcomes.filter(o => o.studentId && !o.error).length, errors: [...rejected, ...r.outcomes.filter(o => o.error).map(o => ({ row: o.row, message: o.error! }))] })));
   }
-
-  bulkImport(items: CreateStudentRequest[]): Observable<BulkImportResult> {
-    const body = items.map(req => ({
-      fullName: req.fullName,
-      phone: req.phone,
-      address: req.address ?? null,
-      area: req.area ?? null,
-      college: req.college ?? null,
-      academicYear: req.academicYear ?? null,
-      confessionFather: req.confessionFather ?? null,
-      gender: Number(req.gender) || 0,
-      servantId: null,
-      birthDate: req.birthDate || null
-    }));
-    return this.http.post<BulkImportResult>(`${this.apiUrl}/bulk-import`, body);
-  }
+  bulkImport(items: CreateStudentRequest[]): Observable<BulkImportResult> { return this.importRows(crypto.randomUUID(), items.map((student, index) => ({ row: index + 2, student }))); }
 }

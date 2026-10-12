@@ -1,12 +1,12 @@
 <div class="profile-photo-wrap" (click)="triggerFileSelect()" [class.disabled]="disabled()">
   <input
     #fileInput
-    type="file"
+    type="file" [attr.aria-label]="label()" [disabled]="disabled()"
     accept="image/*"
     class="hidden-input"
     (change)="onFileChange($event)"
   />
-  <div class="photo-circle" role="button" [attr.aria-label]="label()" tabindex="0" (keydown.enter)="triggerFileSelect()" (keydown.space)="triggerFileSelect(); $event.preventDefault()">
+  <div class="photo-circle" role="button" [attr.aria-label]="label()" [attr.aria-disabled]="disabled()" [attr.tabindex]="disabled() ? -1 : 0" (keydown.enter)="triggerFileSelect()" (keydown.space)="triggerFileSelect(); $event.preventDefault()">
     @if (displayUrl()) {
       <img [src]="displayUrl()" alt="" class="photo-img" />
     } @else {

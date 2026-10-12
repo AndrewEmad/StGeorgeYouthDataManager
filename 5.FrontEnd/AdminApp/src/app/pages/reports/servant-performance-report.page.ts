@@ -1,3 +1,5 @@
+import {apiError} from '@ydm/shared/core/api';
+import {Subscription} from 'rxjs';
 import { Component, OnInit, signal, inject, ChangeDetectionStrategy, TemplateRef, viewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ReportsService } from '../../services/reports.service';
@@ -14,6 +16,8 @@ import { DataTableColumn } from '../../shared/components/data-table/data-table-c
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ServantPerformanceReportPage implements OnInit {
+  private request?:Subscription;ngOnDestroy(){this.request?.unsubscribe();}
+
   private reportsService = inject(ReportsService);
   private router = inject(Router);
 
@@ -27,11 +31,11 @@ export class ServantPerformanceReportPage implements OnInit {
   ];
 
   data = signal<ServantPerformance[]>([]);
-  loading = signal(false);
+  loading = signal(false);error=signal('');
   totalCount = signal(0);
   page = signal(1);
-  pageSize = signal(10);
-  pageSizeOptions = [5, 10, 20, 50];
+  pageSize = signal(25);
+  pageSizeOptions = [25, 50, 100];
   sortBy = signal<string | null>('fullName');
   sortDesc = signal(false);
 
@@ -40,8 +44,8 @@ export class ServantPerformanceReportPage implements OnInit {
   }
 
   loadData(): void {
-    this.loading.set(true);
-    this.reportsService
+    this.request?.unsubscribe();this.loading.set(true);this.error.set('');
+    this.request=this.reportsService
       .getServantPerformancesPaged({
         page: this.page(),
         pageSize: this.pageSize(),
@@ -55,7 +59,7 @@ export class ServantPerformanceReportPage implements OnInit {
           this.page.set(res.page ?? this.page());
           this.loading.set(false);
         },
-        error: () => this.loading.set(false),
+        error:e=>{this.loading.set(false);this.data.set([]);this.error.set(apiError(e));},
       });
   }
 

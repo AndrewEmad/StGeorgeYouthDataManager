@@ -1,3 +1,4 @@
+import {Subscription} from 'rxjs';
 import { Component, OnInit, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ReportsService } from '../../services/reports.service';
 import { UsersService } from '../../services/users.service';
@@ -16,6 +17,8 @@ import { AdvancedFilterConfig, AdvancedFilterModel } from '../../shared/componen
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ServantActivityReportPage implements OnInit {
+  private request?:Subscription;ngOnDestroy(){this.request?.unsubscribe();}
+
   private reportsService = inject(ReportsService);
   private usersService = inject(UsersService);
 
@@ -24,9 +27,9 @@ export class ServantActivityReportPage implements OnInit {
   loading = signal(false);
   error = signal('');
   page = signal(1);
-  pageSize = signal(10);
+  pageSize = signal(25);
   totalCount = signal(0);
-  pageSizeOptions = [5, 10, 20, 50];
+  pageSizeOptions = [25, 50, 100];
   sortBy = signal<string | null>('fullName');
   sortDesc = signal(false);
   filterModel = signal<AdvancedFilterModel>({});
@@ -39,7 +42,7 @@ export class ServantActivityReportPage implements OnInit {
       {
         key: 'servantId',
         label: 'الخادم',
-        type: 'select',
+        type: 'resource',resourceKind:'report-actors',
         placeholder: 'الكل',
         options: list.map((s) => ({ value: s.id ?? '', label: s.fullName ?? s.userName ?? '' })),
       },
@@ -54,16 +57,6 @@ export class ServantActivityReportPage implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.usersService
-      .getPaged({ page: 1, pageSize: 500, sortBy: 'fullName', sortDesc: false })
-      .subscribe({
-        next: (res) => {
-          const sorted = (res.items ?? []).slice().sort((a, b) =>
-            (a.fullName || '').localeCompare(b.fullName || '', 'ar')
-          );
-          this.servants.set(sorted);
-        },
-      });
     this.loadData();
   }
 
@@ -74,7 +67,7 @@ export class ServantActivityReportPage implements OnInit {
   }
 
   loadData(): void {
-    this.loading.set(true);
+    this.request?.unsubscribe();this.loading.set(true);
     this.error.set('');
     const model = this.filterModel();
     const params: {
@@ -98,7 +91,7 @@ export class ServantActivityReportPage implements OnInit {
     if (dateTo != null && String(dateTo).trim()) params.dateTo = String(dateTo).trim();
     if (servantId != null && String(servantId).trim()) params.servantId = String(servantId).trim();
 
-    this.reportsService.getServantActivitySummary(params).subscribe({
+    this.request=this.reportsService.getServantActivitySummary(params).subscribe({
       next: (res) => {
         this.data.set(res.items ?? []);
         this.totalCount.set(res.totalCount ?? 0);

@@ -1,4 +1,6 @@
 <div class="container student-list animate-fade">
+  @if(error()){<p role="alert" class="text-error">{{error()}}</p><button type="button" class="btn-outline" (click)="loadPage()">إعادة المحاولة</button>}
+  @if(message()){<p role="status" class="text-success">{{message()}}</p>}
   <section class="filters-section">
     <h3 class="filters-title">بحث متقدم</h3>
     <div class="filters-row">
@@ -74,12 +76,12 @@
                   }
                 </span>
                 <h3>{{ item.student.fullName }}</h3>
-                <p><span class="material-icons">place</span> {{ item.student.area || '—' }}</p>
-                <p><span class="material-icons">school</span> {{ item.student.college || '—' }}</p>
-                <p><span class="material-icons">calendar_today</span> {{ item.student.academicYear || '—' }}</p>
-                @if (item.student.lastAttendanceDate) {
+                <p><span class="material-icons" aria-hidden="true">place</span> {{ item.student.area || '—' }}</p>
+                <p><span class="material-icons" aria-hidden="true">school</span> {{ item.student.college || '—' }}</p>
+                <p><span class="material-icons" aria-hidden="true">calendar_today</span> {{ item.student.academicYear || '—' }}</p>
+                @if (item.segment==='Assigned' && item.student.lastAttendanceDate) {
                   <p class="last-attendance">
-                    <span class="material-icons">event_available</span>
+                    <span class="material-icons" aria-hidden="true">event_available</span>
                     آخر حضور: {{ item.student.lastAttendanceDate | date:'dd/MM/yyyy' }}
                   </p>
                 }
@@ -87,8 +89,9 @@
               <div class="student-actions">
                 @if (item.segment === 'Assigned') {
                   <div class="contact-actions">
-                    <a [href]="'tel:' + item.student.phone" class="btn-icon call"><span class="material-icons">phone</span></a>
-                    <a [href]="getWaMeUrl(item.student.phone)" target="_blank" rel="noopener noreferrer" class="btn-icon whatsapp"><span class="material-icons">chat</span></a>
+                    @if(phone(item.student.phone)){<a [href]="'tel:+' + phone(item.student.phone)" class="btn-icon call" aria-label="اتصال بالهاتف الأساسي"><span class="material-icons" aria-hidden="true">phone</span></a>
+                    <a [href]="getWaMeUrl(item.student.phone)" target="_blank" rel="noopener noreferrer" class="btn-icon whatsapp" aria-label="فتح واتساب للهاتف الأساسي"><span class="material-icons" aria-hidden="true">chat</span></a>}
+                    @if(item.student.secondaryPhone && phone(item.student.secondaryPhone)){<a [href]="'tel:+'+phone(item.student.secondaryPhone)" class="btn-icon call" aria-label="اتصال بالهاتف البديل"><span class="material-icons" aria-hidden="true">phone_in_talk</span></a>}
                   </div>
                   <a [routerLink]="['/students', item.student.id]" class="btn-outline sm">التفاصيل</a>
                 }
@@ -96,7 +99,7 @@
                   <span class="text-muted small">بانتظار موافقة المدير</span>
                 }
                 @if (item.segment === 'Unassigned') {
-                  <button type="button" class="btn-primary sm" [disabled]="requestingId() === item.student.id" (click)="requestAssignToMe(item)">
+                  <button type="button" class="btn-primary sm" [disabled]="!!requestingId() || loading()" (click)="requestAssignToMe(item)">
                     {{ requestingId() === item.student.id ? 'جاري الإرسال...' : 'طلب تخصيص لي' }}
                   </button>
                 }

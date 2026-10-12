@@ -359,3 +359,7 @@
     font-size: 28px;
   }
 }
+
+.top-bar-left{min-inline-size:0;max-inline-size:60%;gap:8px}.top-bar-name{min-inline-size:0;max-inline-size:100%}.account-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-inline-size:0}.top-bar-name .material-icons,.btn-logout{flex:none}.top-bar .btn-logout{min-block-size:44px;min-inline-size:44px;padding:8px}.sidebar .nav-item{white-space:normal;min-inline-size:0}.sidebar .nav-item.active{background:linear-gradient(135deg,#4f46e5,#7e22ce)}@media(max-width:480px){.account-name{display:none}.top-bar-left{max-inline-size:60%}.top-bar{padding-inline:12px}}
+
+.sidebar[hidden]{display:none!important}.nav-item{min-height:44px;white-space:normal;overflow-wrap:anywhere}.side-nav{max-block-size:none}.side-nav .nav-item.active{background:linear-gradient(135deg,#4f46e5,#7e22ce)}

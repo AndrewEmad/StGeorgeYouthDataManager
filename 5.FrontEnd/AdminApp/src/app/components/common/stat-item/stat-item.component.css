@@ -39,7 +39,7 @@ a.stat-item-link {
   color: #a855f7;
 }
 .stat-item.emerald .material-icons {
-  color: #10b981;
+  color: var(--secondary);
 }
 .stat-item.amber .material-icons {
   color: #f59e0b;
@@ -50,3 +50,5 @@ a.stat-item-link {
 .stat-item.rose .material-icons {
   color: #f43f5e;
 }
+
+.s-info-container,.s-info{min-inline-size:0;overflow-wrap:anywhere}.priest-card-section .priest-card .s-info-container{flex:1}.stat-item{min-inline-size:0}

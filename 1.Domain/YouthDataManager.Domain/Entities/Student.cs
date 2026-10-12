@@ -4,6 +4,8 @@ namespace YouthDataManager.Domain.Entities;
 
 public class Student
 {
+    public byte[] Version { get; set; } = [];
+
     public Guid Id { get; set; }
     public string FullName { get; set; } = string.Empty;
     public string NormalizedFullName { get; set; } = string.Empty;
@@ -11,6 +13,8 @@ public class Student
     public string Area { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
     public string? SecondaryPhone { get; set; }
+    public string? NormalizedPhone { get; set; }
+    public string? NormalizedSecondaryPhone { get; set; }
     public DateTime? BirthDate { get; set; }
     public int? BirthMonth { get; set; }
     public string College { get; set; } = string.Empty;

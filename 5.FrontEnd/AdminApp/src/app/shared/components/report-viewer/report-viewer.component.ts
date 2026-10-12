@@ -34,11 +34,12 @@ export class ReportViewerComponent<T extends object = Record<string, unknown>> {
   initialFilterModel = input<AdvancedFilterModel | null>(null);
   columns = input.required<DataTableColumn<T>[]>();
   data = input.required<T[]>();
+  error=input('');retry=output<void>();
   loading = input<boolean>(false);
   totalCount = input<number>(0);
   page = input<number>(1);
-  pageSize = input<number>(10);
-  pageSizeOptions = input<number[]>([5, 10, 20, 50]);
+  pageSize = input<number>(25);
+  pageSizeOptions = input<number[]>([25, 50, 100]);
   sortBy = input<string | null>(null);
   sortDesc = input<boolean>(false);
   emptyMessage = input<string>('لا توجد بيانات');

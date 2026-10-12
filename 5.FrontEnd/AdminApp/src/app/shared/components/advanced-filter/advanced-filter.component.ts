@@ -8,6 +8,7 @@ import {
   inject,
   effect,
 } from '@angular/core';
+import {ResourcePickerComponent} from '@ydm/shared/ui/resource-picker';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AdvancedFilterConfig, AdvancedFilterModel } from './advanced-filter-config';
@@ -16,7 +17,7 @@ import { FiltersBarComponent } from '../../../components/common/filters-bar/filt
 @Component({
   selector: 'admin-advanced-filter',
   standalone: true,
-  imports: [FiltersBarComponent],
+  imports: [FiltersBarComponent,ResourcePickerComponent],
   templateUrl: './advanced-filter.component.html',
   styleUrl: './advanced-filter.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -75,8 +76,6 @@ export class AdvancedFilterComponent {
 
   setValue(key: string, value: string | null): void {
     this.model.update((m) => ({ ...m, [key]: value }));
-    this.emitFilter();
-    this.syncQueryParams();
   }
 
   apply(): void {

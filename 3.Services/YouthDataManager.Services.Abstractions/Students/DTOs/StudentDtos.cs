@@ -1,3 +1,4 @@
+using YouthDataManager.Shared.Service.Abstractions;
 using System;
 using System.Collections.Generic;
 
@@ -18,10 +19,12 @@ public record StudentListFilter(
     IEnumerable<Guid>? ExcludeStudentIds = null
 );
 
-public record UnassignedStudentForServantDto(StudentDto Student, bool HasPendingRequestByMe);
+public record StudentDiscoveryDto(Guid Id,string FullName,string Area,string College,string AcademicYear);
+
+public record UnassignedStudentForServantDto(object Student, bool HasPendingRequestByMe);
 
 /// <summary>Single paged list for servant: Assigned, then Requested, then Unassigned.</summary>
-public record ServantStudentPageItemDto(StudentDto Student, string Segment);
+public record ServantStudentPageItemDto(object Student, string Segment);
 
 public record StudentDto(
     Guid Id,
@@ -43,7 +46,10 @@ public record StudentDto(
     DateTime? LastAttendanceDate,
     DateTime? CreatedAt,
     DateTime? UpdatedAt,
-    string? PhotoPath = null
+    string? PhotoPath = null,
+    int? BirthMonth = null,
+    byte[]? Version = null,
+    bool IsArchived = false
 );
 
 public record CreateStudentRequest(
@@ -58,21 +64,25 @@ public record CreateStudentRequest(
     string? Notes,
     YouthDataManager.Domain.Enums.Gender Gender,
     Guid? ServantId,
-    DateTime? BirthDate
+    DateTime? BirthDate,
+    int? BirthMonth = null
 );
 
 public record UpdateStudentRequest(
     Guid Id,
-    string FullName,
-    string Phone,
-    string? Address,
-    string? Area,
-    string? College,
-    string? AcademicYear,
-    string? ConfessionFather,
-    YouthDataManager.Domain.Enums.Gender Gender,
-    Guid? ServantId,
-    DateTime? BirthDate
+    OptionalField<string?> FullName = default,
+    OptionalField<string?> Phone = default,
+    OptionalField<string?> Address = default,
+    OptionalField<string?> Area = default,
+    OptionalField<string?> College = default,
+    OptionalField<string?> AcademicYear = default,
+    OptionalField<string?> ConfessionFather = default,
+    OptionalField<YouthDataManager.Domain.Enums.Gender?> Gender = default,
+    OptionalField<Guid?> ServantId = default,
+    OptionalField<DateTime?> BirthDate = default,
+    OptionalField<int?> BirthMonth = default,
+    OptionalField<string?> SecondaryPhone = default,
+    OptionalField<string?> Notes = default
 );
 
 // Removal request (servant requests to remove student; admin approves → unassign and/or flag deleted per RemovalType)
@@ -120,7 +130,15 @@ public record StudentAdditionRequestDto(
     Guid RequestedByUserId,
     string RequestedByUserName,
     DateTime RequestedAt,
-    string Status
+    string Status,
+    string? Address = null,
+    string? ConfessionFather = null,
+    DateTime? BirthDate = null,
+    DateTime? ProcessedAt = null,
+    Guid? ProcessedByUserId = null,
+    Guid? CreatedStudentId = null,
+    int? BirthMonth = null,
+    string? ProcessingReason = null
 );
 
 public record CreateStudentAdditionRequestDto(
@@ -134,7 +152,8 @@ public record CreateStudentAdditionRequestDto(
     string? ConfessionFather,
     string? Notes,
     int Gender,
-    DateTime? BirthDate
+    DateTime? BirthDate,
+    int? BirthMonth = null
 );
 
 public record StudentEditLogDto(

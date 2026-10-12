@@ -21,7 +21,7 @@ public class JwtTokenService : IJwtTokenService
         _config = config.Value;
     }
 
-    public string GenerateToken(ApplicationUser user, IEnumerable<string> roles, bool mustChangePassword = false, bool profileIncomplete = false)
+    public string GenerateToken(ApplicationUser user, IEnumerable<string> roles, bool mustChangePassword = false, bool profileIncomplete = false, Guid? familyId = null)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.Secret));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -31,8 +31,10 @@ public class JwtTokenService : IJwtTokenService
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Name, user.UserName ?? string.Empty),
             new(ClaimTypes.Email, user.Email ?? string.Empty),
-            new("FullName", user.FullName)
+            new("FullName", user.FullName),
+            new("ss", user.SecurityStamp ?? "")
         };
+        if(familyId.HasValue)claims.Add(new("fid",familyId.Value.ToString()));
         if (mustChangePassword)
             claims.Add(new Claim("must_change_password", "true"));
         if (profileIncomplete)

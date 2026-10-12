@@ -79,7 +79,7 @@ Frontend behavior rows are verified across 336 unique browser cases after target
 - [x] Validate schedule days/time and at least one day; edit/pause/resume, inactive-user handling and invalid-token cleanup. Provider timeout defaults to 15 seconds, configurable within 5–30 seconds; failures remain visible.
 - [x] Both PWA workers use base-relative app scopes/navigation and real `logo.png` icons; tokens attach only to API requests and private API responses bypass the static service worker cache.
 - [x] Final packaged three-browser PWA registration/offline/subpath/update/draft-preservation and icon regression after the last worker/icon change.
-- [x] Development/staging/production client configuration; one tested combined Pages publish workflow; backend CI and optional staged schema scripts. Per the updated user preference, automatic migrations and missing role/admin initialization run by default before serving requests in development and production; isolated tests explicitly opt out.
+- [x] Development/staging/production client configuration; one combined frontend-only Pages publish workflow. Per the updated user preference, the Pages workflow has no backend job or dependency; backend verification and optional schema scripts are run separately by operators. Automatic migrations and missing role/admin initialization run by default before serving requests in development and production; isolated tests explicitly opt out.
 - [x] Data exports rename plus old-route redirect, bounded idempotent backfill/preflight, readiness and error/slow-query/worker/delivery/migration metrics.
 - [x] Database plus persistent-photo backup/restore tooling; actual isolated BACKUP/VERIFYONLY/RESTORE/MOVE/hash/decode regression passes.
 
@@ -119,5 +119,5 @@ These require the actual staging/production environment and cannot be closed by 
 - [ ] Verify real FCM registration/rotation/logout, provider delivery, foreground/click behavior and both deployed worker scopes on the actual origin.
 - [ ] Restore a representative real database/photo backup onto a separate staging target and exercise the restored API workflows.
 - [ ] Repeat performance measurements on the documented deployment resources through real TCP/TLS/hosting. Local HTTP measurements include ASP.NET authentication and serialization but use TestServer transport.
-- [ ] Execute the consolidated CI workflow on its actual runners, review browser artifacts/baseline portability, run legacy preflight when applicable, then verify startup schema initialization before the coordinated clients/API serve users.
+- [ ] Execute the frontend-only Pages workflow on its actual runners and review browser artifacts/baseline portability. Separately verify backend hosting and startup schema initialization before the coordinated clients/API serve users.
 - [ ] Consider .NET 10 only after exact ImageSharp 3.1.5 ASP.NET/EF/Identity/auth/migration/image/hosting tests pass there. Keeping .NET 8 fulfills the current compatibility constraint.

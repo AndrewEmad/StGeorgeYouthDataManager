@@ -10,7 +10,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const target = new URL(req.url, location.origin);
   if (target.origin !== api.origin || !(target.pathname === api.pathname || target.pathname.startsWith(api.pathname.replace(/\/$/, '') + '/'))) return next(req);
   // Authenticated API data always uses the network; only the static shell is cached.
-  req=req.clone({setHeaders:{'ngsw-bypass':'true'}});
+  req=req.clone({setHeaders:{'ngsw-bypass':'true','X-YDM-Workspace':'personal'}});
   const match=req.headers.get('If-Match');if(match && !match.startsWith('\"'))req=req.clone({setHeaders:{'If-Match':'\"'+match+'\"'}});
   const reason=req.headers.get('X-Audit-Reason');if(reason!==null && !req.headers.has('X-Audit-Reason-Encoding'))req=req.clone({setHeaders:auditReasonHeaders(reason)});
   const auth = inject(AuthService);

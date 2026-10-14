@@ -3883,5 +3883,64 @@
     },
     "constraints": "ImageSharp/.NET, automatic startup migrations, schema and frontend-only Pages workflow unchanged. Separate observed service-year selector edit left untouched.",
     "rollout": "Publish the updated Admin frontend; existing API null-owner support is already used by this client change."
+  },
+  "servantWorkspaceRevision": {
+    "date": "2026-10-14",
+    "status": "Implemented and verified locally; publication pending",
+    "changes": [
+      "Explicit seven-report servant catalog: own group attendance/history, own contact, own tasks, personal attendance/history and incomplete own-group data. Management reports are not inherited.",
+      "Servant client uses a personal session presentation and API-scoped restrictive workspace header, including for Manager accounts. Endpoint metadata narrows resource/report scope and rejects management-only operations without granting permissions or changing account roles.",
+      "Personal reports and exports credit only recorded calls and recorded/participated visits; shared visits count once. Dashboard never-attempted metric follows the same actor definition.",
+      "Own group is the initial student list; explicit minimal unassigned discovery remains available for assignment requests via a validated SQL segment filter. Existing omitted-segment contract remains compatible.",
+      "Requests are personal; management approval/reassignment controls and actor/group selectors are absent. Secretary/Manager student attendance duty remains separately authorized.",
+      "Personal report and task names, descriptions and dashboard links are specific to the servant. Copied actor IDs and invisible person-name filters cannot change the personal report scope."
+    ],
+    "builds": {
+      "AdminProduction": "Passed",
+      "ServantProduction": "Passed",
+      "AdminInitialKB": 370.59,
+      "ServantInitialKB": 364.82,
+      "budgetKB": 500,
+      "log": "5.FrontEnd/test-results/servant-workspace-build.log"
+    },
+    "verification": {
+      "sqlDistinctCasesPassed": 142,
+      "sqlLog": "5.FrontEnd/test-results/servant-workspace-sql.log",
+      "finalApiCaseLog": "5.FrontEnd/test-results/servant-workspace-final-sql.log",
+      "sqlDetail": "Full isolated SQL Server suite passed. Final personal-workspace API case additionally passed after adding export row/content checks and another-actor-only contact/dashboard checks. Manager personal versus admin scope, forbidden management reports/exports/actions, own tasks/requests, unrelated photos/details, minimal discovery, segment validation, shared visit credit and print/export parity covered.",
+      "browserDistinctCasesPassed": 162,
+      "browserLogs": [
+        "5.FrontEnd/test-results/servant-workspace-browser.log",
+        "5.FrontEnd/test-results/servant-workspace-visual.log",
+        "5.FrontEnd/test-results/servant-workspace-regression.log",
+        "5.FrontEnd/test-results/servant-workspace-final-browser.log",
+        "5.FrontEnd/test-results/servant-workspace-export-final.log"
+      ],
+      "browserBreakdown": {
+        "personalWorkspaceAndExistingReportAccess": 45,
+        "servantReportVisualStates": 24,
+        "adminVisualRequestAndSessionRegression": 93
+      },
+      "engines": [
+        "Chromium",
+        "Firefox",
+        "WebKit"
+      ],
+      "widths": [
+        320,
+        360,
+        390,
+        430,
+        768,
+        1024,
+        1440,
+        1920
+      ],
+      "detail": "Own pages and seven report types traversed at every width, plus 768x360 and 1024x360 landscape; 320px enlarged text, accessibility, modal focus restoration and no page overflow checked. Populated/empty/loading/failed report baselines updated and mobile capture inspected. Final copied-URL and hidden-search export/print case passed in all engines.",
+      "runNotes": "An overlapping local Playwright server lifetime interrupted an initial extra run; it was stopped and rerun sequentially with CI server ownership. Of the subsequent 93 regression cases, two Firefox load/networkidle timeouts passed in an isolated single-worker rerun. Counts are distinct cases, excluding repeated executions.",
+      "distinctCasesPassed": 304
+    },
+    "constraints": "Shared Cairo/RTL indigo theme retained. ImageSharp 3.1.5, .NET 8, schema, automatic startup migrations and frontend-only Pages workflow unchanged.",
+    "rollout": "Publish the API first, then the updated frontend applications. The restrictive workspace behavior and new segment query require the updated API; frontend-only publication is insufficient to complete this change. No schema change is required."
   }
 }

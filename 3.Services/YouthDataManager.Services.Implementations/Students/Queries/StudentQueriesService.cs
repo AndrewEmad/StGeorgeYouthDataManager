@@ -70,11 +70,13 @@ public sealed class StudentQueriesService(IApplicationStore store,ICallerContext
         var rows=await q.OrderBy(s=>s.FullName).ThenBy(s=>s.Id).Skip((page-1)*size).Take(size).Select(s=>new {Student=new StudentDiscoveryDto(s.Id,s.FullName,s.Area,s.College,s.AcademicYear),Pending=pending.Any(r=>r.StudentId==s.Id)}).ToListAsync(caller.CancellationToken);
         return ServiceResult<PagedResult<UnassignedStudentForServantDto>>.Success(new(rows.Select(r=>new UnassignedStudentForServantDto(r.Student,r.Pending)).ToList(),await q.CountAsync(caller.CancellationToken),page,size));
     }
-    public async Task<ServiceResult<PagedResult<ServantStudentPageItemDto>>> GetPagedForServant(Guid id,int page,int size,string? search,string? area=null,string? academicYear=null,int? gender=null)
+    public async Task<ServiceResult<PagedResult<ServantStudentPageItemDto>>> GetPagedForServant(Guid id,int page,int size,string? search,string? area=null,string? academicYear=null,int? gender=null,string? segment=null)
     {
-        if (!ValidPage(page,size) || (!caller.IsPrivileged && id!=caller.UserId)) return ServiceResult<PagedResult<ServantStudentPageItemDto>>.Failure("Invalid request.");
+        if (segment is not (null or "Assigned" or "Unassigned") || !ValidPage(page,size) || (!caller.IsPrivileged && id!=caller.UserId)) return ServiceResult<PagedResult<ServantStudentPageItemDto>>.Failure("Invalid request.");
         var pending=store.Query<StudentAssignmentRequest>(false).Where(r=>r.RequestedByUserId==id && r.Status==AssignmentRequestStatus.Pending);
         var q=Filter(store.Query<Student>(false).Where(s=>s.ServantId==id || s.ServantId==null),search,area,academicYear,gender);
+        if(segment=="Assigned")q=q.Where(s=>s.ServantId==id);
+        else if(segment=="Unassigned")q=q.Where(s=>s.ServantId==null);
         var keys=await q.OrderBy(s=>s.ServantId==id ? 0 : pending.Any(r=>r.StudentId==s.Id) ? 1 : 2).ThenBy(s=>s.FullName).ThenBy(s=>s.Id).Skip((page-1)*size).Take(size)
             .Select(s=>new {s.Id,s.ServantId,s.FullName,s.Area,s.College,s.AcademicYear,Pending=pending.Any(r=>r.StudentId==s.Id)}).ToListAsync(caller.CancellationToken);
         var assignedIds=keys.Where(s=>s.ServantId==id).Select(s=>s.Id).ToArray();

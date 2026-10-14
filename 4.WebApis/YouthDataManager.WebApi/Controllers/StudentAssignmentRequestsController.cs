@@ -10,6 +10,7 @@ using YouthDataManager.WebApi.Authorization;
 
 namespace YouthDataManager.WebApi.Controllers;
 
+[PersonalWorkspace]
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]

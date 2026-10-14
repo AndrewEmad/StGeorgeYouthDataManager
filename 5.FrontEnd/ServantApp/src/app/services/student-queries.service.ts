@@ -50,8 +50,9 @@ export class StudentQueriesService {
     );
   }
 
-  getPagedForServant(params: { page: number; pageSize: number; search?: string; area?: string; academicYear?: string; gender?: number }): Observable<{ items: Array<{ student: any; segment: string }>; totalCount: number; page: number; pageSize: number }> {
+  getPagedForServant(params: { segment?: string; page: number; pageSize: number; search?: string; area?: string; academicYear?: string; gender?: number }): Observable<{ items: Array<{ student: any; segment: string }>; totalCount: number; page: number; pageSize: number }> {
     const httpParams: Record<string, string> = { page: String(params.page), pageSize: String(params.pageSize) };
+    if(params.segment)httpParams['segment']=params.segment;
     if (params.search) httpParams['search'] = params.search;
     if (params.area) httpParams['area'] = params.area;
     if (params.academicYear) httpParams['academicYear'] = params.academicYear;

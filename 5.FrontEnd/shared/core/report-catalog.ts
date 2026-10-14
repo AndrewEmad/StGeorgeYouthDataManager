@@ -16,3 +16,15 @@ export const reportDefinitions:ReportDefinition[]=[
   {key:'approvals',name:'متابعة الطلبات',description:'الطلبات المنتظرة ونتائجها والوقت المستغرق للرد عليها.',group:'الطلبات',icon:'rule'}
 ];
 export const pastoralReports=new Set(['servant-service-summary','group-attendance','pastoral-follow-up']);
+
+// The servant workspace has a small, explicit catalog rather than inheriting
+// management reports when a new report is added to the admin catalog.
+export const servantReportDefinitions:ReportDefinition[]=[
+  {key:'attendance',name:'حضور مجموعتي والغياب',description:'حضور مخدومي ونسب الحضور والغياب المتتالي في الفترة المختارة.',group:'مجموعتي',icon:'groups'},
+  {key:'attendance-history',name:'سجل حضور مجموعتي',description:'تفاصيل حضور مخدومي في الاجتماعات.',group:'مجموعتي',icon:'history'},
+  {key:'contact',name:'افتقادي لمجموعتي',description:'مكالماتي والزيارات التي سجلتها أو شاركت فيها لمخدومي، ومن يحتاج إلى تواصل.',group:'مجموعتي',icon:'phone_in_talk'},
+  {key:'follow-up',name:'متابعاتي',description:'متابعات الافتقاد المسندة إليّ ومواعيدها وحالتها.',group:'متابعاتي وحضوري',icon:'checklist'},
+  {key:'servant-attendance',name:'حضوري',description:'حضوري الشخصي ونسبته في الاجتماعات التي كنت ضمن قائمتها.',group:'متابعاتي وحضوري',icon:'badge'},
+  {key:'servant-attendance-history',name:'سجل حضوري',description:'تفاصيل حضوري الشخصي في الاجتماعات.',group:'متابعاتي وحضوري',icon:'history'},
+  {key:'data-quality',name:'بيانات مجموعتي الناقصة',description:'بيانات مخدومي التي تحتاج استكمالًا أو مراجعة.',group:'مجموعتي',icon:'fact_check'}
+];

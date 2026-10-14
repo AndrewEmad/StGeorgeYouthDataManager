@@ -84,13 +84,23 @@ public partial class ReportDataProvider
         var displayFrom=f.DateFrom;var displayTo=f.DateTo;
         if(_caller.SelectedServiceYear is { } selected){displayFrom=displayFrom.HasValue && displayFrom>selected.Start ? displayFrom : selected.Start;displayTo=displayTo.HasValue && displayTo<selected.LastDay ? displayTo : selected.LastDay;}
         var period=displayFrom>displayTo ? "الفترة المختارة خارج عام الخدمة" : $"{displayFrom?.ToString("yyyy-MM-dd") ?? "كل التواريخ"} – {displayTo?.ToString("yyyy-MM-dd") ?? "بلا حد نهائي"} (القاهرة)";
+        if(!_caller.IsPrivileged)
+        {
+            title=title switch {
+                "الافتقاد والتواصل"=>"افتقادي لمجموعتي", "متابعة الافتقاد"=>"متابعاتي",
+                "جودة البيانات ومراجعة التشابه"=>"بيانات مجموعتي الناقصة",
+                "نسب حضور الخدام"=>"حضوري", "سجل حضور الخدام"=>"سجل حضوري",
+                "نسب حضور المخدومين والغياب المتتالي"=>"حضور مجموعتي والغياب", "سجل حضور المخدومين"=>"سجل حضور مجموعتي",
+                _=>title };
+            scope+=" · بياناتي ومجموعتي فقط";
+        }
         return new(title,period,scope,columns,mapped,count,export ? 1 : f.Page,export ? count : f.PageSize,totals ?? new(){["total"]=count});
     }
     private async Task<ReportTable> ContactTable(ReportSuiteFilter f,bool export)
     {
         var roster=SuiteRoster(f);var (start,end)=Period(f.DateFrom,f.DateTo);var roleIds=_context.Roles.Where(r=>r.Name=="Servant" || r.Name=="Secretary" || r.Name=="Manager").Select(r=>r.Id);var eligibleIds=_context.Users.Where(u=>u.IsActive && _context.UserRoles.Any(r=>r.UserId==u.Id && roleIds.Contains(r.RoleId))).Select(u=>u.Id);
-        var calls=_context.CallLogs.IgnoreQueryFilters().ForServiceYear(_context).AsNoTracking().Where(c=>!c.IsVoided);
-        var visits=_context.HomeVisits.IgnoreQueryFilters().ForServiceYear(_context).AsNoTracking().Where(v=>!v.IsVoided);
+        var calls=Calls;
+        var visits=Visits;
         var periodCalls=calls.Where(c=>(!start.HasValue || c.CallDate>=start) && (!end.HasValue || c.CallDate<end));
         var periodVisits=visits.Where(v=>(!start.HasValue || v.VisitDate>=start) && (!end.HasValue || v.VisitDate<end));
         var cutoff=BusinessTime.UtcStart((_caller.SelectedServiceYear?.AsOf(_caller.UtcNow) ?? TimeZoneInfo.ConvertTimeFromUtc(_caller.UtcNow,BusinessTime.Zone).Date).AddDays(-f.Days));

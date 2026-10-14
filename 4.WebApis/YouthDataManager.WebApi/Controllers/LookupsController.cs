@@ -7,6 +7,7 @@ using YouthDataManager.Shared.Service.Abstractions;
 using YouthDataManager.WebApi.Authorization;
 
 namespace YouthDataManager.WebApi.Controllers;
+[PersonalWorkspace]
 [ApiController,Route("api/lookups"),Authorize]
 public sealed class LookupsController(IApplicationStore store,ResourceAccess access) : ControllerBase
 {

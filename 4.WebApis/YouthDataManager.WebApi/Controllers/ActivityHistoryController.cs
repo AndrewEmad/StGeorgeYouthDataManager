@@ -9,6 +9,7 @@ using YouthDataManager.WebApi.Authorization;
 
 namespace YouthDataManager.WebApi.Controllers;
 
+[PersonalWorkspace]
 [ApiController, Route("api/activity-history"), Authorize]
 public sealed class ActivityHistoryController(IApplicationStore store, ResourceAccess access) : ControllerBase
 {

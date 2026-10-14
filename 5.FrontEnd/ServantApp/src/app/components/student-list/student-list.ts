@@ -33,6 +33,7 @@ export class StudentListComponent {
   readonly page = signal(1);
   readonly pageSize = signal(25);
   readonly searchTerm = signal('');
+  readonly segment = signal('Assigned');
   readonly filterArea = signal('');
   readonly filterAcademicYear = signal('');
   readonly filterGender = signal<number | null>(null);
@@ -65,6 +66,7 @@ export class StudentListComponent {
     this.request?.unsubscribe();this.loading.set(true);this.error.set('');
     this.request=this.studentQueriesService
       .getPagedForServant({
+        segment:this.segment(),
         page: this.page(),
         pageSize: this.pageSize(),
         search: this.searchTerm().trim() || undefined,
@@ -96,6 +98,7 @@ export class StudentListComponent {
   }
 
   clearFilters(): void {
+    this.segment.set('Assigned');
     this.searchTerm.set('');
     this.filterArea.set('');
     this.filterAcademicYear.set('');

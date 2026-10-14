@@ -8,6 +8,7 @@ using YouthDataManager.WebApi.Authorization;
 
 namespace YouthDataManager.WebApi.Controllers;
 
+[PersonalWorkspace]
 [ApiController,Route("api/approvals"),Authorize]
 public sealed class ApprovalsController(IApplicationStore store,ResourceAccess access,ICallerContext caller) : ControllerBase
 {

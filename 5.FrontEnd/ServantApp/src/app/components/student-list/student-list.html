@@ -1,9 +1,11 @@
 <div class="container student-list animate-fade">
   @if(error()){<p role="alert" class="text-error">{{error()}}</p><button type="button" class="btn-outline" (click)="loadPage()">إعادة المحاولة</button>}
   @if(message()){<p role="status" class="text-success">{{message()}}</p>}
+  <header class="content-header"><h2>مجموعتي</h2><p class="text-muted">تظهر مجموعتي أولًا. يمكنك طلب ضم مخدوم غير مسند من قائمة «طلب ضم مخدوم»؛ تُعرض فيها البيانات الأساسية فقط.</p></header>
   <section class="filters-section">
     <h3 class="filters-title">بحث متقدم</h3>
     <div class="filters-row">
+      <label class="filter-label"><span>القائمة</span><select class="form-input filter-select" aria-label="قائمة المخدومين" [value]="segment()" (change)="segment.set($any($event.target).value);onApplyFilters()" [disabled]="loading() || !!requestingId()"><option value="Assigned">مجموعتي</option><option value="Unassigned">طلب ضم مخدوم</option></select></label>
       <label class="filter-label">
         <span>الاسم</span>
         <input

@@ -8,6 +8,7 @@ using YouthDataManager.WebApi.Authorization;
 
 namespace YouthDataManager.WebApi.Controllers;
 
+[PersonalWorkspace]
 [ApiController,Route("api/follow-up-tasks"),Authorize]
 public sealed class FollowUpTasksController(IFollowUpTaskService service,IApplicationStore store,ResourceAccess access) : ControllerBase
 {

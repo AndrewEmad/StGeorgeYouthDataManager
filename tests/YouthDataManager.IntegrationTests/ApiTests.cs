@@ -31,6 +31,69 @@ public class IsolatedApiFactory(string connection, string environment="Testing",
 [Collection("SQL")]
 public sealed class ApiTests(SqlFixture fixture)
 {
+    [Fact]
+    public async Task Servant_workspace_scopes_manager_reports_tasks_requests_and_photos_without_changing_admin_authority()
+    {
+        await using var scope=fixture.Provider.CreateAsyncScope();var p=scope.ServiceProvider;
+        var manager=await fixture.User(p,"Manager");var other=await fixture.User(p);
+        var db=p.GetRequiredService<AppDbContext>();var area="personal_"+Guid.NewGuid().ToString("N");
+        var own=new Student{Id=Guid.NewGuid(),FullName="My group",Phone="01012345678",Area=area,ServantId=manager.Id};
+        var unrelated=new Student{Id=Guid.NewGuid(),FullName="Another group private",Phone="01012345678",Area=area,ServantId=other.Id};
+        var unassigned=new Student{Id=Guid.NewGuid(),FullName="Discovery only",Phone="private",Address="private",Area=area};
+        var untouched=new Student{Id=Guid.NewGuid(),FullName="Only another servant called",Phone="01012345678",Area=area+"_other",ServantId=manager.Id};
+        db.AddRange(own,unrelated,unassigned,untouched);await db.SaveChangesAsync();var at=DateTime.UtcNow;
+        db.AddRange(new CallLog{Id=Guid.NewGuid(),StudentId=own.Id,ServantId=manager.Id,CallDate=at,CallStatus=CallStatus.NotAnswered},
+            new CallLog{Id=Guid.NewGuid(),StudentId=untouched.Id,ServantId=other.Id,CallDate=at,CallStatus=CallStatus.Answered},
+            new CallLog{Id=Guid.NewGuid(),StudentId=own.Id,ServantId=other.Id,CallDate=at,CallStatus=CallStatus.Answered});
+        var shared=new HomeVisit{Id=Guid.NewGuid(),StudentId=own.Id,ServantId=other.Id,VisitDate=at,VisitOutcome=VisitOutcome.Successful};
+        shared.Participants.Add(new HomeVisitParticipant{HomeVisitId=shared.Id,ServantId=manager.Id});
+        db.AddRange(shared,new HomeVisit{Id=Guid.NewGuid(),StudentId=own.Id,ServantId=other.Id,VisitDate=at,VisitOutcome=VisitOutcome.Successful},
+            new FollowUpTask{StudentId=own.Id,AssigneeId=manager.Id,Status="Open",DueAt=at},
+            new FollowUpTask{StudentId=own.Id,AssigneeId=other.Id,Status="Open",DueAt=at},
+            new StudentAdditionRequest{Id=Guid.NewGuid(),FullName="My request",Phone="01012345678",RequestedByUserId=manager.Id,RequestedAt=at},
+            new StudentAdditionRequest{Id=Guid.NewGuid(),FullName="Other private request",Phone="01012345678",RequestedByUserId=other.Id,RequestedAt=at});
+        await db.SaveChangesAsync();
+        await using var factory=new IsolatedApiFactory(fixture.Connection);
+        using var client=factory.CreateClient(new(){BaseAddress=new Uri("https://localhost")});
+        var login=await Login(client,manager);client.DefaultRequestHeaders.Authorization=new("Bearer",login.Token);
+        client.DefaultRequestHeaders.Add("X-YDM-Workspace","personal");
+        var report=(await client.GetFromJsonAsync<System.Text.Json.JsonElement>($"/api/reports/suite/contact?area={area}&serviceYear=all"));
+        Assert.Equal("افتقادي لمجموعتي",report.GetProperty("title").GetString());
+        Assert.Equal(1,report.GetProperty("totalCount").GetInt32());
+        var row=report.GetProperty("rows")[0];Assert.Equal(own.Id.ToString(),row.GetProperty("id").GetString());Assert.Equal(2,row.GetProperty("attempts").GetInt32());
+        var totals=report.GetProperty("totals");Assert.Equal(0,totals.GetProperty("callAnswered").GetInt32());Assert.Equal(1,totals.GetProperty("callNotAnswered").GetInt32());Assert.Equal(1,totals.GetProperty("visitSuccessful").GetInt32());
+        var printed=await client.GetFromJsonAsync<System.Text.Json.JsonElement>($"/api/reports/suite/contact?area={area}&full=true&serviceYear=all");Assert.Equal(report.GetProperty("rows").ToString(),printed.GetProperty("rows").ToString());
+        foreach(var format in new[]{"csv","xlsx"})
+        {
+            var export=await client.GetAsync($"/api/reports/suite/contact/export?area={area}&format={format}&serviceYear=all");Assert.Equal(HttpStatusCode.OK,export.StatusCode);
+            if(format=="csv"){var content=await export.Content.ReadAsStringAsync();Assert.Contains("My group",content);Assert.DoesNotContain("Another group",content);Assert.DoesNotContain("Discovery only",content);}
+            else {using var book=new ClosedXML.Excel.XLWorkbook(new MemoryStream(await export.Content.ReadAsByteArrayAsync()));Assert.Equal(2,book.Worksheet(1).LastRowUsed()!.RowNumber());}
+        }
+        var dashboard=await client.GetFromJsonAsync<System.Text.Json.JsonElement>("/api/Reports/dashboard/servant?serviceYear=all");Assert.Equal(1,dashboard.GetProperty("studentsNotContacted").GetInt32());
+        var missing=await client.GetFromJsonAsync<System.Text.Json.JsonElement>($"/api/reports/suite/contact?area={area}_other&issue=never-attempted&serviceYear=all");Assert.Equal(1,missing.GetProperty("totalCount").GetInt32());Assert.Equal(0,missing.GetProperty("rows")[0].GetProperty("attempts").GetInt32());
+        foreach(var key in new[]{"workload","workload-owners","approvals","meeting-trends","servant-service-summary","group-attendance","pastoral-follow-up"})
+        {
+            Assert.Equal(HttpStatusCode.Forbidden,(await client.GetAsync($"/api/reports/suite/{key}")).StatusCode);
+            Assert.Equal(HttpStatusCode.Forbidden,(await client.GetAsync($"/api/reports/suite/{key}/export?format=csv")).StatusCode);
+        }
+        Assert.Equal(HttpStatusCode.Forbidden,(await client.GetAsync($"/api/reports/suite/contact?servantId={other.Id}")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden,(await client.GetAsync("/api/Reports/dashboard/manager")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden,(await client.GetAsync("/api/StudentAdditionRequests/pending")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden,(await client.GetAsync($"/api/StudentQueries/{unrelated.Id}/photo")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden,(await client.GetAsync($"/api/StudentQueries/{unrelated.Id}")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden,(await client.GetAsync("/api/follow-up-tasks?unassigned=true")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden,(await client.GetAsync("/api/approvals/all?mine=false")).StatusCode);
+        var tasks=await client.GetFromJsonAsync<System.Text.Json.JsonElement>("/api/follow-up-tasks?serviceYear=all");Assert.Equal(1,tasks.GetProperty("totalCount").GetInt32());
+        var requests=await client.GetStringAsync("/api/approvals/all?serviceYear=all");Assert.Contains("My request",requests);Assert.DoesNotContain("Other private request",requests);
+        var group=await client.GetStringAsync($"/api/StudentQueries/students-for-servant?area={area}&segment=Assigned");Assert.Contains("My group",group);Assert.DoesNotContain("Discovery only",group);Assert.DoesNotContain("Another group",group);
+        var discovery=await client.GetStringAsync($"/api/StudentQueries/students-for-servant?area={area}&segment=Unassigned");Assert.Contains("Discovery only",discovery);Assert.DoesNotContain("private",discovery);Assert.DoesNotContain("My group",discovery);
+        Assert.Equal(HttpStatusCode.BadRequest,(await client.GetAsync("/api/StudentQueries/students-for-servant?segment=invalid")).StatusCode);
+        client.DefaultRequestHeaders.Remove("X-YDM-Workspace");
+        Assert.Equal(HttpStatusCode.OK,(await client.GetAsync($"/api/StudentQueries/{unrelated.Id}")).StatusCode);
+        var admin=await client.GetFromJsonAsync<System.Text.Json.JsonElement>($"/api/reports/suite/contact?area={area}&serviceYear=all");Assert.Equal(3,admin.GetProperty("totalCount").GetInt32());Assert.Equal(1,admin.GetProperty("totals").GetProperty("callAnswered").GetInt32());
+        Assert.Equal(HttpStatusCode.OK,(await client.GetAsync("/api/Reports/dashboard/manager")).StatusCode);
+    }
+
     private async Task<LoginResponse> Login(HttpClient client,ApplicationUser user)
     {
         var response=await client.PostAsJsonAsync("/api/Auth/login",new {username=user.UserName,password="password123"});Assert.Equal(HttpStatusCode.OK,response.StatusCode);
@@ -48,6 +111,7 @@ public sealed class ApiTests(SqlFixture fixture)
         Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/StudentCommands",new {fullName="Forbidden",phone="01012345678",gender=0})).StatusCode);
         var minimal=await client.GetStringAsync("/api/StudentQueries/unassigned-for-servant?pageSize=100");Assert.DoesNotContain("private",minimal);Assert.DoesNotContain("secondaryPhone",minimal);Assert.DoesNotContain("notes",minimal);
         var sec=await Login(client,secretary);client.DefaultRequestHeaders.Authorization=new("Bearer",sec.Token);
+        client.DefaultRequestHeaders.Add("X-YDM-Workspace","personal");
         var started=await client.PostAsJsonAsync("/api/meetings",new {date="2026-10-09"});Assert.Equal(HttpStatusCode.OK,started.StatusCode);var meeting=(await started.Content.ReadFromJsonAsync<MeetingSession>())!;
         Assert.Equal(HttpStatusCode.OK,(await client.GetAsync($"/api/meetings/{meeting.Id}/roster?kind=Student")).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden,(await client.GetAsync($"/api/meetings/{meeting.Id}/roster?kind=Servant")).StatusCode);

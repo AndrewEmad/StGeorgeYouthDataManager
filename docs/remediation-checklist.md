@@ -359,3 +359,20 @@ This revision replaces the earlier 40-name list with the user's explicitly appro
 - [x] Four SQL cases and fifteen browser cases pass (nineteen distinct). The batch API test verifies unassignment without archival, open tasks moved to unassigned ownership, and preserved historical call actor. Three-engine browser checks include cross-page/null payload, failure retry, saving locks and existing assignment/attendance/phone behavior; 390px capture inspected.
 - [x] Admin production build passes at 370.59 kB. No backend production, schema/runtime/ImageSharp/startup-migration/Pages workflow change; separate service-year selector edit retained.
 - [ ] Publish the updated Admin frontend to show the option on the live application.
+
+
+## Dedicated servant workspace — 2026-10-14
+
+| Finding | Change | Verification |
+|---|---|---|
+| Servant app inherited unrelated management reports | Explicit seven-report catalog with personal names and descriptions; reject management report deep links and exports | Servant/Manager browser catalog tests and scoped API report/export rejection |
+| Manager account could use the servant client as a global management workspace | Personal presentation context plus API-only restrictive workspace header and controller metadata; management-only role endpoints reject this mode | Same Manager token verified with personal scope and original admin scope; own requests/tasks, unrelated details/photos and role-restricted operations tested |
+| Contact reports credited other servants' work | Use scoped actor queries for calls and recorder/participant visits; distinct visit records and matching dashboard definition | Mixed actors, shared visit, another-actor-only contacted student, full print, CSV contents and XLSX row counts tested |
+| Student list initially mixed own group with discovery | Default Assigned segment with SQL filtering; explicit minimal unassigned view for requests | Default/reset choice, pagination population and discovery privacy verified; legacy omitted segment preserved |
+| General labels and filters confused personal use | Own group/tasks/activity/requests labels and dashboard links; no processor/actor selectors or hidden name filter for personal attendance | Three-engine navigation, copied URLs, filter/print/export and request/session regressions |
+
+- [x] Both production frontend builds pass: Admin 370.59 kB and Servant 364.82 kB, below 500 kB.
+- [x] Full 142-case SQL integration suite passed; final expanded personal-workspace API case also passed. 162 distinct browser cases passed across Chromium, Firefox and WebKit, including isolated retries of two Firefox load/networkidle timeouts. Evidence and run notes in `servantWorkspaceRevision` in `docs/verification-results.json`.
+- [x] Own pages and seven report types fit all eight required widths, landscape and enlarged text checks. Personal report visual states updated; 390px populated capture inspected. Shared theme and existing student-attendance duty retained.
+- [x] No schema, ImageSharp/.NET, automatic startup migration or Pages workflow change.
+- [ ] Publish the API first, then updated frontend applications. Frontend-only publication does not complete personal API scoping; no database migration is needed for this revision.

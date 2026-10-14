@@ -1,3 +1,4 @@
+using YouthDataManager.WebApi.Authorization;
 using System.Globalization;
 using System.Text;
 using ClosedXML.Excel;
@@ -9,11 +10,13 @@ using YouthDataManager.Shared.Service.Abstractions;
 
 namespace YouthDataManager.WebApi.Controllers;
 
+[PersonalWorkspace]
 [ApiController,Route("api/reports/suite"),Authorize]
 public sealed class ReportSuiteController(IReportDataProvider provider,YouthDataManager.WebApi.Authorization.ResourceAccess access) : ControllerBase
 {
     private bool Denied(string report,ReportSuiteFilter filter) => !access.Privileged &&
-        (report is "servant-service-summary" or "group-attendance" or "pastoral-follow-up" || filter.ServantId.HasValue && filter.ServantId!=access.UserId);
+        ((PersonalWorkspaceAttribute.IsRequested(HttpContext) && report is not ("attendance" or "attendance-history" or "contact" or "follow-up" or "servant-attendance" or "servant-attendance-history" or "data-quality")) ||
+         report is "servant-service-summary" or "group-attendance" or "pastoral-follow-up" || filter.ServantId.HasValue && filter.ServantId!=access.UserId);
     [HttpGet("{report}")]
     public async Task<IActionResult> Read(string report,[FromQuery] ReportSuiteFilter filter,bool full=false) => Denied(report,filter) ? Forbid() : Ok(await provider.Suite(report,filter,full));
     [HttpGet("{report}/export")]

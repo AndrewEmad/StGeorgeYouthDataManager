@@ -15,7 +15,7 @@ export const appConfig: ApplicationConfig = {
     {provide:YDM_AUTH,useExisting:AuthService},
     {provide:YDM_FIREBASE,useValue:environment.firebase},
     {provide:YDM_API,useValue:environment.apiUrl},
-    {provide:YDM_SESSION,useFactory:(auth:AuthService)=>()=>({userId:auth.currentUser()?.userId || '',role:auth.currentUser()?.role || '',privileged:['Admin','Manager','Priest'].includes(auth.currentUser()?.role || ''),root:'',app:'Servant',namespace:'ydm.servantapp'}),deps:[AuthService]},
+    {provide:YDM_SESSION,useFactory:(auth:AuthService)=>()=>({userId:auth.currentUser()?.userId || '',role:auth.currentUser()?.role || '',privileged:false,root:'',app:'Servant',namespace:'ydm.servantapp'}),deps:[AuthService]},
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withHashLocation()),
     provideHttpClient(withInterceptors([authInterceptor,serviceYearInterceptor])),

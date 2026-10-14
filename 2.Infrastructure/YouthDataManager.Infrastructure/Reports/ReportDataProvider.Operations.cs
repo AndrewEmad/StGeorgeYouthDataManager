@@ -60,7 +60,7 @@ public partial class ReportDataProvider
         return new(await q.CountAsync(Ct),await Calls.CountAsync(c=>c.ServantId==id && c.CallDate>=start && c.CallDate<end,Ct),
             await Credits.CountAsync(v=>v.ServantId==id && v.VisitDate>=start && v.VisitDate<end,Ct),
             await _context.Set<FollowUpTask>().ForServiceYear(_context).Where(t=>t.AssigneeId==id && t.Status=="Open" && t.DueAt<=_caller.UtcNow).Select(t=>t.StudentId).Distinct().CountAsync(Ct),
-            await q.CountAsync(s=>!s.CallLogs.Any(c=>!c.IsVoided) && !s.HomeVisits.Any(v=>!v.IsVoided),Ct));
+            await q.CountAsync(s=>!Calls.Any(c=>c.StudentId==s.Id && c.ServantId==id) && !Visits.Any(v=>v.StudentId==s.Id && (v.ServantId==id || v.Participants.Any(p=>p.ServantId==id))),Ct));
     }
     public async Task<ManagerDashboardDto> ManagerDashboard()
     {

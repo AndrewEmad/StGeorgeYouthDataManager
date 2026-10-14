@@ -1,3 +1,4 @@
+import {studentAreas} from '../core/student-areas';
 import {onServiceYearChange} from '../core/service-year';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import { Component,DestroyRef,inject,signal } from '@angular/core';
@@ -41,7 +42,7 @@ interface Table {title:string;period:string;scope:string;columns:Column[];rows:R
     }
   </section>`})
 export class ReportSuitePage {
-  private destroy=inject(DestroyRef);private http=inject(HttpClient);private api=inject(YDM_API);private request?:Subscription;session=inject(YDM_SESSION);areas=signal<string[]>([]);years=signal<string[]>([]);months=Array.from({length:12},(_,i)=>i+1);
+  private destroy=inject(DestroyRef);private http=inject(HttpClient);private api=inject(YDM_API);private request?:Subscription;session=inject(YDM_SESSION);areas=signal<string[]>([...studentAreas]);years=signal<string[]>([]);months=Array.from({length:12},(_,i)=>i+1);
   report='attendance';activeReport='attendance';draft:Filter={days:14,minConsecutiveAbsences:3};applied:Filter & {page:number;pageSize:number}={days:14,minConsecutiveAbsences:3,page:1,pageSize:25};
   loading=signal(false);exporting=signal(false);error=signal('');table=signal<Table|null>(null);label=(key:string)=>labels[key] || key;
   reports=reportDefinitions.filter(r=>!r.adminOnly || this.session().app==='Admin' && this.session().privileged);
@@ -57,7 +58,6 @@ export class ReportSuitePage {
     this.applied.page=1;this.table.set(null);this.load();});
   constructor(){
     this.destroy.onDestroy(()=>this.request?.unsubscribe());
-    this.http.get<string[]>(this.api+'/StudentQueries/areas').pipe(takeUntilDestroyed(this.destroy)).subscribe({next:r=>this.areas.set(r.filter(Boolean)),error:e=>this.error.set(apiError(e))});
     this.http.get<string[]>(this.api+'/StudentQueries/academic-years').pipe(takeUntilDestroyed(this.destroy)).subscribe({next:r=>this.years.set(r.filter(Boolean)),error:e=>this.error.set(apiError(e))});
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params=>{
       this.request?.unsubscribe();this.loading.set(false);this.table.set(null);

@@ -54,7 +54,7 @@ public sealed class StudentQueriesService(IApplicationStore store,ICallerContext
             _ => desc ? q.OrderByDescending(s=>s.FullName) : q.OrderBy(s=>s.FullName) };
         return ServiceResult<PagedResult<StudentDto>>.Success(new(await ordered.ThenBy(s=>s.Id).Skip((page-1)*pageSize).Take(pageSize).Select(Selector()).ToListAsync(caller.CancellationToken),await q.CountAsync(caller.CancellationToken),page,pageSize));
     }
-    public async Task<ServiceResult<IEnumerable<string>>> GetDistinctAreas() => ServiceResult<IEnumerable<string>>.Success(await store.Query<Student>(false).Select(s=>s.Area).Distinct().OrderBy(s=>s).ToListAsync(caller.CancellationToken));
+    public Task<ServiceResult<IEnumerable<string>>> GetDistinctAreas() => Task.FromResult(ServiceResult<IEnumerable<string>>.Success(StudentAreas.Values));
     public async Task<ServiceResult<IEnumerable<string>>> GetDistinctAcademicYears() => ServiceResult<IEnumerable<string>>.Success(await store.Query<Student>(false).Select(s=>s.AcademicYear).Distinct().OrderBy(s=>s).ToListAsync(caller.CancellationToken));
     public async Task<ServiceResult<IEnumerable<StudentEditLogDto>>> GetEditHistory(Guid id)
     {

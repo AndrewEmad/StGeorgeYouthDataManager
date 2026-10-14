@@ -60,9 +60,9 @@ test('graduate values and unknown choice follow the reviewed normalization rules
 const areaCode=ts.transpileModule(readFileSync(new URL('./student-areas.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.ES2022,target:ts.ScriptTarget.ES2022}}).outputText;
 const area=await import(`data:text/javascript;base64,${Buffer.from(areaCode).toString('base64')}`);
 test('approved areas normalize spelling and preserve distinct neighborhoods',()=>{
- assert.equal(area.studentAreas.length,40);assert.equal(new Set(area.studentAreas).size,40);
+ assert.equal(area.studentAreas.length,32);assert.equal(new Set(area.studentAreas).size,32);
  for(const value of area.studentAreas)assert.equal(area.canonicalStudentArea(value),value);
- for(const [input,expected] of [['إبراهيم بك','ابراهيم بك'],['المرج الجديده','المرج الجديدة'],['المعادي الجديده','المعادى الجديدة'],['عزبة رستم','عزبه رستم'],['كوبري عرابي','كوبرى عرابى'],['أخرى','اخرى']])assert.equal(area.canonicalStudentArea(input),expected);
+ for(const [input,expected] of [['إبراهيم بك','ابراهيم بك'],['المرج الجديده','اخرى'],['المعادي الجديده','اخرى'],['عزبة رستم','عزبه رستم'],['كوبري عرابي','كوبرى عرابى'],['أخرى','اخرى']])assert.equal(area.canonicalStudentArea(input),expected);
  assert.notEqual(area.canonicalStudentArea('شبرا البلد'),area.canonicalStudentArea('شبرا مصر'));
 });
 test('unapproved nonempty areas become other while blank values stay optional',()=>{
@@ -78,4 +78,11 @@ test('reviewed neighborhood aliases use the user-approved canonical destinations
  }
  assert.equal(area.canonicalStudentArea('أرض نوبار شبرا الخيمة'),'ارض نوبار');
  assert.equal(area.canonicalStudentArea('ترعة زكريا'),'اخرى');
+});
+
+test('the approved region choices match the latest list and excluded names fall back to other',()=>{
+ assert.deepEqual([...area.studentAreas],["ابراهيم بك", "ابن الحكم", "ارض نوبار", "الاسكان الصناعي", "التعاون", "الفرنواني", "القناطر الخيرية", "الكورنيش", "المظلات", "الملف", "المنشية", "المنشية الجديدة", "الوحدة", "ام بيومي", "باسوس", "بهتيم", "جامع ابو الهنا", "شبرا البلد", "شبرا مصر", "عبود", "عزبة عثمان", "عزبه رستم", "قهوة شرف", "كلية الزراعة", "كوبرى عرابى", "مدينة السلام", "مساكن الصباغة", "مساكن الضباط", "مساكن حجازى", "مسطرد", "منطي", "اخرى"]);
+ for(const removed of ["الخانكة", "الزيتون", "العبور", "المرج", "المرج الجديدة", "المعادى الجديدة", "النزهه الجديده", "حدائق الاهرام"]){
+  assert.ok(!area.studentAreas.includes(removed));assert.equal(area.canonicalStudentArea(removed),'اخرى');
+ }
 });

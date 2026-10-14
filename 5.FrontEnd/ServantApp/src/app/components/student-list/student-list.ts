@@ -1,3 +1,4 @@
+import {studentAreas} from '@ydm/shared/core/student-areas';
 import {Subscription} from 'rxjs';
 import {apiError} from '@ydm/shared/core/api';
 import { phoneInternational } from '@ydm/shared/core/utils';
@@ -35,7 +36,7 @@ export class StudentListComponent {
   readonly filterArea = signal('');
   readonly filterAcademicYear = signal('');
   readonly filterGender = signal<number | null>(null);
-  readonly areas = signal<string[]>([]);
+  readonly areas = signal<string[]>([...studentAreas]);
   readonly academicYears = signal<string[]>([]);
   readonly loading = signal(true);
   readonly requestingId = signal<string | null>(null);
@@ -46,10 +47,6 @@ export class StudentListComponent {
 
   constructor() {
     this.destroyRef.onDestroy(()=>this.request?.unsubscribe());
-    this.studentQueriesService
-      .getDistinctAreas()
-      .pipe(takeUntilDestroyed())
-      .subscribe({next:r=>this.areas.set(Array.isArray(r) ? r : []),error:e=>this.error.set(apiError(e))});
     this.studentQueriesService
       .getDistinctAcademicYears()
       .pipe(takeUntilDestroyed())

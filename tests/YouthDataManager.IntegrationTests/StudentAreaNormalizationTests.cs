@@ -16,9 +16,9 @@ public sealed class StudentAreaNormalizationTests(SqlFixture fixture)
     [InlineData("إبراهيم بك","ابراهيم بك")]
     [InlineData("أرض نوبار","ارض نوبار")]
     [InlineData("الإسكان الصناعى","الاسكان الصناعي")]
-    [InlineData("المرج الجديده","المرج الجديدة")]
-    [InlineData(" المعادي   الجديده ","المعادى الجديدة")]
-    [InlineData("النزهة الجديدة","النزهه الجديده")]
+    [InlineData("المرج الجديده","اخرى")]
+    [InlineData(" المعادي   الجديده ","اخرى")]
+    [InlineData("النزهة الجديدة","اخرى")]
     [InlineData("عزبة رستم","عزبه رستم")]
     [InlineData("كوبري عرابي","كوبرى عرابى")]
     [InlineData("أُم بيومي","ام بيومي")]
@@ -35,6 +35,14 @@ public sealed class StudentAreaNormalizationTests(SqlFixture fixture)
     [InlineData("خلف الكنيسة","شبرا البلد")]
     [InlineData("شارع زكريا","شبرا البلد")]
     [InlineData("منية السيرج","اخرى")]
+    [InlineData("الخانكة","اخرى")]
+    [InlineData("الزيتون","اخرى")]
+    [InlineData("العبور","اخرى")]
+    [InlineData("المرج","اخرى")]
+    [InlineData("المرج الجديدة","اخرى")]
+    [InlineData("المعادى الجديدة","اخرى")]
+    [InlineData("النزهه الجديده","اخرى")]
+    [InlineData("حدائق الاهرام","اخرى")]
     [InlineData("ترعة زكريا","اخرى")]
     [InlineData("منطقة قديمة","اخرى")]
     [InlineData("غير معروف","اخرى")]
@@ -43,7 +51,7 @@ public sealed class StudentAreaNormalizationTests(SqlFixture fixture)
     [InlineData(null, "")]
     public void Approved_spellings_are_canonical_without_merging_distinct_areas(string? input,string expected)=>Assert.Equal(expected,StudentAreas.Canonical(input));
     [Fact]
-    public void All_approved_areas_are_unique_and_exactly_canonical(){Assert.Equal(40,StudentAreas.Values.Count);Assert.Equal(40,StudentAreas.Values.Distinct().Count());foreach(var value in StudentAreas.Values)Assert.Equal(value,StudentAreas.Canonical(value));}
+    public void All_approved_areas_are_unique_and_exactly_canonical(){Assert.Equal(32,StudentAreas.Values.Count);Assert.Equal(32,StudentAreas.Values.Distinct().Count());foreach(var value in StudentAreas.Values)Assert.Equal(value,StudentAreas.Canonical(value));}
 
     private static string Script()
     {
@@ -55,8 +63,8 @@ public sealed class StudentAreaNormalizationTests(SqlFixture fixture)
     public async Task SQL_preview_apply_and_retry_preserve_unknowns_archived_history_and_unrelated_fields()
     {
         await using var scope=fixture.Provider.CreateAsyncScope();var db=scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var inputs=StudentAreas.Values.Concat(new[]{"إبراهيم بك","أرض نوبار","الإسكان الصناعى","المرج الجديده"," المعادي   الجديده ","النزهة الجديدة","عزبة رستم","كوبري عرابي","أُم بيومي","أخرى","شبرا المحطة","شبرا الخيمة","شبرا الخيمه","ارض نوبار شبرا الخيمه","المساكن","الملف شبرا الخيمه","الوحدة عند المصانع","خلف الكنيسة","شارع زكريا","منية السيرج","ترعة زكريا","منطقة قديمة","غير معروف","", "  "}).ToArray();
-        var students=inputs.Select((area,i)=>new Student {Id=Guid.NewGuid(),FullName="Normalize "+i,NormalizedFullName="normalize "+i,Phone="012900"+i.ToString("D5"),Area=area,Notes="Keep notes",AcademicYear="سنة رابعة",IsDeleted=i==42 || area=="منطقة قديمة"}).ToList();db.AddRange(students);await db.SaveChangesAsync();
+        var inputs=StudentAreas.Values.Concat(new[]{"إبراهيم بك","أرض نوبار","الإسكان الصناعى","المرج الجديده"," المعادي   الجديده ","النزهة الجديدة","عزبة رستم","كوبري عرابي","أُم بيومي","أخرى","شبرا المحطة","شبرا الخيمة","شبرا الخيمه","ارض نوبار شبرا الخيمه","المساكن","الملف شبرا الخيمه","الوحدة عند المصانع","خلف الكنيسة","شارع زكريا","منية السيرج","الخانكة","الزيتون","العبور","المرج","المرج الجديدة","المعادى الجديدة","النزهه الجديده","حدائق الاهرام","ترعة زكريا","منطقة قديمة","غير معروف","", "  "}).ToArray();
+        var students=inputs.Select((area,i)=>new Student {Id=Guid.NewGuid(),FullName="Normalize "+i,NormalizedFullName="normalize "+i,Phone="012900"+i.ToString("D5"),Area=area,Notes="Keep notes",AcademicYear="سنة رابعة",IsDeleted=area=="العبور" || area=="منطقة قديمة"}).ToList();db.AddRange(students);await db.SaveChangesAsync();
         await using var connection=new SqlConnection(fixture.Connection);await connection.OpenAsync();
         async Task Run(bool apply){await using var command=new SqlCommand(apply ? Script().Replace("DECLARE @Apply bit = 0;","DECLARE @Apply bit = 1;") : Script(),connection){CommandTimeout=60};await command.ExecuteNonQueryAsync();}
         await Run(false);db.ChangeTracker.Clear();foreach(var row in students)Assert.Equal(row.Area,(await db.Students.IgnoreQueryFilters().SingleAsync(s=>s.Id==row.Id)).Area);
@@ -72,6 +80,7 @@ public sealed class StudentAreaNormalizationTests(SqlFixture fixture)
     {
         await using var scope=fixture.Provider.CreateAsyncScope();var p=scope.ServiceProvider;var actor=await fixture.User(p,"Manager");var db=p.GetRequiredService<AppDbContext>();
         await using var factory=new IsolatedApiFactory(fixture.Connection);using var client=factory.CreateClient(new(){BaseAddress=new Uri("https://localhost")});var login=await client.PostAsJsonAsync("/api/Auth/login",new {username=actor.UserName,password="password123"});login.EnsureSuccessStatusCode();client.DefaultRequestHeaders.Authorization=new("Bearer",(await login.Content.ReadFromJsonAsync<LoginResponse>())!.Token);
+        var choices=await client.GetFromJsonAsync<string[]>("/api/StudentQueries/areas");Assert.Equal(StudentAreas.Values,choices!);
         var create=await client.PostAsJsonAsync("/api/StudentCommands",new {fullName="Canonical area API",phone="01012345678",gender=0,area="شبرا الخيمة"});create.EnsureSuccessStatusCode();var id=await create.Content.ReadFromJsonAsync<Guid>();Assert.Equal("شبرا البلد",(await db.Students.SingleAsync(s=>s.Id==id)).Area);
         (await client.PutAsJsonAsync($"/api/StudentCommands/{id}",new {id,area="ارض نوبار شبرا الخيمه"})).EnsureSuccessStatusCode();db.ChangeTracker.Clear();Assert.Equal("ارض نوبار",(await db.Students.SingleAsync(s=>s.Id==id)).Area);
         var fallback=await client.PostAsJsonAsync("/api/StudentCommands",new {fullName="Other area",phone="01012345678",gender=0,area="منطقة مجهولة"});fallback.EnsureSuccessStatusCode();Assert.Equal("اخرى",(await db.Students.SingleAsync(s=>s.FullName=="Other area")).Area);

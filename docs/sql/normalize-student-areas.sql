@@ -2,7 +2,7 @@
    مهم: @Apply=0 يعرض معاينة فقط ولا يحفظ أي تغيير.
    للحفظ غيّر السطر إلى DECLARE @Apply bit = 1 ثم شغّل السكربت كاملًا.
    Preview first (@Apply=0); set @Apply=1 to save normalized areas, including unknown names as اخرى.
-   Approved 40 unique area labels; المرج الجديده maps to المرج الجديدة.
+   Approved 32 area labels match the application choices. Removed or unlisted names map to اخرى.
    Includes archived students; does not rewrite historical requests.
    Reviewed neighborhood aliases map to approved areas (including منية السيرج to اخرى).
    Any other nonempty unrecognized area maps to اخرى. Missing/blank areas stay missing.
@@ -26,26 +26,18 @@ INSERT #AreaAliases(AliasKey,Canonical) VALUES
 (N'ارضنوبار',N'ارض نوبار'),
 (N'الاسكانالصناعي',N'الاسكان الصناعي'),
 (N'التعاون',N'التعاون'),
-(N'الخانكه',N'الخانكة'),
-(N'الزيتون',N'الزيتون'),
-(N'العبور',N'العبور'),
 (N'الفرنواني',N'الفرنواني'),
 (N'القناطرالخيريه',N'القناطر الخيرية'),
 (N'الكورنيش',N'الكورنيش'),
-(N'المرج',N'المرج'),
-(N'المرجالجديده',N'المرج الجديدة'),
 (N'المظلات',N'المظلات'),
-(N'المعاديالجديده',N'المعادى الجديدة'),
 (N'الملف',N'الملف'),
 (N'المنشيه',N'المنشية'),
 (N'المنشيهالجديده',N'المنشية الجديدة'),
-(N'النزههالجديده',N'النزهه الجديده'),
 (N'الوحده',N'الوحدة'),
 (N'امبيومي',N'ام بيومي'),
 (N'باسوس',N'باسوس'),
 (N'بهتيم',N'بهتيم'),
 (N'جامعابوالهنا',N'جامع ابو الهنا'),
-(N'حدائقالاهرام',N'حدائق الاهرام'),
 (N'شبراالبلد',N'شبرا البلد'),
 (N'شبرامصر',N'شبرا مصر'),
 (N'عبود',N'عبود'),

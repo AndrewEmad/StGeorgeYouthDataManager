@@ -3760,5 +3760,98 @@
     },
     "constraints": "No schema migration, .NET/ImageSharp upgrade, startup-migration or frontend-only Pages workflow change.",
     "rollout": "Publish API/both frontends; separately review @Apply=0 preview, then apply @Apply=1 to the intended database."
+  },
+  "approvedAreas32Revision": {
+    "date": "2026-10-14",
+    "status": "Implemented and verified locally; production publication/data normalization pending",
+    "supersedes": "Earlier 40-name catalogue derived from the first supplied database list. The latest user message explicitly defines 32 approved choices.",
+    "approvedChoices": [
+      "ابراهيم بك",
+      "ابن الحكم",
+      "ارض نوبار",
+      "الاسكان الصناعي",
+      "التعاون",
+      "الفرنواني",
+      "القناطر الخيرية",
+      "الكورنيش",
+      "المظلات",
+      "الملف",
+      "المنشية",
+      "المنشية الجديدة",
+      "الوحدة",
+      "ام بيومي",
+      "باسوس",
+      "بهتيم",
+      "جامع ابو الهنا",
+      "شبرا البلد",
+      "شبرا مصر",
+      "عبود",
+      "عزبة عثمان",
+      "عزبه رستم",
+      "قهوة شرف",
+      "كلية الزراعة",
+      "كوبرى عرابى",
+      "مدينة السلام",
+      "مساكن الصباغة",
+      "مساكن الضباط",
+      "مساكن حجازى",
+      "مسطرد",
+      "منطي",
+      "اخرى"
+    ],
+    "approvedChoiceCount": 32,
+    "removedNamesToOther": [
+      "الخانكة",
+      "الزيتون",
+      "العبور",
+      "المرج",
+      "المرج الجديدة",
+      "المعادى الجديدة",
+      "النزهه الجديده",
+      "حدائق الاهرام"
+    ],
+    "rule": "Keep approved names after spelling normalization and the previously reviewed neighborhood aliases; every other nonempty name becomes اخرى. Missing/blank areas stay optional. Historical request snapshots remain unchanged.",
+    "alignment": "Shared client choices used for Admin/Servant add/edit/bulk and student/report filters. Filters no longer rebuild choices from database values. The existing GET /api/StudentQueries/areas contract returns the same server catalogue without a database lookup, preserving caller authorization for actual roster/report reads.",
+    "sql": {
+      "file": "docs/sql/normalize-student-areas.sql",
+      "default": "@Apply=0 preview only; set DECLARE @Apply bit = 1 and run the entire script to save",
+      "behavior": "Remove the eight old approved names from alias lookup; their variants fall back to اخرى. Apply to all students including archived, with version checks, transaction, before/after edit/audit, idempotency and visible database/mode/conversion-count feedback. No actual production data modified."
+    },
+    "build": {
+      "backend": "Passed (.NET 8; existing pinned ImageSharp advisories)",
+      "AdminInitialKB": 370.59,
+      "ServantInitialKB": 364.9,
+      "initialBudgetKB": 500
+    },
+    "verification": {
+      "utilityCasesPassed": 12,
+      "utilityLog": "5.FrontEnd/test-results/approved-areas-32-utilities.log",
+      "sqlCasesPassed": 141,
+      "sqlLog": "5.FrontEnd/test-results/approved-areas-32-sql.log",
+      "sqlDetail": "Full SQL Server integration suite passes. Explicit excluded-name fallback, retained 32 names, approved aliases, archived excluded student, read catalogue equality, preview/apply/audit/idempotency and unrelated fields; all earlier role/workflow/concurrency/rollback/report/Identity/startup-migration tests remain green.",
+      "browserCasesPassed": 135,
+      "browserLog": "5.FrontEnd/test-results/approved-areas-32-browser.log",
+      "engines": [
+        "Chromium",
+        "Firefox",
+        "WebKit"
+      ],
+      "widths": [
+        320,
+        360,
+        390,
+        430,
+        768,
+        1024,
+        1440,
+        1920
+      ],
+      "additionalLayouts": "844x390 and 1024x360 landscape; 320px 200% text reflow",
+      "browserDetail": "32 exact choices in each write entry point; excluded legacy value selects/saves اخرى; all four student/report filter surfaces ignore supplied database outliers and use the fixed catalogue. Bulk area/year locks, cross-page selection, failures, conflicts/replay/focus, phone actions, no overflow and Axe checked.",
+      "visualInspection": "Final mobile area dialog capture inspected; desktop and responsive geometry verified by tests.",
+      "distinctCasesPassed": 288
+    },
+    "constraints": "No schema migration, .NET/ImageSharp upgrade, startup-migration removal or frontend-only Pages workflow change.",
+    "rollout": "Review/apply the updated SQL to the intended database and publish the coordinated API and both clients. Until publication, the live UI can still show the old choices."
   }
 }

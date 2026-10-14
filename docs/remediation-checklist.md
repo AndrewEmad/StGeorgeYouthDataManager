@@ -331,3 +331,21 @@ Per explicit user instruction, this supersedes preserving/rejecting unlisted non
 - [x] Update preview-first SQL to include unlisted areas, including archived students, with transaction, row-version protection, audit/edit history and idempotent repeat. Empty areas remain missing.
 - [x] Backend/both frontend builds pass; 11 utilities, 70 SQL integration cases and 24 browser cases pass (105 distinct). One SQL case additionally rerun with an archived unlisted area. Evidence in `studentAreaFallbackRevision` in `docs/verification-results.json`.
 - [ ] Publish API/both clients and separately review/apply `docs/sql/normalize-student-areas.sql` to the intended database. No production data modified; runtime/ImageSharp/startup migrations/Pages workflow unchanged.
+
+
+## Explicit 32 approved areas and catalogue alignment — 2026-10-14
+
+This revision replaces the earlier 40-name list with the user's explicitly approved 32 choices, including **اخرى**. The following old names (and spelling variants) now become **اخرى**: الخانكة، الزيتون، العبور، المرج، المرج الجديدة، المعادى الجديدة، النزهه الجديده، حدائق الاهرام. Previously approved neighborhood aliases retain their destinations. Blank areas remain optional.
+
+| Finding | Change | Verification |
+|---|---|---|
+| Earlier database names were treated as approved choices | Replace server/client catalogue and SQL allowed names with the exact supplied 32-name list | Independent exact client-list assertion; all server choices and SQL outcomes tested |
+| Eight unwanted areas remained accepted | Remove them from canonical alias rows; retain fallback to اخرى | Explicit eight-name tests; SQL apply includes an archived العبور student and preserves other fields/history |
+| Filter dropdowns rebuilt choices from stored records | Use fixed shared catalogue in both student lists and both report pages; compatible API lookup returns same catalogue | Four filter surfaces tested against fixtures containing unapproved database areas; API equality checked |
+| Users could confuse preview with persistence | Keep Arabic mode/database/conversion-count output and explicit @Apply instructions | SQL preview changes nothing, apply updates areas/history atomically, repeat produces no duplicate changes |
+
+- [x] Backend and both frontend production builds pass; Admin 370.59 kB, Servant 364.90 kB, below 500 kB.
+- [x] Twelve utilities, full 141-case SQL integration suite and 135 browser cases pass (288 distinct). Three engines, eight widths, landscape/reflow, accessibility and existing year/selection workflows included. Final mobile area dialog inspected. Evidence in `approvedAreas32Revision` in `docs/verification-results.json`.
+- [x] Runtime/ImageSharp, automatic startup migrations, schema and Pages deployment workflow unchanged.
+- [ ] Review the updated `docs/sql/normalize-student-areas.sql`, set `DECLARE @Apply bit = 1`, and run it completely against the intended database to update real data.
+- [ ] Publish API and both frontend applications; the live site continues to use its deployed version until publication.

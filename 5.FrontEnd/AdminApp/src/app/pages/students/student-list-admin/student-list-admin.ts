@@ -162,7 +162,7 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
     hasServant: '' as '' | 'yes' | 'no',
     birthMonth: '' as '' | string,
   };
-  regionOptions: string[] = [];
+  readonly regionOptions: readonly string[] = studentAreas;
   academicYearOptions: string[] = [];
   sortBy: string | null = 'fullName';
   sortDesc = false;
@@ -301,11 +301,6 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
   }
 
   loadOptionsAndServants() {
-    this.studentQueries.getDistinctAreas().subscribe({
-      next: (areas) => {
-        this.regionOptions = areas || [];
-      },
-    });
     this.studentQueries.getDistinctAcademicYears().subscribe({
       next: (years) => {
         this.academicYearOptions = years || [];
@@ -618,7 +613,7 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
       if(this.bulkYearOutcomes.length)this.bulkYearError=`تعذر تحديث ${this.bulkYearOutcomes.length} مخدوم. احتفظنا باختياراتهم والقيمة التي اخترتها.`;
       else {this.showBulkYearModal=false;this.focusBulkYearResult();}
       this.page=1;
-      if(saved){if(this.bulkField==='area')this.studentQueries.getDistinctAreas().subscribe({next:areas=>this.regionOptions=areas || []});else this.studentQueries.getDistinctAcademicYears().subscribe({next:years=>this.academicYearOptions=years || []});}
+      if(saved && this.bulkField==='academicYear')this.studentQueries.getDistinctAcademicYears().subscribe({next:years=>this.academicYearOptions=years || []});
       this.loadData();
     },error:e=>{this.bulkYearSaving=false;this.bulkYearError=apiError(e)+' احتفظنا باختياراتك والقيمة التي اخترتها؛ يمكنك إعادة المحاولة.';}});
   }

@@ -10,5 +10,5 @@ import {ServiceYearState} from '../core/service-year';
 `,styles:[`:host{display:flex;align-items:center;gap:8px;min-inline-size:0;inline-size:100%;}.ydm-year-label{font-weight:600;white-space:nowrap;}.ydm-year-select{inline-size:146px;flex:none;min-block-size:44px;block-size:44px;padding-block:4px;line-height:1.2;direction:ltr;}.ydm-year-description{font-size:.8rem;color:var(--text-muted);min-inline-size:0;overflow-wrap:anywhere;}@media(max-width:600px){.ydm-year-description{position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip-path:inset(50%);}.ydm-year-select{flex:1;max-inline-size:180px;}}`]})
 export class ServiceYearComponent {
  state=inject(ServiceYearState);
- years(){const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Cairo',year:'numeric'}).format(new Date());const current=Number(today)+1;const selected=this.state.year();const values=Array.from({length:current-2024},(_,i)=>current-i);return selected!==null && !values.includes(selected) ? [selected,...values] : values;}
+ years(){const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Cairo',year:'numeric'}).format(new Date());const current=Number(today);const selected=this.state.year();const values=Array.from({length:current-2024},(_,i)=>current-i);return selected!==null && !values.includes(selected) ? [selected,...values] : values;}
 }

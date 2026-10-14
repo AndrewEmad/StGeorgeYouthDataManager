@@ -1,3 +1,4 @@
+import {onServiceYearChange} from '@ydm/shared/core/service-year';
 import {Subscription} from 'rxjs';
 import { Component, OnInit, signal, computed, inject, ChangeDetectionStrategy, viewChild, TemplateRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
@@ -18,6 +19,7 @@ import { AdvancedFilterConfig, AdvancedFilterModel } from '../../shared/componen
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudentsNoContactReportPage implements OnInit {
+  private yearScope=onServiceYearChange(()=>{this.page.set(1);this.loadData();});
   private request?:Subscription;ngOnDestroy(){this.request?.unsubscribe();}
 
   private reportsService = inject(ReportsService);

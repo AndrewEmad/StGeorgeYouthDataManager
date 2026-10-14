@@ -13,19 +13,19 @@ public class StudentAssignmentRequestRepository : IStudentAssignmentRequestRepos
     public StudentAssignmentRequestRepository(AppDbContext context) => _context = context;
 
     public async Task<StudentAssignmentRequest?> GetById(Guid id) =>
-        await _context.StudentAssignmentRequests.IgnoreQueryFilters()
+        await _context.StudentAssignmentRequests.IgnoreQueryFilters().ForServiceYear(_context)
             .Include(r => r.Student)
             .Include(r => r.RequestedByUser)
             .FirstOrDefaultAsync(r => r.Id == id);
 
     public async Task<StudentAssignmentRequest?> GetPendingByStudent(Guid studentId) =>
-        await _context.StudentAssignmentRequests.IgnoreQueryFilters()
+        await _context.StudentAssignmentRequests.IgnoreQueryFilters().ForServiceYear(_context)
             .Include(r => r.Student)
             .Include(r => r.RequestedByUser)
             .FirstOrDefaultAsync(r => r.StudentId == studentId && r.Status == AssignmentRequestStatus.Pending);
 
     public async Task<IEnumerable<StudentAssignmentRequest>> GetPendingRequests() =>
-        await _context.StudentAssignmentRequests.IgnoreQueryFilters()
+        await _context.StudentAssignmentRequests.IgnoreQueryFilters().ForServiceYear(_context)
             .Include(r => r.Student)
             .Include(r => r.RequestedByUser)
             .Where(r => r.Status == AssignmentRequestStatus.Pending)
@@ -33,7 +33,7 @@ public class StudentAssignmentRequestRepository : IStudentAssignmentRequestRepos
             .ToListAsync();
 
     public async Task<IEnumerable<StudentAssignmentRequest>> GetByRequestedByUser(Guid userId) =>
-        await _context.StudentAssignmentRequests.IgnoreQueryFilters()
+        await _context.StudentAssignmentRequests.IgnoreQueryFilters().ForServiceYear(_context)
             .Include(r => r.Student)
             .Include(r => r.RequestedByUser)
             .Where(r => r.RequestedByUserId == userId)
@@ -41,20 +41,20 @@ public class StudentAssignmentRequestRepository : IStudentAssignmentRequestRepos
             .ToListAsync();
 
     public async Task<IEnumerable<Guid>> GetStudentIdsWithPendingRequestByOtherThan(Guid servantId) =>
-        await _context.StudentAssignmentRequests.IgnoreQueryFilters()
+        await _context.StudentAssignmentRequests.IgnoreQueryFilters().ForServiceYear(_context)
             .Where(r => r.Status == AssignmentRequestStatus.Pending && r.RequestedByUserId != servantId)
             .Select(r => r.StudentId)
             .Distinct()
             .ToListAsync();
 
     public async Task<IEnumerable<Guid>> GetStudentIdsWithPendingRequestByUser(Guid userId) =>
-        await _context.StudentAssignmentRequests.IgnoreQueryFilters()
+        await _context.StudentAssignmentRequests.IgnoreQueryFilters().ForServiceYear(_context)
             .Where(r => r.Status == AssignmentRequestStatus.Pending && r.RequestedByUserId == userId)
             .Select(r => r.StudentId)
             .ToListAsync();
 
     public async Task<bool> HasPendingRequestByUser(Guid studentId, Guid userId) =>
-        await _context.StudentAssignmentRequests.IgnoreQueryFilters()
+        await _context.StudentAssignmentRequests.IgnoreQueryFilters().ForServiceYear(_context)
             .AnyAsync(r => r.StudentId == studentId && r.RequestedByUserId == userId && r.Status == AssignmentRequestStatus.Pending);
 
     public void Add(StudentAssignmentRequest request) => _context.StudentAssignmentRequests.Add(request);

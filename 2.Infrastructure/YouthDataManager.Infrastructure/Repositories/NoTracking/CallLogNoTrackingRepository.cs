@@ -18,7 +18,7 @@ public class CallLogNoTrackingRepository : ICallLogNoTrackingRepository
 
     public async Task<IEnumerable<T>> GetByStudentId<T>(Guid studentId, Expression<Func<CallLog, T>> selector)
     {
-        return await _context.CallLogs.IgnoreQueryFilters()
+        return await _context.CallLogs.IgnoreQueryFilters().ForServiceYear(_context)
             .AsNoTracking()
             .Where(e => e.StudentId == studentId)
             .OrderByDescending(e => e.CallDate)
@@ -28,7 +28,7 @@ public class CallLogNoTrackingRepository : ICallLogNoTrackingRepository
 
     public async Task<IEnumerable<T>> GetByServantId<T>(Guid servantId, Expression<Func<CallLog, T>> selector)
     {
-        return await _context.CallLogs.IgnoreQueryFilters()
+        return await _context.CallLogs.IgnoreQueryFilters().ForServiceYear(_context)
             .AsNoTracking()
             .Where(e => e.ServantId == servantId)
             .OrderByDescending(e => e.CallDate)
@@ -44,7 +44,7 @@ public class CallLogNoTrackingRepository : ICallLogNoTrackingRepository
         string? college, 
         Expression<Func<CallLog, T>> selector)
     {
-        var query = _context.CallLogs.IgnoreQueryFilters().AsNoTracking();
+        var query = _context.CallLogs.IgnoreQueryFilters().ForServiceYear(_context).AsNoTracking();
 
         if (from.HasValue) query = query.Where(e => e.CallDate >= from.Value);
         if (to.HasValue) query = query.Where(e => e.CallDate <= to.Value);
@@ -57,7 +57,7 @@ public class CallLogNoTrackingRepository : ICallLogNoTrackingRepository
 
     public async Task<IEnumerable<T>> GetAll<T>(Expression<Func<CallLog, T>> selector)
     {
-        return await _context.CallLogs.IgnoreQueryFilters()
+        return await _context.CallLogs.IgnoreQueryFilters().ForServiceYear(_context)
             .AsNoTracking()
             .OrderByDescending(e => e.CallDate)
             .Select(selector)

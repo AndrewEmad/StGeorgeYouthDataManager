@@ -42,8 +42,10 @@
           }
         </select>
       </label>
-      <button type="button" class="btn-primary sm" (click)="onApplyFilters()">تطبيق</button>
-      <button type="button" class="btn-outline sm" (click)="clearFilters()">مسح الفلاتر</button>
+      <div class="ydm-filter-actions">
+        <button type="button" class="btn-primary" (click)="onApplyFilters()">تطبيق</button>
+        <button type="button" class="btn-outline" (click)="clearFilters()">مسح</button>
+      </div>
     </div>
   </section>
 

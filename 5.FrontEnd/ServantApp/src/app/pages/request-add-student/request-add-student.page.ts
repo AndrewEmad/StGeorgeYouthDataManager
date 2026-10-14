@@ -1,3 +1,5 @@
+import {studentAreas} from '@ydm/shared/core/student-areas';
+import {academicYears} from '@ydm/shared/core/academic-years';
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,6 +15,8 @@ import { CardComponent } from '../../shared/components';
   styleUrls: ['./request-add-student.page.css']
 })
 export class RequestAddStudentPage {
+ readonly areaChoices=studentAreas;
+ readonly academicYearChoices=academicYears;
   dto: CreateStudentAdditionRequestDto = {
     fullName: '',
     phone: '',

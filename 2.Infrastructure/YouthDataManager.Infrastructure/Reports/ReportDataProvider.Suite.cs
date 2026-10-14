@@ -1,3 +1,4 @@
+using YouthDataManager.Infrastructure.Data;
 using System.Reflection;
 using System.Data;
 using Microsoft.Data.SqlClient;
@@ -21,13 +22,14 @@ public partial class ReportDataProvider
         {
             if(!_caller.IsPrivileged)throw new DomainValidationException("Privileged report required.");
             var today=TimeZoneInfo.ConvertTimeFromUtc(_caller.UtcNow,BusinessTime.Zone).Date;
-            f.DateFrom ??= new DateTime(today.Year,today.Month,1);f.DateTo ??= today;
+            if(!_caller.AllServiceYears){f.DateFrom ??= _caller.SelectedServiceYear?.Start ?? new DateTime(today.Year,today.Month,1);f.DateTo ??= _caller.SelectedServiceYear?.LastDay ?? today;}
+            else if(report=="pastoral-follow-up"){f.DateFrom ??= new DateTime(1900,1,1);f.DateTo ??= today;}
         }
         if(!_caller.IsPrivileged && f.ServantId.HasValue && f.ServantId!=_caller.UserId) throw new DomainValidationException("Invalid caller scope.");
         _=Period(f.DateFrom,f.DateTo);
         return report switch {
             "servant-service-summary" or "group-attendance" or "pastoral-follow-up" => await ConcurrentReportReads.Run(
-                _context.Database.GetDbConnection().DataSource+"|"+_context.Database.GetDbConnection().Database+"|"+report+"|global|"+export+"|"+System.Text.Json.JsonSerializer.Serialize(f),
+                _context.Database.GetDbConnection().DataSource+"|"+_context.Database.GetDbConnection().Database+"|"+report+"|global|"+export+"|"+_caller.AllServiceYears+"|"+System.Text.Json.JsonSerializer.Serialize(_caller.SelectedServiceYear)+"|"+System.Text.Json.JsonSerializer.Serialize(f),
                 ()=>report=="servant-service-summary" ? ServantServiceTable(f,export) : report=="group-attendance" ? GroupAttendanceTable(f,export) : PastoralFollowUpTable(f,export),Ct),
             "contact" => await ContactTable(f,export),
             "follow-up" => await TaskTable(f,export),
@@ -36,7 +38,7 @@ public partial class ReportDataProvider
             "approvals" => await ApprovalTable(f,export),
             "data-quality" => await QualityTable(f,export),
             "attendance" or "servant-attendance" => await ConcurrentReportReads.Run(
-                _context.Database.GetDbConnection().DataSource+"|"+_context.Database.GetDbConnection().Database+"|"+report+"|"+(_caller.IsPrivileged ? "global" : _caller.UserId.ToString())+"|"+export+"|"+System.Text.Json.JsonSerializer.Serialize(f),
+                _context.Database.GetDbConnection().DataSource+"|"+_context.Database.GetDbConnection().Database+"|"+report+"|"+(_caller.IsPrivileged ? "global" : _caller.UserId.ToString())+"|"+export+"|"+_caller.AllServiceYears+"|"+System.Text.Json.JsonSerializer.Serialize(_caller.SelectedServiceYear)+"|"+System.Text.Json.JsonSerializer.Serialize(f),
                 ()=>AttendanceTable(report,f,export),Ct),
             "attendance-history" or "servant-attendance-history" => await AttendanceHistoryTable(report,f,export),
             "meeting-trends" => await MeetingTable(f,export),
@@ -78,17 +80,20 @@ public partial class ReportDataProvider
         else if(title=="ملخص خدمة الخدام")scopeFilters.Add("العمل بحسب مسجل المكالمة ومشارك الزيارة؛ المجموعات والمهام بحسب الوضع الحالي؛ مجموع مشاركات الزيارات قد يتجاوز عدد الزيارات الفعلي");
         else if(title is "الافتقاد والتواصل" or "متابعة الطلبات")scopeFilters.Add("حد الاتصال الحديث / عمر الطلب: "+f.Days+" يومًا");
         var scope=(export ? "كل الصفوف المطابقة للفلاتر" : "الصفحة الحالية؛ الإجماليات لكل النتائج")+" · "+string.Join(" · ",scopeFilters);
-        var period=$"{f.DateFrom?.ToString("yyyy-MM-dd") ?? "كل التواريخ"} – {f.DateTo?.ToString("yyyy-MM-dd") ?? "بلا حد نهائي"} (القاهرة)";
+        if(_caller.SelectedServiceYear is { } year)scope += " · عام الخدمة: "+year.Start.Year+"–"+(year.Start.Year+1)+" ("+year.Start.ToString("yyyy-MM-dd")+" إلى "+year.LastDay.ToString("yyyy-MM-dd")+")";
+        var displayFrom=f.DateFrom;var displayTo=f.DateTo;
+        if(_caller.SelectedServiceYear is { } selected){displayFrom=displayFrom.HasValue && displayFrom>selected.Start ? displayFrom : selected.Start;displayTo=displayTo.HasValue && displayTo<selected.LastDay ? displayTo : selected.LastDay;}
+        var period=displayFrom>displayTo ? "الفترة المختارة خارج عام الخدمة" : $"{displayFrom?.ToString("yyyy-MM-dd") ?? "كل التواريخ"} – {displayTo?.ToString("yyyy-MM-dd") ?? "بلا حد نهائي"} (القاهرة)";
         return new(title,period,scope,columns,mapped,count,export ? 1 : f.Page,export ? count : f.PageSize,totals ?? new(){["total"]=count});
     }
     private async Task<ReportTable> ContactTable(ReportSuiteFilter f,bool export)
     {
         var roster=SuiteRoster(f);var (start,end)=Period(f.DateFrom,f.DateTo);var roleIds=_context.Roles.Where(r=>r.Name=="Servant" || r.Name=="Secretary" || r.Name=="Manager").Select(r=>r.Id);var eligibleIds=_context.Users.Where(u=>u.IsActive && _context.UserRoles.Any(r=>r.UserId==u.Id && roleIds.Contains(r.RoleId))).Select(u=>u.Id);
-        var calls=_context.CallLogs.IgnoreQueryFilters().AsNoTracking().Where(c=>!c.IsVoided);
-        var visits=_context.HomeVisits.IgnoreQueryFilters().AsNoTracking().Where(v=>!v.IsVoided);
+        var calls=_context.CallLogs.IgnoreQueryFilters().ForServiceYear(_context).AsNoTracking().Where(c=>!c.IsVoided);
+        var visits=_context.HomeVisits.IgnoreQueryFilters().ForServiceYear(_context).AsNoTracking().Where(v=>!v.IsVoided);
         var periodCalls=calls.Where(c=>(!start.HasValue || c.CallDate>=start) && (!end.HasValue || c.CallDate<end));
         var periodVisits=visits.Where(v=>(!start.HasValue || v.VisitDate>=start) && (!end.HasValue || v.VisitDate<end));
-        var cutoff=BusinessTime.UtcStart(TimeZoneInfo.ConvertTimeFromUtc(_caller.UtcNow,BusinessTime.Zone).Date.AddDays(-f.Days));
+        var cutoff=BusinessTime.UtcStart((_caller.SelectedServiceYear?.AsOf(_caller.UtcNow) ?? TimeZoneInfo.ConvertTimeFromUtc(_caller.UtcNow,BusinessTime.Zone).Date).AddDays(-f.Days));
         var events=calls.Select(c=>new ContactEvent {StudentId=c.StudentId,At=c.CallDate,Successful=c.CallStatus==CallStatus.Answered})
             .Concat(visits.Select(v=>new ContactEvent {StudentId=v.StudentId,At=v.VisitDate,Successful=v.VisitOutcome==VisitOutcome.Successful}));
         var history=events.GroupBy(e=>e.StudentId).Select(g=>new {StudentId=g.Key,LastAttempt=g.Max(e=>e.At),LastSuccess=g.Max(e=>e.Successful ? (DateTime?)e.At : null),
@@ -113,21 +118,21 @@ public partial class ReportDataProvider
         if(f.Status!=null && f.Status is not ("Open" or "Completed" or "Cancelled" or "PendingReview" or "Due" or "Overdue"))throw new DomainValidationException("Invalid task status.");
         if(f.Type!=null && f.Type is not ("Call" or "Visit"))throw new DomainValidationException("Invalid task type.");
         var ids=StudentFilter(f.StudentFilter,true).Select(s=>s.Id);var (start,end)=Period(f.DateFrom,f.DateTo);
-        var q=_context.Set<FollowUpTask>().AsNoTracking().Where(t=>ids.Contains(t.StudentId) && (_caller.IsPrivileged || t.AssigneeId==_caller.UserId));
+        var q=_context.Set<FollowUpTask>().ForServiceYear(_context).AsNoTracking().Where(t=>ids.Contains(t.StudentId) && (_caller.IsPrivileged || t.AssigneeId==_caller.UserId));
         if(f.ServantId.HasValue)q=q.Where(t=>t.AssigneeId==f.ServantId);
         if(f.Type!=null)q=q.Where(t=>t.Type==f.Type);
         if(start.HasValue)q=q.Where(t=>t.DueAt>=start);if(end.HasValue)q=q.Where(t=>t.DueAt<end);
         if(f.Status is "Due" or "Overdue")q=q.Where(t=>t.Status=="Open" && t.DueAt<=_caller.UtcNow);
         else if(f.Status!=null)q=q.Where(t=>t.Status==f.Status);
         var totals=new Dictionary<string,decimal?> { ["open"]=await q.CountAsync(t=>t.Status=="Open",Ct),["completed"]=await q.CountAsync(t=>t.Status=="Completed",Ct),["cancelled"]=await q.CountAsync(t=>t.Status=="Cancelled",Ct),["pendingReview"]=await q.CountAsync(t=>t.Status=="PendingReview",Ct),["dueStudents"]=await q.Where(t=>t.Status=="Open" && t.DueAt<=_caller.UtcNow).Select(t=>t.StudentId).Distinct().CountAsync(Ct) };
-        var rows=from t in q join s in _context.Students.IgnoreQueryFilters() on t.StudentId equals s.Id
+        var rows=from t in q join s in _context.Students.IgnoreQueryFilters().ForServiceYear(_context) on t.StudentId equals s.Id
             join u in _context.Users on t.AssigneeId equals (Guid?)u.Id into owners from u in owners.DefaultIfEmpty()
             select new TaskRow {Id=t.Id,StudentId=s.Id,Name=s.FullName,Owner=u==null ? "قائمة إعادة الإسناد" : u.FullName,Type=t.Type,Status=t.Status,DueAt=t.DueAt,CompletedAt=t.CompletedAt,Source=t.SourceType,Reason=t.Reason};
         return await Table("متابعة الافتقاد",f,export,rows.OrderBy(r=>r.DueAt).ThenBy(r=>r.Id),[new("id","المعرف"),new("studentId","معرف المخدوم"),new("name","المخدوم"),new("owner","المسؤول"),new("type","النوع"),new("status","الحالة"),new("dueAt","الاستحقاق","datetime"),new("completedAt","الإنجاز","datetime"),new("source","المصدر"),new("reason","السبب")],totals);
     }
     private async Task<ReportTable> WorkloadTable(ReportSuiteFilter f,bool export)
     {
-        var roster=SuiteRoster(f);var roleIds=_context.Roles.Where(r=>r.Name=="Servant" || r.Name=="Secretary" || r.Name=="Manager").Select(r=>r.Id);var eligibleIds=_context.Users.Where(u=>u.IsActive && _context.UserRoles.Any(r=>r.UserId==u.Id && roleIds.Contains(r.RoleId))).Select(u=>u.Id);var q=roster.Select(s=>new WorkloadRow {Id=s.Id,Name=s.FullName,OwnerId=s.ServantId,Owner=s.Servant==null ? "غير مسند" : s.Servant.FullName,OwnerActive=s.ServantId!=null && eligibleIds.Contains(s.ServantId.Value),Area=s.Area,Year=s.AcademicYear,Tasks=_context.Set<FollowUpTask>().Count(t=>t.StudentId==s.Id && t.Status=="Open")});
+        var roster=SuiteRoster(f);var roleIds=_context.Roles.Where(r=>r.Name=="Servant" || r.Name=="Secretary" || r.Name=="Manager").Select(r=>r.Id);var eligibleIds=_context.Users.Where(u=>u.IsActive && _context.UserRoles.Any(r=>r.UserId==u.Id && roleIds.Contains(r.RoleId))).Select(u=>u.Id);var q=roster.Select(s=>new WorkloadRow {Id=s.Id,Name=s.FullName,OwnerId=s.ServantId,Owner=s.Servant==null ? "غير مسند" : s.Servant.FullName,OwnerActive=s.ServantId!=null && eligibleIds.Contains(s.ServantId.Value),Area=s.Area,Year=s.AcademicYear,Tasks=_context.Set<FollowUpTask>().ForServiceYear(_context).Count(t=>t.StudentId==s.Id && t.Status=="Open")});
         if(f.Issue!=null)q=f.Issue switch {"unassigned"=>q.Where(r=>r.OwnerId==null),"inactive-owner"=>q.Where(r=>r.OwnerId!=null && !r.OwnerActive),_=>throw new DomainValidationException("Invalid workload filter.")};
         var totals=new Dictionary<string,decimal?> { ["roster"]=await q.CountAsync(Ct),["unassigned"]=await q.CountAsync(r=>r.OwnerId==null,Ct),["inactiveOwners"]=await q.CountAsync(r=>r.OwnerId!=null && !r.OwnerActive,Ct),["owners"]=await q.Where(r=>r.OwnerId!=null).Select(r=>r.OwnerId).Distinct().CountAsync(Ct) };
         return await Table("توزيع المخدومين",f,export,q.OrderBy(r=>r.Owner).ThenBy(r=>r.Name).ThenBy(r=>r.Id),[new("id","معرف المخدوم"),new("name","المخدوم"),new("ownerId","معرف المسؤول"),new("owner","المسؤول"),new("ownerActive","مسؤول نشط","boolean"),new("area","المنطقة"),new("year","السنة"),new("tasks","مهام مفتوحة","number")],totals);
@@ -135,11 +140,11 @@ public partial class ReportDataProvider
     private async Task<ReportTable> OwnerWorkloadTable(ReportSuiteFilter f,bool export)
     {
         var roster=SuiteRoster(f);var (start,end)=Period(f.DateFrom,f.DateTo);var roleIds=_context.Roles.Where(r=>r.Name=="Servant" || r.Name=="Secretary" || r.Name=="Manager").Select(r=>r.Id);var eligibleIds=_context.Users.Where(u=>u.IsActive && _context.UserRoles.Any(r=>r.UserId==u.Id && roleIds.Contains(r.RoleId))).Select(u=>u.Id);
-        var attempts=_context.CallLogs.IgnoreQueryFilters().Where(c=>!c.IsVoided && (!start.HasValue || c.CallDate>=start) && (!end.HasValue || c.CallDate<end)).Select(c=>c.StudentId)
-            .Union(_context.HomeVisits.IgnoreQueryFilters().Where(v=>!v.IsVoided && (!start.HasValue || v.VisitDate>=start) && (!end.HasValue || v.VisitDate<end)).Select(v=>v.StudentId));
+        var attempts=_context.CallLogs.IgnoreQueryFilters().ForServiceYear(_context).Where(c=>!c.IsVoided && (!start.HasValue || c.CallDate>=start) && (!end.HasValue || c.CallDate<end)).Select(c=>c.StudentId)
+            .Union(_context.HomeVisits.IgnoreQueryFilters().ForServiceYear(_context).Where(v=>!v.IsVoided && (!start.HasValue || v.VisitDate>=start) && (!end.HasValue || v.VisitDate<end)).Select(v=>v.StudentId));
         // Coverage concerns the current filtered cohort and every actor who contacted it.
-        var successes=_context.CallLogs.IgnoreQueryFilters().Where(c=>!c.IsVoided && c.CallStatus==CallStatus.Answered && (!start.HasValue || c.CallDate>=start) && (!end.HasValue || c.CallDate<end)).Select(c=>c.StudentId)
-            .Union(_context.HomeVisits.IgnoreQueryFilters().Where(v=>!v.IsVoided && v.VisitOutcome==VisitOutcome.Successful && (!start.HasValue || v.VisitDate>=start) && (!end.HasValue || v.VisitDate<end)).Select(v=>v.StudentId));
+        var successes=_context.CallLogs.IgnoreQueryFilters().ForServiceYear(_context).Where(c=>!c.IsVoided && c.CallStatus==CallStatus.Answered && (!start.HasValue || c.CallDate>=start) && (!end.HasValue || c.CallDate<end)).Select(c=>c.StudentId)
+            .Union(_context.HomeVisits.IgnoreQueryFilters().ForServiceYear(_context).Where(v=>!v.IsVoided && v.VisitOutcome==VisitOutcome.Successful && (!start.HasValue || v.VisitDate>=start) && (!end.HasValue || v.VisitDate<end)).Select(v=>v.StudentId));
         var owners=roster.GroupBy(s=>s.ServantId ?? Guid.Empty).Select(g=>new {Id=g.Key,Eligible=g.Count()});
         var attempted=roster.Where(s=>attempts.Contains(s.Id)).GroupBy(s=>s.ServantId ?? Guid.Empty).Select(g=>new {Id=g.Key,Count=g.Count()});
         var reached=roster.Where(s=>successes.Contains(s.Id)).GroupBy(s=>s.ServantId ?? Guid.Empty).Select(g=>new {Id=g.Key,Count=g.Count()});
@@ -170,9 +175,9 @@ public partial class ReportDataProvider
     }
     private IQueryable<ApprovalRow> ApprovalRows(ReportSuiteFilter f)
     {
-        var additions=_context.Set<StudentAdditionRequest>().AsNoTracking().Where(r=>_caller.IsPrivileged || r.RequestedByUserId==_caller.UserId);
-        var assignments=_context.Set<StudentAssignmentRequest>().IgnoreQueryFilters().AsNoTracking().Where(r=>_caller.IsPrivileged || r.RequestedByUserId==_caller.UserId);
-        var removals=_context.Set<StudentRemovalRequest>().IgnoreQueryFilters().AsNoTracking().Where(r=>_caller.IsPrivileged || r.RequestedByUserId==_caller.UserId);
+        var additions=_context.Set<StudentAdditionRequest>().ForServiceYear(_context).AsNoTracking().Where(r=>_caller.IsPrivileged || r.RequestedByUserId==_caller.UserId);
+        var assignments=_context.Set<StudentAssignmentRequest>().IgnoreQueryFilters().ForServiceYear(_context).AsNoTracking().Where(r=>_caller.IsPrivileged || r.RequestedByUserId==_caller.UserId);
+        var removals=_context.Set<StudentRemovalRequest>().IgnoreQueryFilters().ForServiceYear(_context).AsNoTracking().Where(r=>_caller.IsPrivileged || r.RequestedByUserId==_caller.UserId);
         var matchingStudents=StudentFilter(f.StudentFilter,true).Select(s=>s.Id);
         if(!string.IsNullOrWhiteSpace(f.Search)) {
             var term=YouthDataManager.Domain.Utilities.ArabicNormalizer.Normalize(f.Search.Trim());
@@ -207,7 +212,7 @@ public partial class ReportDataProvider
     private IQueryable<AttendanceEntry> AttendanceEntries(ReportSuiteFilter f,string kind,bool knownOnly)
     {
         var students=StudentFilter(f.StudentFilter,true).Select(s=>s.Id);
-        var q=from r in _context.Set<MeetingRosterEntry>().AsNoTracking() join m in _context.Set<MeetingSession>().AsNoTracking() on r.SessionId equals m.Id
+        var q=from r in _context.Set<MeetingRosterEntry>().AsNoTracking() join m in _context.Set<MeetingSession>().ForServiceYear(_context).AsNoTracking() on r.SessionId equals m.Id
             where r.Kind==kind && m.Status=="Finalized" && (!knownOnly || m.RosterKnown) &&
                 (_caller.IsPrivileged || (kind=="Student" ? r.AssignedServantId==_caller.UserId : r.PersonId==_caller.UserId)) && (kind!="Student" || students.Contains(r.PersonId))
             select new AttendanceEntry {Id=r.Id,PersonId=r.PersonId,Name=r.Name,OwnerId=r.AssignedServantId,Date=m.Date,Present=r.Present,RosterKnown=m.RosterKnown};
@@ -229,6 +234,7 @@ public partial class ReportDataProvider
         if(kind=="Student" && f.Issue=="unassigned-group")conditions.Add("r.AssignedServantId IS NULL");
         if(f.DateFrom.HasValue){conditions.Add("m.Date>=@from");parameters.Add(new("@from",SqlDbType.Date){Value=f.DateFrom.Value.Date});}
         if(f.DateTo.HasValue){conditions.Add("m.Date<=@to");parameters.Add(new("@to",SqlDbType.Date){Value=f.DateTo.Value.Date});}
+        if(_caller.SelectedServiceYear is { } year){conditions.Add("m.Date>=@yearFrom AND m.Date<=@yearTo");parameters.Add(new("@yearFrom",SqlDbType.Date){Value=year.Start});parameters.Add(new("@yearTo",SqlDbType.Date){Value=year.LastDay});}
         var eligibleSql="SELECT r.PersonId,r.Present,m.Date FROM dbo.MeetingRosterEntry r INNER HASH JOIN dbo.MeetingSession m ON m.Id=r.SessionId WHERE "+string.Join(" AND ",conditions);
         // Only fixed SQL fragments are concatenated; filter values remain typed parameters.
         string AggregateAttendance(string eligible) => "SELECT g.PersonId AS Id,CAST(N'' AS nvarchar(1)) AS Name,g.Eligible,g.Present,g.LastPresent,COUNT(a.PersonId) AS ConsecutiveAbsences FROM (SELECT PersonId,COUNT(*) AS Eligible,SUM(CASE WHEN Present=1 THEN 1 ELSE 0 END) AS Present,MAX(CASE WHEN Present=1 THEN Date END) AS LastPresent FROM ("+eligible+") e GROUP BY PersonId) g LEFT HASH JOIN ("+eligible+") a ON a.PersonId=g.PersonId AND a.Present=0 AND (g.LastPresent IS NULL OR a.Date>g.LastPresent) GROUP BY g.PersonId,g.Eligible,g.Present,g.LastPresent";
@@ -265,7 +271,7 @@ public partial class ReportDataProvider
     {
         var entries=AttendanceEntries(f,"Student",true);
         var servantEntries=AttendanceEntries(new(){DateFrom=f.DateFrom,DateTo=f.DateTo,ServantId=f.ServantId},"Servant",true);
-        var q=_context.Set<MeetingSession>().AsNoTracking();
+        var q=_context.Set<MeetingSession>().ForServiceYear(_context).AsNoTracking();
         if(f.DateFrom.HasValue)q=q.Where(m=>m.Date>=f.DateFrom.Value.Date);if(f.DateTo.HasValue)q=q.Where(m=>m.Date<=f.DateTo.Value.Date);
         var rows=q.Select(m=>new MeetingRow {Id=m.Id,Date=m.Date,Status=m.Status,RosterKnown=m.RosterKnown,Eligible=entries.Count(r=>r.Date==m.Date),Present=entries.Count(r=>r.Date==m.Date && r.Present),ServantEligible=servantEntries.Count(r=>r.Date==m.Date),ServantPresent=servantEntries.Count(r=>r.Date==m.Date && r.Present)});
         var studentEligible=await entries.CountAsync(Ct);var studentPresent=await entries.CountAsync(r=>r.Present,Ct);

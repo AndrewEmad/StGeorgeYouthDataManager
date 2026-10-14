@@ -1,3 +1,4 @@
+import {ServiceYearComponent} from '@ydm/shared/ui/service-year';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterLink, RouterOutlet, RouterLinkActive, ActivatedRoute, NavigationEnd } from '@angular/router';
 import {NgTemplateOutlet} from '@angular/common';
@@ -8,7 +9,7 @@ import { AuthService } from '../core/services/auth.service';
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterLink, RouterOutlet, RouterLinkActive,NgTemplateOutlet,ModalComponent],
+  imports: [RouterLink, RouterOutlet, RouterLinkActive,NgTemplateOutlet,ModalComponent,ServiceYearComponent],
   templateUrl: './layout.html',
   styleUrls: ['./layout.css'],
 })

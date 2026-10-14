@@ -3247,5 +3247,518 @@
       "visualReview": "Final requests and distribution portrait captures inspected; affected maintained Admin/report baselines refreshed."
     },
     "constraints": "ImageSharp 3.1.5, .NET 8, automatic startup migrations, appsettings credentials and frontend-only Pages workflows unchanged."
+  },
+  "dropdownAndFilterActionsRevision": {
+    "date": "2026-10-13",
+    "status": "Passed",
+    "deployment": "Local frontend changes only; publish both clients. No API deployment is required for this revision.",
+    "changes": [
+      "Shared resource pickers in both apps use searchable comboboxes with a bounded scroll list. Scrolling appends 25-item pages; next/previous buttons are removed from dropdowns. Existing table pagination remains available.",
+      "Only one additional-page request runs at a time. Search cancels superseded requests immediately, resets paging and debounces the replacement query. Query versions discard pending searches for a replaced resource kind; IDs are deduplicated and empty/non-advancing pages stop loading.",
+      "Additional-page failures retain loaded options and retry the failed page. Current selection stays named outside the loaded/search results, including externally supplied owner labels. Unassignment presents the empty choice rather than its internal sentinel.",
+      "Keyboard selection, Escape, Tab and click-away behavior preserve dialog focus. Scroll lists explicitly have tabindex=-1 to avoid Firefox automatically adding scroll containers to the tab order; dialog boundaries exclude negative-tabindex controls.",
+      "Filter action labels are تطبيق and مسح. One shared full-row action group keeps both buttons adjacent with 44px targets, equal typography and no wrapping, including the Servant student list and legacy advanced filters.",
+      "Shared theme tokens, RTL logical spacing, bounded list scrolling and wrapping long names apply in both apps. Form grids align their fields from the top while a dropdown is open."
+    ],
+    "build": {
+      "result": "Passed",
+      "adminInitialKb": 368.11,
+      "servantInitialKb": 362.32,
+      "initialErrorBudgetKb": 500
+    },
+    "browser": {
+      "core": {
+        "distinctCasesPassed": 105,
+        "engines": [
+          "chromium",
+          "firefox",
+          "webkit"
+        ],
+        "resourcePickerCases": 60,
+        "filterActionCases": 33,
+        "dialogFocusCases": 3,
+        "existingSelectionCases": 9,
+        "coverage": "Both apps; widths 320/360/390/430/768/1024/1440/1920, landscape and 200% text; scroll append, concurrent-scroll guards, selected IDs, cancellation/out-of-order search, retry/empty/failed/saving states, keyboard/modal focus, report filters and owner unassignment. Axe scans open dialogs at 390/1440px.",
+        "initialCombinedRun": {
+          "passed": 80,
+          "failed": 1,
+          "notRun": 24,
+          "detail": "A WebKit enlarged-text geometry check read two button rectangles during continuing scrolling. The test now waits for fonts and reads both rectangles atomically; no application change was needed for that measurement failure."
+        },
+        "finalWebkitRun": {
+          "passed": 35,
+          "failed": 0,
+          "detail": "Closes the measurement failure and all 24 unexecuted cases; ten earlier WebKit passes are repeats."
+        }
+      },
+      "regressions": {
+        "result": "Passed",
+        "cases": 69,
+        "functionalCases": 15,
+        "visualCases": 54,
+        "coverage": "Personal-history apply/reset/scoping, mixed requests, report filter/refresh and full filtered export/print. Report populated/empty/failed/loading views in both apps and church reports at 390/1440px on all three engines.",
+        "maintainedBaselinesChanged": 60,
+        "visualInspection": "Portrait filter groups in both apps and desktop/portrait dropdown captures inspected; representative final report baselines inspected."
+      },
+      "distinctCasesPassed": 174
+    },
+    "constraints": "ImageSharp 3.1.5, .NET 8, automatic startup migrations, appsettings credentials and frontend-only Pages workflow unchanged.",
+    "cleanup": {
+      "status": "Blocked by automatic approval review",
+      "action": "Remove only task-owned development probe files/folders under 5.FrontEnd/test-results",
+      "statedReason": "blocked by policy",
+      "remaining": "Ignored probe outputs retained. Reusable tests, updated baselines and final verification evidence are kept."
+    }
+  },
+  "serviceYearRevision": {
+    "date": "2026-10-13",
+    "status": "Implemented and verified locally; publication pending",
+    "contract": {
+      "selection": "Account-specific, app-namespaced global year or all; same-app tabs synchronize; initial default all",
+      "definition": "Strict first Friday after September 12 through strict last Friday before September 12 of the next year, inclusive Cairo calendar days",
+      "example2026": "2026-09-18 through 2027-09-10; next Cairo midnight is exclusive",
+      "scope": "GET event data: meetings/student and servant attendance, calls, visits, follow-up due dates, request submission dates, audit/activity timestamps, dashboards, reports and matching exports/print",
+      "roster": "User explicitly chose complete current student and servant lists; no person creation-date restriction from the global year",
+      "localFilters": "Explicit report date filters intersect the global period and survive reload; default dates follow the year; explicit all removes implicit month limits",
+      "commands": "No year scope on commands, authentication/session state, notification configuration or background workers",
+      "api": "serviceYear=<starting year> or serviceYear=all; omit to preserve legacy endpoint defaults; malformed/duplicate/out-of-range values rejected",
+      "history": "Archived history reads explicitly restore temporal scope after ignoring archival filters; raw attendance SQL and report coalescing keys include selected scope"
+    },
+    "build": {
+      "backend": "Passed (.NET 8; existing pinned ImageSharp advisory warnings)",
+      "AdminInitialKB": 370.59,
+      "ServantInitialKB": 364.9,
+      "budgetKB": 500
+    },
+    "verification": {
+      "utilities": {
+        "passed": 5,
+        "detail": "Strict Friday boundaries including September 12 Fridays, timezone independence and invalid years"
+      },
+      "sql": {
+        "distinctCasesPassed": 30,
+        "log": "5.FrontEnd/test-results/service-year-final-sql.log",
+        "detail": "Year boundaries, current roster preservation, raw attendance SQL/group aggregates, event/task/request scope, archived history, exports, commands, activity authorization, existing reports/approvals and startup migrations"
+      },
+      "sqlAdditionalFinalAssertions": {
+        "passed": 5,
+        "repeatedCases": true,
+        "log": "5.FrontEnd/test-results/service-year-final-boundaries.log",
+        "detail": "Visits and participant credit, explicit all, disjoint periods, Cairo final-day inclusion, context scope changes"
+      },
+      "browser": {
+        "distinctCasesPassed": 144,
+        "engines": [
+          "Chromium",
+          "Firefox",
+          "WebKit"
+        ],
+        "globalYearCases": 42,
+        "filterGeometryCases": 33,
+        "regressionCases": 69,
+        "regressionFunctionalCases": 15,
+        "regressionVisualCases": 54,
+        "viewportWidths": [
+          320,
+          360,
+          390,
+          430,
+          768,
+          1024,
+          1440,
+          1920
+        ],
+        "additionalLayouts": "844x390 landscape and 320px text reflow",
+        "reportSnapshotsExercised": 66,
+        "detail": "Scope propagation across routes, export/print parameters, reload persistence, same-app tab synchronization and open draft retention, labelled 44px selector, no page overflow/header obstruction. Report local period persistence additionally verified in final 42-case rerun.",
+        "logs": [
+          "5.FrontEnd/test-results/service-year-final-browser.log",
+          "5.FrontEnd/test-results/service-year-report-regressions.log",
+          "5.FrontEnd/test-results/service-year-final-scope.log"
+        ],
+        "visualInspection": "Final Admin portrait and Servant desktop header captures inspected; retained report snapshots updated for the new header and explicit all defaults"
+      },
+      "distinctCasesPassed": 179
+    },
+    "constraints": "ImageSharp 3.1.5, .NET 8, automatic startup migrations in development/production, appsettings credentials and frontend-only GitHub Pages workflow unchanged. No schema migration added.",
+    "rollout": "Publish API and both frontend applications together to enable authoritative filtering; deployment workflow untouched."
+  },
+  "bulkAcademicYearRevision": {
+    "date": "2026-10-14",
+    "status": "Implemented and verified locally; publication pending",
+    "feature": "Admin student selection toolbar → تغيير السنة الدراسية للمحددين; reuse selections across pages, choose a known value or type a new value",
+    "api": {
+      "endpoint": "POST /api/StudentCommands/bulk-academic-year",
+      "roles": [
+        "Admin",
+        "Manager",
+        "Priest"
+      ],
+      "selectionLimit": 5000,
+      "academicYearLimit": 100,
+      "request": "students: [{studentId, version}], academicYear",
+      "response": "Per-student outcomes including current academic year/version on conflict",
+      "behavior": "Single selected-roster read, preserve unrelated fields, row-version review, atomic successful changes/edit logs/structured audit, archived/missing rows rejected, already-saved target values replay without duplicate edits"
+    },
+    "ui": "Shared modal/theme, wrapped selection toolbar, saving locks and duplicate guards, preserve target/input/failed choices, explicit conflict review, remove unavailable choices, result status receives visible keyboard focus; distinction from the existing service-year date filter remains clear",
+    "build": {
+      "backend": "Passed; existing pinned ImageSharp advisory warnings",
+      "AdminInitialKB": 370.59,
+      "ServantInitialKB": 364.9,
+      "initialBudgetKB": 500
+    },
+    "verification": {
+      "sqlCasesPassed": 6,
+      "sqlLog": "5.FrontEnd/test-results/bulk-academic-year-sql.log",
+      "sqlCoverage": "All 3 privileged roles; denied servant/secretary roles; trim/limits/invalid selections and versions; stale/missing/archived outcomes; replay; before/after audit and actor/reason; rollback of student/edit/audit; unrelated legacy fields preserved",
+      "sqlRegressionCasesPassed": 6,
+      "sqlRegressionLog": "5.FrontEnd/test-results/bulk-academic-year-sql-regressions.log",
+      "sqlRegressionCoverage": "Existing imports, archive/restore, attendance, follow-up tasks and assigned discovery queries",
+      "browserCasesPassed": 54,
+      "browserLog": "5.FrontEnd/test-results/bulk-academic-year-final.log",
+      "newFeatureBehaviorCases": 12,
+      "newFeatureLayoutCases": 33,
+      "existingSelectionRegressionCases": 9,
+      "engines": [
+        "Chromium",
+        "Firefox",
+        "WebKit"
+      ],
+      "widths": [
+        320,
+        360,
+        390,
+        430,
+        768,
+        1024,
+        1440,
+        1920
+      ],
+      "additionalLayouts": "844x390 and 1024x360 landscape; 320px 200% text reflow",
+      "browserCoverage": "Cross-page save payload, trim, partial conflict/review/version retry, transport failure input retention, unavailable-choice removal, saving locks, keyboard Escape/focus return, no page overflow, dialog controls reachable, WCAG 2A/AA/2.1AA Axe checks",
+      "finalFocusRerun": {
+        "casesPassed": 6,
+        "repeatedCases": true,
+        "log": "5.FrontEnd/test-results/bulk-academic-year-focus-final.log",
+        "coverage": "Success and last-unavailable-choice removal restore focus to visible result feedback after final scroll adjustment"
+      },
+      "visualInspection": "Final desktop and portrait dialog captures inspected; common action spacing retained",
+      "distinctCasesPassed": 66
+    },
+    "constraints": "No schema migration, .NET/ImageSharp version change, startup-migration change, workflow change or appsettings credential remediation.",
+    "rollout": "Publish the API and updated Admin frontend to expose and enable the new bulk action."
+  },
+  "academicYearChoicesRevision": {
+    "date": "2026-10-14",
+    "status": "Implemented and verified locally; publication and production normalization pending",
+    "choices": [
+      "سنة اولى",
+      "سنة ثانية",
+      "سنة ثالثة",
+      "سنة رابعة",
+      "سنة خامسة",
+      "سنة سادسة",
+      "سنة سابعة",
+      "حديث التخرج"
+    ],
+    "scope": "Fixed write dropdowns: Admin add/edit/bulk, shared detail edit in both apps, Servant addition request. Supersedes the free-form input described in bulkAcademicYearRevision. Read filters retain legacy lookup values until normalization.",
+    "api": "Canonicalize known aliases for create/import/addition requests/edit/bulk; reject unsupported new values; preserve an existing unknown year when editing unrelated fields without a year change.",
+    "sql": {
+      "file": "docs/sql/normalize-student-academic-years.sql",
+      "default": "Preview only (@Apply=0); set @Apply=1 to save recognized aliases",
+      "coverage": "All students including archived; preserve missing and unknown stages; list unknown values for review; do not infer generic graduates or secondary-school stages. Row-version protection, atomic student/edit/audit changes, idempotent repeat. No production data modified."
+    },
+    "build": {
+      "backend": "Passed (.NET 8; existing pinned ImageSharp advisory warnings)",
+      "AdminInitialKB": 370.59,
+      "ServantInitialKB": 364.9,
+      "initialBudgetKB": 500
+    },
+    "verification": {
+      "utilityCasesPassed": 7,
+      "sqlCasesPassed": 27,
+      "sqlLog": "5.FrontEnd/test-results/academic-years-sql.log",
+      "sqlCoverage": "16 alias cases; preview/apply/idempotency against SQL Server including archival, audit, unrelated fields; create/import/addition validation; existing bulk concurrency/authorization/replay and import/archive regressions.",
+      "browserCasesPassed": 57,
+      "bulkCasesPassed": 45,
+      "dropdownEntryPointCasesPassed": 12,
+      "engines": [
+        "Chromium",
+        "Firefox",
+        "WebKit"
+      ],
+      "widths": [
+        320,
+        360,
+        390,
+        430,
+        768,
+        1024,
+        1440,
+        1920
+      ],
+      "additionalLayouts": "844x390 and 1024x360 landscape; 320px 200% text reflow",
+      "browserLogs": [
+        "5.FrontEnd/test-results/academic-years-bulk-browser.log",
+        "5.FrontEnd/test-results/academic-year-options-browser.log"
+      ],
+      "detail": "Exact eight dropdown values across all write entry points, known legacy display normalization, unknown-year retention on unrelated edits, existing cross-page bulk behavior, responsive geometry and accessibility. A test locator assumed Angular bound name properties were DOM attributes; switched to the visible accessible combobox label, then all 12 entry-point cases passed.",
+      "visualInspection": "Final 390px portrait and 1440px desktop bulk dropdown captures inspected.",
+      "distinctCasesPassed": 91
+    },
+    "constraints": "No runtime/ImageSharp version change, schema migration, startup-migration change, Pages workflow change or appsettings credential remediation.",
+    "rollout": "Publish API and both frontend applications. Separately review and apply the supplied SQL script against the intended database."
+  },
+  "academicYearReviewedValuesRevision": {
+    "date": "2026-10-14",
+    "status": "Implemented and verified locally; production publication/data normalization pending",
+    "supersedes": "Previous eight-option list and conservative generic-graduate mapping in academicYearChoicesRevision, per explicit user clarification.",
+    "choices": [
+      "سنة اولى",
+      "سنة ثانية",
+      "سنة ثالثة",
+      "سنة رابعة",
+      "سنة خامسة",
+      "سنة سادسة",
+      "سنة سابعة",
+      "حديث التخرج",
+      "غير معروف"
+    ],
+    "reviewedMappings": {
+      "خريجين": "حديث التخرج",
+      "غير معروف": "غير معروف",
+      "خريجة": "حديث التخرج",
+      "اتخرجت 2025": "حديث التخرج",
+      "حديثي التخرج": "حديث التخرج",
+      "خريج ": "حديث التخرج",
+      "سنة رابعه  ( هيتخرج ٢٠٢٧": "سنة رابعة"
+    },
+    "rules": "Shared API/client/SQL rules recognize graduate prefixes, plural recent-graduate aliases and the explicit unknown option. Remove only parenthetical future-graduation notes; other unresolved stages remain reviewable. SQL retains preview/apply, audit, concurrency and idempotency behavior.",
+    "build": {
+      "backend": "Passed during integration build; .NET/ImageSharp unchanged",
+      "AdminInitialKB": 370.59,
+      "ServantInitialKB": 364.9,
+      "initialBudgetKB": 500
+    },
+    "verification": {
+      "utilityCasesPassed": 8,
+      "utilityLog": "5.FrontEnd/test-results/academic-years-reviewed-utilities.log",
+      "sqlCasesPassed": 35,
+      "sqlLog": "5.FrontEnd/test-results/academic-years-reviewed-sql-final.log",
+      "sqlDetail": "Every supplied reviewed value tested; preview/apply/idempotency, no update/history for unchanged غير معروف, graduate request/import normalization and existing bulk/import/archive regression. Initial SQL test exposed a SQL Server correlated-aggregate restriction in note extraction; replaced with ordered TOP(1), then all 35 cases passed.",
+      "browserCasesPassed": 57,
+      "browserLog": "5.FrontEnd/test-results/academic-years-reviewed-browser-final.log",
+      "engines": [
+        "Chromium",
+        "Firefox",
+        "WebKit"
+      ],
+      "widths": [
+        320,
+        360,
+        390,
+        430,
+        768,
+        1024,
+        1440,
+        1920
+      ],
+      "additionalLayouts": "844x390 and 1024x360 landscape; 320px 200% text reflow",
+      "browserDetail": "Nine choices at all write entry points; selectable/savable غير معروف in shared detail; unknown legacy-stage omission; bulk saving/selection/conflict/error behavior, responsive layouts and Axe. An intermittent Firefox result-focus regression prompted waiting for Angular afterNextRender before focusing after native dialog restoration; rebuilt Admin and all 57 final cases passed. Final 390px portrait capture inspected.",
+      "distinctCasesPassed": 100
+    },
+    "sqlFile": "docs/sql/normalize-student-academic-years.sql",
+    "rollout": "Publish API and both frontends; review @Apply=0 preview, then optionally apply @Apply=1 to the intended database. No actual production database changed.",
+    "constraints": "No schema migration, runtime/ImageSharp upgrade, automatic-startup-migration change or frontend-only Pages workflow change."
+  },
+  "studentAreaRevision": {
+    "date": "2026-10-14",
+    "status": "Implemented and verified locally; production publication/data normalization pending",
+    "approvedChoices": [
+      "ابراهيم بك",
+      "ابن الحكم",
+      "ارض نوبار",
+      "الاسكان الصناعي",
+      "التعاون",
+      "الخانكة",
+      "الزيتون",
+      "العبور",
+      "الفرنواني",
+      "القناطر الخيرية",
+      "الكورنيش",
+      "المرج",
+      "المرج الجديدة",
+      "المظلات",
+      "المعادى الجديدة",
+      "الملف",
+      "المنشية",
+      "المنشية الجديدة",
+      "النزهه الجديده",
+      "الوحدة",
+      "ام بيومي",
+      "باسوس",
+      "بهتيم",
+      "جامع ابو الهنا",
+      "حدائق الاهرام",
+      "شبرا البلد",
+      "شبرا مصر",
+      "عبود",
+      "عزبة عثمان",
+      "عزبه رستم",
+      "قهوة شرف",
+      "كلية الزراعة",
+      "كوبرى عرابى",
+      "مدينة السلام",
+      "مساكن الصباغة",
+      "مساكن الضباط",
+      "مساكن حجازى",
+      "مسطرد",
+      "منطي",
+      "اخرى"
+    ],
+    "approvedChoiceCount": 40,
+    "duplicateLabel": "المرج الجديده canonicalizes to المرج الجديدة; one dropdown choice",
+    "normalization": "Match only approved labels after removing whitespace/Arabic marks/tatweel and normalizing alif, ya and ta marbuta spellings. Preserve distinct approved neighborhoods (e.g. شبرا البلد versus شبرا مصر). Empty area stays optional; other unrecognized old values remain reviewable, not automatically assigned to اخرى.",
+    "entryPoints": "Admin add/edit, shared student-detail edit in both clients, Servant addition request, create/import/request processing, and Admin cross-page bulk area change. Existing read filters retain legacy lookup values until the database is normalized.",
+    "bulkApi": {
+      "endpoint": "POST /api/StudentCommands/bulk-area",
+      "roles": [
+        "Admin",
+        "Manager",
+        "Priest"
+      ],
+      "selectionLimit": 5000,
+      "request": "students: [{studentId, version}], area",
+      "behavior": "Shared owned transaction/concurrency helper with academic-year endpoint; validate target and selected versions, reject missing/archived students per row, explicit current-area conflict review, lost-response replay without duplicate edit, preserve all unrelated fields, audit successful changes atomically."
+    },
+    "ui": "One shared field-change modal for area/year, fixed native dropdowns, common theme/RTL, saving locks, preserve failed IDs/target, retain historical unknown fields when saving unrelated edits, refresh changed lookup values and focus visible result feedback.",
+    "sql": {
+      "file": "docs/sql/normalize-student-areas.sql",
+      "inventoryFile": "docs/sql/review-student-areas.sql",
+      "default": "Preview only (@Apply=0); set @Apply=1 to save recognized aliases",
+      "behavior": "All students including archived; before/after preview and unresolved values report; immutable row-version capture, one transaction for Area/UpdatedAt/edit logs/audit, optional actor, idempotent repeat. Historical requests untouched; no production database modified."
+    },
+    "build": {
+      "backend": "Passed; .NET 8/ImageSharp 3.1.5 retained, existing pinned advisories",
+      "AdminInitialKB": 370.59,
+      "ServantInitialKB": 364.9,
+      "initialBudgetKB": 500
+    },
+    "verification": {
+      "utilityCasesPassed": 10,
+      "utilityLog": "5.FrontEnd/test-results/student-area-utilities-final.log",
+      "sqlDistinctCasesPassed": 118,
+      "sqlLog": "5.FrontEnd/test-results/student-area-sql-full-final.log",
+      "sqlDetail": "Full integration suite passes. New area tests cover all approved values, spelling variants, distinct neighborhoods, unsupported choices, preview/apply/idempotency/archival/audit/unrelated fields, API create/import/addition normalization, role access, bulk partial concurrency review/replay/rollback. Initial broad run passed 115/118; isolated Identity race databases from unrelated Admin/Priest actors and used a unique archive-test phone to avoid the intentional 10-candidate preview cap, then 118/118 passed. No production identity/import behavior changed.",
+      "browserDistinctCasesPassed": 123,
+      "newAreaCases": 57,
+      "academicYearRegressionCases": 57,
+      "selectionPhoneRegressionCases": 9,
+      "browserLogs": [
+        "5.FrontEnd/test-results/student-area-browser.log",
+        "5.FrontEnd/test-results/student-area-selection-regressions.log"
+      ],
+      "engines": [
+        "Chromium",
+        "Firefox",
+        "WebKit"
+      ],
+      "widths": [
+        320,
+        360,
+        390,
+        430,
+        768,
+        1024,
+        1440,
+        1920
+      ],
+      "additionalLayouts": "844x390 and 1024x360 landscape; 320px 200% text reflow",
+      "browserDetail": "All 40 choices in each write entry point; legacy normalization/omission, explicit اخرى save, cross-page area/year payloads, partial and transport failures, reviewed retries, locks and focus, no horizontal page overflow, reachable dialogs and Axe. Final mobile/desktop area dialog captures inspected.",
+      "distinctCasesPassed": 251
+    },
+    "constraints": "No schema migration, ImageSharp/.NET upgrade, startup-migration removal, credential remediation or Pages workflow change.",
+    "rollout": "Publish API and both frontend clients; separately review and apply the supplied area-normalization script to the intended database."
+  },
+  "reviewedStudentAreaAliasesRevision": {
+    "date": "2026-10-14",
+    "status": "Implemented and verified locally; production publication/data normalization pending",
+    "reviewedMappings": {
+      "شبرا المحطة": "شبرا البلد",
+      "شبرا الخيمة": "شبرا البلد",
+      "شبرا الخيمه": "شبرا البلد",
+      "ارض نوبار شبرا الخيمه": "ارض نوبار",
+      "المساكن": "الوحدة",
+      "الملف شبرا الخيمه": "الملف",
+      "الوحدة عند المصانع": "الوحدة",
+      "خلف الكنيسة": "شبرا البلد",
+      "شارع زكريا": "شبرا البلد",
+      "منية السيرج": "اخرى"
+    },
+    "approvedChoiceCount": 40,
+    "normalizedAliasKeyCount": 9,
+    "behavior": "Exact reviewed aliases plus existing Arabic spelling normalization in shared client/server/SQL. شبرا الخيمة and شبرا الخيمه share one normalized key; all targets remain approved choices. Only explicitly approved منية السيرج maps to اخرى; other unresolved values stay reviewable. Dropdown options unchanged.",
+    "sql": "docs/sql/normalize-student-areas.sql; preview remains @Apply=0, apply requires @Apply=1; archived rows, transaction, row versions, audit/edit logs and idempotency preserved. No production database modified.",
+    "build": {
+      "backend": "Passed during integration build; existing pinned ImageSharp advisories",
+      "AdminInitialKB": 370.59,
+      "ServantInitialKB": 364.9
+    },
+    "verification": {
+      "utilityCasesPassed": 11,
+      "utilityLog": "5.FrontEnd/test-results/student-area-reviewed-aliases-utilities.log",
+      "sqlDistinctCasesPassed": 34,
+      "sqlLog": "5.FrontEnd/test-results/student-area-reviewed-aliases-sql.log",
+      "bulkSqlFinalRerunCasesPassed": 6,
+      "bulkSqlRerunRepeatedCases": true,
+      "bulkSqlFinalLog": "5.FrontEnd/test-results/student-area-reviewed-aliases-bulk-sql.log",
+      "sqlDetail": "Every supplied mapping; negative near-name case; real SQL preview/apply/audit/idempotency; all existing approved areas and archival/unrelated fields preserved; create/edit/request/import alias handling; bulk roles/conflicts/replay/rollback rerun with المساكن to الوحدة.",
+      "browserCasesPassed": 12,
+      "browserLog": "5.FrontEnd/test-results/student-area-reviewed-aliases-browser.log",
+      "engines": [
+        "Chromium",
+        "Firefox",
+        "WebKit"
+      ],
+      "browserDetail": "Exact 40 approved choices and newly mapped شبرا الخيمه display in both detail editors; unrelated unknown-value preservation and explicit اخرى saves; Admin add/edit/bulk and Servant request dropdowns. Layouts unchanged from verified studentAreaRevision.",
+      "distinctCasesPassed": 57
+    },
+    "constraints": "No schema, .NET/ImageSharp, startup-migration or frontend-only Pages workflow change.",
+    "rollout": "Publish API and both clients; separately review/apply the updated SQL script to the intended database."
+  },
+  "studentAreaFallbackRevision": {
+    "date": "2026-10-14",
+    "status": "Implemented and verified locally; production publication/data normalization pending",
+    "supersedes": "Earlier area policies preserving/rejecting unlisted nonempty names; user explicitly requested all such names become اخرى.",
+    "rule": "Approved 40 names and explicitly reviewed aliases retain priority. Any remaining nonempty area maps to اخرى. Blank/null area remains optional/missing. Creation, imports, addition requests, explicit edits (including a repeated legacy value), and bulk targets use the same server/client rule. Omitted PATCH area stays omitted; full edit forms resolve an unlisted old value to اخرى.",
+    "sql": "docs/sql/normalize-student-areas.sql now previews/applies fallback for every unlisted nonempty area, including archived students. Retains immutable row-version snapshot, transaction, before/after edit/audit and repeat safety. No production database modified.",
+    "ui": "Unlisted legacy area selects اخرى directly; removed obsolete unknown-area sentinel from Admin editor. Academic-year unknown handling and the 40 approved area choices remain unchanged.",
+    "build": {
+      "backend": "Passed; existing pinned ImageSharp advisories",
+      "AdminInitialKB": 370.59,
+      "ServantInitialKB": 364.9
+    },
+    "verification": {
+      "utilityCasesPassed": 11,
+      "utilityLog": "5.FrontEnd/test-results/student-area-fallback-utilities.log",
+      "sqlCasesPassed": 70,
+      "sqlLog": "5.FrontEnd/test-results/student-area-fallback-sql-final.log",
+      "sqlDetail": "Fallback/null/blank/approved names and all prior aliases; preview/apply/idempotency/audit/unrelated fields, create/edit/request/import/bulk fallback, omitted-field semantics, explicit legacy re-save, area length bounds, bulk roles/concurrency/rollback and academic-year regressions.",
+      "additionalArchiveCasePassed": 1,
+      "additionalArchiveCaseRepeated": true,
+      "archiveLog": "5.FrontEnd/test-results/student-area-fallback-archive-sql.log",
+      "archiveDetail": "Existing SQL case rerun with an archived unlisted area; fallback and history verified.",
+      "browserCasesPassed": 24,
+      "browserLog": "5.FrontEnd/test-results/student-area-fallback-browser.log",
+      "engines": [
+        "Chromium",
+        "Firefox",
+        "WebKit"
+      ],
+      "browserDetail": "Both detail editors select/save اخرى for unlisted data; approved options, explicit choices and unchanged academic-year workflows verified. No layout/style change.",
+      "distinctCasesPassed": 105
+    },
+    "constraints": "No schema migration, .NET/ImageSharp upgrade, startup-migration or frontend-only Pages workflow change.",
+    "rollout": "Publish API/both frontends; separately review @Apply=0 preview, then apply @Apply=1 to the intended database."
   }
 }

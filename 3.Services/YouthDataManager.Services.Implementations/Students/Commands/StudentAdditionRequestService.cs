@@ -55,7 +55,7 @@ public class StudentAdditionRequestService : IStudentAdditionRequestService
 
             var validation=StudentFields.Validate(dto.FullName,dto.Phone,dto.SecondaryPhone,dto.Address,dto.Area,dto.College,dto.AcademicYear,dto.ConfessionFather,dto.Notes,(Gender)dto.Gender,dto.BirthDate,dto.BirthMonth);
             if (validation!=null) return ServiceResult<Guid>.Failure(validation);
-            var key=Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(System.Text.Json.JsonSerializer.Serialize(new {Name=dto.FullName.Trim(),Phone=PhoneFields.Canonical(dto.Phone),Secondary=PhoneFields.Canonical(dto.SecondaryPhone),Address=dto.Address?.Trim(),Area=dto.Area?.Trim(),College=dto.College?.Trim(),Year=dto.AcademicYear?.Trim(),Father=dto.ConfessionFather?.Trim(),Notes=dto.Notes?.Trim(),dto.Gender,Birthday=dto.BirthDate?.Date,Month=dto.BirthDate?.Month ?? dto.BirthMonth}))));
+            var key=Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(System.Text.Json.JsonSerializer.Serialize(new {Name=dto.FullName.Trim(),Phone=PhoneFields.Canonical(dto.Phone),Secondary=PhoneFields.Canonical(dto.SecondaryPhone),Address=dto.Address?.Trim(),Area=StudentAreas.Canonical(dto.Area),College=dto.College?.Trim(),Year=AcademicYears.Canonical(dto.AcademicYear),Father=dto.ConfessionFather?.Trim(),Notes=dto.Notes?.Trim(),dto.Gender,Birthday=dto.BirthDate?.Date,Month=dto.BirthDate?.Month ?? dto.BirthMonth}))));
             var duplicate=await _store.Query<StudentAdditionRequest>().FirstOrDefaultAsync(r=>r.RequestedByUserId==requestedByUserId && r.Status==AssignmentRequestStatus.Pending && r.RequestKey==key, _caller.CancellationToken);
             if (duplicate!=null) return ServiceResult<Guid>.Success(duplicate.Id);
             var request = new StudentAdditionRequest
@@ -69,9 +69,9 @@ public class StudentAdditionRequestService : IStudentAdditionRequestService
                 Phone = dto.Phone.Trim(),
                 SecondaryPhone = string.IsNullOrWhiteSpace(dto.SecondaryPhone) ? null : dto.SecondaryPhone.Trim(),
                 Address = string.IsNullOrWhiteSpace(dto.Address) ? null : dto.Address.Trim(),
-                Area = string.IsNullOrWhiteSpace(dto.Area) ? null : dto.Area.Trim(),
+                Area = StudentAreas.Canonical(dto.Area),
                 College = string.IsNullOrWhiteSpace(dto.College) ? null : dto.College.Trim(),
-                AcademicYear = string.IsNullOrWhiteSpace(dto.AcademicYear) ? null : dto.AcademicYear.Trim(),
+                AcademicYear = AcademicYears.Canonical(dto.AcademicYear),
                 ConfessionFather = string.IsNullOrWhiteSpace(dto.ConfessionFather) ? null : dto.ConfessionFather.Trim(),
                 Notes = string.IsNullOrWhiteSpace(dto.Notes) ? null : dto.Notes.Trim(),
                 Gender = (Gender)dto.Gender,

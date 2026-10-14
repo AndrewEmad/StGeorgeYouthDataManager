@@ -18,7 +18,7 @@ public class HomeVisitNoTrackingRepository : IHomeVisitNoTrackingRepository
 
     public async Task<IEnumerable<T>> GetByStudentId<T>(Guid studentId, Expression<Func<HomeVisit, T>> selector)
     {
-        return await _context.HomeVisits.IgnoreQueryFilters()
+        return await _context.HomeVisits.IgnoreQueryFilters().ForServiceYear(_context)
             .AsNoTracking()
             .Include(e => e.Participants).ThenInclude(p => p.Servant)
             .Where(e => e.StudentId == studentId)
@@ -29,7 +29,7 @@ public class HomeVisitNoTrackingRepository : IHomeVisitNoTrackingRepository
 
     public async Task<IEnumerable<T>> GetByServantId<T>(Guid servantId, Expression<Func<HomeVisit, T>> selector)
     {
-        return await _context.HomeVisits.IgnoreQueryFilters()
+        return await _context.HomeVisits.IgnoreQueryFilters().ForServiceYear(_context)
             .AsNoTracking()
             .Include(e => e.Participants).ThenInclude(p => p.Servant)
             .Where(e => e.ServantId == servantId || e.Participants.Any(p => p.ServantId == servantId))
@@ -46,7 +46,7 @@ public class HomeVisitNoTrackingRepository : IHomeVisitNoTrackingRepository
         string? college, 
         Expression<Func<HomeVisit, T>> selector)
     {
-        IQueryable<HomeVisit> query = _context.HomeVisits.IgnoreQueryFilters()
+        IQueryable<HomeVisit> query = _context.HomeVisits.IgnoreQueryFilters().ForServiceYear(_context)
             .AsNoTracking()
             .Include(e => e.Participants).ThenInclude(p => p.Servant);
 
@@ -61,7 +61,7 @@ public class HomeVisitNoTrackingRepository : IHomeVisitNoTrackingRepository
 
     public async Task<IEnumerable<T>> GetAll<T>(Expression<Func<HomeVisit, T>> selector)
     {
-        return await _context.HomeVisits.IgnoreQueryFilters()
+        return await _context.HomeVisits.IgnoreQueryFilters().ForServiceYear(_context)
             .AsNoTracking()
             .Include(e => e.Participants).ThenInclude(p => p.Servant)
             .OrderByDescending(e => e.VisitDate)

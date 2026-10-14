@@ -1,3 +1,4 @@
+import {onServiceYearChange} from '../core/service-year';
 import { Component,DestroyRef,inject,signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {ActivatedRoute} from '@angular/router';
@@ -35,6 +36,7 @@ export class TasksPage {
   rows=signal<Task[]>([]);total=signal(0);dueStudents=signal(0);loading=signal(false);error=signal('');message=signal('');opened=signal(false);saving=signal(false);dialogError=signal('');title=signal('');busy=signal(new Set<string>());stale=signal(false);participants:{id:string;name:string}[]=[];format=display;
   taskId='';status='Open';type='';unassigned=false;page=1;applied={status:'Open',type:'',unassigned:false};action='Create';selected:Task|null=null;
   input={studentId:'',type:'Call',dueAt:'',assigneeId:null as string|null,eventAt:'',outcome:1,notes:'',reason:''};
+  private yearScope=onServiceYearChange(()=>{this.page=1;this.load();});
   constructor(){const params=inject(ActivatedRoute).snapshot.queryParamMap;this.taskId=params.get('taskId') || '';if(this.taskId){this.status='';this.applied.status='';}this.destroy.onDestroy(()=>this.request?.unsubscribe());this.load();if(params.get('create')==='true' && params.get('studentId'))this.create(params.get('studentId')!);}
   isBusy(id:string){return this.busy().has(id);}
   apply(){this.taskId='';this.applied={status:this.status,type:this.type,unassigned:this.unassigned};this.page=1;this.message.set('');this.load();}

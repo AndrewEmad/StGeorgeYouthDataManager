@@ -179,3 +179,155 @@ This revision supersedes the earlier sidebar description. Existing historical ve
 - [x] Both production builds pass: Admin 366.32 kB and Servant 360.54 kB, below the 500 kB limit.
 - [x] Final browser gate: 105 distinct cases pass across Chromium/Firefox/WebKit, including unified workflows, eight widths plus landscape/reflow, session regressions, existing route coverage and visual states. The broad run passed 102 cases and exposed three missing-birthday drilldown failures. After preserving `birthMonth=0` through the list and service, all twelve affected drilldown/responsive cases pass (three previously failed plus nine repeats), including a known May group. Final portrait captures inspected and affected maintained baselines refreshed. Evidence is recorded separately in `unifiedPagesRevision` in `docs/verification-results.json`.
 - [ ] Publish the coordinated API and both clients. Runtime/ImageSharp, startup migrations and the Pages workflow remain unchanged.
+
+
+## Scrollable resource choices and compact filter actions (2026-10-13)
+
+| Finding | Change | Verification |
+|---|---|---|
+| Dropdowns require next/previous buttons | Shared searchable combobox appends lookup pages when its list scrolls; bounded list and existing table pagers | Both apps select and save later-page IDs; no dropdown page buttons |
+| Repeated scrolling or old search responses can replace options | One pending append, immediate cancellation, debounced query/version reset, stable ID deduplication and non-advancing-page termination | Pending-page repeated scrolls, out-of-order search and duplicate-row fixtures |
+| A failed later page removes usable choices | Preserve prior options; visible retry requests the same failed page and restores input focus | Additional-page failure/retry and failed/empty first pages |
+| Current owners disappear during paging/search | ID-bound selected-name cache and explicit current-option fallback; normalize the unassignment sentinel at the parent boundary | Existing off-page owner, search with no matches, clearing and actual unassign request |
+| Keyboard focus enters the scroll container in Firefox | Explicit negative list tabindex; combobox active descendant, arrows/Home/End/Enter, Escape and outside/focus-out handling; modal tab boundaries exclude negative-tabindex controls | All three browsers; repeated participant choices, dialog containment/restoration and existing Tab-cycle regression |
+| Filter labels are long and action buttons split or differ in height | Short apply/clear labels and one shared full-row, non-wrapping action group; consistent filter-button typography | Eight widths, two landscape sizes, 200% text, same-row/same-height/44px assertions; requests, history, reports, legacy filters and the Servant student list |
+| Dropdown/theme changes disturb responsive reports | Shared theme tokens, wrapping names, bounded scrolling and top-aligned open grids | Open-dialog Axe scans, no page-wide overflow, retained report visual states |
+
+- [x] Both production builds pass: Admin 368.11 kB, Servant 362.32 kB; below 500 kB.
+- [x] Core verification: 105 distinct cases pass across Chromium/Firefox/WebKit. The initial combined run passed 80 cases, then stopped on one WebKit geometry-measurement failure with 24 cases unexecuted. After reading both rectangles atomically once fonts are ready, all 35 WebKit cases pass (ten repeats, one corrected measurement and 24 remaining cases).
+- [x] A further 69 regression cases pass: 15 filter/workflow/export/print cases and 54 report visual cases. Sixty changed maintained report baselines updated; portrait button groups and dropdown captures inspected. Combined distinct passing coverage is 174 cases, recorded in `dropdownAndFilterActionsRevision` in `docs/verification-results.json`.
+- [ ] Publish both frontend clients to make the revision visible on the live site. No API/runtime/ImageSharp/startup-migration/Pages workflow changes are part of this revision.
+- [ ] Remove only this revision's temporary development probe outputs. Automatic approval review rejected the guarded deletion command with the stated reason `blocked by policy`; the ignored outputs remain under `5.FrontEnd/test-results`. Reusable tests and maintained baselines are needed files.
+
+
+## Global service-year filter — 2026-10-13
+
+The header in both applications now offers **عام الخدمة** and **الكل**. A year starts on the strict first Friday after September 12 and ends on the strict last Friday before September 12 of the following year. 2026–2027 is September 18, 2026 through September 10, 2027; Cairo's next midnight is the exclusive event boundary.
+
+The user explicitly selected complete current student/servant lists. People are not excluded because they were created in an earlier year. Meetings/attendance use meeting dates, calls/visits use event dates, tasks use due dates, requests use submission dates, and activity/audit history uses timestamps. Current roster statistics remain current. Authentication, notification settings, writes and background processing retain their complete operational scope.
+
+| Finding | Change | Verification |
+|---|---|---|
+| No common service-year selection | One shared accessible header selector and app/account-specific persisted state; same-app tab synchronization | Both apps, route transitions, reload, open draft retention and 8 widths across 3 engines |
+| Incorrect Friday/day boundaries would alter attendance and activity | Strict shared calendar rules, inclusive Cairo final date and exclusive next-day UTC instant | 2024/2025/2026 examples, September 12 Friday cases, timezone-independent client utility checks and real SQL boundary records |
+| Existing historical reads bypass ordinary EF filters | Scoped normal event queries plus explicit temporal predicates after archival-filter bypass; raw attendance SQL scoped too | Events, visits/participant credit, requests, tasks, raw attendance and group aggregates; archived histories and current rosters |
+| Different scope in summaries/export/print or cached concurrent reports | API-selected scope in all report reads, export queries, print queries, metadata and report coalescing keys | SQL reports/XLSX plus client export/print parameter parity |
+| “All” could silently retain a default month limit | Explicit `serviceYear=all` contract removes implicit month defaults; omitted parameter keeps old API defaults | All-history activity and attendance assertions; full report filter workflow checks |
+| Changing years could erase local period/drafts or display a stale request | Preserve explicit local dates and business forms; cancel superseded temporal reads and reset page state | Local report date filters survive year changes/reload; two-tab open call drafts remain intact |
+
+- [x] Both production builds pass: Admin 370.59 kB, Servant 364.90 kB; below 500 kB.
+- [x] Five utility checks and 30 distinct SQL integration tests pass. Five service-year cases additionally rerun after expanded visit/all/disjoint-period assertions.
+- [x] 144 distinct browser cases pass: 42 global-year cases, 33 existing filter-layout cases, and 69 report/workflow regressions (15 functional, 54 visual). The final 42-case rerun verifies local-period persistence and final header styling. Sixty-six retained report snapshots exercised, with updated baselines where needed.
+- [x] Cairo inclusive boundaries, role/actor scope, current roster preservation, archival history and command independence verified. No schema migration, runtime/ImageSharp upgrade, startup-migration removal or workflow change.
+- [ ] Publish the API and both frontend applications to make the feature available on the live site. The Pages workflow remains frontend-only.
+
+
+## Bulk student academic-year change — 2026-10-14
+
+The Admin student toolbar now includes **تغيير السنة الدراسية للمحددين** alongside bulk servant assignment. It uses the same cross-page selection, and accepts either an existing academic-year label or a new trimmed value (1–100 characters). This edits the student's academic-year field; the separate global service-year attendance/activity filter keeps its existing purpose.
+
+| Finding | Change | Verification |
+|---|---|---|
+| Academic-year changes required individual edits | One privileged batch endpoint and shared-theme dialog | Admin/Manager/Priest API tests; cross-page two-student browser save |
+| Bulk updates could overwrite stale or unrelated fields | Capture selected row versions; update only academic year/timestamp; return current data for explicit conflict review | Stale-row partial result, reviewed retry, legacy invalid phone/unrelated fields preserved |
+| Failures could lose selections or produce duplicate changes | Retain failed IDs and input, prevent duplicate submits, treat already-saved target value as a safe replay | Transport failure/retry, partial result, archived/missing rows, repeated request without duplicate edit history |
+| Changes need a reliable history | Save successful rows, per-student edit history and structured field audit in one owned transaction | Actor/name, reason/correlation, old/new academic-year values and enclosing rollback assertions |
+| Another bulk action increases mobile toolbar width | Wrap shared-theme action buttons; use the common accessible dialog with separate action spacing | 8 widths, 2 landscape sizes, 200% text reflow, 3 engines, Axe scans, Escape and result focus/visibility |
+
+- [x] Backend and both production frontend builds pass. Initial bundles: Admin 370.59 kB, Servant 364.90 kB; below 500 kB.
+- [x] Twelve SQL integration cases pass: 6 feature cases plus 6 existing workflow/import/archive regressions.
+- [x] Fifty-four browser cases pass: 12 new behavior, 33 responsive/accessibility, 9 existing selection/phone regressions. Six completed-operation focus/visibility cases rerun after the final focus adjustment.
+- [x] Desktop/portrait dialog captures inspected. No schema/runtime/ImageSharp/startup-migration/Pages workflow change.
+- [ ] Publish the API and Admin frontend to enable the action on the live site. The deployment workflow remains frontend-only.
+
+
+## Fixed academic-year choices and data normalization — 2026-10-14
+
+This revision supersedes the free-input academic-year control described above. All write controls share exactly **سنة اولى، سنة ثانية، سنة ثالثة، سنة رابعة، سنة خامسة، سنة سادسة، سنة سابعة، حديث التخرج**. Optional missing values remain supported. Existing read filters retain legacy choices until the database is normalized.
+
+| Finding | Change | Verification |
+|---|---|---|
+| Free-text years create inconsistent groups | Shared fixed options in Admin add/edit/bulk, both student-detail pages and Servant addition requests | Exact eight options checked at every write entry point in Chromium/Firefox/WebKit |
+| API/import callers could reintroduce spelling variants | Shared server canonicalization and validation on create/import/request/edit/bulk | Known aliases stored canonically; unsupported new values rejected |
+| Existing ambiguous values could block unrelated edits or be guessed incorrectly | Display current unknown grade for review; omit unchanged grade on save; preserve secondary-school and generic-graduate values | Both detail UIs and API unrelated-edit tests |
+| Existing students have inconsistent year spelling | Standalone preview-first SQL script for all students including archived, with explicit apply switch and unknown-value report | Real SQL preview leaves data unchanged; apply updates known values, preserves unrelated data, and writes audit/edit logs |
+| Repeated or concurrent normalization might duplicate history or overwrite edits | Immutable captured binary row-version, transaction, before/after history and idempotent target comparison | SQL apply twice produces no extra updates/history; preview snapshots use captured version bytes |
+| Dropdown change could affect existing batch behavior/layout | Retain shared theme, busy states, failed selections and conflict review | 45 bulk browser cases across three engines, eight widths, landscape/reflow and accessibility |
+
+- [x] Backend and both production frontend builds pass: Admin 370.59 kB, Servant 364.90 kB. Runtime/ImageSharp, automatic startup migrations and frontend-only Pages workflow unchanged.
+- [x] Seven utility cases, 27 SQL Server cases and 57 browser cases pass (91 distinct cases). Final mobile/desktop captures inspected. Evidence in `academicYearChoicesRevision` in `docs/verification-results.json`.
+- [ ] Publish the API and both frontend clients.
+- [ ] Review the preview from `docs/sql/normalize-student-academic-years.sql`, then set `@Apply=1` to save against the intended database. This script has only been applied to an isolated test database.
+
+
+## Reviewed graduate values and unknown academic year — 2026-10-14
+
+The user clarified that every graduate is represented as **حديث التخرج**, and **غير معروف** must remain an explicit selectable value. This supersedes the earlier conservative graduate mapping and extends the shared list to nine choices.
+
+| Reviewed input | Canonical value |
+|---|---|
+| خريجين، خريجة، خريج، اتخرجت 2025، حديثي التخرج | حديث التخرج |
+| غير معروف | غير معروف (no data/history change when already exact) |
+| سنة رابعه ( هيتخرج ٢٠٢٧ | سنة رابعة |
+
+- [x] Apply identical rules in the shared client helper, server validation/canonicalization and preview-first SQL script. All write dropdowns include غير معروف.
+- [x] Preserve other unresolved stages for explicit review; remove only supported future-graduation parenthetical notes.
+- [x] Eight utility cases and 35 SQL Server cases pass, covering the supplied values, API/import/request normalization, unchanged unknown values, audited/idempotent SQL, and existing bulk/import/archive behavior. Both production frontend builds pass within the 500 kB initial budget.
+- [x] Final browser gate: 57 cases pass across Chromium/Firefox/WebKit, including all nine write choices, saving غير معروف, eight widths, landscape/reflow and accessibility. Corrected an intermittent Firefox result-focus race by waiting for Angular rendering before focusing after dialog closure. Final portrait capture inspected. Total passing coverage: 100 distinct cases.
+- [ ] Publish API/both clients and separately review/apply the supplied SQL against the intended database. Runtime/ImageSharp/startup migrations/Pages workflow unchanged.
+
+
+## Approved areas and audited area normalization — 2026-10-14
+
+Use the user-approved 40 unique labels across all write controls. **المرج الجديده** maps to **المرج الجديدة** rather than producing duplicate options. Retain the supplied canonical spelling of every other approved area, including **اخرى**. Existing read filters retain unresolved legacy values until normalization/review.
+
+| Finding | Change | Verification |
+|---|---|---|
+| Free-text area fields create spelling variants | Shared fixed choices in Admin add/edit, both details pages and Servant addition request | Exact 40 options checked in all write entry points across 3 engines |
+| API/import/request callers could reintroduce variants | Same approved-label normalization on server/client/SQL, and validation of new values | Every approved label, common Arabic spelling variants, create/import/addition, and unknown rejection |
+| Distinct neighborhoods might be merged or unknown data erased | Exact normalized-name matching; preserve distinct names and leave unknown values reviewable | شبرا البلد versus شبرا مصر, unknown stage retained on unrelated edit, explicit اخرى selection/save |
+| Area changes need the same group workflow as academic years | Admin cross-page area action shares modal, selections and backend transaction/concurrency helper with the year endpoint | Privileged/assigned-user roles, missing/archived/stale outcomes, replay, review/retry, saving guards, failed-ID retention |
+| Area changes could overwrite unrelated history or fail partially | Update only Area/timestamp, with edit history and structured field audit in one operation transaction | Before/after values, actor/reason, unrelated academic year/phone/address/notes preserved and rollback |
+| Old database values differ from approved choices | Preview-first `docs/sql/normalize-student-areas.sql`, including archived students; unresolved-value report | All 40 canonical values plus aliases tested on real SQL Server; preview/read-only, audited apply and idempotent repeat |
+| Extra field action can widen the mobile toolbar | Wrap existing themed toolbar and reuse the common accessible dialog | Eight widths, landscape/reflow, no page overflow, reachable controls, Axe, focus restoration; portrait/desktop captures inspected |
+| Shared test data affected full-suite assertions | Give Identity race cases their own database, and archive preview its own test phone | Full 118-case SQL Server integration gate passes without product behavior changes |
+
+- [x] Backend and both production frontend builds pass: Admin 370.59 kB, Servant 364.90 kB, below 500 kB.
+- [x] Ten utilities, 118 SQL integration cases and 123 browser cases pass (251 distinct). Browser coverage includes 57 new area cases, 57 academic-year regressions and 9 selection/phone regressions. Evidence in `studentAreaRevision` in `docs/verification-results.json`.
+- [x] No schema/runtime/ImageSharp/startup-migration/Pages workflow change.
+- [ ] Publish API and both frontend clients.
+- [ ] Review the SQL preview (@Apply=0), then set @Apply=1 to save in the intended database. The script has only been applied to isolated test data.
+
+
+## Reviewed neighborhood aliases — 2026-10-14
+
+The following explicit mappings extend area normalization while retaining the same 40 dropdown choices. No fuzzy, substring or blanket city-name merge is applied.
+
+| Reviewed old value | Approved destination |
+|---|---|
+| شبرا المحطة | شبرا البلد |
+| شبرا الخيمة | شبرا البلد |
+| شبرا الخيمه | شبرا البلد |
+| ارض نوبار شبرا الخيمه | ارض نوبار |
+| المساكن | الوحدة |
+| الملف شبرا الخيمه | الملف |
+| الوحدة عند المصانع | الوحدة |
+| خلف الكنيسة | شبرا البلد |
+| شارع زكريا | شبرا البلد |
+| منية السيرج | اخرى |
+
+- [x] Identical mappings in client/server helpers and `docs/sql/normalize-student-areas.sql`. The two شبرا الخيمة spellings use a single SQL alias key.
+- [x] All supplied mappings verified through canonicalization and real SQL preview/apply/idempotent audit; API create/edit/addition/import and bulk aliases covered. Other unresolved values remain reviewable.
+- [x] Backend and both production frontend builds pass. Eleven utility, 34 distinct SQL and 12 browser cases pass (57 distinct); six bulk cases additionally rerun with المساكن → الوحدة. Existing responsive layouts retained; dropdown count remains 40.
+- [ ] Publish API/both clients and separately review/apply the updated SQL script against the intended database. Runtime/ImageSharp, automatic startup migrations and Pages workflow unchanged.
+
+
+## Unlisted area fallback to اخرى — 2026-10-14
+
+Per explicit user instruction, this supersedes preserving/rejecting unlisted nonempty area names. Approved names and reviewed aliases retain priority; all remaining nonempty names become **اخرى**. Empty/null area stays **غير مسجلة**. Omitted PATCH fields retain their existing meaning.
+
+- [x] Apply identical client/server fallback for create/edit/import/addition/bulk, including explicit re-submission of an unchanged old unlisted name. Keep field length validation and preserve unrelated fields.
+- [x] Edit dropdowns select اخرى for unlisted old values; remove obsolete Admin unknown-area review choice. Academic-year handling and the 40 approved area choices unchanged.
+- [x] Update preview-first SQL to include unlisted areas, including archived students, with transaction, row-version protection, audit/edit history and idempotent repeat. Empty areas remain missing.
+- [x] Backend/both frontend builds pass; 11 utilities, 70 SQL integration cases and 24 browser cases pass (105 distinct). One SQL case additionally rerun with an archived unlisted area. Evidence in `studentAreaFallbackRevision` in `docs/verification-results.json`.
+- [ ] Publish API/both clients and separately review/apply `docs/sql/normalize-student-areas.sql` to the intended database. No production data modified; runtime/ImageSharp/startup migrations/Pages workflow unchanged.

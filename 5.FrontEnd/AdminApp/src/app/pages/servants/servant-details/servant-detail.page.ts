@@ -1,3 +1,4 @@
+import {onServiceYearChange} from '@ydm/shared/core/service-year';
 import {ActivityHistoryComponent} from '@ydm/shared/pages/activity-history';
 import {apiError} from '@ydm/shared/core/api';
 import { Component, OnDestroy, OnInit } from '@angular/core';
@@ -34,6 +35,7 @@ import { VisitOutcomePipe } from '../../../shared/pipes/visit-outcome.pipe';
   styleUrls: ['./servant-detail.page.css'],
 })
 export class ServantDetailPage implements OnInit, OnDestroy {
+  private yearScope=onServiceYearChange(()=>{const id=this.route.snapshot.paramMap.get('id');if(id)this.reportsService.getServantPerformance(id).subscribe({next:p=>this.performance=p,error:e=>this.performanceError=apiError(e)});});
   servant: any = null;
   servantPhotoUrl: string | null = null;
   performance: any = null;

@@ -1,10 +1,11 @@
+import {onServiceYearChange} from '../core/service-year';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import { Component,DestroyRef,inject,signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient,HttpParams } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import {ActivatedRoute,Router,RouterLink} from '@angular/router';
-import {datetimeLocal,dateOnly} from '../core/utils';
+import {dateOnly} from '../core/utils';
 import {reportDefinitions,pastoralReports} from '../core/report-catalog';
 import { YDM_API,apiError,saveBlob,labels } from '../core/api';
 import {YDM_SESSION} from '../core/api';
@@ -25,7 +26,7 @@ interface Table {title:string;period:string;scope:string;columns:Column[];rows:R
       <!-- Only relevant thresholds are shown, so attendance filters remain simple. -->
       @if(['contact','pastoral-follow-up','approvals'].includes(report)){<label>{{report==='approvals' ? 'الطلب قديم بعد عدد أيام' : 'لا يوجد تواصل حديث خلال عدد أيام'}}<input class="form-input" type="number" min="0" max="36500" name="days" [(ngModel)]="draft.days" required /></label>}
       @if(report==='pastoral-follow-up'){<label>حد الغياب المتتالي (اجتماعات)<input class="form-input" type="number" min="1" max="365" name="absences" [(ngModel)]="draft.minConsecutiveAbsences" required /></label>}
-      <div class="ydm-toolbar"><button class="btn-primary" type="submit" [disabled]="loading() || exporting()">تطبيق الفلاتر</button><button class="btn-outline" type="button" (click)="reset()" [disabled]="loading()">مسح الفلاتر</button></div>
+      <div class="ydm-filter-actions"><button class="btn-primary" type="submit" [disabled]="loading() || exporting()">تطبيق</button><button class="btn-outline" type="button" (click)="reset()" [disabled]="loading()">مسح</button></div>
     </form>
     <p class="text-muted">{{dateMeaning()}}</p>
     @if(error()){<div class="ydm-notice text-error" role="alert">{{error()}} <button class="btn-outline" type="button" (click)="load()" [disabled]="loading()">إعادة المحاولة</button></div>}
@@ -47,6 +48,13 @@ export class ReportSuitePage {
   groups=['الحضور','خدمة الخدام والافتقاد','بيانات المخدومين','الطلبات'];
   private route=inject(ActivatedRoute);
   private router=inject(Router);
+  private yearScope=onServiceYearChange(()=>{const period=this.yearScope.period(),params=this.route.snapshot.queryParamMap;
+    if(!params.has('dateFrom') && !params.has('dateTo')){
+      const pristine=this.draft.dateFrom===this.applied.dateFrom && this.draft.dateTo===this.applied.dateTo;
+      if(pristine){this.draft.dateFrom=period?.dateFrom;this.draft.dateTo=period?.dateTo;}
+      this.applied={...this.applied,dateFrom:period?.dateFrom,dateTo:period?.dateTo};
+    }
+    this.applied.page=1;this.table.set(null);this.load();});
   constructor(){
     this.destroy.onDestroy(()=>this.request?.unsubscribe());
     this.http.get<string[]>(this.api+'/StudentQueries/areas').pipe(takeUntilDestroyed(this.destroy)).subscribe({next:r=>this.areas.set(r.filter(Boolean)),error:e=>this.error.set(apiError(e))});
@@ -62,7 +70,7 @@ export class ReportSuitePage {
       this.applied={...this.draft,page:1,pageSize:25};this.load();
     });
   }
-  private defaults(key:string):Filter{const today=datetimeLocal(new Date()).slice(0,10);return {days:14,minConsecutiveAbsences:3,search:'',area:'',academicYear:'',status:'',issue:'',type:'',servantId:'',...(pastoralReports.has(key) ? {dateFrom:today.slice(0,8)+'01',dateTo:today} : {})};}
+  private defaults(key:string):Filter{return {days:14,minConsecutiveAbsences:3,search:'',area:'',academicYear:'',status:'',issue:'',type:'',servantId:'',...(this.yearScope.period() || {})};}
   reportName(key:string){return this.reports.find(r=>r.key===key)?.name || 'التقارير';}
   reportDescription(key:string){return this.reports.find(r=>r.key===key)?.description || '';}
   studentFilters(){return !this.report.startsWith('servant-attendance') && this.report!=='servant-service-summary';}

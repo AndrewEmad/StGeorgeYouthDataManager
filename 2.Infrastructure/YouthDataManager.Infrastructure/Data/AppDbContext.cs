@@ -11,6 +11,11 @@ namespace YouthDataManager.Infrastructure.Data;
 public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>, IUnitOfWork
 {
     private readonly ICallerContext? _caller;
+    public bool HasServiceYear => _caller?.SelectedServiceYear != null;
+    public DateTime ServiceYearStart => _caller?.SelectedServiceYear?.UtcStart ?? DateTime.MinValue;
+    public DateTime ServiceYearEnd => _caller?.SelectedServiceYear?.UtcEnd ?? DateTime.MaxValue;
+    public DateTime ServiceYearFirstDate => _caller?.SelectedServiceYear?.Start ?? DateTime.MinValue;
+    public DateTime ServiceYearNextDate => _caller?.SelectedServiceYear?.LastDay.AddDays(1) ?? DateTime.MaxValue;
     public CancellationToken RequestCancellation => _caller?.CancellationToken ?? default;
     public AppDbContext(DbContextOptions<AppDbContext> options, ICallerContext? caller = null)
         : base(options)
@@ -37,6 +42,12 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
         base.OnModelCreating(builder);
         
         builder.HasDefaultSchema("dbo");
+        builder.Entity<MeetingSession>().HasQueryFilter(x=>(!HasServiceYear || (x.Date>=ServiceYearFirstDate && x.Date<ServiceYearNextDate)));
+        builder.Entity<FollowUpTask>().HasQueryFilter(x=>(!HasServiceYear || (x.DueAt>=ServiceYearStart && x.DueAt<ServiceYearEnd)));
+        builder.Entity<AuditEntry>().HasQueryFilter(x=>(!HasServiceYear || (x.Timestamp>=ServiceYearStart && x.Timestamp<ServiceYearEnd)));
+        builder.Entity<ActivityLog>().HasQueryFilter(x=>(!HasServiceYear || (x.Timestamp>=ServiceYearStart && x.Timestamp<ServiceYearEnd)));
+        builder.Entity<StudentAdditionRequest>().HasQueryFilter(x=>(!HasServiceYear || (x.RequestedAt>=ServiceYearStart && x.RequestedAt<ServiceYearEnd)));
+        builder.Entity<ServantAttendance>().HasQueryFilter(x=>(!HasServiceYear || (x.Date>=ServiceYearFirstDate && x.Date<ServiceYearNextDate)));
         builder.Entity<RefreshSession>().Property(x => x.TokenHash).HasMaxLength(64);
         builder.Entity<RefreshSession>().HasIndex(x => x.TokenHash).IsUnique();
         builder.Entity<RefreshSession>().HasIndex(x => x.UserId);
@@ -86,13 +97,13 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
         builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
         // Current-roster reads use matching filters on required navigations.
         // Authorized histories, actor reports and backfills explicitly ignore these filters.
-        builder.Entity<CallLog>().HasQueryFilter(x=>!x.Student.IsDeleted);
-        builder.Entity<HomeVisit>().HasQueryFilter(x=>!x.Student.IsDeleted);
+        builder.Entity<CallLog>().HasQueryFilter(x=>!x.Student.IsDeleted && (!HasServiceYear || (x.CallDate>=ServiceYearStart && x.CallDate<ServiceYearEnd)));
+        builder.Entity<HomeVisit>().HasQueryFilter(x=>!x.Student.IsDeleted && (!HasServiceYear || (x.VisitDate>=ServiceYearStart && x.VisitDate<ServiceYearEnd)));
         builder.Entity<HomeVisitParticipant>().HasQueryFilter(x=>!x.HomeVisit.Student.IsDeleted);
-        builder.Entity<StudentAttendance>().HasQueryFilter(x=>!x.Student.IsDeleted);
-        builder.Entity<StudentAssignmentRequest>().HasQueryFilter(x=>!x.Student.IsDeleted);
-        builder.Entity<StudentRemovalRequest>().HasQueryFilter(x=>!x.Student.IsDeleted);
-        builder.Entity<StudentEditLog>().HasQueryFilter(x=>!x.Student.IsDeleted);
+        builder.Entity<StudentAttendance>().HasQueryFilter(x=>!x.Student.IsDeleted && (!HasServiceYear || (x.Date>=ServiceYearFirstDate && x.Date<ServiceYearNextDate)));
+        builder.Entity<StudentAssignmentRequest>().HasQueryFilter(x=>!x.Student.IsDeleted && (!HasServiceYear || (x.RequestedAt>=ServiceYearStart && x.RequestedAt<ServiceYearEnd)));
+        builder.Entity<StudentRemovalRequest>().HasQueryFilter(x=>!x.Student.IsDeleted && (!HasServiceYear || (x.RequestedAt>=ServiceYearStart && x.RequestedAt<ServiceYearEnd)));
+        builder.Entity<StudentEditLog>().HasQueryFilter(x=>!x.Student.IsDeleted && (!HasServiceYear || (x.UpdatedAt>=ServiceYearStart && x.UpdatedAt<ServiceYearEnd)));
 
 
         var utcConverter=new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime,DateTime>(v=>DateTime.SpecifyKind(v,DateTimeKind.Utc),v=>DateTime.SpecifyKind(v,DateTimeKind.Utc));

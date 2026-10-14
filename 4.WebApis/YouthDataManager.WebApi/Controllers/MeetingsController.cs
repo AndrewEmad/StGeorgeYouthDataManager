@@ -9,7 +9,7 @@ using YouthDataManager.WebApi.Authorization;
 namespace YouthDataManager.WebApi.Controllers;
 
 [ApiController, Route("api/meetings"), Authorize(Roles=RolePolicies.CanRecordStudentAttendance)]
-public sealed class MeetingsController(IMeetingService service,IApplicationStore store,ResourceAccess access,IConfiguration configuration) : ControllerBase
+public sealed class MeetingsController(IMeetingService service,IApplicationStore store,ResourceAccess access,IConfiguration configuration,ICallerContext caller) : ControllerBase
 {
     [HttpGet("settings")]
     public async Task<IActionResult> Settings(CancellationToken ct) => Ok(await store.Query<MeetingConfiguration>(false).SingleOrDefaultAsync(s=>s.Id==1,ct) ?? new MeetingConfiguration {MeetingDay=configuration.GetValue("Attendance:MeetingDay",5),ReportWeekStart=configuration.GetValue("Reports:WeekStart",5)});
@@ -28,6 +28,7 @@ public sealed class MeetingsController(IMeetingService service,IApplicationStore
         var settings=await store.Query<MeetingConfiguration>(false).SingleOrDefaultAsync(s=>s.Id==1,ct);
         var day=settings?.MeetingDay ?? configuration.GetValue("Attendance:MeetingDay",5);var today=BusinessTime.LocalNow.Date;
         var first=today.AddDays((day-(int)today.DayOfWeek+7)%7);var dates=Enumerable.Range(0,12).Select(n=>first.AddDays(n*7)).ToArray();
+        if(caller.SelectedServiceYear is { } year)dates=dates.Where(d=>d>=year.Start && d<=year.LastDay).ToArray();
         var existing=await store.Query<MeetingSession>(false).Where(m=>dates.Contains(m.Date)).ToListAsync(ct);
         return Ok(dates.Select(d=>new {Date=d,Session=existing.SingleOrDefault(m=>m.Date==d)}));
     }

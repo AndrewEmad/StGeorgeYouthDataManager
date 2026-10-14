@@ -1,3 +1,4 @@
+using YouthDataManager.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using YouthDataManager.Domain.Entities;
 using YouthDataManager.Domain.Enums;
@@ -21,7 +22,7 @@ public partial class ReportDataProvider
         var visits=Visits.Where(v=>(!start.HasValue || v.VisitDate>=start) && (!end.HasValue || v.VisitDate<end));
         // A visit belongs to its recorder and distinct companions, including legacy visits with no companions.
         var credits=visits.Select(v=>new ServiceVisitCredit {VisitId=v.Id,StudentId=v.StudentId,ActorId=v.ServantId,Outcome=v.VisitOutcome})
-            .Concat(from p in _context.HomeVisitParticipants.IgnoreQueryFilters() join v in visits on p.HomeVisitId equals v.Id
+            .Concat(from p in _context.HomeVisitParticipants.IgnoreQueryFilters().ForServiceYear(_context) join v in visits on p.HomeVisitId equals v.Id
                 select new ServiceVisitCredit {VisitId=v.Id,StudentId=v.StudentId,ActorId=p.ServantId,Outcome=v.VisitOutcome}).Distinct();
         var callGroups=calls.GroupBy(c=>c.ServantId).Select(g=>new {Id=g.Key,Total=g.Count(),Answered=g.Count(c=>c.CallStatus==CallStatus.Answered),NotAnswered=g.Count(c=>c.CallStatus==CallStatus.NotAnswered),Busy=g.Count(c=>c.CallStatus==CallStatus.Busy),SwitchedOff=g.Count(c=>c.CallStatus==CallStatus.SwitchedOff),WrongNumber=g.Count(c=>c.CallStatus==CallStatus.WrongNumber)});
         var visitGroups=credits.GroupBy(v=>v.ActorId).Select(g=>new {Id=g.Key,Total=g.Count(),Successful=g.Count(v=>v.Outcome==VisitOutcome.Successful),NotAtHome=g.Count(v=>v.Outcome==VisitOutcome.NotAtHome),Refused=g.Count(v=>v.Outcome==VisitOutcome.RefusedVisit),Postponed=g.Count(v=>v.Outcome==VisitOutcome.Postponed)});
@@ -30,14 +31,14 @@ public partial class ReportDataProvider
         var contactGroups=contacts.GroupBy(c=>c.ActorId).Select(g=>new {Id=g.Key,Attempted=g.Select(c=>c.StudentId).Distinct().Count(),Reached=g.Where(c=>c.Successful).Select(c=>c.StudentId).Distinct().Count()});
         var attendance=AttendanceEntries(f,"Servant",true).GroupBy(r=>r.PersonId).Select(g=>new {Id=g.Key,Eligible=g.Count(),Present=g.Count(r=>r.Present)});
         var assignments=Roster.Where(s=>s.ServantId!=null).GroupBy(s=>s.ServantId).Select(g=>new {Id=g.Key,Count=g.Count()});
-        var tasks=_context.Set<FollowUpTask>().AsNoTracking().Where(t=>t.AssigneeId!=null).GroupBy(t=>t.AssigneeId)
+        var tasks=_context.Set<FollowUpTask>().ForServiceYear(_context).AsNoTracking().Where(t=>t.AssigneeId!=null).GroupBy(t=>t.AssigneeId)
             .Select(g=>new {Id=g.Key,Open=g.Count(t=>t.Status=="Open"),Overdue=g.Count(t=>t.Status=="Open" && t.DueAt<now)});
         var roleIds=_context.Roles.Where(r=>r.Name=="Servant" || r.Name=="Secretary" || r.Name=="Manager").Select(r=>r.Id);
         // Select actor IDs before the aggregates instead of correlating aggregate subqueries per person.
         var actorIds=_context.Users.Where(u=>u.IsActive && _context.UserRoles.Any(r=>r.UserId==u.Id && roleIds.Contains(r.RoleId))).Select(u=>u.Id)
             .Union(calls.Select(c=>c.ServantId)).Union(credits.Select(v=>v.ActorId)).Union(AttendanceEntries(f,"Servant",true).Select(r=>r.PersonId))
             .Union(Roster.Where(s=>s.ServantId!=null).Select(s=>s.ServantId!.Value))
-            .Union(_context.Set<FollowUpTask>().Where(t=>t.Status=="Open" && t.AssigneeId!=null).Select(t=>t.AssigneeId!.Value));
+            .Union(_context.Set<FollowUpTask>().ForServiceYear(_context).Where(t=>t.Status=="Open" && t.AssigneeId!=null).Select(t=>t.AssigneeId!.Value));
         var people=_context.Users.AsNoTracking().Where(u=>actorIds.Contains(u.Id));
         if(f.ServantId.HasValue)people=people.Where(u=>u.Id==f.ServantId);
         if(!string.IsNullOrWhiteSpace(f.Search)){var term=ArabicNormalizer.Normalize(f.Search.Trim());people=people.Where(u=>u.NormalizedFullName.Contains(term) || u.FullName.Contains(f.Search.Trim()));}
@@ -81,16 +82,16 @@ public partial class ReportDataProvider
     {
         if(f.Status!=null || f.Type!=null)throw new DomainValidationException("Invalid pastoral filter.");
         var now=_caller.UtcNow;var roster=SuiteRoster(f);
-        var asOf=f.DateTo!.Value.Date;var end=BusinessTime.UtcStart(asOf.AddDays(1));var cutoff=BusinessTime.UtcStart(asOf.AddDays(-f.Days));
+        var asOf=f.DateTo!.Value.Date;if(_caller.SelectedServiceYear is { } year && asOf>year.AsOf(now))asOf=year.AsOf(now);var end=BusinessTime.UtcStart(asOf.AddDays(1));var cutoff=BusinessTime.UtcStart(asOf.AddDays(-f.Days));
         // Seek the person's indexed history rather than repeatedly aggregating every group's history.
         // Current ownership selects the roster; historical meeting ownership never changes eligibility.
-        var entries=from r in _context.Set<MeetingRosterEntry>().AsNoTracking() join m in _context.Set<MeetingSession>().AsNoTracking() on r.SessionId equals m.Id
+        var entries=from r in _context.Set<MeetingRosterEntry>().AsNoTracking() join m in _context.Set<MeetingSession>().ForServiceYear(_context).AsNoTracking() on r.SessionId equals m.Id
             where r.Kind=="Student" && m.Status=="Finalized" && m.RosterKnown && m.Date<=asOf
             select new {r.PersonId,r.Present,m.Date};
         var periodEntries=entries.Where(r=>r.Date>=f.DateFrom!.Value.Date);
         var contacts=Calls.Where(c=>c.CallDate<end).Select(c=>new ContactEvent {StudentId=c.StudentId,At=c.CallDate,Successful=c.CallStatus==CallStatus.Answered})
             .Concat(Visits.Where(v=>v.VisitDate<end).Select(v=>new ContactEvent {StudentId=v.StudentId,At=v.VisitDate,Successful=v.VisitOutcome==VisitOutcome.Successful}));
-        var tasks=_context.Set<FollowUpTask>().AsNoTracking().Where(t=>t.Status=="Open");
+        var tasks=_context.Set<FollowUpTask>().ForServiceYear(_context).AsNoTracking().Where(t=>t.Status=="Open");
         var measurements=roster.Select(s=>new {
             s.Id,s.FullName,s.ServantId,Owner=s.Servant==null ? "غير موزع على خادم" : s.Servant.FullName,s.Phone,
             Eligible=periodEntries.Count(r=>r.PersonId==s.Id),Present=periodEntries.Count(r=>r.PersonId==s.Id && r.Present),

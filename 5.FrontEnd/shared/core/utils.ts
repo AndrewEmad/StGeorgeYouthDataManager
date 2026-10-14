@@ -70,3 +70,11 @@ export function parseCsv(text: string): { values: string[]; line: number }[] {
 export function auditReasonHeaders(reason:string):Record<string,string> {
   return {'X-Audit-Reason':encodeURIComponent(reason),'X-Audit-Reason-Encoding':'uri'};
 }
+
+export function serviceYearPeriod(year:number):{dateFrom:string;dateTo:string} {
+  if(!Number.isInteger(year) || year<1900 || year>9997)throw new RangeError('Invalid service year');
+  const start=new Date(Date.UTC(year,8,12)),end=new Date(Date.UTC(year+1,8,12));
+  const after=(5-start.getUTCDay()+7)%7,before=(end.getUTCDay()-5+7)%7;
+  start.setUTCDate(start.getUTCDate()+(after || 7));end.setUTCDate(end.getUTCDate()-(before || 7));
+  return {dateFrom:start.toISOString().slice(0,10),dateTo:end.toISOString().slice(0,10)};
+}

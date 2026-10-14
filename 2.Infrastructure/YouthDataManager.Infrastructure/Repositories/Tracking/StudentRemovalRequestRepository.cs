@@ -13,18 +13,18 @@ public class StudentRemovalRequestRepository : IStudentRemovalRequestRepository
     public StudentRemovalRequestRepository(AppDbContext context) => _context = context;
 
     public async Task<StudentRemovalRequest?> GetById(Guid id) =>
-        await _context.StudentRemovalRequests.IgnoreQueryFilters()
+        await _context.StudentRemovalRequests.IgnoreQueryFilters().ForServiceYear(_context)
             .Include(r => r.Student)
             .FirstOrDefaultAsync(r => r.Id == id);
 
     public async Task<StudentRemovalRequest?> GetPendingByStudentAndUser(Guid studentId, Guid requestedByUserId) =>
-        await _context.StudentRemovalRequests.IgnoreQueryFilters()
+        await _context.StudentRemovalRequests.IgnoreQueryFilters().ForServiceYear(_context)
             .Include(r => r.Student)
             .Include(r => r.RequestedByUser)
             .FirstOrDefaultAsync(r => r.StudentId == studentId && r.RequestedByUserId == requestedByUserId && r.Status == RemovalRequestStatus.Pending);
 
     public async Task<IEnumerable<StudentRemovalRequest>> GetPendingRequests() =>
-        await _context.StudentRemovalRequests.IgnoreQueryFilters()
+        await _context.StudentRemovalRequests.IgnoreQueryFilters().ForServiceYear(_context)
             .Include(r => r.Student)
             .Include(r => r.RequestedByUser)
             .Where(r => r.Status == RemovalRequestStatus.Pending)
@@ -32,7 +32,7 @@ public class StudentRemovalRequestRepository : IStudentRemovalRequestRepository
             .ToListAsync();
 
     public async Task<IEnumerable<StudentRemovalRequest>> GetByRequestedByUser(Guid userId) =>
-        await _context.StudentRemovalRequests.IgnoreQueryFilters()
+        await _context.StudentRemovalRequests.IgnoreQueryFilters().ForServiceYear(_context)
             .Include(r => r.Student)
             .Include(r => r.RequestedByUser)
             .Where(r => r.RequestedByUserId == userId)

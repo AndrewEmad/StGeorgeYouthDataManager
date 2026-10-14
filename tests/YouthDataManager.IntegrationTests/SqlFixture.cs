@@ -13,6 +13,8 @@ namespace YouthDataManager.IntegrationTests;
 
 public sealed class TestCaller : ICallerContext
 {
+    public ServiceYear? SelectedServiceYear { get; set; }
+    public bool AllServiceYears { get; set; }
     public DateTime UtcNow { get; set; } = DateTime.UtcNow;
     public Guid? UserId { get; set; }
     public bool IsPrivileged { get; set; } = true;

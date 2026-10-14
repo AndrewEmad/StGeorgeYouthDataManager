@@ -1,3 +1,4 @@
+import {onServiceYearChange} from '@ydm/shared/core/service-year';
 import { Component, OnInit, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ReportsService } from '../../services/reports.service';
@@ -16,6 +17,7 @@ import { DateFormatPipe } from '../../shared/pipes/date-format.pipe';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StatsComponent implements OnInit {
+  private yearScope=onServiceYearChange(()=>{this.loading.set(false);this.loadStats();});
   private reportsService = inject(ReportsService);
   private usersService = inject(UsersService);
   private router = inject(Router);

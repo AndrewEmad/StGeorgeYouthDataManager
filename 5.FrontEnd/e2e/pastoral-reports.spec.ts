@@ -27,7 +27,7 @@ for(const viewport of [...[320,360,390,430,768,1024,1440,1920].map(width=>({widt
  expect((await noOverflow(page)).scroll).toBeLessThanOrEqual(viewport.width+1);
  for(const key of keys){
   await page.goto('/admin/#/dashboard/report-suite?report='+key);await expect(page.locator('main h1')).toHaveText(definitions[key].title);await expect(page.getByText('جارٍ تحميل النتائج…')).not.toBeVisible();
-  await expect(page.getByLabel('من تاريخ',{exact:true})).toHaveValue('2026-10-01');await expect(page.getByLabel('إلى تاريخ (شامل)',{exact:true})).toHaveValue('2026-10-12');
+  await expect(page.getByRole('combobox',{name:'عام الخدمة',exact:true})).toHaveValue('');await expect(page.getByLabel('من تاريخ',{exact:true})).toHaveValue('');await expect(page.getByLabel('إلى تاريخ (شامل)',{exact:true})).toHaveValue('');
   expect((await noOverflow(page)).scroll).toBeLessThanOrEqual(viewport.width+1);
   const closeNav=page.getByRole('button',{name:'القائمة',exact:true});if(viewport.width<=768){await closeNav.click();const drawer=page.getByRole('dialog');await expect(drawer).toBeVisible();await page.keyboard.press('Escape');await expect(drawer).not.toBeVisible();}
   if(viewport.width===390 || viewport.width===1440)await expect(page).toHaveScreenshot(`${key}-${viewport.width}.png`,{fullPage:true,animations:'disabled',maxDiffPixelRatio:.015});
@@ -60,7 +60,7 @@ test('new report exports and print retain applied filters and invalid absence li
   await page.getByRole('button',{name:'طباعة كل النتائج',exact:true}).click();await expect.poll(()=>urls.some(u=>u.includes(key) && u.includes('full=true'))).toBeTruthy();await page.evaluate(()=>dispatchEvent(new Event('afterprint')));
   const exported=urls.filter(u=>u.includes(key+'/export') || u.includes(key+'?') && u.includes('full=true'));expect(exported).toHaveLength(3);for(const u of exported){const p=new URL(u).searchParams;expect(p.get('dateFrom')).toBe('2026-10-01');expect(p.get('dateTo')).toBe('2026-10-12');expect(p.get('servantId')).toBe(owner);}
  }
- await page.goto('/admin/#/dashboard/report-suite?report=pastoral-follow-up');await expect(page.getByText('جارٍ تحميل النتائج…')).not.toBeVisible();const count=urls.length;await page.getByLabel('حد الغياب المتتالي (اجتماعات)',{exact:true}).fill('0');await page.getByRole('button',{name:'تطبيق الفلاتر',exact:true}).click();expect(urls.length).toBe(count);
+ await page.goto('/admin/#/dashboard/report-suite?report=pastoral-follow-up');await expect(page.getByText('جارٍ تحميل النتائج…')).not.toBeVisible();const count=urls.length;await page.getByLabel('حد الغياب المتتالي (اجتماعات)',{exact:true}).fill('0');await page.getByRole('button',{name:'تطبيق',exact:true}).click();expect(urls.length).toBe(count);
 });
 
 test('new reports have honest empty and failed states and are unavailable in the servant app',async({page,context})=>{
@@ -73,7 +73,7 @@ test('new reports have honest empty and failed states and are unavailable in the
 test('applying report filters fetches once and survives refresh and returning from details',async({page,context})=>{
  await authenticate(context,'admin');await reportFixtures(context);const requests:string[]=[];page.on('request',r=>{if(r.url().includes('/reports/suite/pastoral-follow-up?'))requests.push(r.url());});
  await page.goto('/admin/#/dashboard/report-suite?report=pastoral-follow-up');await expect(page.getByText('جارٍ تحميل النتائج…')).not.toBeVisible();const before=requests.length;
- await page.getByLabel('من تاريخ',{exact:true}).fill('2026-09-01');await page.getByLabel('حد الغياب المتتالي (اجتماعات)',{exact:true}).fill('4');await page.getByRole('button',{name:'تطبيق الفلاتر',exact:true}).click();await expect(page).toHaveURL(/dateFrom=2026-09-01/);await expect(page.getByText('جارٍ تحميل النتائج…')).not.toBeVisible();expect(requests.length-before).toBe(1);
+ await page.getByLabel('من تاريخ',{exact:true}).fill('2026-09-01');await page.getByLabel('حد الغياب المتتالي (اجتماعات)',{exact:true}).fill('4');await page.getByRole('button',{name:'تطبيق',exact:true}).click();await expect(page).toHaveURL(/dateFrom=2026-09-01/);await expect(page.getByText('جارٍ تحميل النتائج…')).not.toBeVisible();expect(requests.length-before).toBe(1);
  await page.reload();await expect(page.getByLabel('من تاريخ',{exact:true})).toHaveValue('2026-09-01');await expect(page.getByLabel('حد الغياب المتتالي (اجتماعات)',{exact:true})).toHaveValue('4');
  await page.setViewportSize({width:1440,height:900});await page.locator('.ydm-table tbody tr').first().getByRole('link',{name:longName,exact:true}).first().click();await expect(page).toHaveURL(new RegExp('students/'+id));await page.goBack();await expect(page.getByLabel('من تاريخ',{exact:true})).toHaveValue('2026-09-01');await expect(page.getByLabel('حد الغياب المتتالي (اجتماعات)',{exact:true})).toHaveValue('4');
 });

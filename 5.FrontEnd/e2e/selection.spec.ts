@@ -22,8 +22,8 @@ test('bulk partial assignment retains only failed choices for retry',async({page
  let requests=0;await context.route('**/api/StudentCommands/bulk-assignment',route=>{requests++;const submitted=route.request().postDataJSON();expect(submitted.ids.sort()).toEqual([id,second].sort());return route.fulfill({json:{outcomes:[{studentId:id,success:true},{studentId:second,success:false,error:'راجع الإسناد'}]}});});
  await page.goto('/admin/#/dashboard/students');await page.getByRole('checkbox',{name:'تحديد مخدوم أول',exact:true}).check();
  await page.getByRole('button',{name:'التالي',exact:true}).last().click();await page.getByRole('checkbox',{name:'تحديد مخدوم ثان',exact:true}).check();
- await page.getByRole('button',{name:'تخصيص المحددين لخادم'}).click();const dialog=page.getByRole('dialog');await dialog.getByLabel('المسؤول',{exact:true}).selectOption(owner);
- await dialog.getByRole('button',{name:'تأكيد التخصيص',exact:true}).click();await expect(page.getByText('1 مخدوم محدد')).toBeVisible();expect(requests).toBe(1);await expect(dialog).toBeVisible();
+ await page.getByRole('button',{name:'تخصيص المحددين لخادم'}).click();const dialog=page.getByRole('dialog');await dialog.getByRole('combobox',{name:'المسؤول',exact:true}).click();await dialog.getByRole('option',{name:student.fullName,exact:true}).click();
+ await dialog.getByRole('button',{name:'تأكيد التخصيص',exact:true}).click();await expect(page.getByText('1 مخدوم محدد',{exact:true})).toBeVisible();expect(requests).toBe(1);await expect(dialog).toBeVisible();
 });
 test('phone actions normalize both fields once and preserve international codes',async({page,context})=>{
  await authenticate(context,'admin');await fixtures(context);await page.goto(`/admin/#/dashboard/students/${id}`);

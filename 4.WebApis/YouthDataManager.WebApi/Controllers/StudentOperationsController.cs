@@ -68,6 +68,19 @@ public sealed class StudentOperationsController(IApplicationStore store,IStudent
     {
         var r=await commands.UnassignFromServant(id);return r.Status==ServiceResultStatus.Success ? Ok() : BadRequest(r);
     }
+    [HttpPost("bulk-area")]
+    public async Task<IActionResult> Area([FromBody] BulkAreaRequest batch)
+    {
+        var result=await commands.UpdateAreas(batch);
+        return result.Status==ServiceResultStatus.Success ? Ok(result.Data) : result.Errors.Any(e=>e.Code=="Forbidden") ? Forbid() : BadRequest(result);
+    }
+    [HttpPost("bulk-academic-year")]
+    public async Task<IActionResult> AcademicYear([FromBody] BulkAcademicYearRequest batch)
+    {
+        var result = await commands.UpdateAcademicYears(batch);
+        if (result.Status == ServiceResultStatus.Success) return Ok(result.Data);
+        return result.Errors.Any(e => e.Code == "Forbidden") ? Forbid() : BadRequest(result);
+    }
     [HttpPost("{id:guid}/restore")]
     public async Task<IActionResult> Restore(Guid id,CancellationToken ct)
     {

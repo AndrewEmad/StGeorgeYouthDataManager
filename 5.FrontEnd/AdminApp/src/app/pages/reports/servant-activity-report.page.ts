@@ -1,3 +1,4 @@
+import {onServiceYearChange} from '@ydm/shared/core/service-year';
 import {Subscription,map} from 'rxjs';
 import {FormsModule} from '@angular/forms';
 import {Router,RouterLink} from '@angular/router';
@@ -20,6 +21,7 @@ import { AdvancedFilterConfig, AdvancedFilterModel } from '../../shared/componen
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ServantActivityReportPage implements OnInit {
+  private yearScope=onServiceYearChange(()=>{this.page.set(1);this.loadData();});
   private request?:Subscription;ngOnDestroy(){this.request?.unsubscribe();}
 
   private route=inject(ActivatedRoute);private router=inject(Router);period=signal('custom');

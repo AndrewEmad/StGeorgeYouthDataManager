@@ -1,9 +1,9 @@
 <ng-template #selectAllHeader>
-  <label class="ydm-check-target"><input type="checkbox" [checked]="allFilteredSelected" [indeterminate]="pageSelectionIndeterminate" [disabled]="loading || bulkAssignSaving" aria-label="تحديد الصفحة الحالية" (change)="selectAllFiltered()" title="تحديد الصفحة الحالية" class="col-checkbox-input" /></label>
+  <label class="ydm-check-target"><input type="checkbox" [checked]="allFilteredSelected" [indeterminate]="pageSelectionIndeterminate" [disabled]="loading || bulkSelectionSaving" aria-label="تحديد الصفحة الحالية" (change)="selectAllFiltered()" title="تحديد الصفحة الحالية" class="col-checkbox-input" /></label>
 </ng-template>
 <ng-template #rowCheckbox let-row>
   <label class="ydm-check-target" (click)="$event.stopPropagation()">
-    <input type="checkbox" [checked]="isSelected(row)" (change)="toggleSelection(row)" [attr.aria-label]="'تحديد '+row.fullName" class="col-checkbox-input" />
+    <input type="checkbox" [checked]="isSelected(row)" [disabled]="loading || bulkSelectionSaving" (change)="toggleSelection(row)" [attr.aria-label]="'تحديد '+row.fullName" class="col-checkbox-input" />
   </label>
 </ng-template>
 <ng-template #servantNameCell let-row>
@@ -23,7 +23,7 @@
 </ng-template>
 
 <div class="animate-slide">
-  @if(formMessage){<p class="ydm-notice" role="status">{{formMessage}} @if(photoRetry){<button class="btn-outline" type="button" (click)="retryPhoto()" [disabled]="photoRetryBusy">إعادة رفع الصورة فقط</button>}</p>}
+  @if(formMessage){<p #bulkResultStatus class="ydm-notice" role="status" tabindex="-1">{{formMessage}} @if(photoRetry){<button class="btn-outline" type="button" (click)="retryPhoto()" [disabled]="photoRetryBusy">إعادة رفع الصورة فقط</button>}</p>}
   @if(listError){<p class="ydm-notice text-error" role="alert">{{listError}} <button class="btn-outline" type="button" (click)="loadData()">إعادة المحاولة</button></p>}
 
   <app-content-header title="إدارة المخدومين" subtitle="عرض وتوزيع المخدومين على الخدام">
@@ -98,7 +98,7 @@
       </app-form-field> -->
     </div>
     <div class="filters-actions">
-      <button type="button" class="btn-outline sm" (click)="clearFilters()">مسح خيارات البحث</button>
+      <button type="button" class="btn-outline sm" (click)="clearFilters()">مسح</button>
       <span class="filter-count">{{ totalCount }} مخدوم</span>
     </div>
   </app-filters-bar>
@@ -106,11 +106,13 @@
   @if (selectedStudentIds.size > 0) {
   <div class="bulk-actions">
     <span class="selected-count">{{ selectedStudentIds.size }} مخدوم محدد</span>
-    <button type="button" class="btn-outline" (click)="clearSelection()" [disabled]="bulkAssignSaving">مسح الاختيارات</button>
-    <button type="button" class="btn-primary" (click)="openBulkAssignModal()">
+    <button type="button" class="btn-outline" (click)="clearSelection()" [disabled]="bulkSelectionSaving">مسح الاختيارات</button>
+    <button type="button" class="btn-primary" (click)="openBulkAssignModal()" [disabled]="loading || bulkSelectionSaving">
       <span class="material-icons" aria-hidden="true">group_work</span>
       تخصيص المحددين لخادم
     </button>
+    <button type="button" class="btn-primary" (click)="openBulkYearModal('area')" [disabled]="loading || bulkSelectionSaving"><span class="material-icons" aria-hidden="true">location_on</span>تغيير المنطقة للمحددين</button>
+    <button type="button" class="btn-primary" (click)="openBulkYearModal()" [disabled]="loading || bulkSelectionSaving"><span class="material-icons" aria-hidden="true">school</span>تغيير السنة الدراسية للمحددين</button>
   </div>
   }
 
@@ -179,7 +181,7 @@
       <div class="form-row">
         <div class="form-group">
           <label for="ydm-student-list-admin-4">المنطقة</label>
-          <input id="ydm-student-list-admin-4" type="text" [(ngModel)]="newStudent.area" class="form-input" placeholder="المنطقة" />
+          <select id="ydm-student-list-admin-4" [(ngModel)]="newStudent.area" class="form-input"><option [ngValue]="null">غير مسجلة</option>@for(area of areaChoices;track area){<option [value]="area">{{area}}</option>}</select>
         </div>
         <div class="form-group">
           <label for="ydm-student-list-admin-5">النوع</label>
@@ -196,7 +198,7 @@
         </div>
         <div class="form-group">
           <label for="ydm-student-list-admin-7">السنة الدراسية</label>
-          <input id="ydm-student-list-admin-7" type="text" [(ngModel)]="newStudent.academicYear" class="form-input" placeholder="السنة" />
+          <select id="ydm-student-list-admin-7" [(ngModel)]="newStudent.academicYear" class="form-input"><option [ngValue]="null">غير مسجلة</option>@for(year of academicYearChoices;track year){<option [value]="year">{{year}}</option>}</select>
         </div>
       </div>
       <div class="form-group">
@@ -252,7 +254,7 @@
     <div class="form-row">
       <div class="form-group">
         <label for="ydm-student-list-admin-12">المنطقة</label>
-        <input id="ydm-student-list-admin-12" type="text" [(ngModel)]="editForm.area" class="form-input" placeholder="المنطقة" />
+        <select id="ydm-student-list-admin-12" [(ngModel)]="editForm.area" class="form-input"><option [ngValue]="null">غير مسجلة</option>@for(area of areaChoices;track area){<option [value]="area">{{area}}</option>}</select>
       </div>
       <div class="form-group">
         <label for="ydm-student-list-admin-13">النوع</label>
@@ -269,7 +271,7 @@
       </div>
       <div class="form-group">
         <label for="ydm-student-list-admin-15">السنة الدراسية</label>
-        <input id="ydm-student-list-admin-15" type="text" [(ngModel)]="editForm.academicYear" class="form-input" placeholder="السنة" />
+        <select id="ydm-student-list-admin-15" [(ngModel)]="editForm.academicYear" class="form-input">@if(editForm.academicYear===undefined){<option [ngValue]="undefined">اترك القيمة الحالية</option>}<option [ngValue]="null">غير مسجلة</option>@for(year of academicYearChoices;track year){<option [value]="year">{{year}}</option>}</select>@if(editForm.academicYear===undefined){<p class="text-muted">القيمة الحالية تحتاج مراجعة: {{editingStudent?.academicYear}}</p>}
       </div>
     </div>
     <div class="form-group">
@@ -296,7 +298,7 @@
 
     <div class="form-group mt-4">
       <label>الخادم</label>
-      <ydm-resource-picker kind="servants" label="المسؤول" [value]="targetServantId" [selectedLabel]="selectedStudent?.servantName || ''" [allowEmpty]="true" [disabled]="assignSaving" (valueChange)="targetServantId=$event || '_none'"/>
+      <ydm-resource-picker kind="servants" label="المسؤول" [value]="targetServantId==='_none' ? null : targetServantId" [selectedLabel]="selectedStudent?.servantName || ''" [allowEmpty]="true" [disabled]="assignSaving" (valueChange)="targetServantId=$event || '_none'"/>
     </div>
 
     <div class="modal-actions">
@@ -350,6 +352,29 @@
     </div>
   </fieldset></div></app-modal>
 }
+
+<app-modal [title]="'تغيير '+bulkFieldLabel+' للمحددين'" [visible]="showBulkYearModal" [busy]="bulkYearSaving" (close)="showBulkYearModal = false">
+  <div body>
+    <p>حفظ {{bulkFieldLabel}} الجديدة لـ <strong>{{selectedStudentIds.size}}</strong> مخدوم محدد عبر الصفحات.</p>
+    <label for="bulk-academic-year">{{bulkFieldLabel}} الجديدة</label>
+    <select id="bulk-academic-year" class="form-input" [(ngModel)]="bulkYear" [disabled]="bulkYearSaving" required aria-describedby="bulk-academic-year-help"><option value="" disabled>اختر {{bulkFieldLabel}}</option>@for(year of bulkFieldChoices;track year){<option [value]="year">{{year}}</option>}</select>
+    <p id="bulk-academic-year-help" class="text-muted">اختر {{bulkFieldLabel}} من القائمة الموحدة للمخدومين.</p>
+    @if(bulkYearSaving){<p role="status" class="ydm-notice">جارٍ حفظ {{bulkFieldLabel}}…</p>}
+    @if(bulkYearError){<p role="alert" class="ydm-notice text-error">{{bulkYearError}}</p>}
+    @for(outcome of bulkYearOutcomes;track outcome.studentId){
+      <section class="ydm-notice bulk-year-outcome">
+        <strong>{{bulkYearName(outcome)}}</strong><p>{{outcome.error}}</p>
+        @if(outcome.code==='Conflict'){
+          <p>{{bulkField==='area' ? 'المنطقة' : 'السنة'}} المسجلة الآن: {{(bulkField==='area' ? outcome.area : outcome.academicYear) || 'غير مسجلة'}}</p>
+          @if(bulkYearReviewed(outcome.studentId)){<p role="status">تمت المراجعة؛ يمكنك إعادة المحاولة.</p>}
+          @else{<button type="button" class="btn-outline" (click)="reviewBulkYear(outcome)" [disabled]="bulkYearSaving">راجعت البيانات وأريد إعادة المحاولة</button>}
+        }
+        <button type="button" class="btn-outline" (click)="removeBulkYearSelection(outcome.studentId)" [disabled]="bulkYearSaving" [attr.aria-label]="'إلغاء اختيار '+bulkYearName(outcome)">إلغاء اختيار</button>
+      </section>
+    }
+  </div>
+  <div actions class="ydm-toolbar"><button type="button" class="btn-outline" (click)="showBulkYearModal = false" [disabled]="bulkYearSaving">إلغاء</button><button type="button" class="btn-primary" (click)="onBulkYearSave()" [disabled]="!bulkYearCanSave">{{bulkYearSaving ? 'جارٍ الحفظ…' : 'تأكيد التغيير'}}</button></div>
+</app-modal>
 
 <app-modal title="معاينة ملف الاستيراد" [visible]="csvPreview !== null" [busy]="uploadingCsv" (close)="cancelCsv()">
   <div body>

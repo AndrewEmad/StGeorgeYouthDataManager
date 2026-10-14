@@ -152,6 +152,7 @@ app.UseAuthentication();
 app.UseMiddleware<RequirePasswordChangeMiddleware>();
 app.UseMiddleware<RequireProfileCompletionMiddleware>();
 app.UseAuthorization();
+app.UseMiddleware<ServiceYearMiddleware>();
 
 app.MapHealthChecks("/health/ready",new HealthCheckOptions {Predicate=r=>r.Tags.Contains("ready")}).AllowAnonymous();
 app.MapGet("/health/live",()=>Results.Ok(new {Status="alive"})).AllowAnonymous();

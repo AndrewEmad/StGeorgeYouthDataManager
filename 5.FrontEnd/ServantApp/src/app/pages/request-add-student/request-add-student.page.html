@@ -32,7 +32,7 @@
         </div>
         <div class="form-group">
           <label for="ydm-request-add-student-page-6">المنطقة</label>
-          <input id="ydm-request-add-student-page-6" type="text" [(ngModel)]="dto.area" name="area" class="form-input" placeholder="المنطقة" />
+          <select id="ydm-request-add-student-page-6" [(ngModel)]="dto.area" name="area" class="form-input"><option value="">غير مسجلة</option>@for(area of areaChoices;track area){<option [value]="area">{{area}}</option>}</select>
         </div>
         <div class="form-group">
           <label for="ydm-request-add-student-page-7">الكلية</label>
@@ -40,7 +40,7 @@
         </div>
         <div class="form-group">
           <label for="ydm-request-add-student-page-8">السنة الدراسية</label>
-          <input id="ydm-request-add-student-page-8" type="text" [(ngModel)]="dto.academicYear" name="academicYear" class="form-input" placeholder="مثال: أولى" />
+          <select id="ydm-request-add-student-page-8" [(ngModel)]="dto.academicYear" name="academicYear" class="form-input"><option value="">غير مسجلة</option>@for(year of academicYearChoices;track year){<option [value]="year">{{year}}</option>}</select>
         </div>
         <div class="form-group">
           <label for="ydm-request-add-student-page-9">تاريخ الميلاد</label>

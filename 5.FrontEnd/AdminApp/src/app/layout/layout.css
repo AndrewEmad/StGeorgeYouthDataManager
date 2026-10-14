@@ -1,5 +1,5 @@
 /* Layout owns its spacing; shared styles own colors, controls and typography. */
-.app-wrapper { --header-height: calc(56px + var(--safe-top)); min-block-size: 100dvh; }
+.app-wrapper { --header-height: calc(108px + var(--safe-top)); min-block-size: 100dvh; }
 .main-layout { min-block-size: 100dvh; padding-block-start: var(--header-height); padding-inline-start: 240px; }
 .top-bar {
   position: fixed;
@@ -91,3 +91,7 @@
 }
 @media (max-width: 480px) { .top-bar { gap: var(--space-1); padding-inline: max(var(--space-2), var(--safe-right)) max(var(--space-2), var(--safe-left)); } .top-bar-heading, .top-bar-left { gap: var(--space-1); } }
 @media print { .main-layout { display: block; } }
+
+.top-bar{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:44px 44px;gap:4px 8px;padding-block-end:8px;}
+.global-year-filter{grid-column:1/-1;}
+.sidebar-header{min-block-size:calc(56px + var(--safe-top));}

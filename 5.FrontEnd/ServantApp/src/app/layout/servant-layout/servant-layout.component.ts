@@ -1,3 +1,4 @@
+import {ServiceYearComponent} from '@ydm/shared/ui/service-year';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterLink, RouterOutlet, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -7,7 +8,7 @@ import { AuthService } from '../../core/services/auth.service';
 @Component({
   selector: 'app-servant-layout',
   standalone: true,
-  imports: [RouterLink, RouterOutlet],
+  imports: [RouterLink, RouterOutlet,ServiceYearComponent],
   templateUrl: './servant-layout.component.html',
   styleUrls: ['./servant-layout.component.css'],
 })

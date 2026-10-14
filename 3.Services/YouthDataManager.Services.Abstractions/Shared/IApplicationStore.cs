@@ -12,6 +12,8 @@ public interface IApplicationStore
 }
 public interface ICallerContext
 {
+    ServiceYear? SelectedServiceYear => null;
+    bool AllServiceYears => false;
     string? ExpectedVersion => null;
     DateTime UtcNow => DateTime.UtcNow;
     CancellationToken CancellationToken => default;

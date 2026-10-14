@@ -21,7 +21,7 @@ public partial class ReportDataProvider : IReportDataProvider
     {
         Page(page,pageSize,sortBy,"fullname","servantname","lastcontactdate");
         if (days is <0 or >36500) throw new DomainValidationException("Invalid nonnegative day range.");
-        var cutoff = BusinessTime.UtcStart(TimeZoneInfo.ConvertTimeFromUtc(_caller.UtcNow,BusinessTime.Zone).Date.AddDays(-days));
+        var cutoff = BusinessTime.UtcStart((_caller.SelectedServiceYear?.AsOf(_caller.UtcNow) ?? TimeZoneInfo.ConvertTimeFromUtc(_caller.UtcNow,BusinessTime.Zone).Date).AddDays(-days));
         var baseQuery = Roster
             .AsNoTracking()
             .Where(s => !servantId.HasValue || s.ServantId == servantId)

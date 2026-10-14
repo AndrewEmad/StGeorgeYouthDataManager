@@ -5,6 +5,8 @@ namespace YouthDataManager.WebApi.Authorization;
 
 public sealed class CallerContext(IHttpContextAccessor accessor) : ICallerContext
 {
+    public bool AllServiceYears => accessor.HttpContext?.Items["AllServiceYears"] is true;
+    public ServiceYear? SelectedServiceYear => accessor.HttpContext?.Items["ServiceYear"] as ServiceYear;
     public string? ExpectedVersion => accessor.HttpContext?.Request.Headers["If-Match"].FirstOrDefault()?.Trim('"');
     public DateTime UtcNow { get; } = DateTime.UtcNow;
     public CancellationToken CancellationToken => accessor.HttpContext?.RequestAborted ?? default;

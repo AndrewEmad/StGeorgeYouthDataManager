@@ -1,3 +1,4 @@
+import {onServiceYearChange} from '@ydm/shared/core/service-year';
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -24,6 +25,7 @@ import type { ServantDashboardStats } from '../../shared/models/reports.model';
   styleUrls: ['./dashboard.page.css'],
 })
 export class DashboardPage {
+  private yearScope=onServiceYearChange(()=>{this.loadStats();});
   private readonly reportsService = inject(ReportsService);
   readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);

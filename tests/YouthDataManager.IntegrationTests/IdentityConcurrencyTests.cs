@@ -10,7 +10,11 @@ using YouthDataManager.Users.Service.Implementations;
 using YouthDataManager.Users.Service.Abstractions.DTOs;
 namespace YouthDataManager.IntegrationTests;
 [Collection("SQL")]
-public sealed class IdentityConcurrencyTests(SqlFixture fixture) {
+public sealed class IdentityConcurrencyTests : IAsyncLifetime {
+ // These races require a database with no unrelated Admin/Priest accounts.
+ private readonly SqlFixture fixture=new();
+ public Task InitializeAsync()=>fixture.InitializeAsync();
+ public Task DisposeAsync()=>fixture.DisposeAsync();
  private static UserService Service(IServiceProvider p)=>new(p.GetRequiredService<UserManager<ApplicationUser>>(),p.GetRequiredService<RoleManager<IdentityRole<Guid>>>(),new ActivityLogger(p.GetRequiredService<IApplicationStore>(),new HttpContextAccessor()),p.GetRequiredService<IApplicationStore>());
  [Fact] public async Task Concurrent_deactivation_cannot_remove_both_last_active_Admins(){
   await using var seed=fixture.Provider.CreateAsyncScope();var a=await fixture.User(seed.ServiceProvider,"Admin");var b=await fixture.User(seed.ServiceProvider,"Admin");

@@ -1,3 +1,4 @@
+import {serviceYearInterceptor} from '@ydm/shared/core/service-year';
 import { YDM_FIREBASE } from '@ydm/shared/core/push';
 import { YDM_API,YDM_SESSION,YDM_AUTH } from '@ydm/shared/core/api';
 import { environment } from '../environments/environment';
@@ -17,7 +18,7 @@ export const appConfig: ApplicationConfig = {
     {provide:YDM_SESSION,useFactory:(auth:AuthService)=>()=>({userId:auth.currentUser()?.userId || '',role:auth.currentUser()?.role || '',privileged:['Admin','Manager','Priest'].includes(auth.currentUser()?.role || ''),root:'/dashboard',app:'Admin',namespace:'ydm.adminapp'}),deps:[AuthService]},
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withHashLocation()),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor,serviceYearInterceptor])),
     provideServiceWorker('ngsw-worker.js', { enabled: !isDevMode() }),
   ],
 };

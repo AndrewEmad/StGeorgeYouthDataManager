@@ -98,12 +98,6 @@
   cursor: pointer;
 }
 
-.filter-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 16px;
-  flex-wrap: wrap;
-}
 
 @media (max-width: 600px) {
   .filter-fields {

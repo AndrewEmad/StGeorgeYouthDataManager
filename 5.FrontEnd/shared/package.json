@@ -27,7 +27,11 @@
     "./pages/archives": "./pages/archives.ts",
     "./pages/operations": "./pages/operations.ts",
     "./ui/card": "./ui/card/card.component.ts",
-    "./ui/loader": "./ui/loader/loader.component.ts"
+    "./ui/loader": "./ui/loader/loader.component.ts",
+    "./core/service-year": "./core/service-year.ts",
+    "./ui/service-year": "./ui/service-year.ts",
+    "./core/academic-years": "./core/academic-years.ts",
+    "./core/student-areas": "./core/student-areas.ts"
   },
   "peerDependencies": {
     "@angular/core": "20.3.33"

@@ -67,7 +67,7 @@ export class ModalComponent {
   onKeydown(event: KeyboardEvent): void {
     if(event.key!=='Tab')return;
     const dialog=this.dialog().nativeElement;
-    const nodes=Array.from(dialog.querySelectorAll<HTMLElement>('button:not(:disabled),a[href],input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex]:not([tabindex="-1"])')).filter(e=>e.getClientRects().length>0 && !e.closest('fieldset:disabled'));
+    const nodes=Array.from(dialog.querySelectorAll<HTMLElement>('button:not(:disabled),a[href],input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex]:not([tabindex="-1"])')).filter(e=>e.tabIndex>=0 && e.getClientRects().length>0 && !e.closest('fieldset:disabled'));
     const first=nodes[0],last=nodes[nodes.length-1];
     if(!first){event.preventDefault();dialog.focus();return;}
     if(event.shiftKey && (document.activeElement===first || document.activeElement===dialog)){event.preventDefault();last.focus();}

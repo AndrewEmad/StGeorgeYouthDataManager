@@ -12,4 +12,6 @@ public interface IStudentCommandsService
     Task<ServiceResult> Delete(Guid id);
     Task<ServiceResult> AssignToServant(Guid studentId, Guid servantId);
     Task<ServiceResult> UnassignFromServant(Guid studentId);
+    Task<ServiceResult<BulkAreaResult>> UpdateAreas(BulkAreaRequest request);
+    Task<ServiceResult<BulkAcademicYearResult>> UpdateAcademicYears(BulkAcademicYearRequest request);
 }

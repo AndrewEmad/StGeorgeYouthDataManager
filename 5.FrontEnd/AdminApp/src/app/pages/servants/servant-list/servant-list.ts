@@ -1,3 +1,4 @@
+import {onServiceYearChange} from '@ydm/shared/core/service-year';
 import { AfterViewInit, Component, OnInit, OnDestroy, TemplateRef, signal, viewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { apiError } from '@ydm/shared/core/api';
@@ -40,6 +41,7 @@ import { DateFormatPipe } from '../../../shared/pipes/date-format.pipe';
   styleUrls: ['./servant-list.css'],
 })
 export class ServantListComponent implements OnInit, AfterViewInit, OnDestroy {
+  private yearScope=onServiceYearChange(()=>{this.loadServants();});
   servants: ServantWithStats[] = [];
   error = ''; message = ''; dialogError = ''; createdId = ''; editRecordSaved = false;
   busy = new Set<string>(); deleting: ServantWithStats | null = null; opening = false;

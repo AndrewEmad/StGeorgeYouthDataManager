@@ -23,10 +23,10 @@ public partial class ReportDataProvider
         _weekStart=int.TryParse(configuration["Reports:WeekStart"],out var day) && day is >=0 and <=6 ? day : 5;
     }
     private IQueryable<Student> Roster => _context.Students.AsNoTracking().Where(s=>!s.IsDeleted && (_caller.IsPrivileged || s.ServantId==_caller.UserId));
-    private IQueryable<CallLog> Calls => _context.CallLogs.IgnoreQueryFilters().AsNoTracking().Where(c=>!c.IsVoided && (_caller.IsPrivileged || c.ServantId==_caller.UserId));
-    private IQueryable<HomeVisit> Visits => _context.HomeVisits.IgnoreQueryFilters().AsNoTracking().Where(v=>!v.IsVoided && (_caller.IsPrivileged || v.ServantId==_caller.UserId || v.Participants.Any(p=>p.ServantId==_caller.UserId)));
+    private IQueryable<CallLog> Calls => _context.CallLogs.IgnoreQueryFilters().ForServiceYear(_context).AsNoTracking().Where(c=>!c.IsVoided && (_caller.IsPrivileged || c.ServantId==_caller.UserId));
+    private IQueryable<HomeVisit> Visits => _context.HomeVisits.IgnoreQueryFilters().ForServiceYear(_context).AsNoTracking().Where(v=>!v.IsVoided && (_caller.IsPrivileged || v.ServantId==_caller.UserId || v.Participants.Any(p=>p.ServantId==_caller.UserId)));
     private IQueryable<VisitCredit> Credits => Visits.Select(v=>new VisitCredit { VisitId=v.Id,StudentId=v.StudentId,ServantId=v.ServantId,VisitDate=v.VisitDate })
-        .Concat(from p in _context.HomeVisitParticipants.IgnoreQueryFilters().AsNoTracking() join v in Visits on p.HomeVisitId equals v.Id select new VisitCredit {VisitId=v.Id,StudentId=v.StudentId,ServantId=p.ServantId,VisitDate=v.VisitDate}).Distinct();
+        .Concat(from p in _context.HomeVisitParticipants.IgnoreQueryFilters().ForServiceYear(_context).AsNoTracking() join v in Visits on p.HomeVisitId equals v.Id select new VisitCredit {VisitId=v.Id,StudentId=v.StudentId,ServantId=p.ServantId,VisitDate=v.VisitDate}).Distinct();
     private IQueryable<ApplicationUser> People
     {
         get
@@ -59,7 +59,7 @@ public partial class ReportDataProvider
         var (start,end)=await CurrentWeek();var q=Roster.Where(s=>s.ServantId==id);
         return new(await q.CountAsync(Ct),await Calls.CountAsync(c=>c.ServantId==id && c.CallDate>=start && c.CallDate<end,Ct),
             await Credits.CountAsync(v=>v.ServantId==id && v.VisitDate>=start && v.VisitDate<end,Ct),
-            await _context.Set<FollowUpTask>().Where(t=>t.AssigneeId==id && t.Status=="Open" && t.DueAt<=_caller.UtcNow).Select(t=>t.StudentId).Distinct().CountAsync(Ct),
+            await _context.Set<FollowUpTask>().ForServiceYear(_context).Where(t=>t.AssigneeId==id && t.Status=="Open" && t.DueAt<=_caller.UtcNow).Select(t=>t.StudentId).Distinct().CountAsync(Ct),
             await q.CountAsync(s=>!s.CallLogs.Any(c=>!c.IsVoided) && !s.HomeVisits.Any(v=>!v.IsVoided),Ct));
     }
     public async Task<ManagerDashboardDto> ManagerDashboard()
@@ -73,10 +73,10 @@ public partial class ReportDataProvider
         var activeOwners=_context.Users.AsNoTracking().Where(u=>u.IsActive && _context.UserRoles.Any(r=>r.UserId==u.Id && activeRoleIds.Contains(r.RoleId)));
         return new(await Roster.CountAsync(Ct),await activeOwners.CountAsync(Ct),await Calls.CountAsync(Ct),await Visits.CountAsync(Ct),
             await Calls.CountAsync(c=>c.CallDate>=start && c.CallDate<end,Ct),await Visits.CountAsync(v=>v.VisitDate>=start && v.VisitDate<end,Ct),assignments,recent,
-            await _context.Set<FollowUpTask>().Where(t=>t.Status=="Open" && t.DueAt<=_caller.UtcNow).Select(t=>t.StudentId).Distinct().CountAsync(Ct),
+            await _context.Set<FollowUpTask>().ForServiceYear(_context).Where(t=>t.Status=="Open" && t.DueAt<=_caller.UtcNow).Select(t=>t.StudentId).Distinct().CountAsync(Ct),
             await Roster.CountAsync(s=>!s.CallLogs.Any(c=>!c.IsVoided) && !s.HomeVisits.Any(v=>!v.IsVoided),Ct),
             await Roster.CountAsync(s=>s.ServantId==null,Ct),
-            await _context.Set<FollowUpTask>().CountAsync(t=>t.Status=="Open" && t.AssigneeId==null,Ct));
+            await _context.Set<FollowUpTask>().ForServiceYear(_context).CountAsync(t=>t.Status=="Open" && t.AssigneeId==null,Ct));
     }
     public async Task<IReadOnlyList<ServantStatsDto>> Stats(IEnumerable<Guid> ids)
     {
@@ -127,9 +127,9 @@ public partial class ReportDataProvider
     {
         Page(page,size,sort,"fullname","assignedcount","callsinperiod","visitsinperiod");
         _configuredWeekStart ??= await _context.Set<MeetingConfiguration>().Where(s=>s.Id==1).Select(s=>(int?)s.ReportWeekStart).SingleOrDefaultAsync(Ct) ?? _weekStart;
-        var local=TimeZoneInfo.ConvertTimeFromUtc(_caller.UtcNow,BusinessTime.Zone);var (start,end)=Period(from ?? local.Date.AddMonths(-1),to ?? local.Date);
+        var local=TimeZoneInfo.ConvertTimeFromUtc(_caller.UtcNow,BusinessTime.Zone);var (start,end)=Period(from ?? _caller.SelectedServiceYear?.Start ?? (_caller.AllServiceYears ? (DateTime?)null : local.Date.AddMonths(-1)),to ?? _caller.SelectedServiceYear?.LastDay ?? (_caller.AllServiceYears ? (DateTime?)null : local.Date));
         var people=People;if(id.HasValue)people=people.Where(u=>u.Id==id);
-        var q=people.Select(u=>new ServantActivitySummaryDto { ServantId=u.Id,FullName=u.FullName,AssignedCount=Roster.Count(s=>s.ServantId==u.Id),CallsInPeriod=Calls.Count(c=>c.ServantId==u.Id && c.CallDate>=start && c.CallDate<end),VisitsInPeriod=Credits.Count(v=>v.ServantId==u.Id && v.VisitDate>=start && v.VisitDate<end) });
+        var q=people.Select(u=>new ServantActivitySummaryDto { ServantId=u.Id,FullName=u.FullName,AssignedCount=Roster.Count(s=>s.ServantId==u.Id),CallsInPeriod=Calls.Count(c=>c.ServantId==u.Id && (!start.HasValue || c.CallDate>=start) && (!end.HasValue || c.CallDate<end)),VisitsInPeriod=Credits.Count(v=>v.ServantId==u.Id && (!start.HasValue || v.VisitDate>=start) && (!end.HasValue || v.VisitDate<end)) });
         IOrderedQueryable<ServantActivitySummaryDto> ordered=sort?.ToLowerInvariant() switch {
             "assignedcount"=>desc ? q.OrderByDescending(x=>x.AssignedCount) : q.OrderBy(x=>x.AssignedCount),
             "callsinperiod"=>desc ? q.OrderByDescending(x=>x.CallsInPeriod) : q.OrderBy(x=>x.CallsInPeriod),
@@ -140,7 +140,7 @@ public partial class ReportDataProvider
     private IQueryable<Student> StudentFilter(ReportRequestDto f,bool history=false)
     {
         if (f.Gender is <0 or >1 || f.BirthMonth is <0 or >12 || f.ServantId==Guid.Empty) throw new DomainValidationException("Invalid report filters.");
-        var q=history ? _context.Students.IgnoreQueryFilters().AsNoTracking() : Roster;
+        var q=history ? _context.Students.IgnoreQueryFilters().ForServiceYear(_context).AsNoTracking() : Roster;
         if(f.Area!=null)q=f.Area=="__missing__" ? q.Where(s=>s.Area==null || s.Area.Trim()=="") : q.Where(s=>s.Area==f.Area);
         if(f.College!=null)q=q.Where(s=>s.College==f.College);
         if(f.AcademicYear!=null)q=f.AcademicYear=="__missing__" ? q.Where(s=>s.AcademicYear==null || s.AcademicYear.Trim()=="") : q.Where(s=>s.AcademicYear==f.AcademicYear);

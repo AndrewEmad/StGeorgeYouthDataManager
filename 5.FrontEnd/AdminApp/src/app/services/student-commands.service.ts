@@ -5,6 +5,8 @@ import { environment } from '../../environments/environment';
 import { CreateStudentRequest, UpdateStudentRequest, BulkImportResult } from '../shared/models';
 import { parseCsv, csvDocument } from '@ydm/shared/core/utils';
 
+export interface BulkStudentFieldOutcome { studentId:string;success:boolean;error?:string;code?:string;fullName?:string;academicYear?:string;area?:string;version?:string;changed?:boolean; }
+export type BulkAcademicYearOutcome=BulkStudentFieldOutcome;
 export interface CsvStudentRow { row: number; student: CreateStudentRequest; error?: string; candidates?: {studentId?:string;name:string;row?:number}[];duplicateReviewed?:boolean; }
 
 @Injectable({ providedIn: 'root' })
@@ -16,6 +18,12 @@ export class StudentCommandsService {
   unassign(id:string):Observable<unknown>{return this.http.post(`${this.apiUrl}/${id}/unassign`,{});}
   assignToServant(studentId: string, servantId: string): Observable<unknown> { return this.http.post(`${this.apiUrl}/${studentId}/assign/${servantId}`, {}); }
   bulkAssign(ids: string[], servantId: string): Observable<{ outcomes: { studentId: string; success: boolean; error?: string }[] }> { return this.http.post<{ outcomes: { studentId: string; success: boolean; error?: string }[] }>(`${this.apiUrl}/bulk-assignment`, { ids, servantId }); }
+  bulkArea(students:{studentId:string;version:string}[],area:string):Observable<{outcomes:BulkStudentFieldOutcome[]}>{
+    return this.http.post<{outcomes:BulkStudentFieldOutcome[]}>(`${this.apiUrl}/bulk-area`,{students,area},{headers:{'X-Audit-Reason':'تغيير المنطقة للمخدومين المحددين'}});
+  }
+  bulkAcademicYear(students:{studentId:string;version:string}[],academicYear:string):Observable<{outcomes:BulkAcademicYearOutcome[]}>{
+    return this.http.post<{outcomes:BulkAcademicYearOutcome[]}>(`${this.apiUrl}/bulk-academic-year`,{students,academicYear},{headers:{'X-Audit-Reason':'تغيير السنة الدراسية للمخدومين المحددين'}});
+  }
   delete(id: string,reason:string='Student archival',version?:string): Observable<void> { return this.http.delete<void>(`${this.apiUrl}/${id}`,{headers:{'X-Audit-Reason':reason,...(version ? {'If-Match':version} : {})}}); }
   uploadPhoto(id: string, file: File): Observable<{ photoPath: string }> { const data = new FormData(); data.append('file', file); return this.http.post<{ photoPath: string }>(`${this.apiUrl}/${id}/photo`, data); }
   downloadCsvTemplate(): void {

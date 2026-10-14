@@ -77,6 +77,8 @@
 
 .bulk-actions {
   display: flex;
+  flex-wrap: wrap;
+  min-inline-size: 0;
   align-items: center;
   gap: 16px;
   margin-bottom: 16px;
@@ -460,3 +462,6 @@ th.sortable:hover {
 .date-input-wrap input {
   cursor: pointer;
 }
+
+.bulk-actions > button {max-inline-size:100%;white-space:normal;overflow-wrap:anywhere;}
+.bulk-year-outcome{overflow-wrap:anywhere;}.bulk-year-outcome button{margin-block:4px;max-inline-size:100%;white-space:normal;}

@@ -1,8 +1,13 @@
+import {studentAreas,studentAreaForEdit} from '@ydm/shared/core/student-areas';
+import {academicYears,academicYearForEdit} from '@ydm/shared/core/academic-years';
 import { apiError } from '@ydm/shared/core/api';
 import { dateOnly } from '@ydm/shared/core/utils';
 import { ResourcePickerComponent } from '@ydm/shared/ui/resource-picker';
 import {
   AfterViewInit,
+  afterNextRender,
+  inject,
+  Injector,
   Component,
   ElementRef,
   OnInit,
@@ -24,7 +29,7 @@ import {
   PhotoCropModalComponent,
   ProfilePhotoInputComponent,
 } from '../../../components/common/common';
-import { StudentCommandsService, CsvStudentRow } from '../../../services/student-commands.service';
+import { StudentCommandsService, CsvStudentRow, BulkStudentFieldOutcome } from '../../../services/student-commands.service';
 import { StudentQueriesService } from '../../../services/student-queries.service';
 import { UsersService } from '../../../services/users.service';
 import type { DataTableColumn } from '../../../shared/components/data-table/data-table-column';
@@ -78,6 +83,26 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
   showAssignModal = false;
   targetServantId = '';
   selectedStudentIds = new Set<string>();
+  private selectedStudentSnapshots=new Map<string,{version:string;name:string}>();
+  readonly areaChoices=studentAreas;
+  bulkField:'academicYear'|'area'='academicYear';
+  get bulkFieldLabel(){return this.bulkField==='area' ? 'المنطقة' : 'السنة الدراسية';}
+  get bulkFieldChoices():readonly string[]{return this.bulkField==='area' ? this.areaChoices : this.academicYearChoices;}
+  readonly academicYearChoices=academicYears;
+  showBulkYearModal=false;
+  bulkYear='';
+  bulkYearSaving=false;
+  bulkYearError='';
+  bulkYearOutcomes:BulkStudentFieldOutcome[]=[];
+  private reviewedBulkYearIds=new Set<string>();
+  private bulkResultStatus=viewChild<ElementRef<HTMLElement>>('bulkResultStatus');
+  private readonly renderInjector=inject(Injector);
+  private focusBulkYearResult(){
+    // Wait for dialog closure and its focus restoration before focusing result feedback.
+    afterNextRender(()=>requestAnimationFrame(()=>{const status=this.bulkResultStatus()?.nativeElement;if(status){status.focus({preventScroll:true});status.scrollIntoView({block:'center',behavior:'instant'});}}),{injector:this.renderInjector});
+  }
+  get bulkSelectionSaving(){return this.bulkAssignSaving || this.bulkYearSaving;}
+  get bulkYearCanSave(){return this.bulkFieldChoices.some(value=>value===this.bulkYear) && this.selectedStudentIds.size>0 && this.selectedStudentIds.size<=5000 && !this.bulkSelectionSaving && [...this.selectedStudentIds].every(id=>!!this.selectedStudentSnapshots.get(id)?.version) && !this.bulkYearOutcomes.some(o=>o.code==='Conflict' && this.selectedStudentIds.has(o.studentId) && !this.reviewedBulkYearIds.has(o.studentId));}
   showBulkAssignModal = false;
   bulkTargetServantId = '';
   bulkAssignSaving = false;
@@ -99,7 +124,7 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
     address: string | null;
     area: string | null;
     college: string | null;
-    academicYear: string | null;
+    academicYear: string | null | undefined;
     confessionFather: string | null;
     gender: number;
     servantId: string | null;
@@ -233,7 +258,7 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
 
   loadData() {
     this.listRequest?.unsubscribe();this.loading=true;this.listError="";
-    const scope=JSON.stringify(this.filters);if(this.scopeKey && this.scopeKey!==scope && this.selectedStudentIds.size){this.selectedStudentIds.clear();this.formMessage="تغير نطاق البحث؛ تم مسح الاختيارات.";}this.scopeKey=scope;
+    const scope=JSON.stringify(this.filters);if(this.scopeKey && this.scopeKey!==scope && this.selectedStudentIds.size){this.selectedStudentIds.clear();this.selectedStudentSnapshots.clear();this.formMessage="تغير نطاق البحث؛ تم مسح الاختيارات.";}this.scopeKey=scope;
     const genderNum = this.filters.gender === '' ? null : Number(this.filters.gender);
     const hasServant =
       this.filters.hasServant === 'yes'
@@ -512,17 +537,19 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
   }
 
   toggleSelection(s: any) {
-    if (this.selectedStudentIds.has(s.id)) this.selectedStudentIds.delete(s.id);
-    else this.selectedStudentIds.add(s.id);
+    if(this.loading || this.bulkSelectionSaving)return;
+    if (this.selectedStudentIds.has(s.id)) {this.selectedStudentIds.delete(s.id);this.selectedStudentSnapshots.delete(s.id);}
+    else {this.selectedStudentIds.add(s.id);this.selectedStudentSnapshots.set(s.id,{version:s.version || '',name:s.fullName});}
     this.selectedStudentIds = new Set(this.selectedStudentIds);
   }
 
-  clearSelection() { if(this.bulkAssignSaving)return;this.selectedStudentIds=new Set<string>();this.formMessage='تم مسح الاختيارات عبر الصفحات.'; }
+  clearSelection() { if(this.bulkSelectionSaving)return;this.selectedStudentIds=new Set<string>();this.selectedStudentSnapshots.clear();this.formMessage='تم مسح الاختيارات عبر الصفحات.'; }
 
   selectAllFiltered() {
+    if(this.loading || this.bulkSelectionSaving)return;
     const all = this.students.every((s: any) => this.selectedStudentIds.has(s.id));
-    if (all) this.students.forEach(s => this.selectedStudentIds.delete(s.id));
-    else this.students.forEach((s: any) => this.selectedStudentIds.add(s.id));
+    if (all) this.students.forEach(s => {this.selectedStudentIds.delete(s.id);this.selectedStudentSnapshots.delete(s.id);});
+    else this.students.forEach((s: any) => {this.selectedStudentIds.add(s.id);this.selectedStudentSnapshots.set(s.id,{version:s.version || '',name:s.fullName});});
     this.selectedStudentIds = new Set(this.selectedStudentIds);
   }
 
@@ -533,25 +560,67 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
   }
 
   openBulkAssignModal() {
-    if (this.selectedStudentIds.size === 0) return;
+    if (this.loading || this.bulkSelectionSaving || this.selectedStudentIds.size === 0) return;
     this.bulkTargetServantId = '';
     this.showBulkAssignModal = true;
   }
 
   onBulkAssign() {
-    if (this.bulkAssignSaving || !this.bulkTargetServantId || this.selectedStudentIds.size === 0) return;
+    if (this.bulkSelectionSaving || !this.bulkTargetServantId || this.selectedStudentIds.size === 0) return;
     this.bulkAssignSaving = true;
     const ids = Array.from(this.selectedStudentIds);
     this.studentCommands.bulkAssign(ids, this.bulkTargetServantId).subscribe({
       next: result => {
         this.bulkAssignSaving = false;
         this.selectedStudentIds = new Set(result.outcomes.filter(o => !o.success).map(o => o.studentId));
+        for(const id of this.selectedStudentSnapshots.keys())if(!this.selectedStudentIds.has(id))this.selectedStudentSnapshots.delete(id);
         this.uploadResult = { created: result.outcomes.filter(o => o.success).length, errors: result.outcomes.filter(o => !o.success).map((o, i) => ({ row: i + 1, message: o.error || 'تعذر التخصيص؛ الاختيار محفوظ لإعادة المحاولة' })) };
         if (!this.selectedStudentIds.size) this.showBulkAssignModal = false;
         this.loadData();
       },
       error: () => { this.bulkAssignSaving = false; this.uploadResult = { created: 0, errors: [{ row: 0, message: 'تعذر التخصيص. الاختيارات محفوظة لإعادة المحاولة.' }] }; }
     });
+  }
+  openBulkYearModal(field:'academicYear'|'area'='academicYear'){
+    if(this.loading || this.bulkSelectionSaving || !this.selectedStudentIds.size)return;
+    this.bulkField=field;this.bulkYear='';this.bulkYearError='';this.bulkYearOutcomes=[];this.reviewedBulkYearIds.clear();this.showBulkYearModal=true;
+    if(this.selectedStudentIds.size>5000)this.bulkYearError='اختر بحد أقصى 5000 مخدوم في المرة الواحدة.';
+    else if([...this.selectedStudentIds].some(id=>!this.selectedStudentSnapshots.get(id)?.version))this.bulkYearError='بعض بيانات الاختيار غير مكتملة. أعد تحميل القائمة وحدد المخدومين مجددًا.';
+  }
+  bulkYearName(outcome:BulkStudentFieldOutcome){return outcome.fullName || this.selectedStudentSnapshots.get(outcome.studentId)?.name || 'مخدوم محدد';}
+  reviewBulkYear(outcome:BulkStudentFieldOutcome){
+    if(this.bulkYearSaving || !outcome.version || !this.selectedStudentIds.has(outcome.studentId))return;
+    this.selectedStudentSnapshots.set(outcome.studentId,{version:outcome.version,name:this.bulkYearName(outcome)});
+    this.reviewedBulkYearIds.add(outcome.studentId);
+  }
+  bulkYearReviewed(id:string){return this.reviewedBulkYearIds.has(id);}
+  removeBulkYearSelection(id:string){
+    if(this.bulkYearSaving)return;
+    this.selectedStudentIds=new Set([...this.selectedStudentIds].filter(selected=>selected!==id));this.selectedStudentSnapshots.delete(id);
+    this.bulkYearOutcomes=this.bulkYearOutcomes.filter(o=>o.studentId!==id);
+    if(!this.selectedStudentIds.size){this.showBulkYearModal=false;this.formMessage='تم إلغاء الاختيارات المتبقية.';this.focusBulkYearResult();}
+  }
+  onBulkYearSave(){
+    if(!this.bulkYearCanSave)return;
+    const students=[...this.selectedStudentIds].map(studentId=>({studentId,version:this.selectedStudentSnapshots.get(studentId)!.version}));
+    const year=this.bulkYear.trim();this.bulkYearSaving=true;this.bulkYearError='';this.formMessage='';
+    const label=this.bulkFieldLabel;
+    const request=this.bulkField==='area' ? this.studentCommands.bulkArea(students,year) : this.studentCommands.bulkAcademicYear(students,year);
+    request.subscribe({next:result=>{
+      this.bulkYearSaving=false;
+      const outcomes=new Map(result.outcomes.map(o=>[o.studentId,o]));
+      this.bulkYearOutcomes=students.map(s=>outcomes.get(s.studentId) || {studentId:s.studentId,success:false,error:'لم تصل نتيجة هذا المخدوم؛ الاختيار محفوظ لإعادة المحاولة.'}).filter(o=>!o.success);
+      this.selectedStudentIds=new Set(this.bulkYearOutcomes.map(o=>o.studentId));
+      for(const id of this.selectedStudentSnapshots.keys())if(!this.selectedStudentIds.has(id))this.selectedStudentSnapshots.delete(id);
+      this.reviewedBulkYearIds.clear();
+      const saved=students.length-this.bulkYearOutcomes.length;
+      this.formMessage=saved ? `تم حفظ ${label} «${year}» لـ ${saved} مخدوم.` : '';
+      if(this.bulkYearOutcomes.length)this.bulkYearError=`تعذر تحديث ${this.bulkYearOutcomes.length} مخدوم. احتفظنا باختياراتهم والقيمة التي اخترتها.`;
+      else {this.showBulkYearModal=false;this.focusBulkYearResult();}
+      this.page=1;
+      if(saved){if(this.bulkField==='area')this.studentQueries.getDistinctAreas().subscribe({next:areas=>this.regionOptions=areas || []});else this.studentQueries.getDistinctAcademicYears().subscribe({next:years=>this.academicYearOptions=years || []});}
+      this.loadData();
+    },error:e=>{this.bulkYearSaving=false;this.bulkYearError=apiError(e)+' احتفظنا باختياراتك والقيمة التي اخترتها؛ يمكنك إعادة المحاولة.';}});
   }
   get pageSelectionIndeterminate() { return this.students.some(s => this.selectedStudentIds.has(s.id)) && !this.allFilteredSelected; }
 
@@ -566,9 +635,9 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
           phone: st.phone || '',
           secondaryPhone:st.secondaryPhone ?? null,birthMonth:st.birthMonth ?? null,notes:st.notes ?? null,
           address: st.address ?? null,
-          area: st.area ?? null,
+          area: studentAreaForEdit(st.area),
           college: st.college ?? null,
-          academicYear: st.academicYear ?? null,
+          academicYear: academicYearForEdit(st.academicYear),
           confessionFather: st.confessionFather ?? null,
           gender: st.gender ?? 0,
           servantId: st.servantId ?? null,
@@ -623,7 +692,7 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
       address: this.editForm.address ?? null,
       area: this.editForm.area ?? null,
       college: this.editForm.college ?? null,
-      academicYear: this.editForm.academicYear ?? null,
+      ...(this.editForm.academicYear!==undefined ? {academicYear:this.editForm.academicYear} : {}),
       confessionFather: this.editForm.confessionFather ?? null,
       gender: this.editForm.gender ?? 0,
       servantId: this.editForm.servantId ?? null,

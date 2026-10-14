@@ -10,7 +10,7 @@ public sealed class ApplicationStore(AppDbContext context) : IApplicationStore
     {
         IQueryable<T> query = context.Set<T>();
         if (!tracking) query = query.AsNoTracking();
-        return includeArchived ? query.IgnoreQueryFilters() : query;
+        return includeArchived ? query.IgnoreQueryFilters().ForServiceYear(context) : query;
     }
     public void Add<T>(T entity) where T : class => context.Add(entity);
     public void Remove<T>(T entity) where T : class => context.Remove(entity);

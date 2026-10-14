@@ -17,7 +17,7 @@ export class StudentCommandsService {
   update(request: UpdateStudentRequest,version?:string): Observable<void> { return this.http.put<void>(`${this.apiUrl}/${request.id}`, {...request,gender:Number(request.gender)},{headers:version ? {'If-Match':version} : {}}); }
   unassign(id:string):Observable<unknown>{return this.http.post(`${this.apiUrl}/${id}/unassign`,{});}
   assignToServant(studentId: string, servantId: string): Observable<unknown> { return this.http.post(`${this.apiUrl}/${studentId}/assign/${servantId}`, {}); }
-  bulkAssign(ids: string[], servantId: string): Observable<{ outcomes: { studentId: string; success: boolean; error?: string }[] }> { return this.http.post<{ outcomes: { studentId: string; success: boolean; error?: string }[] }>(`${this.apiUrl}/bulk-assignment`, { ids, servantId }); }
+  bulkAssign(ids: string[], servantId: string | null): Observable<{ outcomes: { studentId: string; success: boolean; error?: string }[] }> { return this.http.post<{ outcomes: { studentId: string; success: boolean; error?: string }[] }>(`${this.apiUrl}/bulk-assignment`, { ids, servantId }); }
   bulkArea(students:{studentId:string;version:string}[],area:string):Observable<{outcomes:BulkStudentFieldOutcome[]}>{
     return this.http.post<{outcomes:BulkStudentFieldOutcome[]}>(`${this.apiUrl}/bulk-area`,{students,area},{headers:{'X-Audit-Reason':'تغيير المنطقة للمخدومين المحددين'}});
   }

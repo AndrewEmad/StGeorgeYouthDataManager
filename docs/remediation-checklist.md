@@ -349,3 +349,13 @@ This revision replaces the earlier 40-name list with the user's explicitly appro
 - [x] Runtime/ImageSharp, automatic startup migrations, schema and Pages deployment workflow unchanged.
 - [ ] Review the updated `docs/sql/normalize-student-areas.sql`, set `DECLARE @Apply bit = 1`, and run it completely against the intended database to update real data.
 - [ ] Publish API and both frontend applications; the live site continues to use its deployed version until publication.
+
+
+## Bulk servant choice includes غير مسند — 2026-10-14
+
+- [x] Add **غير مسند** to the shared picker in the Admin selected-student assignment dialog; explicit selection enables **تأكيد إلغاء الإسناد** and posts `servantId:null`. Initial no-choice remains disabled.
+- [x] Keep failed IDs and chosen target for retry; handle missing per-row results, partial failures and transport failures. Lock dependent controls and duplicate saving.
+- [x] Show assignment/unassignment outcome and dialog errors with accurate wording; keep CSV import feedback separate; focus successful result feedback.
+- [x] Four SQL cases and fifteen browser cases pass (nineteen distinct). The batch API test verifies unassignment without archival, open tasks moved to unassigned ownership, and preserved historical call actor. Three-engine browser checks include cross-page/null payload, failure retry, saving locks and existing assignment/attendance/phone behavior; 390px capture inspected.
+- [x] Admin production build passes at 370.59 kB. No backend production, schema/runtime/ImageSharp/startup-migration/Pages workflow change; separate service-year selector edit retained.
+- [ ] Publish the updated Admin frontend to show the option on the live application.

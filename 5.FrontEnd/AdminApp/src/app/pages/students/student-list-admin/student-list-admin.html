@@ -339,15 +339,16 @@
 @if (showBulkAssignModal) {
 <app-modal title="تخصيص مخدومين لخادم" [visible]="showBulkAssignModal" [busy]="bulkAssignSaving" (close)="showBulkAssignModal = false"><div body><fieldset class="ydm-fieldset" [disabled]="bulkAssignSaving">
 
-    <p>تخصيص <strong>{{ selectedStudentIds.size }}</strong> مخدوم للخادم المختار.</p>
+    <p>تخصيص <strong>{{ selectedStudentIds.size }}</strong> مخدوم لخادم، أو اختيار «غير مسند» لإلغاء الإسناد.</p>
     <div class="form-group mt-4">
       <label>اختر الخادم</label>
-      <ydm-resource-picker kind="servants" label="المسؤول" [value]="bulkTargetServantId" [disabled]="bulkAssignSaving" (valueChange)="bulkTargetServantId=$event || ''"/>
+      <ydm-resource-picker kind="servants" label="المسؤول" [value]="bulkTargetServantId==='_none' ? null : bulkTargetServantId" [allowEmpty]="true" emptyLabel="غير مسند" [disabled]="bulkAssignSaving" (valueChange)="bulkTargetServantId=$event || '_none'"/>
     </div>
+    @if(bulkAssignError){<p role="alert" class="ydm-notice text-error">{{bulkAssignError}}</p>}
     <div class="modal-actions">
       <button class="btn-outline" (click)="showBulkAssignModal = false" [disabled]="bulkAssignSaving">إلغاء</button>
       <button class="btn-primary" [disabled]="!bulkTargetServantId || bulkAssignSaving" (click)="onBulkAssign()">
-        {{ bulkAssignSaving ? 'جاري التخصيص...' : 'تأكيد التخصيص' }}
+        {{ bulkAssignSaving ? 'جارٍ الحفظ…' : bulkTargetServantId==='_none' ? 'تأكيد إلغاء الإسناد' : 'تأكيد التخصيص' }}
       </button>
     </div>
   </fieldset></div></app-modal>

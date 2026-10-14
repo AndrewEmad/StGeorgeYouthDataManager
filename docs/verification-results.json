@@ -3853,5 +3853,35 @@
     },
     "constraints": "No schema migration, .NET/ImageSharp upgrade, startup-migration removal or frontend-only Pages workflow change.",
     "rollout": "Review/apply the updated SQL to the intended database and publish the coordinated API and both clients. Until publication, the live UI can still show the old choices."
+  },
+  "bulkUnassignedChoiceRevision": {
+    "date": "2026-10-14",
+    "status": "Implemented and verified locally; Admin publication pending",
+    "feature": "Admin selected-student bulk servant picker now includes غير مسند. An explicit choice maps the UI sentinel _none to servantId:null; no target selected keeps confirmation disabled. Button distinguishes تأكيد إلغاء الإسناد from assigning a servant.",
+    "ui": "Preserve cross-page selection, null target and failed IDs through partial/transport failures. Lock picker/close/selection during saving, guard duplicates, show row failure details in the dialog and correct assignment/unassignment feedback rather than updating the CSV import-result banner. Successful completion focuses visible feedback.",
+    "api": "Existing POST /api/StudentCommands/bulk-assignment nullable servantId contract reused; no backend production change or schema migration. Unassignment keeps students active, leaves call history with its original actor and moves open task ownership to the unassigned queue.",
+    "build": {
+      "AdminInitialKB": 370.59,
+      "initialBudgetKB": 500,
+      "AdminProduction": "Passed"
+    },
+    "verification": {
+      "sqlCasesPassed": 4,
+      "sqlLog": "5.FrontEnd/test-results/bulk-unassign-sql.log",
+      "sqlDetail": "Existing batch API case extended with null owner/failed row, student not archived, open task unassigned without cancellation and original call actor preserved. Attendance/task/discovery regression cases also passed.",
+      "browserCasesPassed": 15,
+      "browserLog": "5.FrontEnd/test-results/bulk-unassign-browser.log",
+      "engines": [
+        "Chromium",
+        "Firefox",
+        "WebKit"
+      ],
+      "newUnassignmentCases": 6,
+      "existingSelectionAssignmentPhoneCases": 9,
+      "detail": "Explicit none and cross-page null payload, initial disabled confirmation, saving locks, closed modal/result focus, partial failure and transport retry with failed IDs retained; existing servant assignment, attendance selection and phone actions remain valid. 390px chosen-none capture inspected.",
+      "distinctCasesPassed": 19
+    },
+    "constraints": "ImageSharp/.NET, automatic startup migrations, schema and frontend-only Pages workflow unchanged. Separate observed service-year selector edit left untouched.",
+    "rollout": "Publish the updated Admin frontend; existing API null-owner support is already used by this client change."
   }
 }

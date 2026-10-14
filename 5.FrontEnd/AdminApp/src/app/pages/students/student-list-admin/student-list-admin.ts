@@ -106,6 +106,7 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
   showBulkAssignModal = false;
   bulkTargetServantId = '';
   bulkAssignSaving = false;
+  bulkAssignError = '';
   showAddModal = false;
   addSaving = false;
   showEditModal = false;
@@ -556,24 +557,29 @@ export class StudentListAdminComponent implements OnInit, AfterViewInit {
 
   openBulkAssignModal() {
     if (this.loading || this.bulkSelectionSaving || this.selectedStudentIds.size === 0) return;
-    this.bulkTargetServantId = '';
+    this.bulkTargetServantId = '';this.bulkAssignError='';this.formMessage='';
     this.showBulkAssignModal = true;
   }
 
   onBulkAssign() {
     if (this.bulkSelectionSaving || !this.bulkTargetServantId || this.selectedStudentIds.size === 0) return;
-    this.bulkAssignSaving = true;
+    this.bulkAssignSaving = true;this.bulkAssignError='';this.formMessage='';
     const ids = Array.from(this.selectedStudentIds);
-    this.studentCommands.bulkAssign(ids, this.bulkTargetServantId).subscribe({
+    const unassign=this.bulkTargetServantId==='_none';
+    this.studentCommands.bulkAssign(ids, unassign ? null : this.bulkTargetServantId).subscribe({
       next: result => {
         this.bulkAssignSaving = false;
-        this.selectedStudentIds = new Set(result.outcomes.filter(o => !o.success).map(o => o.studentId));
+        const outcomes=new Map(result.outcomes.map(o=>[o.studentId,o]));
+        const failures=ids.map(id=>outcomes.get(id) || {studentId:id,success:false,error:'لم تصل نتيجة هذا المخدوم؛ الاختيار محفوظ لإعادة المحاولة.'}).filter(o=>!o.success);
+        this.bulkAssignError=failures.map(o=>(this.selectedStudentSnapshots.get(o.studentId)?.name || 'مخدوم محدد')+': '+(o.error || 'تعذر الحفظ؛ الاختيار محفوظ لإعادة المحاولة.')).join(' · ');
+        this.selectedStudentIds = new Set(failures.map(o => o.studentId));
         for(const id of this.selectedStudentSnapshots.keys())if(!this.selectedStudentIds.has(id))this.selectedStudentSnapshots.delete(id);
-        this.uploadResult = { created: result.outcomes.filter(o => o.success).length, errors: result.outcomes.filter(o => !o.success).map((o, i) => ({ row: i + 1, message: o.error || 'تعذر التخصيص؛ الاختيار محفوظ لإعادة المحاولة' })) };
-        if (!this.selectedStudentIds.size) this.showBulkAssignModal = false;
+        const saved=ids.length-failures.length;
+        this.formMessage=saved ? (unassign ? `تم إلغاء إسناد ${saved} مخدوم.` : `تم تخصيص ${saved} مخدوم للخادم المختار.`) : '';
+        if (!this.selectedStudentIds.size){this.showBulkAssignModal = false;this.focusBulkYearResult();}
         this.loadData();
       },
-      error: () => { this.bulkAssignSaving = false; this.uploadResult = { created: 0, errors: [{ row: 0, message: 'تعذر التخصيص. الاختيارات محفوظة لإعادة المحاولة.' }] }; }
+      error: e => { this.bulkAssignSaving = false;this.bulkAssignError=apiError(e)+' احتفظنا بالاختيارات لإعادة المحاولة.'; }
     });
   }
   openBulkYearModal(field:'academicYear'|'area'='academicYear'){

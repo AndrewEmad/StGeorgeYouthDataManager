@@ -99,5 +99,10 @@ public sealed class ApiTests(SqlFixture fixture)
         using var json=System.Text.Json.JsonDocument.Parse(await response.Content.ReadAsStringAsync());var outcomes=json.RootElement.GetProperty("outcomes");Assert.False(outcomes[0].GetProperty("success").GetBoolean());Assert.True(outcomes[1].GetProperty("success").GetBoolean());
         await db.Entry(student).ReloadAsync();Assert.Equal(owner.Id,student.ServantId);
         var retry=await client.PostAsJsonAsync("/api/StudentCommands/bulk-assignment",new {ids=new[]{student.Id},servantId=owner.Id});Assert.Equal(HttpStatusCode.OK,retry.StatusCode);
+        var task=new FollowUpTask {StudentId=student.Id,AssigneeId=owner.Id,Status="Open"};var history=new CallLog {Id=Guid.NewGuid(),StudentId=student.Id,ServantId=owner.Id,CallDate=DateTime.UtcNow};db.AddRange(task,history);await db.SaveChangesAsync();
+        var unassign=await client.PostAsJsonAsync("/api/StudentCommands/bulk-assignment",new {ids=new[]{missing,student.Id},servantId=(Guid?)null});unassign.EnsureSuccessStatusCode();
+        using var unassignJson=System.Text.Json.JsonDocument.Parse(await unassign.Content.ReadAsStringAsync());var unassignOutcomes=unassignJson.RootElement.GetProperty("outcomes");Assert.False(unassignOutcomes[0].GetProperty("success").GetBoolean());Assert.True(unassignOutcomes[1].GetProperty("success").GetBoolean());
+        await db.Entry(student).ReloadAsync();await db.Entry(task).ReloadAsync();await db.Entry(history).ReloadAsync();Assert.Null(student.ServantId);Assert.False(student.IsDeleted);Assert.Null(task.AssigneeId);Assert.Equal("Open",task.Status);Assert.Equal(owner.Id,history.ServantId);
+
     }
 }

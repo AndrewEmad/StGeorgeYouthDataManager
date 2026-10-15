@@ -14,6 +14,7 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage),
     canActivate: [authGuard],
     children: [
+      {path:'help',loadComponent:()=>import('@ydm/shared/pages/help').then(m=>m.HelpPage),data:{title:'دليل الاستخدام'}},
       {path:'operations',loadComponent:()=>import('@ydm/shared/pages/operations').then(m=>m.OperationsPage),data:{title:'حالة التطبيق'}},
       {path:'archived-students',loadComponent:()=>import('@ydm/shared/pages/archives').then(m=>m.ArchivesPage),data:{title:'المخدومون المؤرشفون'}},
       {path:'activity-history',loadComponent:()=>import('@ydm/shared/pages/activity-history').then(m=>m.PersonalActivityPage),data:{title:'سجل النشاط'}},

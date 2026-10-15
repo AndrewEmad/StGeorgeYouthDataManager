@@ -1,0 +1,308 @@
+{
+  "app": "servant",
+  "date": "2026-10-15",
+  "data": "Fictional demonstration records; all API requests intercepted locally",
+  "viewport": "1440x1000; mobile 390x844",
+  "captures": {
+    "home": {
+      "route": "/dashboard",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "header-mobile": {
+      "route": "/dashboard",
+      "kind": "viewport",
+      "imageWidth": 390,
+      "imageHeight": 844
+    },
+    "dashboard-mobile": {
+      "route": "/dashboard",
+      "kind": "viewport",
+      "imageWidth": 390,
+      "imageHeight": 844
+    },
+    "service-year": {
+      "route": "/dashboard",
+      "kind": "viewport",
+      "imageWidth": 1440,
+      "imageHeight": 1000
+    },
+    "profile": {
+      "route": "/profile",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "profile-password": {
+      "route": "/profile",
+      "kind": "dialog-or-section",
+      "imageWidth": 1392,
+      "imageHeight": 218
+    },
+    "students": {
+      "route": "/students",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "student-filters": {
+      "route": "/students",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "unassigned": {
+      "route": "/students",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "student-detail": {
+      "route": "/students/11111111-1111-1111-1111-111111111111",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 2010
+    },
+    "student-edit": {
+      "route": "/students/11111111-1111-1111-1111-111111111111",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 874
+    },
+    "student-history": {
+      "route": "/students/11111111-1111-1111-1111-111111111111",
+      "kind": "viewport",
+      "imageWidth": 1440,
+      "imageHeight": 1000
+    },
+    "call-history": {
+      "route": "/students/11111111-1111-1111-1111-111111111111",
+      "kind": "viewport",
+      "imageWidth": 1440,
+      "imageHeight": 1000
+    },
+    "call-form": {
+      "route": "/students/11111111-1111-1111-1111-111111111111",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 434
+    },
+    "visit-form": {
+      "route": "/students/11111111-1111-1111-1111-111111111111",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 598
+    },
+    "visit-participants": {
+      "route": "/students/11111111-1111-1111-1111-111111111111",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 650
+    },
+    "student-audit": {
+      "route": "/students/11111111-1111-1111-1111-111111111111",
+      "kind": "viewport",
+      "imageWidth": 1440,
+      "imageHeight": 1000
+    },
+    "removal-request": {
+      "route": "/students/11111111-1111-1111-1111-111111111111",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 330
+    },
+    "activity": {
+      "route": "/activity-history",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "activity-correct": {
+      "route": "/activity-history",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 574
+    },
+    "activity-void": {
+      "route": "/activity-history",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 322
+    },
+    "tasks": {
+      "route": "/tasks",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "task-new": {
+      "route": "/tasks",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 404
+    },
+    "task-complete": {
+      "route": "/tasks",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 434
+    },
+    "task-reschedule": {
+      "route": "/tasks",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 322
+    },
+    "task-cancel": {
+      "route": "/tasks",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 322
+    },
+    "requests": {
+      "route": "/requests?mine=true",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "request-details": {
+      "route": "/requests?mine=true",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 1066
+    },
+    "request-withdraw": {
+      "route": "/requests?mine=true",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 1203
+    },
+    "notifications": {
+      "route": "/notifications",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "notification-schedule": {
+      "route": "/notifications",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 624
+    },
+    "install": {
+      "route": "/notifications",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 304
+    },
+    "attendance": {
+      "route": "/attendance",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1388
+    },
+    "attendance-mark": {
+      "route": "/attendance",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 370
+    },
+    "add-request": {
+      "route": "/request-add-student",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1213
+    },
+    "whatsapp": {
+      "route": "/dashboard",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 958
+    },
+    "sms": {
+      "route": "/dashboard",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 1085
+    },
+    "report-attendance": {
+      "route": "/report-suite?report=attendance&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1383
+    },
+    "report-attendance-history": {
+      "route": "/report-suite?report=attendance-history&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1298
+    },
+    "report-contact": {
+      "route": "/report-suite?report=contact&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1589
+    },
+    "report-follow-up": {
+      "route": "/report-suite?report=follow-up&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1358
+    },
+    "report-servant-attendance": {
+      "route": "/report-suite?report=servant-attendance&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1188
+    },
+    "report-servant-attendance-history": {
+      "route": "/report-suite?report=servant-attendance-history&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1188
+    },
+    "report-data-quality": {
+      "route": "/report-suite?report=data-quality&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1388
+    },
+    "empty": {
+      "route": "/report-suite?report=contact",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1230
+    },
+    "error": {
+      "route": "/report-suite?report=contact",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "validation": {
+      "route": "/notifications",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 670
+    },
+    "change-password": {
+      "route": "/change-password",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "complete-profile": {
+      "route": "/complete-profile",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "login": {
+      "route": "/login",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    }
+  }
+}

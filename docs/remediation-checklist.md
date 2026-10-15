@@ -376,3 +376,20 @@ This revision replaces the earlier 40-name list with the user's explicitly appro
 - [x] Own pages and seven report types fit all eight required widths, landscape and enlarged text checks. Personal report visual states updated; 390px populated capture inspected. Shared theme and existing student-attendance duty retained.
 - [x] No schema, ImageSharp/.NET, automatic startup migration or Pages workflow change.
 - [ ] Publish the API first, then updated frontend applications. Frontend-only publication does not complete personal API scoping; no database migration is needed for this revision.
+
+
+## Illustrated user manuals for both frontends — 2026-10-15
+
+| Finding | Change | Verification |
+|---|---|---|
+| Users lacked a complete, accessible guide | Shared themed help reader, question-mark header links and separate Admin/Servant content | Header access, app scope, all active page coverage and deep links checked |
+| Pages and operations needed practical explanation | 47 Admin chapters and 28 Servant chapters with purpose, numbered steps, caveats and contextual links | Each chapter traversed; attendance links withheld from ordinary servants |
+| Report numbers could be misunderstood | Explain all 17 Admin and 7 Servant reports, including source scope, formulas, distinct people versus attempts, historical ownership, confirmed rosters, empty denominators and export scope | Calculation coverage assertions and review against report-provider implementations |
+| Text alone could not demonstrate the workflows | 137 native captures: 87 Admin and 50 Servant; fictional records and intercepted APIs, operation dialogs and report views | Complete capture manifests, image dimensions, all referenced assets decoded in the reader and print checks; loaded desktop/mobile guide captures inspected |
+| Users need lookup, sharing and printed instructions | Arabic search, grouped contents, bookmarked chapters, full-size images, whole-guide/current-part print with contents and browser Save as PDF | Search/bookmarks/keyboard and full/part print checks on three engines; incomplete image/chapter downloads show readable recovery |
+| A large manual could slow ordinary app use | Lazy route/content and per-app lazy image assets; retain shared theme and responsive layout | Admin 370.77 kB and Servant 365.00 kB initial builds; help images absent from prefetch app assets |
+
+- [x] Both production builds pass without warnings and remain below 500 kB.
+- [x] Ninety distinct browser cases pass across Chromium, Firefox and WebKit, including the eight required widths, landscape, 200% text, accessibility, failed downloads, image decoding and deployed subpaths. Two native capture generation jobs pass. Details in `userManualRevision` in `docs/verification-results.json`.
+- [x] No backend, schema, runtime/ImageSharp, automatic startup migration or frontend-only deployment workflow change.
+- [ ] Publish the updated frontend applications to expose the header icon and manual on the live site.

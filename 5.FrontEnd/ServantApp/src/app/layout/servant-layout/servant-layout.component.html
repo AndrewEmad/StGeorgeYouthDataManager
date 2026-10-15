@@ -8,6 +8,7 @@
     <h1 class="page-title">{{ pageTitle }}</h1>
   </div>
   <div class="header-left">
+    <a routerLink="/help" class="ydm-icon-button" aria-label="دليل الاستخدام" title="دليل الاستخدام"><span class="material-icons" aria-hidden="true">help_outline</span></a>
     <a routerLink="/profile" class="profile-link" [attr.aria-label]="servantName + '، الملف الشخصي'" [title]="servantName">
       <span class="material-icons" aria-hidden="true">account_circle</span>
       <span class="profile-name">{{ servantName }}</span>

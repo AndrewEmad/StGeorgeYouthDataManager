@@ -31,7 +31,8 @@
     "./core/service-year": "./core/service-year.ts",
     "./ui/service-year": "./ui/service-year.ts",
     "./core/academic-years": "./core/academic-years.ts",
-    "./core/student-areas": "./core/student-areas.ts"
+    "./core/student-areas": "./core/student-areas.ts",
+    "./pages/help": "./pages/help.ts"
   },
   "peerDependencies": {
     "@angular/core": "20.3.33"

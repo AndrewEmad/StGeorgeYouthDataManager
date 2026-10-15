@@ -3942,5 +3942,82 @@
     },
     "constraints": "Shared Cairo/RTL indigo theme retained. ImageSharp 3.1.5, .NET 8, schema, automatic startup migrations and frontend-only Pages workflow unchanged.",
     "rollout": "Publish the API first, then the updated frontend applications. The restrictive workspace behavior and new segment query require the updated API; frontend-only publication is insufficient to complete this change. No schema change is required."
+  },
+  "userManualRevision": {
+    "date": "2026-10-15",
+    "status": "Implemented and verified locally; frontend publication pending",
+    "content": {
+      "language": "Arabic; church-service terminology",
+      "adminChapters": 47,
+      "servantChapters": 28,
+      "adminReportsExplained": 17,
+      "servantReportsExplained": 7,
+      "adminScreenshots": 87,
+      "servantScreenshots": 50,
+      "screenshotTotal": 137,
+      "source": "5.FrontEnd/shared/help/",
+      "screenshotData": "Fictional, independently illustrative records; all APIs intercepted locally during capture. No real people, credentials or live operations used.",
+      "calculationSources": [
+        "2.Infrastructure/YouthDataManager.Infrastructure/Reports/ReportDataProvider.Operations.cs",
+        "2.Infrastructure/YouthDataManager.Infrastructure/Reports/ReportDataProvider.Suite.cs",
+        "2.Infrastructure/YouthDataManager.Infrastructure/Reports/ReportDataProvider.Pastoral.cs",
+        "2.Infrastructure/YouthDataManager.Infrastructure/Reports/ReportDataProvider.cs"
+      ]
+    },
+    "features": [
+      "Question-mark header link in both authenticated app shells; app-specific lazy-loaded guide",
+      "Searchable grouped contents, chapter bookmarks, keyboard focus, contextual page links restricted for attendance duty",
+      "Every active page, common operation and report explained with steps, caveats, purpose and relevant calculation examples",
+      "Native screenshots of pages, dialogs, reports, narrow screens, empty/error/validation states and onboarding; full-size image links; explicit fictional-data captions",
+      "Whole-guide and current-chapter printing, printable contents and browser Save as PDF; wait for image decoding; readable missing-image/chapter-download recovery",
+      "Base-relative screenshot assets copied separately per app and lazily cached; no full screenshot bundle fetched at installation"
+    ],
+    "builds": {
+      "AdminProduction": "Passed",
+      "AdminInitialKB": 370.77,
+      "ServantProduction": "Passed",
+      "ServantInitialKB": 365.0,
+      "budgetKB": 500,
+      "warnings": 0,
+      "log": "5.FrontEnd/test-results/user-manual-build.log"
+    },
+    "verification": {
+      "browserDistinctCasesPassed": 90,
+      "engines": [
+        "Chromium",
+        "Firefox",
+        "WebKit"
+      ],
+      "widths": [
+        320,
+        360,
+        390,
+        430,
+        768,
+        1024,
+        1440,
+        1920
+      ],
+      "landscape": [
+        "768x360",
+        "1024x360"
+      ],
+      "detail": "Full 84-case guide suite passed; 18 final print/visual cases passed after screenshot refresh, including current-chapter printing. Six additional failed-chapter-download recovery cases passed after decoding escaped production JS in the test harness. Distinct browser cases exclude repeats. Every chapter and referenced image exercised, calculation coverage and page inventory checked, whole/part print decoding, bookmark/search/focus, missing-image feedback, deployed subpath resolution, reflow, enlarged text and WCAG checks verified. Loaded mobile and desktop captures inspected.",
+      "logs": [
+        "5.FrontEnd/test-results/user-manual-ui.log",
+        "5.FrontEnd/test-results/user-manual-final.log",
+        "5.FrontEnd/test-results/user-manual-recovery.log"
+      ],
+      "captureJobsPassed": 2,
+      "captureLog": "5.FrontEnd/test-results/manual-capture.log",
+      "captureManifests": [
+        "5.FrontEnd/shared/help/assets/admin/capture-manifest.json",
+        "5.FrontEnd/shared/help/assets/servant/capture-manifest.json"
+      ],
+      "assetCaching": "Production ngsw manifest confirms zero help images in the prefetch app group and 87/50 screenshots in the respective lazy assets groups."
+    },
+    "maintenance": "Regenerate native demonstration screenshots from 5.FrontEnd using YDM_CAPTURE_MANUAL=1 and npx playwright test e2e/manual-capture.spec.ts --project chromium --workers 1. Rebuild both clients to copy assets. Capture generation is skipped in ordinary test runs.",
+    "constraints": "No backend, schema, ImageSharp/.NET, automatic startup migration or GitHub Pages workflow changes. No tests added to deployment workflow.",
+    "rollout": "Publish both updated frontend builds using the existing frontend-only workflow. This guide revision introduces no API changes."
   }
 }

@@ -13,6 +13,7 @@ export const routes: Routes = [
     loadComponent: () => import('./layout/servant-layout/servant-layout.component').then(m => m.ServantLayoutComponent),
     canActivate: [authGuard],
     children: [
+      {path:'help',loadComponent:()=>import('@ydm/shared/pages/help').then(m=>m.HelpPage),data:{title:'دليل الاستخدام'}},
       {path:'activity-history',loadComponent:()=>import('@ydm/shared/pages/activity-history').then(m=>m.PersonalActivityPage),data:{title:'سجل النشاط'}},
       {path:'notifications',loadComponent:()=>import('@ydm/shared/pages/notifications').then(m=>m.NotificationsPage),data:{title:'الإشعارات والتذكيرات'}},
       {path:'requests',loadComponent:()=>import('@ydm/shared/pages/requests').then(m=>m.RequestsPage),data:{title:'طلباتي'}},

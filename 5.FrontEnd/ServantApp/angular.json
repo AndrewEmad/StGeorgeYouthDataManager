@@ -48,7 +48,12 @@
                 "glob": "**/*",
                 "input": "public"
               },
-              "src/firebase-messaging-sw.js"
+              "src/firebase-messaging-sw.js",
+              {
+                "glob": "**/*.png",
+                "input": "../shared/help/assets/servant",
+                "output": "assets/help"
+              }
             ],
             "styles": [
               "src/styles.css"

@@ -1,0 +1,530 @@
+{
+  "app": "admin",
+  "date": "2026-10-15",
+  "data": "Fictional demonstration records; all API requests intercepted locally",
+  "viewport": "1440x1000; mobile 390x844",
+  "captures": {
+    "home": {
+      "route": "/dashboard/stats",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1258
+    },
+    "statistics": {
+      "route": "/dashboard/stats",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1258
+    },
+    "statistics-groups": {
+      "route": "/dashboard/stats",
+      "kind": "viewport",
+      "imageWidth": 1440,
+      "imageHeight": 1000
+    },
+    "header-mobile": {
+      "route": "/dashboard/stats",
+      "kind": "viewport",
+      "imageWidth": 390,
+      "imageHeight": 844
+    },
+    "service-year": {
+      "route": "/dashboard/stats",
+      "kind": "viewport",
+      "imageWidth": 1440,
+      "imageHeight": 1000
+    },
+    "profile": {
+      "route": "/dashboard/profile",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1112
+    },
+    "profile-password": {
+      "route": "/dashboard/profile",
+      "kind": "dialog-or-section",
+      "imageWidth": 1152,
+      "imageHeight": 218
+    },
+    "students": {
+      "route": "/dashboard/students",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "student-filters": {
+      "route": "/dashboard/students",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "student-detail": {
+      "route": "/dashboard/students/11111111-1111-1111-1111-111111111111",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 2256
+    },
+    "student-edit": {
+      "route": "/dashboard/students/11111111-1111-1111-1111-111111111111",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 874
+    },
+    "student-history": {
+      "route": "/dashboard/students/11111111-1111-1111-1111-111111111111",
+      "kind": "viewport",
+      "imageWidth": 1440,
+      "imageHeight": 1000
+    },
+    "call-history": {
+      "route": "/dashboard/students/11111111-1111-1111-1111-111111111111",
+      "kind": "viewport",
+      "imageWidth": 1440,
+      "imageHeight": 1000
+    },
+    "call-form": {
+      "route": "/dashboard/students/11111111-1111-1111-1111-111111111111",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 434
+    },
+    "visit-form": {
+      "route": "/dashboard/students/11111111-1111-1111-1111-111111111111",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 598
+    },
+    "visit-participants": {
+      "route": "/dashboard/students/11111111-1111-1111-1111-111111111111",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 650
+    },
+    "student-audit": {
+      "route": "/dashboard/students/11111111-1111-1111-1111-111111111111",
+      "kind": "viewport",
+      "imageWidth": 1440,
+      "imageHeight": 1000
+    },
+    "activity": {
+      "route": "/dashboard/activity-history",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1193
+    },
+    "activity-correct": {
+      "route": "/dashboard/activity-history",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 574
+    },
+    "activity-void": {
+      "route": "/dashboard/activity-history",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 322
+    },
+    "tasks": {
+      "route": "/dashboard/tasks",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "task-new": {
+      "route": "/dashboard/tasks",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 404
+    },
+    "task-complete": {
+      "route": "/dashboard/tasks",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 434
+    },
+    "task-reschedule": {
+      "route": "/dashboard/tasks",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 322
+    },
+    "task-cancel": {
+      "route": "/dashboard/tasks",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 322
+    },
+    "task-reassign": {
+      "route": "/dashboard/tasks",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 322
+    },
+    "task-activate": {
+      "route": "/dashboard/tasks",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 322
+    },
+    "requests": {
+      "route": "/dashboard/requests?mine=true",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "request-details": {
+      "route": "/dashboard/requests?mine=true",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 1066
+    },
+    "request-withdraw": {
+      "route": "/dashboard/requests?mine=true",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 1203
+    },
+    "request-approve": {
+      "route": "/dashboard/requests?mine=true",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 1247
+    },
+    "request-reject": {
+      "route": "/dashboard/requests?mine=true",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 1203
+    },
+    "notifications": {
+      "route": "/dashboard/notifications",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "notification-schedule": {
+      "route": "/dashboard/notifications",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 624
+    },
+    "install": {
+      "route": "/dashboard/notifications",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 304
+    },
+    "attendance": {
+      "route": "/dashboard/attendance",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1456
+    },
+    "attendance-status": {
+      "route": "/dashboard/attendance",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 370
+    },
+    "attendance-settings": {
+      "route": "/dashboard/attendance",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 496
+    },
+    "attendance-mark": {
+      "route": "/dashboard/attendance",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 370
+    },
+    "attendance-eligibility": {
+      "route": "/dashboard/attendance",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 930
+    },
+    "student-add": {
+      "route": "/dashboard/students",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 1584
+    },
+    "student-edit-modal": {
+      "route": "/dashboard/students",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 1584
+    },
+    "student-assignment": {
+      "route": "/dashboard/students",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 422
+    },
+    "bulk-assignment": {
+      "route": "/dashboard/students",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 422
+    },
+    "bulk-year": {
+      "route": "/dashboard/students",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 400
+    },
+    "bulk-area": {
+      "route": "/dashboard/students",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 400
+    },
+    "import-dialog": {
+      "route": "/dashboard/students",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 422
+    },
+    "import-preview": {
+      "route": "/dashboard/students",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 758
+    },
+    "import-result": {
+      "route": "/dashboard/students",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1344
+    },
+    "archive": {
+      "route": "/dashboard/students",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 446
+    },
+    "archives": {
+      "route": "/dashboard/archived-students",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "restore": {
+      "route": "/dashboard/archived-students",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 370
+    },
+    "servants": {
+      "route": "/dashboard/servants",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "servant-add": {
+      "route": "/dashboard/servants",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 744
+    },
+    "photo-crop": {
+      "route": "/dashboard/servants",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 730
+    },
+    "servant-edit": {
+      "route": "/dashboard/servants",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 642
+    },
+    "servant-delete": {
+      "route": "/dashboard/servants",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 258
+    },
+    "servant-detail": {
+      "route": "/dashboard/servants/22222222-2222-2222-2222-222222222222",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1918
+    },
+    "servant-reset": {
+      "route": "/dashboard/servants/22222222-2222-2222-2222-222222222222",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 416
+    },
+    "data-exports": {
+      "route": "/dashboard/data-exports",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "operations": {
+      "route": "/dashboard/operations",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1401
+    },
+    "report-catalog": {
+      "route": "/dashboard/reports",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1847
+    },
+    "report-distribution": {
+      "route": "/dashboard/reports/student-distribution",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "report-activity": {
+      "route": "/dashboard/reports/servant-activity?period=week",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "report-no-contact": {
+      "route": "/dashboard/reports/students-no-contact",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "report-attendance": {
+      "route": "/dashboard/report-suite?report=attendance&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1591
+    },
+    "report-servant-attendance": {
+      "route": "/dashboard/report-suite?report=servant-attendance&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1396
+    },
+    "report-group-attendance": {
+      "route": "/dashboard/report-suite?report=group-attendance&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1476
+    },
+    "report-meeting-trends": {
+      "route": "/dashboard/report-suite?report=meeting-trends&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1396
+    },
+    "report-attendance-history": {
+      "route": "/dashboard/report-suite?report=attendance-history&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1536
+    },
+    "report-servant-attendance-history": {
+      "route": "/dashboard/report-suite?report=servant-attendance-history&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1426
+    },
+    "report-servant-service-summary": {
+      "route": "/dashboard/report-suite?report=servant-service-summary&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1670
+    },
+    "report-servant-service-summary-end": {
+      "route": "/dashboard/report-suite?report=servant-service-summary&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1670
+    },
+    "report-pastoral-follow-up": {
+      "route": "/dashboard/report-suite?report=pastoral-follow-up&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1626
+    },
+    "report-pastoral-follow-up-end": {
+      "route": "/dashboard/report-suite?report=pastoral-follow-up&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1626
+    },
+    "report-contact": {
+      "route": "/dashboard/report-suite?report=contact&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1797
+    },
+    "report-follow-up": {
+      "route": "/dashboard/report-suite?report=follow-up&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1596
+    },
+    "report-workload-owners": {
+      "route": "/dashboard/report-suite?report=workload-owners&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1596
+    },
+    "report-workload": {
+      "route": "/dashboard/report-suite?report=workload&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1711
+    },
+    "report-data-quality": {
+      "route": "/dashboard/report-suite?report=data-quality&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1596
+    },
+    "report-approvals": {
+      "route": "/dashboard/report-suite?report=approvals&dateFrom=2026-09-18&dateTo=2026-10-15",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1596
+    },
+    "empty": {
+      "route": "/dashboard/report-suite?report=contact",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1408
+    },
+    "error": {
+      "route": "/dashboard/report-suite?report=contact",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "validation": {
+      "route": "/dashboard/notifications",
+      "kind": "dialog-or-section",
+      "imageWidth": 640,
+      "imageHeight": 670
+    },
+    "change-password": {
+      "route": "/change-password",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "complete-profile": {
+      "route": "/complete-profile",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    },
+    "login": {
+      "route": "/login",
+      "kind": "full-page",
+      "imageWidth": 1440,
+      "imageHeight": 1084
+    }
+  }
+}
